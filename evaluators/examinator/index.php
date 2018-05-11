@@ -1,0 +1,5 @@
+<?php
+  
+  /**
+   * Init examinator
+   */
