@@ -1,0 +1,26 @@
+{
+	"localhost": {
+		"host": "localhost",
+		"user": "root",
+		"password": "mysql",
+		"name": "amp_new"
+	},
+  "localhost_v2": {
+    "host": "localhost",
+    "user": "root",
+    "password": "mysql",
+    "name": "amp_new_v2"
+  },
+	"localhost_old": {
+		"host": "localhost",
+		"user": "root",
+		"password": "mysql",
+		"name": "accessmonitor"
+	},
+	"server": {
+		"host": "localhost",
+		"user": "jvicente",
+		"password": "jvicente19",
+		"name": "amonitor"
+	}
+}

@@ -8,33 +8,105 @@
  * Libraries and modules
  */
 const _ = require('lodash');
+const crypto = require("crypto");
+const fs = require('fs');
+const constants = require('../lib/_constants');
+const Response = require('../lib/_response');
 const Database = require('../lib/_database');
 
 /**
  * Authtentication functions
  */
 
-module.exports.verify = function() {
-
+function encrypt(text) {
+  let password = fs.readFileSync(constants.SECRET_KEY);
+  let cipher = crypto.createCipher('aes-256-ctr', _.toString(password))
+  let crypted = cipher.update(text, 'utf8', 'hex')
+  crypted += cipher.final('hex');
+  return crypted;
+}
+ 
+function decrypt(text) {
+  let password = fs.readFileSync(constants.SECRET_KEY);
+  let decipher = crypto.createDecipher('aes-256-ctr', _.toString(password))
+  let dec = decipher.update(text, 'hex', 'utf8')
+  return dec += decipher.final('utf8');
+  return dec;
 }
 
-module.exports.login = async function(email, password) {
-  const query = `SELECT * FROM User WHERE Email = "${email}"`;
-  console.log(query);
-  return await Database.execute(query);
+function password_hash(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+function generate_unique_hash() {
+  let current_date = (new Date()).valueOf().toString();
+  let random = Math.random().toString();
+  return crypto.createHash('sha256').update(current_date + random).digest('hex');
+}
+
+module.exports.verify = async cookie => {
+  cookie = JSON.parse(decrypt(cookie));
+
+  const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
+  const data = await Database.execute(query);
+  let user = data[0];
+
+  if (_.isEqual(_.size(data), 0)) return false;
+  if (!_.isEqual(user.Type, cookie.Type)) return false;
+  if (!_.isEqual(user.Unique_Hash, cookie.Unique_Hash)) return false;
+  if (new Date(user.Expire) < new Date()) return false;
+
+  return true;
+}
+
+module.exports.login = async (email, password) => {
+  const query = `SELECT * FROM User WHERE Email = "${email}" LIMIT 1`;
+  const data = await Database.execute(query);
+
+  if (_.size(data) === 0) {
+    return Response.error(-1, 'USER_NOT_FOUND');
+  } else {
+    let user = data[0];
+    if (_.isEqual(user.Password, password_hash(password))) {
+      delete user.Password;
+      delete user.Register_Date;
+      delete user.Last_Login;
+      let date = new Date();
+      date.setTime(date.getTime() + 1 * 86400000);
+      user.Expire = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+      return Response.success(encrypt(JSON.stringify(user)));
+    } else {
+      return Response.error(-2, 'INVALID_PASSWORD');
+    }
+  }
 }
 
 /**
  * Create functions
  */
 
-module.exports.create = function(email, password, type) {
-
+module.exports.create = async (email, password, type) => {
+  password = password_hash(password);
+  let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+  let hash = generate_unique_hash();
+  const query = `INSERT INTO User (Email, Password, Type, Register_Date, Unique_Hash) 
+    VALUES ("${email}", "${password}", "${type}", "${date}", "${hash}")`;
+  
+  await Database.execute(query);
+  return Response.success();
 }
 
 /**
  * Get functions
  */
+
+module.exports.all = async () => {
+  const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type != "nimda"`;
+  
+  const users = await Database.execute(query);
+  return Response.success(users);
+}
 
 /**
  * Update functions

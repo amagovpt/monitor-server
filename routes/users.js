@@ -26,27 +26,79 @@ router.get('/', function(req, res, next) {
  * [description]
  * @param  {[type]} req   [description]
  * @param  {[type]} res   [description]
- * @param  {[type]} next) {             const user [description]
+ * @param  {[type]} next) {             try {    req.check('email', 'Ivalid Email').exists().isEmail();    req.check('password', 'Invalid Password').exists();        var errors [description]
  * @return {[type]}       [description]
  */
 router.post('/login', async function(req, res, next) {
-  req.check('email', 'Ivalid Email').exists().isEmail();
-  req.check('password', 'Invalid Password').exists();
+  try {
+    req.check('email', 'Ivalid Email').exists().isEmail();
+    req.check('password', 'Invalid Password').exists();
+    
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      let email = req.body.email;
+      let password = req.body.password;
 
-  let email = req.params.email;
-  let password = req.params.password;
-  console.log(email);
-  var errors = req.validationErrors();
-  if (errors) {
-    res.send(Response.params_error(errors));
-  } else {
-    const user = await User.login(email, password);
-    console.log(user);
-    /*user.then(res => {
-      res.send(Response.success(res));
-    }).catch(err => {
-      res.send(Response.error(err));
-    });*/
+      const user = await User.login(email, password);
+      res.send(user);
+    }
+  } catch (err) {
+    res.send(Response.error(-14, 'SERVER_ERROR', err));
+  }
+});
+
+router.post('/create', async function (req, res, next) {
+  try {
+    req.check('email', 'Ivalid Email').exists();
+    req.check('password', 'Invalid Password').exists();
+    req.check('confirmPassword', 'Invalid Password Confirmation').exists().equals(req.body.password);
+    req.check('app', 'Ivalid user Type').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(req.body.cookie);
+      if (verification) {
+        let email = req.body.email;
+        let password = req.body.password;
+        let type = req.body.app;
+
+        const user = await User.create(email, password, type);
+        res.send(user);
+      } else {
+        res.send(Response.error(-13, 'USER_VERIFICATION_ERROR'));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.post('/all', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(req.body.cookie);
+      if (verification) {
+
+        const users = await User.all();
+        res.send(users);
+      } else {
+        res.send(Response.error(-13, 'USER_VERIFICATION_ERROR'));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
   }
 });
 
