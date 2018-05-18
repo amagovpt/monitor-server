@@ -7,9 +7,13 @@ const logger = require('morgan');
 const expressValidator = require('express-validator');
 const cors = require('cors');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 const ampRouter = require('./routes/amp');
+const tagsRouter = require('./routes/tags');
+const usersRouter = require('./routes/users');
+const websitesRouter = require('./routes/websites');
+const entitiesRouter = require('./routes/entities');
+const domainsRouter = require('./routes/domains');
+const pagesRouter = require('./routes/pages');
 
 const app = express();
 app.use(cors());
@@ -25,9 +29,13 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/amp', ampRouter);
+app.use('/users', usersRouter);
+app.use('/entities', entitiesRouter);
+app.use('/websites', websitesRouter);
+app.use('/domains', domainsRouter);
+app.use('/pages', pagesRouter);
+app.use('/tags', tagsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

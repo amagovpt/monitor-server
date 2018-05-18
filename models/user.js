@@ -44,23 +44,39 @@ function generate_unique_hash() {
   return crypto.createHash('sha256').update(current_date + random).digest('hex');
 }
 
-module.exports.verify = async cookie => {
+module.exports.verify = async (res, cookie, admin=false) => {
   cookie = JSON.parse(decrypt(cookie));
 
   const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
   const data = await Database.execute(query);
   let user = data[0];
 
-  if (_.isEqual(_.size(data), 0)) return false;
-  if (!_.isEqual(user.Type, cookie.Type)) return false;
-  if (!_.isEqual(user.Unique_Hash, cookie.Unique_Hash)) return false;
-  if (new Date(user.Expire) < new Date()) return false;
+  if (_.isEqual(_.size(data), 0)) {
+    res.send(Response.error(-11, 'USER_NOT_FOUND'));
+    return false;
+  }
+  if (!_.isEqual(user.Type, cookie.Type)) {
+    res.send(Response.error(-12, 'USER_DATA_COMPROMISED'));
+    return false;
+  }
+  if (!_.isEqual(user.Unique_Hash, cookie.Unique_Hash)) {
+    res.send(Response.error(-12, 'USER_DATA_COMPROMISED'));
+    return false; 
+  }
+  if (admin && !_.isEqual(user.Type, 'nimda')) {
+    res.send(Response.error(-13, 'PERMISSION_DENIED'));
+    return false;  
+  }
+  if (new Date(user.Expire) < new Date()) {
+    res.send(Response.error(-14, 'SESSION_EXPIRED'));
+    return false; 
+  }
 
   return true;
 }
 
-module.exports.login = async (email, password) => {
-  const query = `SELECT * FROM User WHERE Email = "${email}" LIMIT 1`;
+module.exports.login = async (email, password, app) => {
+  const query = `SELECT * FROM User WHERE Email = "${email}" AND Type = "${app}" LIMIT 1`;
   const data = await Database.execute(query);
 
   if (_.size(data) === 0) {
@@ -71,6 +87,7 @@ module.exports.login = async (email, password) => {
       delete user.Password;
       delete user.Register_Date;
       delete user.Last_Login;
+      
       let date = new Date();
       date.setTime(date.getTime() + 1 * 86400000);
       user.Expire = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -103,6 +120,13 @@ module.exports.create = async (email, password, type) => {
 
 module.exports.all = async () => {
   const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type != "nimda"`;
+  
+  const users = await Database.execute(query);
+  return Response.success(users);
+}
+
+module.exports.all_from_monitor = async () => {
+  const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type = "monitor"`;
   
   const users = await Database.execute(query);
   return Response.success(users);

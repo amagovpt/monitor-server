@@ -250,7 +250,10 @@
     }
   }
 
-  function testView2(&$ele, &$txt, &$tot, $id) {
+  function testView2(&$ele, &$txt, &$tot, $id, $url) {
+    $url = str_replace('http://', '', $url);
+    $url = str_replace('https://', '', $url);
+
     global $href;
     $txt = preg_replace('|<(/)?[^>]+>|U', '', $txt);
     $txt = str_replace('"', '', $txt);
@@ -262,7 +265,7 @@
       return $r.'</li>'."\n";
     }
     if (($tot > 0) || ($ele=='langNo') || ($ele=='langCodeNo') || ($ele=='langExtra') || ($ele=='titleChars')) {
-      $r .= ' <a href="#"> 
+      $r .= ' <a href="/results/'.$url.'/'.$ele.'"> 
   <img src="assets/images/see.png" width="18" height="18" class="ico" alt="'.Lang('seeInPage').'" title="'.Lang('seeInPage').'" /></a></li>'."\n"; // '.$href.'&amp;e='.$ele.'
     }
     return $r;
@@ -352,12 +355,15 @@
           }
         }
 
-        $item = (!in_array($ele, $hidden))? testView2($ele, $elems[$ele], $tot['elems'][$ele], $ee) : '';
-        $item .= testView2($tes, $elems[$tes], $tnum, $ee);
+        $item = (!in_array($ele, $hidden))? testView2($ele, $elems[$ele], $tot['elems'][$ele], $ee, $url) : '';
+        $item .= testView2($tes, $elems[$tes], $tnum, $ee, $url);
 
         array_push($result["tech_list"], $item);
 
         array_push($data["results"][$scrcrd], $result);
+
+        array_push($data['elems'], $ele);
+        array_push($data['elems'], $tes);
 
         /*if (!in_array($ele, $hidden)) {
           if (($ele=='langNo') || ($ele=='langCodeNo') || ($ele=='langExtra') || ($ele=='titleChars')) {

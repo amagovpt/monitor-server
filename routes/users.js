@@ -10,19 +10,6 @@ const Response = require('../lib/_response');
 const User = require('../models/user');
 
 /**
- * Root user router
- * Does nothing - service not available
- * @param  {[type]} req   [description]
- * @param  {[type]} res   [description]
- * @param  {[type]} next) {             res.send(Reponse.no_service());} [description]
- * @return {[type]}       [description]
- */
-router.get('/', function(req, res, next) {
-  res.send(Reponse.no_service());
-});
-
-
-/**
  * [description]
  * @param  {[type]} req   [description]
  * @param  {[type]} res   [description]
@@ -33,6 +20,7 @@ router.post('/login', async function(req, res, next) {
   try {
     req.check('email', 'Ivalid Email').exists().isEmail();
     req.check('password', 'Invalid Password').exists();
+    req.check('app', 'Invalid App').exists();
     
     let errors = req.validationErrors();
     if (errors) {
@@ -40,12 +28,13 @@ router.post('/login', async function(req, res, next) {
     } else {
       let email = req.body.email;
       let password = req.body.password;
+      let app = req.body.app;
 
-      const user = await User.login(email, password);
+      const user = await User.login(email, password, app);
       res.send(user);
     }
   } catch (err) {
-    res.send(Response.error(-14, 'SERVER_ERROR', err));
+    res.send(Response.error(-17, 'SERVER_ERROR', err));
   }
 });
 
@@ -61,7 +50,7 @@ router.post('/create', async function (req, res, next) {
     if (errors) {
       res.send(Response.params_error(errors));
     } else {
-      const verification = await User.verify(req.body.cookie);
+      const verification = await User.verify(res, req.body.cookie, true);
       if (verification) {
         let email = req.body.email;
         let password = req.body.password;
@@ -69,15 +58,17 @@ router.post('/create', async function (req, res, next) {
 
         const user = await User.create(email, password, type);
         res.send(user);
-      } else {
-        res.send(Response.error(-13, 'USER_VERIFICATION_ERROR'));
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
+
+/**
+ * GETS
+ */
 
 router.post('/all', async function (req, res, next) {
   try {
@@ -87,18 +78,35 @@ router.post('/all', async function (req, res, next) {
     if (errors) {
       res.send(Response.params_error(errors));
     } else {
-      const verification = await User.verify(req.body.cookie);
+      const verification = await User.verify(res, req.body.cookie, true);
       if (verification) {
-
         const users = await User.all();
         res.send(users);
-      } else {
-        res.send(Response.error(-13, 'USER_VERIFICATION_ERROR'));
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.post('/monitor', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(res, req.body.cookie, true);
+      if (verification) {
+        const users = await User.all_from_monitor();
+        res.send(users);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 

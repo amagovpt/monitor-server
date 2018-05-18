@@ -23,16 +23,20 @@
 
       $tot = unserialize(gzuncompress(base64_decode($data[4])));
       $nodes = unserialize(gzuncompress(base64_decode($data[5])));
-
+      
       $pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
-      $pdata['elems'] = [];
+      
+      //echo json_encode($pdata['elems']);
 
       global $tests, $elems, $xpath;
 
-      foreach ($tot['results'] as $ee => $r) {
-        $ele = $tests[$ee]['elem'];
-        if (array_key_exists($ele, $xpath))
+      foreach ($pdata['elems'] as $ele) {
+        //$ele = $tests[$ee]['elem'];
+        //echo $ele.' '; 
+        //if (array_key_exists($ele, $xpath))
+        if ($ele != 'all' && array_key_exists($ele, $xpath)) {
           $pdata['elems'][$ele] = element_evaluation($tot, $webpage[1], $nodes, $url, $ele);
+        }
       }
 
       echo json_encode(["pagecode" => $webpage[1], "evaluation" => $data, "processed" => $pdata]);

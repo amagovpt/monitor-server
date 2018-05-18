@@ -17,7 +17,7 @@ router.get('/eval/:url', async function(req, res, next) {
     if (errors) {
       res.send(Response.params_error(errors));
     } else {
-      let url = req.params.url;
+      let url = decodeURIComponent(req.params.url);
       const data = await Evaluator.evaluate_url(url);
       res.send(data);
     }
