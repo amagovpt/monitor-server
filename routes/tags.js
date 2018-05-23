@@ -31,7 +31,51 @@ router.post('/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+/**
+ * GETS
+ */
+
+router.post('/all', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(res, req.body.cookie, true);
+      if (verification) {
+        const tags = await Tag.all();
+        res.send(tags);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.post('/allInfo', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(res, req.body.cookie, true);
+      if (verification) {
+        const tags = await Tag.all_info();
+        res.send(tags);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 

@@ -15,7 +15,7 @@ const Database = require('../lib/_database');
  * Create functions
  */
 
-module.exports.create = async (shortName, longName, domain, entityId, userId) => {
+module.exports.create = async (shortName, longName, domain, entityId, userId, tags) => {
   let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
   let query = `INSERT INTO Website (Short_Name, Long_Name, Creation_Date) 
     VALUES ("${shortName}", "${longName}", "${date}")`;
@@ -38,6 +38,12 @@ module.exports.create = async (shortName, longName, domain, entityId, userId) =>
 
   await Database.execute(query);
 
+  let size = _.size(tags);
+  for(let i = 0 ; i < size ; i++) {
+    query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tags[i]}", "${res.insertId}")`;
+    await Database.execute(query);
+  }
+
   return Response.success();
 }
 
@@ -53,6 +59,12 @@ module.exports.all = async () => {
 
 module.exports.all_without_entity = async () => {
   const query = `SELECT * FROM Website WHERE EntityId IS NULL`;
+  const res = await Database.execute(query);
+  return Response.success(res);
+}
+
+module.exports.all_without_user = async () => {
+  const query = `SELECT * FROM Website WHERE UserId IS NULL`;
   const res = await Database.execute(query);
   return Response.success(res);
 }

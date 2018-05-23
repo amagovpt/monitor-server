@@ -45,3 +45,35 @@ module.exports.create = async (name, observatorio, entities, websites, domains, 
 
   return Response.success();
 }
+
+/**
+ * Get functions
+ */
+
+module.exports.all = async () => {
+  const query = `SELECT * FROM Tag`;
+  
+  const tags = await Database.execute(query);
+  return Response.success(tags);
+}
+
+module.exports.all_info = async () => {
+  const query = `
+    SELECT 
+    t.*,
+      COUNT(distinct te.EntityId) as Entities,
+      COUNT(distinct tw.WebsiteId) as Websites,
+      COUNT(distinct td.DomainId) as Domains,
+      COUNT(distinct tp.PageId) as Pages
+  FROM
+    Tag as t
+  LEFT OUTER JOIN TagEntity as te ON te.TagId = t.TagId
+  LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+  LEFT OUTER JOIN TagDomain as td ON td.TagId = t.TagId
+  LEFT OUTER JOIN TagPage as tp ON tp.TagId = t.TagId
+  GROUP BY t.TagId
+  `;
+  
+  const tags = await Database.execute(query);
+  return Response.success(tags);
+}

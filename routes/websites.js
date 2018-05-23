@@ -28,14 +28,15 @@ router.post('/create', async function (req, res, next) {
         let domain = req.body.domain;
         let entityId = req.body.entityId;
         let userId = req.body.userId;
+        let tags = req.body.tags;
 
-        const website = await Website.create(shortName, longName, domain, entityId, userId);
+        const website = await Website.create(shortName, longName, domain, entityId, userId, tags);
         res.send(website);
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 
@@ -55,7 +56,7 @@ router.post('/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 
@@ -75,7 +76,27 @@ router.post('/withoutEntity', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.post('/withoutUser', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(res, req.body.cookie, true);
+      if (verification) {
+        const websites = await Website.all_without_user();
+        res.send(websites);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 

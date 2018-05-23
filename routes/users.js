@@ -55,8 +55,9 @@ router.post('/create', async function (req, res, next) {
         let email = req.body.email;
         let password = req.body.password;
         let type = req.body.app;
+        let websites = req.body.websites;
 
-        const user = await User.create(email, password, type);
+        const user = await User.create(email, password, type, websites);
         res.send(user);
       }
     }

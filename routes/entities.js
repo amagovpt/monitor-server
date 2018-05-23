@@ -21,14 +21,15 @@ router.post('/create', async function (req, res, next) {
         let shortName = req.body.shortName;
         let longName = req.body.longName;
         let websites = req.body.websites;
+        let tags = req.body.tags;
 
-        const entity = await Entity.create(shortName, longName, websites);
+        const entity = await Entity.create(shortName, longName, websites, tags);
         res.send(entity);
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 
@@ -52,7 +53,7 @@ router.post('/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 

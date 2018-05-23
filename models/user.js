@@ -103,14 +103,23 @@ module.exports.login = async (email, password, app) => {
  * Create functions
  */
 
-module.exports.create = async (email, password, type) => {
+module.exports.create = async (email, password, type, websites) => {
   password = password_hash(password);
   let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
   let hash = generate_unique_hash();
-  const query = `INSERT INTO User (Email, Password, Type, Register_Date, Unique_Hash) 
+  let query = `INSERT INTO User (Email, Password, Type, Register_Date, Unique_Hash) 
     VALUES ("${email}", "${password}", "${type}", "${date}", "${hash}")`;
   
-  await Database.execute(query);
+  const res = await Database.execute(query);
+
+  if (_.isEqual(type, 'monitor')) {
+    let size = _.size(websites);
+    for (let i = 0 ; i < size ; i++) {
+      query = `UPDATE Website SET UserId = "${res.insertId}" WHERE WebsiteId = "${websites[i]}"`;
+      await Database.execute(query);
+    }
+  }
+
   return Response.success();
 }
 

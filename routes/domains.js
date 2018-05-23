@@ -20,14 +20,15 @@ router.post('/create', async function (req, res, next) {
       if (verification) {
         let websiteId = req.body.websiteId;
         let url = req.body.url;
+        let tags = req.body.tags;
         
-        const domain = await Domain.create(websiteId, url);
+        const domain = await Domain.create(websiteId, url, tags);
         res.send(domain);
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 
@@ -51,7 +52,7 @@ router.post('/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(Response.error(-14, 'SERVER_ERROR', err)); 
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
   }
 });
 
