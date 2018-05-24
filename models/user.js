@@ -128,7 +128,14 @@ module.exports.create = async (email, password, type, websites) => {
  */
 
 module.exports.all = async () => {
-  const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type != "nimda"`;
+  const query = `
+    SELECT 
+      u.UserId, u.Email, u.Type, u.Register_Date, u.Last_Login, 
+      COUNT(distinct w.WebsiteId) as Websites
+    FROM User as u
+    LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+    WHERE u.Type != "nimda"
+    GROUP BY u.UserId`;
   
   const users = await Database.execute(query);
   return Response.success(users);

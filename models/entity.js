@@ -40,3 +40,15 @@ module.exports.all = async () => {
   const entities = await Database.execute(query);
   return Response.success(entities);
 }
+
+module.exports.all_info = async () => {
+  const query = `
+    SELECT e.*, COUNT(distinct w.WebsiteId) as Websites, COUNT(distinct te.TagId) as Tags 
+    FROM Entity as e
+    LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
+    LEFT OUTER JOIN TagEntity as te ON te.EntityId = e.EntityId
+    GROUP BY e.EntityId`;
+  
+  const entities = await Database.execute(query);
+  return Response.success(entities);
+}
