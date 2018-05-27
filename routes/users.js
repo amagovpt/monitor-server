@@ -71,6 +71,23 @@ router.post('/create', async function (req, res, next) {
  * GETS
  */
 
+router.get('/exists/:email', async function (req, res, next) {
+  try {
+    req.check('email', 'Invalid Email').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const user = await User.email_exists(req.params.email);
+      res.send(user); 
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
 router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();

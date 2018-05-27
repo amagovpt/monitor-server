@@ -127,6 +127,13 @@ module.exports.create = async (email, password, type, websites) => {
  * Get functions
  */
 
+module.exports.email_exists = async (email) => {
+  const query = `SELECT UserId FROM User WHERE Email = "${email}" LIMIT 1`;
+
+  const user = await Database.execute(query);
+  return Response.success(_.size(user) === 1);
+}
+
 module.exports.all = async () => {
   const query = `
     SELECT 

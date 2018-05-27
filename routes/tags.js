@@ -39,6 +39,23 @@ router.post('/create', async function (req, res, next) {
  * GETS
  */
 
+router.get('/existsOfficial/:name', async function (req, res, next) {
+  try {
+    req.check('name', 'Invalid Name').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const user = await Tag.official_name_exists(req.params.name);
+      res.send(user); 
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
 router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();

@@ -36,6 +36,23 @@ router.post('/create', async function (req, res, next) {
  * GETS
  */
 
+router.get('/exists/:domain', async function (req, res, next) {
+  try {
+    req.check('domain', 'Invalid Domain').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const domain = await Domain.exists(req.params.domain);
+      res.send(domain); 
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
 router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -47,6 +64,26 @@ router.post('/all', async function (req, res, next) {
       const verification = await User.verify(res, req.body.cookie, true);
       if (verification) {
         const domains = await Domain.all();
+        res.send(domains);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.post('/allInfo', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const verification = await User.verify(res, req.body.cookie, true);
+      if (verification) {
+        const domains = await Domain.all_info();
         res.send(domains);
       }
     }

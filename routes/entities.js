@@ -37,6 +37,40 @@ router.post('/create', async function (req, res, next) {
  * GETS
  */
 
+router.get('/existsShortName/:name', async function (req, res, next) {
+  try {
+    req.check('name', 'Invalid Name').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const entity = await Entity.short_name_exists(req.params.name);
+      res.send(entity); 
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
+router.get('/existsLongName/:name', async function (req, res, next) {
+  try {
+    req.check('name', 'Invalid Name').exists();
+
+    let errors = req.validationErrors();
+    if (errors) {
+      res.send(Response.params_error(errors));
+    } else {
+      const entity = await Entity.long_name_exists(req.params.name);
+      res.send(entity); 
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+  }
+});
+
 router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();

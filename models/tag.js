@@ -50,6 +50,13 @@ module.exports.create = async (name, observatorio, entities, websites, domains, 
  * Get functions
  */
 
+module.exports.official_name_exists = async (name) => {
+  const query = `SELECT * FROM Tag WHERE Name = "${name}" AND UserId IS NULL LIMIT 1`;
+
+  const tag = await Database.execute(query);
+  return Response.success(_.size(tag) === 1);
+}
+
 module.exports.all = async () => {
   const query = `SELECT * FROM Tag`;
   

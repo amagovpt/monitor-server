@@ -34,6 +34,20 @@ module.exports.create = async (shortName, longName, websites, tags) => {
   return Response.success();
 }
 
+module.exports.short_name_exists = async (name) => {
+  const query = `SELECT * FROM Entity WHERE Short_Name = "${name}" LIMIT 1`;
+
+  const entity = await Database.execute(query);
+  return Response.success(_.size(entity) === 1);
+}
+
+module.exports.long_name_exists = async (name) => {
+  const query = `SELECT * FROM Entity WHERE Long_Name = "${name}" LIMIT 1`;
+
+  const entity = await Database.execute(query);
+  return Response.success(_.size(entity) === 1);
+}
+
 module.exports.all = async () => {
   const query = `SELECT * FROM Entity`;
   
