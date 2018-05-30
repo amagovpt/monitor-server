@@ -20,16 +20,16 @@ const Database = require('../lib/_database');
 
 function encrypt(text) {
   let password = fs.readFileSync(constants.SECRET_KEY);
-  let cipher = crypto.createCipher('aes-256-ctr', _.toString(password))
-  let crypted = cipher.update(text, 'utf8', 'hex')
+  let cipher = crypto.createCipher('aes-256-ctr', _.toString(password));
+  let crypted = cipher.update(text, 'utf8', 'hex');
   crypted += cipher.final('hex');
   return crypted;
 }
  
 function decrypt(text) {
   let password = fs.readFileSync(constants.SECRET_KEY);
-  let decipher = crypto.createDecipher('aes-256-ctr', _.toString(password))
-  let dec = decipher.update(text, 'hex', 'utf8')
+  let decipher = crypto.createDecipher('aes-256-ctr', _.toString(password));
+  let dec = decipher.update(text, 'hex', 'utf8');
   return dec += decipher.final('utf8');
   return dec;
 }
@@ -49,7 +49,7 @@ module.exports.verify = async (res, cookie, admin=false) => {
 
   const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
   const data = await Database.execute(query);
-  let user = data[0];
+  const user = data[0];
 
   if (_.isEqual(_.size(data), 0)) {
     res.send(Response.error(-11, 'USER_NOT_FOUND'));

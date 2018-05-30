@@ -56,7 +56,7 @@ module.exports.all_info = async () => {
       d.Active,
       d.Start_Date,
       d.End_Date,
-      w.Long_Name as Website,
+      w.Name as Website,
       COUNT(distinct p.PageId) as Pages,
       COUNT(distinct td.TagId) as Tags
     FROM 

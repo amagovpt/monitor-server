@@ -21,8 +21,8 @@
     if ($webpage) {
       $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
 
-      $tot = unserialize(gzuncompress(base64_decode($data[4])));
-      $nodes = unserialize(gzuncompress(base64_decode($data[5])));
+      $tot = $data[4];
+      $nodes = $data[5];
       
       $pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
       
@@ -39,7 +39,7 @@
         }
       }
 
-      echo json_encode(["pagecode" => $webpage[1], "evaluation" => $data, "processed" => $pdata]);
+      echo json_encode(["pagecode" => $webpage[1], "data" => $data]);
     } else {
       echo json_encode(null);
     }

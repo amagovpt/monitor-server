@@ -12,8 +12,7 @@ const Website = require('../models/website');
 
 router.post('/create', async function (req, res, next) {
   try {
-    req.check('shortName', 'Ivalid Short Name').exists();
-    req.check('longName', 'Invalid Long Name').exists();
+    req.check('name', 'Invalid Name').exists();
     req.check('domain', 'Invalid Domain').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -23,14 +22,13 @@ router.post('/create', async function (req, res, next) {
     } else {
       const verification = await User.verify(res, req.body.cookie, true);
       if (verification) {
-        let shortName = req.body.shortName;
-        let longName = req.body.longName;
+        let name = req.body.name;
         let domain = req.body.domain;
         let entityId = req.body.entityId;
         let userId = req.body.userId;
         let tags = req.body.tags;
 
-        const website = await Website.create(shortName, longName, domain, entityId, userId, tags);
+        const website = await Website.create(name, domain, entityId, userId, tags);
         res.send(website);
       }
     }
@@ -120,7 +118,7 @@ router.post('/allInfo', async function (req, res, next) {
   }
 });
 
-router.get('/existsShortName/:name', async function (req, res, next) {
+router.get('/existsName/:name', async function (req, res, next) {
   try {
     req.check('name', 'Invalid Name').exists();
 
@@ -128,7 +126,7 @@ router.get('/existsShortName/:name', async function (req, res, next) {
     if (errors) {
       res.send(Response.params_error(errors));
     } else {
-      const website = await Website.short_name_exists(req.params.name);
+      const website = await Website.name_exists(req.params.name);
       res.send(website); 
     }
   } catch (err) {
@@ -137,15 +135,15 @@ router.get('/existsShortName/:name', async function (req, res, next) {
   }
 });
 
-router.get('/existsLongName/:name', async function (req, res, next) {
+router.get('/activeDomain/:id', async function (req, res, next) {
   try {
-    req.check('name', 'Invalid Name').exists();
+    req.check('id', 'Invalid Id').exists();
 
     let errors = req.validationErrors();
     if (errors) {
       res.send(Response.params_error(errors));
     } else {
-      const website = await Website.long_name_exists(req.params.name);
+      const website = await Website.active_domain(req.params.id);
       res.send(website); 
     }
   } catch (err) {

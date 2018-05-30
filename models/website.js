@@ -15,20 +15,20 @@ const Database = require('../lib/_database');
  * Create functions
  */
 
-module.exports.create = async (shortName, longName, domain, entityId, userId, tags) => {
+module.exports.create = async (name, domain, entityId, userId, tags) => {
   let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-  let query = `INSERT INTO Website (Short_Name, Long_Name, Creation_Date) 
-    VALUES ("${shortName}", "${longName}", "${date}")`;
+  let query = `INSERT INTO Website (Name, Creation_Date) 
+    VALUES ("${name}", "${date}")`;
   
   if (entityId && userId) {
-    query = `INSERT INTO Website (EntityId, UserId, Short_Name, Long_Name, Creation_Date) 
-    VALUES ("${entityId}", "${userId}", "${shortName}", "${longName}", "${date}")`;
+    query = `INSERT INTO Website (EntityId, UserId, Name, Creation_Date) 
+    VALUES ("${entityId}", "${userId}", "${name}", "${date}")`;
   } else if (entityId) {
-     query = `INSERT INTO Website (EntityId, Short_Name, Long_Name, Creation_Date) 
-    VALUES ("${entityId}", "${shortName}", "${longName}", "${date}")`;
+     query = `INSERT INTO Website (EntityId, Name, Creation_Date) 
+    VALUES ("${entityId}", "${name}", "${date}")`;
   } else if (userId) {
-     query = `INSERT INTO Website (UserId, Short_Name, Long_Name, Creation_Date) 
-    VALUES ("${userId}", "${shortName}", "${longName}", "${date}")`;
+     query = `INSERT INTO Website (UserId, Name, Creation_Date) 
+    VALUES ("${userId}", "${name}", "${date}")`;
   }
 
   const res = await Database.execute(query);
@@ -51,15 +51,8 @@ module.exports.create = async (shortName, longName, domain, entityId, userId, ta
  * Get functions
  */
 
-module.exports.short_name_exists = async (name) => {
-  const query = `SELECT * FROM Website WHERE Short_Name = "${name}" LIMIT 1`;
-
-  const website = await Database.execute(query);
-  return Response.success(_.size(website) === 1);
-}
-
-module.exports.long_name_exists = async (name) => {
-  const query = `SELECT * FROM Website WHERE Long_Name = "${name}" LIMIT 1`;
+module.exports.name_exists = async (name) => {
+  const query = `SELECT * FROM Website WHERE Name = "${name}" LIMIT 1`;
 
   const website = await Database.execute(query);
   return Response.success(_.size(website) === 1);
@@ -86,14 +79,12 @@ module.exports.all_without_user = async () => {
 module.exports.all_info = async () => {
   const query = `
     SELECT 
-      w.WebsiteId, 
-      w.Short_Name, 
-      w.Long_Name, 
+      w.WebsiteId,
+      w.Name, 
       w.Creation_Date,
       e.Long_Name as Entity,
       u.Email as User,
       d.Url as Current_Domain,
-      COUNT(distinct d2.DomainId) as Domains,
       COUNT(distinct p.PageId) as Pages,
       COUNT(distinct tw.TagId) as Tags
     FROM 
@@ -101,11 +92,16 @@ module.exports.all_info = async () => {
     LEFT OUTER JOIN Entity as e ON e.EntityId =  w.EntityId
     LEFT OUTER JOIN User as u ON u.UserId = w.UserId
     LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-    LEFT OUTER JOIN Domain as d2 ON d2.WebsiteId = w.WebsiteId
-    LEFT OUTER JOIN Page as p ON p.DomainId = d2.DomainId
+    LEFT OUTER JOIN Page as p ON p.DomainId = d.DomainId
     LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
     GROUP BY w.WebsiteId, d.Url`;
 
+  const res = await Database.execute(query);
+  return Response.success(res);
+}
+
+module.exports.active_domain = async (id) => {
+  const query = `SELECT Url FROM Domain WHERE WebsiteId = "${id}" AND Active = 1 LIMIT 1`;
   const res = await Database.execute(query);
   return Response.success(res);
 }

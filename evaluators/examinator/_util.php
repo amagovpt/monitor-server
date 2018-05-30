@@ -54,9 +54,9 @@
         $tot['info']['title'],
         $tot['info']['score'],
         $rawUrl,
-        base64_encode(gzcompress($pagecode, 9)),
-        base64_encode(gzcompress(serialize($tot), 9)),
-        base64_encode(gzcompress(serialize($xp), 9)),
+        $pagecode,
+        $tot,
+        $xp,
         $tot['info']['conform'],
         json_encode($tot['elems']),
         date('Y-m-d H:i:s')
