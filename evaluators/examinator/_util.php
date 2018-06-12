@@ -48,18 +48,18 @@
       $examinator = new eXaminator();
       $examinator->parserPage($info, $pagecode, $start);
       $tot = $examinator->tot;
-      $xp = $examinator->nodes;
+      $nodes = $examinator->nodes;
 
       $a = array(
-        $tot['info']['title'],
-        $tot['info']['score'],
-        $rawUrl,
-        $pagecode,
-        $tot,
-        $xp,
-        $tot['info']['conform'],
-        json_encode($tot['elems']),
-        date('Y-m-d H:i:s')
+        "title" => $tot['info']['title'],
+        "score" => $tot['info']['score'],
+        "rawUrl" => $rawUrl,
+        //"pagecode" => $pagecode,
+        "tot" => $tot,
+        "nodes" => $nodes,
+        "conform" => $tot['info']['conform'],
+        "elems" => $tot['elems'],
+        "date" => date('Y-m-d H:i:s')
       );
 
       return $a;
@@ -396,11 +396,11 @@
         // Scorecard
         $table[$key][$lev][] = '<tr class="'.$class.'">
           <td>'.$sctable.'</td>
-          <td class="left">'.$msg.'</td>
-          <td>'.$sco.'</td>
+          <td class="left">'.$msg.'</td>'
+          /*<td>'.$sco.'</td>
           <td>'.$pond.'</td>
           <td>'.$res.'</td>
-          </tr>'."\n";
+          </tr>'*/."\n";
         $table[$key]['rows']++;
         $table['p'] += $pond;
         $table['r'] += $res;
@@ -417,19 +417,19 @@
       $levels = array('A'=>'a','AA'=>'aa','AAA'=>'aaa');
       $p = number_format(($table['p'] / $table['tot']), 3);
       $r = number_format(($table['r'] / $table['tot']), 3);
-      $data["table"] .= '<div class="tab-pane" id="scorecrd">
-      <h3 class="concept">'.Lang('modeScore').':
-      '.$table['tot'].' '.Lang('seeTests').'. '.Lang('score').' '.$tot['info']['score'].'</h3>
-      <table id="scorcard" class="table table-bordered table-sm">
-      <caption>'.Lang('fullList').'</caption>
-      <tr>
+      $data["table"] .= '<div class="tab-pane" id="scorecrd">'.
+      //'<h3 class="concept">'.Lang('modeScore').':
+      //'.$table['tot'].' '.Lang('seeTests').'. '.Lang('score').' '.$tot['info']['score'].'</h3>'.
+      '<table id="scorcard" class="table table-bordered table-sm">'.
+      //'<caption>'.Lang('fullList').'</caption>'.
+      '<tr>
       <th scope="col"><abbr title="Prioridade">Prio.</abbr></th>
       <th scope="col"><abbr title="Critério(s) de sucesso(s)">CS</abbr></th>
-      <th scope="col">'.Lang('testCase').'</th>
-      <th scope="col"><abbr title="'.Lang('testGrade').'">N</abbr></th>
+      <th scope="col">'.Lang('testCase').'</th>'
+      /*<th scope="col"><abbr title="'.Lang('testGrade').'">N</abbr></th>
       <th scope="col"><abbr title="'.Lang('testPond').'">P</abbr></th>
       <th scope="col"><abbr title="'.Lang('score').'">N*P</abbr></th>
-      </tr>'."\n";
+      </tr>'*/."\n";
       foreach ($levels as $k => $v) {
         $first=true;
         if ($table[$k]['rows'] == 0) { continue; }
@@ -460,7 +460,7 @@
         }
       }
 
-      $data["table"] .= '<tr class="sortbottom">
+      /*$data["table"] .= '<tr class="sortbottom">
       <td colspan="4">&nbsp;</td>
       <td><strong>'.$p.'</strong></td>
       <td><strong>'.$r.'</strong></td>
@@ -468,15 +468,15 @@
       </table>
       <p class="scoreop">'.Lang('scorePond').' = round( '.$r.' / '.$p.' ) = '.$tot['info']['score'].'</p>
       <h4>'.Lang('resultsUx').'</h4>
-      <ul style="font-size:0.9em">'."\n";
-      foreach ($tot['users'] as $k => $v) {
+      <ul style="font-size:0.9em">'."\n";*/
+      /*foreach ($tot['users'] as $k => $v) {
         list($num, $sco) = explode("@", $v);
         if (in_array($k, $userdisc) && ($num > 0)) {
           $data["table"] .= '<li>'.Lang($k).': Score <strong>'.$sco.'</strong> ('.$num.' pruebas)</li>'."\n";
         }
-      }
-      $data["table"] .= '</ul>
-      </div>
+      }*/
+      $data["table"] .= //'</ul>
+      '</div>
       </div>'."\n";
 
       return $data;

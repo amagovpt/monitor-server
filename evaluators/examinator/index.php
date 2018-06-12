@@ -15,33 +15,56 @@
   require_once(__DIR__.'/_util.php');
 
   try {
-    $url = $argv[1];
+    $service = $argv[1];
 
-    $webpage = get_webpage($url);
-    if ($webpage) {
-      $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
+    if ($service == 1) {
+      $url = $argv[2];
 
-      $tot = $data[4];
-      $nodes = $data[5];
-      
-      $pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
-      
-      //echo json_encode($pdata['elems']);
+      $webpage = get_webpage($url);
+      if ($webpage) {
+        $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
 
-      global $tests, $elems, $xpath;
+        $tot = $data["tot"];
+        $nodes = $data["nodes"];
+        
+        $pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
+        
+        //echo json_encode($pdata['elems']);
 
-      foreach ($pdata['elems'] as $ele) {
-        //$ele = $tests[$ee]['elem'];
-        //echo $ele.' '; 
-        //if (array_key_exists($ele, $xpath))
-        if ($ele != 'all' && array_key_exists($ele, $xpath)) {
-          $pdata['elems'][$ele] = element_evaluation($tot, $webpage[1], $nodes, $url, $ele);
-        }
+        global $tests, $elems, $xpath;
+
+        /*foreach ($pdata['elems'] as $ele) {
+          //$ele = $tests[$ee]['elem'];
+          //echo $ele.' '; 
+          //if (array_key_exists($ele, $xpath))
+          if ($ele != 'all' && array_key_exists($ele, $xpath)) {
+            $pdata['elems'][$ele] = element_evaluation($tot, $webpage[1], $nodes, $url, $ele);
+          }
+        }*/
+
+        echo json_encode(["pagecode" => $webpage[1], "data" => $data, "processed" => $pdata]);
+      } else {
+        echo json_encode(null);
       }
+    } elseif ($service == 2) {
+      $url = $argv[2];
+      $element = $argv[3];
 
-      echo json_encode(["pagecode" => $webpage[1], "data" => $data]);
+      $webpage = get_webpage($url);
+      if ($webpage) {
+        $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
+
+        $tot = $data["tot"];
+        $nodes = $data["nodes"];
+
+        $elems = element_evaluation($tot, $webpage[1], $nodes, $url, $element);
+
+        echo json_encode(["elems" => $elems]);
+      } else {
+        echo json_encode(null);
+      }
     } else {
-      echo json_encode(null);
+      echo json_encode(["error" => "NO_SERVICE"]);
     }
   } catch (Exception $e) {
     echo json_encode(null);

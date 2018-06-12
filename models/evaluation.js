@@ -38,7 +38,24 @@ function evaluate(url, engine) {
 
 module.exports.evaluate_url = (url, engine) => {
   return new Promise((resolve, reject) => {
-    exec(Evaluator.get_command(engine) + ' ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
+    exec(Evaluator.get_command(engine) + ' 1 ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      }
+      else if (stderr) {
+        reject(stderr);
+      }
+      else 
+        resolve(Response.success(_.trim(stdout)));
+    });
+  });
+}
+
+module.exports.get_elements = (url, element, engine) => {
+  return new Promise((resolve, reject) => {
+    let command = (Evaluator.get_command(engine) + ' 2 ' + correct_url(url) + ' ' + element).toString();
+    
+    exec(command, {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       }
