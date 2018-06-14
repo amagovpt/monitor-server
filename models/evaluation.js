@@ -23,7 +23,7 @@ function correct_url(url) {
 
 function evaluate(url, engine) {
   return new Promise((resolve, reject) => {
-    exec(Evaluator.get_command(engine) + ' ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
+    exec(Evaluator.get_command(engine) + ' 1 ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       }
@@ -74,15 +74,15 @@ module.exports.evaluate_and_save = async (id, url) => {
   const webpage = Buffer.from(evaluation.pagecode).toString('base64');
   const data = evaluation.data;
 
-  const conform = _.split(data[6], '@');
+  const conform = _.split(data.conform, '@');
 
   const query = `
     INSERT INTO 
       Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
     VALUES 
-      ("${id}", "${data[0]}", "${data[1]}", "${webpage}", "${Buffer.from(JSON.stringify(data[4])).toString('base64')}", 
-      "${Buffer.from(JSON.stringify(data[5])).toString('base64')}", "${Buffer.from(JSON.stringify(data[7])).toString('base64')}", "${conform[0]}", 
-      "${conform[1]}", "${conform[2]}", "${data[8]}")`;
+      ("${id}", "${data.title}", "${data.score}", "${webpage}", "${Buffer.from(JSON.stringify(data.tot)).toString('base64')}", 
+      "${Buffer.from(JSON.stringify(data.nodes)).toString('base64')}", "${Buffer.from(JSON.stringify(data.elems)).toString('base64')}", "${conform[0]}", 
+      "${conform[1]}", "${conform[2]}", "${data.date}")`;
 
   await Database.execute(query);
 

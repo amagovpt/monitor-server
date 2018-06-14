@@ -265,7 +265,7 @@
       return $r.'</li>'."\n";
     }
     if (($tot > 0) || ($ele=='langNo') || ($ele=='langCodeNo') || ($ele=='langExtra') || ($ele=='titleChars')) {
-      $r .= ' <a href="/results/'.$url.'/'.$ele.'"> 
+      $r .= ' <a href="/results/'.urlencode($url).'/'.$ele.'" target="_blank"> 
   <img src="assets/images/see.png" width="18" height="18" class="ico" alt="'.Lang('seeInPage').'" title="'.Lang('seeInPage').'" /></a></li>'."\n"; // '.$href.'&amp;e='.$ele.'
     }
     return $r;
