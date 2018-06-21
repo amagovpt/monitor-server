@@ -27,11 +27,11 @@
         $tot = $data["tot"];
         $nodes = $data["nodes"];
         
-        $pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
+        //$pdata = process_data_observatorio($tot, $webpage[1], $nodes, $url);
         
         //echo json_encode($pdata['elems']);
 
-        global $tests, $elems, $xpath;
+        //global $tests, $elems, $xpath;
 
         /*foreach ($pdata['elems'] as $ele) {
           //$ele = $tests[$ee]['elem'];
@@ -42,7 +42,7 @@
           }
         }*/
 
-        echo json_encode(["pagecode" => $webpage[1], "data" => $data, "processed" => $pdata]);
+        echo json_encode(["pagecode" => $webpage[1], "data" => $data/* , "processed" => $pdata*/]);
       } else {
         echo json_encode(null);
       }

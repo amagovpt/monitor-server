@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const Response = require('../lib/_response');
 const Observatorio = require('../models/observatorio');
 
 router.get('/', async function(req, res, next) {

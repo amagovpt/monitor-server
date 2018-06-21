@@ -12,46 +12,14 @@ const _ = require('lodash');
 const Promise = require('promise');
 const Database = require('../lib/_database');
 const Response = require('../lib/_response');
-const Evaluator = require('../lib/_api');
+const Middleware = require('../lib/_middleware');
 
-function correct_url(url) {
-  if (_.startsWith(url, 'http:') || _.startsWith(url, 'https:'))
-    return url;
-
-  return 'http://' + url;
+module.exports.evaluate_url = async (url, engine) => {
+  const data = await Middleware.evaluate_and_process(url, engine);
+  return Response.success(data);
 }
 
-function evaluate(url, engine) {
-  return new Promise((resolve, reject) => {
-    exec(Evaluator.get_command(engine) + ' 1 ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-      }
-      else if (stderr) {
-        reject(stderr);
-      }
-      else 
-        resolve(_.trim(stdout));
-    });
-  });
-}
-
-module.exports.evaluate_url = (url, engine) => {
-  return new Promise((resolve, reject) => {
-    exec(Evaluator.get_command(engine) + ' 1 ' + correct_url(url), {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-      }
-      else if (stderr) {
-        reject(stderr);
-      }
-      else 
-        resolve(Response.success(_.trim(stdout)));
-    });
-  });
-}
-
-module.exports.get_elements = (url, element, engine) => {
+/*module.exports.get_elements = (url, element, engine) => {
   return new Promise((resolve, reject) => {
     let command = (Evaluator.get_command(engine) + ' 2 ' + correct_url(url) + ' ' + element).toString();
     
@@ -66,10 +34,10 @@ module.exports.get_elements = (url, element, engine) => {
         resolve(Response.success(_.trim(stdout)));
     });
   });
-}
+}*/
 
 module.exports.evaluate_and_save = async (id, url) => {
-  const evaluation = JSON.parse(await evaluate(url, 'examinator'));
+  const evaluation = JSON.parse(await Middleware.evaluate(url, 'examinator'));
 
   const webpage = Buffer.from(evaluation.pagecode).toString('base64');
   const data = evaluation.data;
@@ -84,7 +52,6 @@ module.exports.evaluate_and_save = async (id, url) => {
       "${Buffer.from(JSON.stringify(data.nodes)).toString('base64')}", "${Buffer.from(JSON.stringify(data.elems)).toString('base64')}", "${conform[0]}", 
       "${conform[1]}", "${conform[2]}", "${data.date}")`;
 
-  await Database.execute(query);
-
+  Database.execute(query);
   return;
 }
