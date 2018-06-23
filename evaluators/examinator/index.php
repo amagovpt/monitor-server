@@ -67,5 +67,5 @@
       echo json_encode(["error" => "NO_SERVICE"]);
     }
   } catch (Exception $e) {
-    echo json_encode(null);
+    echo json_encode($e->getMessage());
   }

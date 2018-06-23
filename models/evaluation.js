@@ -14,27 +14,34 @@ const Database = require('../lib/_database');
 const Response = require('../lib/_response');
 const Middleware = require('../lib/_middleware');
 
+function correct_url(url) {
+  if (_.startsWith(url, 'http:') || _.startsWith(url, 'https:'))
+    return url;
+
+  return 'http://' + url;
+}
+
 module.exports.evaluate_url = async (url, engine) => {
   const data = await Middleware.evaluate_and_process(url, engine);
   return Response.success(data);
 }
 
-/*module.exports.get_elements = (url, element, engine) => {
+module.exports.get_elements = (url, element, engine) => {
   return new Promise((resolve, reject) => {
-    let command = (Evaluator.get_command(engine) + ' 2 ' + correct_url(url) + ' ' + element).toString();
-    
+    let command = (Middleware.get_command(engine) + ' 2 ' + correct_url(url) + ' ' + element).toString();
+    console.log(command)
     exec(command, {maxBuffer: 1024 * 1024}, (error, stdout, stderr) => {
       if (error) {
-        reject(error);
+        reject(Response.error(-1, 'ERROR_EXECUTING', error));
       }
       else if (stderr) {
-        reject(stderr);
+        reject(Response.error(-2, 'ERROR_EXECUTING_2', stderr));
       }
       else 
         resolve(Response.success(_.trim(stdout)));
     });
   });
-}*/
+}
 
 module.exports.evaluate_and_save = async (id, url) => {
   const evaluation = JSON.parse(await Middleware.evaluate(url, 'examinator'));
