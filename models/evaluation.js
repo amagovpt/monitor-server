@@ -23,7 +23,11 @@ function correct_url(url) {
 
 module.exports.evaluate_url = async (url, engine) => {
   const data = await Middleware.evaluate_and_process(url, engine);
-  return Response.success(data);
+  if (data) {
+    return Response.success(data);
+  } else {
+    return Response.error(-2, 'Invalida url or webpage doesn\'t exist');
+  }
 }
 
 module.exports.get_elements = (url, element, engine) => {

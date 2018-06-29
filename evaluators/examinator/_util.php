@@ -15,12 +15,11 @@
         $curl->uri = $url;
         $curl->getPage();
         
-        //echo $curl->hasError304();
         if ($curl->error != '') {
-          return ["success" => "ERROR_EVALUATION", "message" => "GETTING_PAGE_ERROR"];
+          return null;
         } else {
           if ((count($curl->info) == 0) || ($curl->pagecode == '')) {
-            return ["success" => "ERROR_EVALUATION", "message" => "GETTING_PAGE_ERROR"];
+            return null;
           } else {
             $pagecode = $curl->pagecode;
             $info = $curl->info;
@@ -30,7 +29,7 @@
           }
         }
       } else {
-        return ["success" => "ERROR_URL", "message" => "INVALID_URL"];
+        return null;
       }
 
       return [$info, $pagecode, $start];
