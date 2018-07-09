@@ -1,35 +1,42 @@
-"use strict";
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const Response = require('../lib/_response');
-const User = require('../models/user');
-const Entity = require('../models/entity');
+const { ServerError, ParamsError } = require('../lib/_error');
+const { error } = require('../lib/_response');
+const { verify_user } = require('../models/user');
+const { 
+  create_entity, 
+  entity_short_name_exists, 
+  entity_long_name_exists, 
+  get_all_entities, 
+  get_all_entities_info 
+} = require('../models/entity');
 
 router.post('/create', async function (req, res, next) {
   try {
-    req.check('shortName', 'Ivalid Short Name').exists();
+    req.check('shortName', 'Invalid Short Name').exists();
     req.check('longName', 'Invalid Long Name').exists();
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        let shortName = req.body.shortName;
-        let longName = req.body.longName;
-        let websites = req.body.websites;
-        let tags = req.body.tags;
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const shortName = req.body.shortName;
+        const longName = req.body.longName;
+        const websites = req.body.websites;
+        const tags = req.body.tags;
 
-        const entity = await Entity.create(shortName, longName, websites, tags);
-        res.send(entity);
+        create_entity(shortName, longName, websites, tags)
+          .then(success => res.send(success))
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -41,16 +48,16 @@ router.get('/existsShortName/:name', async function (req, res, next) {
   try {
     req.check('name', 'Invalid Name').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const entity = await Entity.short_name_exists(req.params.name);
-      res.send(entity); 
+      entity_short_name_exists(req.params.name)
+        .then(exists => res.send(exists))
+        .catch(err => res.send(err));
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -58,16 +65,16 @@ router.get('/existsLongName/:name', async function (req, res, next) {
   try {
     req.check('name', 'Invalid Name').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const entity = await Entity.long_name_exists(req.params.name);
-      res.send(entity); 
+      entity_long_name_exists(req.params.name)
+        .then(exists => res.send(exists))
+        .catch(err => res.send(err));
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -75,19 +82,19 @@ router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        const entities = await Entity.all();
-        res.send(entities);
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user !== -1) {
+        get_all_entities()
+          .then(entities => res.send(entites))
+          .catch(err => res.send(res));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -95,19 +102,19 @@ router.post('/allInfo', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        const entities = await Entity.all_info();
-        res.send(entities);
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user !== -1) {
+        get_all_entities_info()
+          .then(entities => res.send(entites))
+          .catch(err => res.send(res));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 

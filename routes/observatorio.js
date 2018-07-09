@@ -1,16 +1,18 @@
-"use strict";
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const Response = require('../lib/_response');
-const Observatorio = require('../models/observatorio');
+const { ServerError } = require('../lib/_error');
+const { error } = require('../lib/_response');
+const { get_observatorio_data } = require('../models/observatorio');
 
 router.get('/', async function(req, res, next) {
   try {
-    const data = await Observatorio.get_data();
-    res.send(data);
+    get_observatorio_data()
+      .then(data => res.send(data))
+      .catch(err => res.send(err));
   } catch (err) {
-    res.send(Response.error(-17, 'SERVER_ERROR', err));
+    res.send(error(new ServerError(err)));
   }
 });
 

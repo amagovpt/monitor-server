@@ -1,37 +1,38 @@
-"use strict";
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const Response = require('../lib/_response');
-const User = require('../models/user');
-const Tag = require('../models/tag');
+const { ServerError, ParamsError } = require('../lib/_error');
+const { error } = require('../lib/_response');
+const { verify_user } = require('../models/user');
+const { create_tag, tag_official_name_exists, get_all_tags, get_all_tags_info } = require('../models/tag');
 
 router.post('/create', async function (req, res, next) {
   try {
-    req.check('name', 'Ivalid Name').exists();
+    req.check('name', 'Invalid Name').exists();
     req.check('observatorio', 'Invalid Observatorio').exists();
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        let name = req.body.name;
-        let observatorio = req.body.observatorio;
-        let entities = req.body.entities;
-        let websites = req.body.websites;
-        let domains = req.body.domains;
-        let pages = req.body.pages;
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const name = req.body.name;
+        const observatorio = req.body.observatorio;
+        const entities = req.body.entities;
+        const websites = req.body.websites;
+        const domains = req.body.domains;
+        const pages = req.body.pages;
         
-        const tag = await Tag.create(name, observatorio, entities, websites, domains, pages);
-        res.send(tag);
+        create_tag(name, observatorio, entities, websites, domains, pages)
+          .then(success => res.send(success))
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -39,20 +40,20 @@ router.post('/create', async function (req, res, next) {
  * GETS
  */
 
-router.get('/existsOfficial/:name', async function (req, res, next) {
+router.get('/existsOfficial/:name', function (req, res, next) {
   try {
     req.check('name', 'Invalid Name').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const user = await Tag.official_name_exists(req.params.name);
-      res.send(user); 
+      tag_official_name_exists(req.params.name)
+        .then(exists => res.send(exists))
+        .catch(err => res.send(err));
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -60,19 +61,19 @@ router.post('/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        const tags = await Tag.all();
-        res.send(tags);
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_all_tags()
+          .then(tags => res.send(tags))
+          .catch(res => res.send(res));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 
@@ -80,19 +81,19 @@ router.post('/allInfo', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
 
-    let errors = req.validationErrors();
+    const errors = req.validationErrors();
     if (errors) {
-      res.send(Response.params_error(errors));
+      res.send(error(new ParamsError(errors)));
     } else {
-      const verification = await User.verify(res, req.body.cookie, true);
-      if (verification) {
-        const tags = await Tag.all_info();
-        res.send(tags);
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_all_tags_info()
+          .then(tags => res.send(tags))
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
-    console.log(err);
-    res.send(Response.error(-17, 'SERVER_ERROR', err)); 
+    res.send(error(new ServerError(err))); 
   }
 });
 

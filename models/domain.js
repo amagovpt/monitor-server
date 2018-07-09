@@ -7,65 +7,85 @@
 /**
  * Libraries and modules
  */
-const _ = require('lodash');
-const Response = require('../lib/_response');
-const Database = require('../lib/_database');
+const { size } = require('lodash');
+const { each } = require('async');
+const { success } = require('../lib/_response');
+const { execute_query } = require('../lib/_database');
 
-module.exports.create = async (_websiteId, _url, _tags) => {
-  let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+module.exports.create_domain = async (website_id, url, tags) => {
+  try {
+    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-  let query = `UPDATE Domain SET End_Date = "${date}", Active = 0
-    WHERE WebsiteId = "${_websiteId}" AND Active = "1"`;
+    let query = `UPDATE Domain SET End_Date = "${date}", Active = 0
+      WHERE WebsiteId = "${website_id}" AND Active = "1"`;
 
-  await Database.execute(query);
+    await execute_query(query);
 
-  query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
-    VALUES ("${_websiteId}", "${_url}", "${date}", "1")`;
-  
-  const res = await Database.execute(query);
+    query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
+      VALUES ("${website_id}", "${url}", "${date}", "1")`;
+    
+    const domain = await execute_query(query);
 
-  let size = _.size(_tags);
-  for(let i = 0 ; i < size ; i++) {
-    query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${_tags[i]}", "${res.insertId}")`;
-    await Database.execute(query);
+    each(tags, (tag, callback) => {
+      query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${tag}", "${domain.insertId}")`;
+      execute_query(query)
+        .then(success => callback())
+        .catch(err => callback(err));
+    }, err => {
+      if (err)
+        return error(err);
+      else
+        return success(domain.insertId);
+    });
+  } catch(err) {
+    return error(err);
   }
-
-  return Response.success();
 }
 
-module.exports.exists = async (_domain) => {
-  _domain = decodeURIComponent(_domain);
-  const query = `SELECT * FROM Domain WHERE Url = "${_domain}" LIMIT 1`;
+module.exports.domain_exists = async (url) => {
+  try {
+    url = decodeURIComponent(url);
+    const query = `SELECT * FROM Domain WHERE Url = "${url}" LIMIT 1`;
 
-  const domain = await Database.execute(query);
-  return Response.success(_.size(domain) === 1);
+    const domain = await execute_query(query);
+    return success(size(domain) === 1);
+  } catch(err) {
+    return error(err);
+  } 
 }
 
-module.exports.all = async () => {
-  const query = `SELECT * FROM Domain WHERE Active = "1"`;
-  
-  const domains = await Database.execute(query);
-  return Response.success(domains);
+module.exports.get_all_active_domains = async () => {
+  try {
+    const query = `SELECT * FROM Domain WHERE Active = "1"`;
+    const domains = await execute_query(query);
+    return success(domains);
+  } catch(err) {
+    return error(err);
+  }
 }
 
 module.exports.all_info = async () => {
-  const query = `
-    SELECT 
-      d.DomainId,
-      d.Url,
-      d.Active,
-      d.Start_Date,
-      d.End_Date,
-      w.Name as Website,
-      COUNT(distinct p.PageId) as Pages,
-      COUNT(distinct td.TagId) as Tags
-    FROM 
-      Domain as d
-    LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
-    LEFT OUTER JOIN Page as p ON p.DomainId = d.DomainId
-    LEFT OUTER JOIN TagDomain as td ON td.DomainId = d.DomainId
-    GROUP BY d.DomainId`;
+  try {
+    const query = `
+      SELECT 
+        d.DomainId,
+        d.Url,
+        d.Active,
+        d.Start_Date,
+        d.End_Date,
+        w.Name as Website,
+        COUNT(distinct p.PageId) as Pages,
+        COUNT(distinct td.TagId) as Tags
+      FROM 
+        Domain as d
+      LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
+      LEFT OUTER JOIN Page as p ON p.DomainId = d.DomainId
+      LEFT OUTER JOIN TagDomain as td ON td.DomainId = d.DomainId
+      GROUP BY d.DomainId`;
 
-  const res = await Database.execute(query);
-  return Response.success(res);
+    const domains = await execute_query(query);
+    return success(domains);
+  } catch(err) {
+    return error(err);
+  }
 }

@@ -2985,5 +2985,3 @@ function testList() {
 );
 	return $tests;
 } // testList
-
-?>

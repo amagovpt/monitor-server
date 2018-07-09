@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const expressValidator = require('express-validator');
 const cors = require('cors');
+const compression = require('compression');
 
 const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatorio');
@@ -17,6 +18,7 @@ const domainsRouter = require('./routes/domains');
 const pagesRouter = require('./routes/pages');
 
 const app = express();
+app.use(compression());
 app.use(cors());
 
 // view engine setup

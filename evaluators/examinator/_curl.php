@@ -207,4 +207,3 @@ function CheckURI(&$uri, &$error) {
 		}
 	}
 } // CheckURI
-?>
