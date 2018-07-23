@@ -8,7 +8,6 @@
  * Libraries and modules
  */
 const { size } = require('lodash');
-const { series, each } = require('async')
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
@@ -20,39 +19,19 @@ module.exports.create_entity = async (shortName, longName, websites, tags) => {
     
     const entity = await execute_query(query);
 
-    series([
-      function(websites_callback) {
-        each(websites, (website, callback) => {
-          query = `UPDATE Website SET EntityId = ${entity.insertId} WHERE WebsiteId = ${website}`;
-          execute_query(query)
-            .then(success => callback())
-            .catch(err => callback(err));
-        }, err => {
-          if (err)
-            websites_callback(err);
-          else
-            websites_callback();
-        });
-      },
-      function(tags_callback) {
-        each(tags, (tag, callback) => {
-          query = `INSERT INTO TagEntity (TagId, EntityId) VALUES ("${tag}", "${entity.insertId}")`;
-          execute_query(query)
-            .then(success => callback())
-            .catch(err => callback(err));
-        }, err => {
-          if (err)
-            tags_callback(err);
-          else
-            tags_callback
-        });
-      }
-    ], err => {
-      if (err)
-        return error(err);
-      else
-        return success(entity.insertId);
-    });
+    let size = size(websites);
+    for (let i = 0 ; i < size ; i++) {
+      query = `UPDATE Website SET EntityId = ${entity.insertId} WHERE WebsiteId = ${websites[i]}`;
+      await execute_query(query);
+    }
+
+    size = size(tags);
+    for (let i = 0 ; i < size ; i++) {
+      query = `INSERT INTO TagEntity (TagId, EntityId) VALUES ("${tags[i]}", "${entity.insertId}")`;
+      await execute_query(query);
+    }
+
+    return success(entity.insertId);
   } catch(err) {
     return error(err);
   }

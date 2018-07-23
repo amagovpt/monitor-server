@@ -34,10 +34,10 @@ router.post('/create', async function (req, res, next) {
         const name = req.body.name;
         const domain = req.body.domain;
         const entity_id = req.body.entityId;
-        const userId = req.body.userId;
+        const _user_id = req.body.userId;
         const tags = req.body.tags;
 
-        create_website(name, domain, entityId, userId, tags)
+        create_website(name, domain, entity_id, _user_id, tags)
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }

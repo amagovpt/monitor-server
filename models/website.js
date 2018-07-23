@@ -8,7 +8,6 @@
  * Libraries and modules
  */
 const { size } = require('lodash');
-const { each } = require('async');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
@@ -16,20 +15,20 @@ const { execute_query } = require('../lib/_database');
  * Create functions
  */
 
-module.exports.create_website = async (name, domain, entityId, userId, tags) => {
+module.exports.create_website = async (name, domain, entity_id, user_id, tags) => {
   try {
-    let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${name}", "${date}")`;
     
-    if (entityId && userId) {
+    if (entity_id && user_id) {
       query = `INSERT INTO Website (EntityId, UserId, Name, Creation_Date) 
-      VALUES ("${entityId}", "${userId}", "${name}", "${date}")`;
-    } else if (entityId) {
+      VALUES ("${entity_id}", "${user_id}", "${name}", "${date}")`;
+    } else if (entity_id) {
        query = `INSERT INTO Website (EntityId, Name, Creation_Date) 
-      VALUES ("${entityId}", "${name}", "${date}")`;
-    } else if (userId) {
+      VALUES ("${entity_id}", "${name}", "${date}")`;
+    } else if (user_id) {
        query = `INSERT INTO Website (UserId, Name, Creation_Date) 
-      VALUES ("${userId}", "${name}", "${date}")`;
+      VALUES ("${user_id}", "${name}", "${date}")`;
     }
 
     const website = await execute_query(query);
@@ -39,18 +38,14 @@ module.exports.create_website = async (name, domain, entityId, userId, tags) => 
 
     await execute_query(query);
 
-    each(tags, (tag, callback) => {
-      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag}", "${website.insertId}")`;
-      execute_query(query)
-        .then(success => callback())
-        .catch(err => callback(err));
-    }, err => {
-      if (err)
-        return error(err);
-      else
-        return success(website.insertId);
-    });
-  } catch(err){
+    const size = size(tags);
+    for (let i = 0 ; i < size ; i++) {
+      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tags[i]}", "${website.insertId}")`;
+      await execute_query(query);
+    }
+
+    return success(website.insertId);
+  } catch(err) {
     return error(err);
   }
 }
@@ -137,9 +132,18 @@ module.exports.get_website_active_domain = async (id) => {
   }
 }
 
-module.exports.get_all_websites_from_user = (user_id) => {
+module.exports.get_all_user_websites = async (user_id) => {
   try {
-    return success();
+    const query = `SELECT w.*, COUNT(distinct p.PageId) as Pages 
+      FROM 
+        Website as w, 
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+        LEFT OUTER JOIN Page as p ON p.DomainId = d.DomainId
+      WHERE 
+        w.UserId = "${user_id}"
+      LIMIT 1`;
+    const websites = await execute_query(query);
+    return success(websites);
   } catch(err) {
     return error(err)
   }

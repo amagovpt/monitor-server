@@ -26,17 +26,13 @@ module.exports.create_domain = async (website_id, url, tags) => {
     
     const domain = await execute_query(query);
 
-    each(tags, (tag, callback) => {
-      query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${tag}", "${domain.insertId}")`;
-      execute_query(query)
-        .then(success => callback())
-        .catch(err => callback(err));
-    }, err => {
-      if (err)
-        return error(err);
-      else
-        return success(domain.insertId);
-    });
+    const size = size(tags);
+    for (let i = 0 ; i < size ; i++) {
+      query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${tags[i]}", "${domain.insertId}")`;
+      await execute_query(query);
+    }
+
+    return success(domain.insertId);
   } catch(err) {
     return error(err);
   }
@@ -64,7 +60,7 @@ module.exports.get_all_active_domains = async () => {
   }
 }
 
-module.exports.all_info = async () => {
+module.exports.get_all_domains_info = async () => {
   try {
     const query = `
       SELECT 

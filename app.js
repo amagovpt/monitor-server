@@ -10,6 +10,7 @@ const compression = require('compression');
 
 const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatorio');
+const studiesRouter = require('./routes/studies');
 const tagsRouter = require('./routes/tags');
 const usersRouter = require('./routes/users');
 const websitesRouter = require('./routes/websites');
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/amp', ampRouter);
 app.use('/obs', obsRouter);
+app.use('/studies', studiesRouter);
 app.use('/users', usersRouter);
 app.use('/entities', entitiesRouter);
 app.use('/websites', websitesRouter);

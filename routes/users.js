@@ -8,7 +8,14 @@ const express = require('express');
 const router = express.Router();
 const { ServerError, ParamsError } = require('../lib/_error');
 const { success, error } = require('../lib/_response');
-const { verify_user, login_user } = require('../models/user');
+const { 
+  verify_user, 
+  login_user,
+  create_user,
+  email_exists,
+  get_all_users,
+  get_all_monitor_users
+} = require('../models/user');
 
 /**
  * [description]
@@ -65,7 +72,6 @@ router.post('/create', async function (req, res, next) {
       }
     }
   } catch (err) {
-    console.log(err);
     res.send(error(new ServerError(err))); 
   }
 });
@@ -121,7 +127,7 @@ router.post('/monitor', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        get_all_users_from_monitor()
+        get_all_monitor_users()
           .then(users => res.send(users))
           .catch(err => res.send(err));
       }

@@ -7,7 +7,7 @@
 /**
  * Libraries and modules
  */
-const { each } = require('async');
+const { size } = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
@@ -20,17 +20,24 @@ module.exports.create_page = async (domain_id, uri, tags) => {
     
     const page = await execute_query(query);
 
-    each(tags, (tag, callback) => {
-      query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${tag}", "${page.insertId}")`;
-      execute_query(query)
-        .then(success => callback())
-        .catch(err => callback(err));
-    }, err => {
-      if (err)
-        return error(err);
-      else 
-        return success(page.insertId);
-    });
+    const tsize = size(tags);
+    for (let i = 0 ; i < tsize ; i++) {
+      query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${tags[i]}", "${page.insertId}")`;
+      await execute_query(query);
+    }
+
+    return success(page.insertId);
+  } catch(err) {
+    return error(err);
+  }
+}
+
+module.exports.get_page_id = async (url) => {
+  try {
+    const query = `SELECT PageId FROM Page WHERE Uri = "${url}"`;
+    
+    const page = await execute_query(query);
+    return success(page[0].PageId);
   } catch(err) {
     return error(err);
   }
@@ -79,6 +86,66 @@ module.exports.get_all_pages_info = async () => {
     const pages = await execute_query(query);
     return success(pages);
   } catch(err) {
+    return error(err);
+  }
+}
+
+module.exports.get_user_website_pages = async (user_id, website_id) => {
+  try {
+    const query = `SELECT 
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Website as w,
+        Domain as d,
+        User as u,
+        Evaluation as e
+      WHERE
+        w.WebsiteId = "${website_id}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1 AND
+        p.DomainId = d.DomainId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
+    const pages = await execute_query(query);
+    return success(pages);
+  } catch(err) {
+    return error(err);
+  }
+}
+
+module.exports.get_access_studies_user_tag_pages = async (user_id, tag) => {
+  try {
+    const query = `SELECT 
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagPage as tp,
+        User as u,
+        Evaluation as e
+      WHERE
+        t.Name = "${tag}" AND
+        t.UserId = "${user_id}" AND
+        tp.TagId = t.TagId AND
+        p.PageId = tp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
+    const pages = await execute_query(query);
+    return success(pages);
+  } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

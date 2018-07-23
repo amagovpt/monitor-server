@@ -1261,7 +1261,7 @@ class eXaminator {
 						$this->tot['elems']['titleNull'] = 1;
 					}
 					try {
-						$titlelen = mb_strlen($title, $this->tot['info']['encoding']);
+						$titlelen = @mb_strlen($title, $this->tot['info']['encoding']);
 					} catch (Exception $e) {
 						$titlelen = strlen(utf8_decode($title));
 					}

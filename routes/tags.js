@@ -5,7 +5,13 @@ const router = express.Router();
 const { ServerError, ParamsError } = require('../lib/_error');
 const { error } = require('../lib/_response');
 const { verify_user } = require('../models/user');
-const { create_tag, tag_official_name_exists, get_all_tags, get_all_tags_info } = require('../models/tag');
+const { 
+  create_tag, 
+  tag_official_name_exists, 
+  get_all_tags, 
+  get_all_official_tags,
+  get_all_tags_info 
+} = require('../models/tag');
 
 router.post('/create', async function (req, res, next) {
   try {
@@ -73,6 +79,27 @@ router.post('/all', async function (req, res, next) {
       }
     }
   } catch (err) {
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/allOfficial', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, false);
+      if (user_id !== -1) {
+        get_all_official_tags(user_id)
+          .then(tags => res.send(tags))
+          .catch(res => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err))); 
   }
 });

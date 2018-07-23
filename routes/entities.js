@@ -107,10 +107,10 @@ router.post('/allInfo', async function (req, res, next) {
       res.send(error(new ParamsError(errors)));
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
-      if (user !== -1) {
+      if (user_id !== -1) {
         get_all_entities_info()
-          .then(entities => res.send(entites))
-          .catch(err => res.send(res));
+          .then(entities => res.send(entities))
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {

@@ -23,17 +23,24 @@ const {
  * Authtentication functions
  */
 
-const create_user_cookie = (user) => {
-  delete user.UserId;
-  delete user.Password;
-  delete user.Register_Date;
-  delete user.Last_Login;
-  
-  const date = new Date();
-  date.setTime(date.getTime() + 1 * 86400000);
-  user.Expire = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+const create_user_cookie = async (user) => {
+  try {
+    delete user.UserId;
+    delete user.Password;
+    delete user.Register_Date;
+    delete user.Last_Login;
+    
+    const date = new Date();
+    date.setTime(date.getTime() + 1 * 86400000);
+    user.Expire = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-  return encrypt(JSON.stringify(user))
+    const cookie = await encrypt(JSON.stringify(user));
+    
+    return success(cookie);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
 }
 
 module.exports.verify_user = async (res, cookie, admin=false) => {
@@ -41,7 +48,7 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
     cookie = JSON.parse(await decrypt(cookie));
 
     const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
-    const user = await execute_query(query);
+    let user = await execute_query(query);
     user = user[0];
 
     if (isEqual(size(user), 0)) {
@@ -81,13 +88,14 @@ module.exports.login_user = async (email, password, app) => {
       return error(new UserNotFoundError());
     } else {
       let user = data[0];
-      if (isEqual(user.Password, password_hash(password))) {
-        return success(create_user_cookie(user));
+      if (isEqual(user.Password, generate_password_hash(password))) {
+        return create_user_cookie(user);
       } else {
         return error(new UserError(null, -2, 'INVALID_PASSWORD'));
       }
     }
   } catch (err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -149,7 +157,7 @@ module.exports.get_all_users = async () => {
   }
 }
 
-module.exports.get_all_users_from_monitor = async () => {
+module.exports.get_all_monitor_users = async () => {
   try {
     const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type = "monitor"`;
     const users = await execute_query(query);

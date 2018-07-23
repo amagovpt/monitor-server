@@ -163,8 +163,8 @@ class myCurl {
 		curl_setopt($this->ch,CURLOPT_REFERER,'http://www.google.com');
 		curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,true);
 		curl_setopt($this->ch,CURLOPT_TIMEOUT,20);
-		curl_setopt($this->ch,CURLOPT_SSL_VERIFYPEER,false);
-		curl_setopt($this->ch,CURLOPT_USERAGENT,'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+		curl_setopt($this->ch,CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($this->ch,CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'); //'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 	}
 
 	function close() {
