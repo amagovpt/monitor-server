@@ -120,7 +120,11 @@ module.exports.get_user_website_pages = async (user_id, website_id) => {
   }
 }
 
-module.exports.get_access_studies_user_tag_pages = async (user_id, tag) => {
+/**
+ * ACCESS STUDIES
+ */
+
+module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, website) => {
   try {
     const query = `SELECT 
         distinct p.*,
@@ -132,20 +136,137 @@ module.exports.get_access_studies_user_tag_pages = async (user_id, tag) => {
       FROM 
         Page as p,
         Tag as t,
-        TagPage as tp,
-        User as u,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
         Evaluation as e
       WHERE
         t.Name = "${tag}" AND
         t.UserId = "${user_id}" AND
-        tp.TagId = t.TagId AND
-        p.PageId = tp.PageId AND
-        e.PageId = p.PageId AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = "${website}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        e.PageId = dp.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
+
     return success(pages);
   } catch(err) {
     console.log(err);
     return error(err);
   }
+}
+
+module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, pages) => {
+  try {
+    const _size = size(pages);
+    for (let i = 0 ; i < _size ; i++) {
+      let query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
+      let page = await execute_query(query);
+
+      if (size(page) > 0) {
+        query = `SELECT 
+            dp.* 
+          FROM
+            Tag as t,
+            TagWebsite as tw,
+            Website as w,
+            Domain as d,
+            DomainPage as dp
+          WHERE 
+            t.Name = "${tag}" AND
+            t.UserId = "${user_id}" AND 
+            tw.TagId = t.TagId AND
+            w.WebsiteId = tw.WebsiteId AND
+            w.Name = "${website}" AND
+            w.UserId = "${user_id}" AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            dp.PageId = "${page[0].PageId}"`;
+        
+        let domainPage = await execute_query(query);
+        if (size(domainPage) === 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              "${page[0].PageId}" 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d
+            WHERE 
+              t.Name = "${tag}" AND
+              t.UserId = "${user_id}" AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              w.Name = "${website}" AND
+              w.UserId = "${user_id}" AND
+              d.WebsiteId = w.WebsiteId`;
+          await execute_query(query);
+        }
+      } else {
+        let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${pages[i]}", "${date}")`;
+        let newPage = await execute_query(query);
+        
+        await evaluate_url_and_save(newPage.insertId, pages[i]);
+
+        query = `INSERT INTO DomainPage (DomainId, PageId) 
+          SELECT 
+            d.DomainId, 
+            "${newPage.insertId}" 
+          FROM
+            Tag as t,
+            TagWebsite as tw,
+            Website as,
+            Domains as d
+          WHERE 
+            t.Name = "${tag}" AND
+            t.UserId = "${user_id}" AND 
+            tw.TagId = t.TagId AND
+            w.WebsiteId = tw.WebsiteId AND
+            w.Name = "${website}" AND
+            w.UserId = "${user_id}" AND
+            d.WebsiteId = w.WebsiteId`;
+        await execute_query(query);
+      }
+    }
+
+    return this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}
+
+module.exports.remove_access_studies_user_tag_website_pages = async (user_id, tag, website, pagesId) => {
+  try {
+    const query = `
+      DELETE 
+        dp.* 
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Domain as d,
+        DomainPage as dp
+      WHERE 
+        t.Name = "${tag}" AND
+        t.UserId = "${user_id}" AND 
+        tw.TagId = t.TagId AND 
+        d.WebsiteId = tw.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId IN ("${pagesId}")`;
+
+    await execute_query(query);
+
+    return this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  } 
 }

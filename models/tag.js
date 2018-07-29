@@ -148,9 +148,17 @@ module.exports.get_all_tags_info = async () => {
 
 module.exports.get_access_studies_user_tags = async user_id => {
   try {
-    const query = `SELECT t.*, COUNT(distinct tp.PageId) as Pages FROM Tag as t
-      LEFT OUTER JOIN TagPage as tp ON tp.TagId = t.TagId
-      WHERE UserId = "${user_id}"
+    const query = `SELECT 
+        distinct t.*, 
+        COUNT(distinct tw.WebsiteId) as Websites,
+        COUNT(distinct dp.PageId) as Pages 
+      FROM 
+        Tag as t
+        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = tw.WebsiteId
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+      WHERE 
+        t.UserId = "${user_id}"
       GROUP BY t.TagId`;
     const tags = await execute_query(query);
     return success(tags);
@@ -165,125 +173,23 @@ module.exports.user_tag_name_exists = async (user_id, name) => {
   return success(size(tag) !== 0);
 }
 
-module.exports.add_user_tag_pages = async (user_id, tag, urls) => {
-  try {
-    let query = `SELECT TagId FROM Tag WHERE Name = "${tag}" AND UserId = "${user_id}"`;
-    let _tag = await execute_query(query);
-
-    if (size(_tag) === 0) {
-      throw InvalidTagTypeError(_tag);
-    }
-
-    _tag = _tag[0];
-
-    const _size = size(urls);
-    for (let i = 0 ; i < _size ; i++) {
-      query = `SELECT PageId FROM Page WHERE Uri = "${urls[i]}" LIMIT 1`;
-      let page = await execute_query(query);
-
-      if (size(page) > 0) {
-        query = `SELECT tp.* FROM TagPage as tp, Tag as t WHERE t.Name = "${_tag.Name}" AND tp.TagId = t.TagId AND tp.PageId = "${page[0].PageId}"`;
-        let tagPage = await execute_query(query);
-        if (size(tagPage) === 0) {
-          query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${_tag.TagId}", "${page[0].PageId}")`;
-          await execute_query(query);
-        }
-      } else {
-        let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${urls[i]}", "${date}")`;
-        let newPage = await execute_query(query);
-        
-        await evaluate_url_and_save(newPage.insertId, urls[i]);
-
-        query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${_tag.TagId}", "${newPage.insertId}")`;
-        await execute_query(query);
-      }
-    }
-
-    query = `SELECT 
-        distinct p.*,
-        e.Score,
-        e.A,
-        e.AA,
-        e.AAA,
-        e.Evaluation_Date
-      FROM 
-        Page as p,
-        Tag as t,
-        TagPage as tp,
-        User as u,
-        Evaluation as e
-      WHERE
-        t.Name = "${tag}" AND
-        t.UserId = "${user_id}" AND
-        tp.TagId = t.TagId AND
-        p.PageId = tp.PageId AND
-        e.PageId = p.PageId AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
-    const pages = await execute_query(query);
-
-    return success(pages);
-  } catch(err) {
-    console.log(err);
-    throw error(err);
-  }
-}
-
 module.exports.user_remove_tags = async (user_id, tagsId) => {
   try {
     const _delete = map(tagsId, id => id+'');
-    let query = `DELETE FROM TagPage WHERE TagId IN (${_delete})`;
+    let query = `DELETE
+        w.*
+      FROM
+        Website as w
+      WHERE
+        w.WebsiteId IN (SELECT WebsiteId FROM TagWebsite WHERE TagId IN (${_delete}))`;
     await execute_query(query);
 
     query = `DELETE FROM Tag WHERE TagId IN (${_delete})`;
     await execute_query(query);
 
-    query = `SELECT t.*, COUNT(distinct tp.PageId) as Pages FROM Tag as t
-      LEFT OUTER JOIN TagPage as tp ON tp.TagId = t.TagId
-      WHERE UserId = "${user_id}"
-      GROUP BY t.TagId`;
-    const tags = await execute_query(query);
-
-    return success(tags);
+    return await get_user_tags(user_id);
   } catch(err) {
     console.log(err);
     throw error(err);
   }
-}
-
-module.exports.user_tag_remove_pages = async (user_id, tag, pagesId) => {
-  try {
-    const _delete = map(pagesId, id => id+'');
-    let query = `DELETE tp.* FROM TagPage as tp, Tag as t 
-      WHERE t.Name = "${tag}" AND tp.TagId = t.TagId AND tp.PageId IN (${_delete})`;
-
-    await execute_query(query);
-
-    query = `SELECT 
-        distinct p.*,
-        e.Score,
-        e.A,
-        e.AA,
-        e.AAA,
-        e.Evaluation_Date
-      FROM 
-        Page as p,
-        Tag as t,
-        TagPage as tp,
-        User as u,
-        Evaluation as e
-      WHERE
-        t.Name = "${tag}" AND
-        t.UserId = "${user_id}" AND
-        tp.TagId = t.TagId AND
-        p.PageId = tp.PageId AND
-        e.PageId = p.PageId AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
-    const pages = await execute_query(query);
-
-    return success(pages);
-  } catch(err) {
-    console.log(err);
-    throw error(err);
-  } 
 }

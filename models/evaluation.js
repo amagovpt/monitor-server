@@ -49,20 +49,29 @@ module.exports.evaluate_url_and_save = async (page_id, url) => {
   }
 }
 
-module.exports.get_newest_evaluation = async (user_id, url) => {
+module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
   try {
     const query = `SELECT e.* 
-      FROM 
-        Evaluation as e, 
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
         Page as p,
-        TagPage as tp,
-        Tag as t
-      WHERE 
+        Evaluation as e
+      WHERE
+        t.Name = "${tag}" AND
+        t.UserId = "${user_id}" AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = "${website}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
         p.Uri = "${url}" AND 
-        e.PageId = p.PageId AND
-        tp.PageId = p.PageId AND
-        tp.TagId = t.TagId AND
-        t.UserId = "${user_id}"
+        e.PageId = p.PageId
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
     let evaluation = await execute_query(query);
