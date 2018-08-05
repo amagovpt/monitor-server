@@ -11,6 +11,8 @@ const { size } = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
+const { evaluate_url_and_save } = require('./evaluation');
+
 module.exports.create_page = async (domain_id, uri, tags) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -150,7 +152,47 @@ module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, 
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
-        e.PageId = dp.PageId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
+    const pages = await execute_query(query);
+
+    return success(pages);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, tag, website) => {
+  try {
+    const query = `SELECT 
+        distinct p.*,
+        e.Score,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        t.Name = "${tag}" AND
+        t.UserId = "${user_id}" AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = "${website}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
 
@@ -223,8 +265,8 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
           FROM
             Tag as t,
             TagWebsite as tw,
-            Website as,
-            Domains as d
+            Website as w,
+            Domain as d
           WHERE 
             t.Name = "${tag}" AND
             t.UserId = "${user_id}" AND 

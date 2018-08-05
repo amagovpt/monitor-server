@@ -11,6 +11,8 @@ const { size, map } = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
+const { evaluate_url_and_save } = require('./evaluation');
+
 /**
  * Create functions
  */
@@ -153,6 +155,63 @@ module.exports.get_all_user_websites = async (user_id) => {
  * ACCESS STUDIES
  */
 
+module.exports.get_access_studies_user_websites_from_other_tags = async (user_id, tag) => {
+  try {
+    const query = `SELECT
+        distinct w.*,
+        d.Url,
+        t.Name as TagName
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d
+      WHERE
+        t.Name != "${tag}" AND
+        t.UserId = "${user_id}" AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.UserId = "${user_id}" AND
+        w.Name NOT IN (
+          SELECT 
+            w2.Name 
+          FROM
+            Tag as t2,
+            TagWebsite as tw2,
+            Website as w2
+          WHERE
+            t2.Name = "${tag}" AND
+            t2.UserId = "${user_id}" AND
+            tw2.TagId = t2.TagId AND
+            w2.WebsiteId = tw2.WebsiteId AND
+            w2.UserId = "${user_id}"
+        ) AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Url NOT IN (
+          SELECT 
+            d2.Url 
+          FROM
+            Tag as t2,
+            TagWebsite as tw2,
+            Website as w2,
+            Domain as d2
+          WHERE
+            t2.Name = "${tag}" AND
+            t2.UserId = "${user_id}" AND
+            tw2.TagId = t2.TagId AND
+            w2.WebsiteId = tw2.WebsiteId AND
+            w2.UserId = "${user_id}" AND
+            d2.WebsiteId = w2.WebsiteId
+        );`;
+    const websites = await execute_query(query);
+
+    return success(websites);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}
+
 module.exports.get_access_studies_user_tag_websites = async (user_id, tag) => {
   try {
     const query = `SELECT 
@@ -188,8 +247,63 @@ module.exports.get_access_studies_user_tag_websites = async (user_id, tag) => {
   }
 }
 
-module.exports.add_access_studies_user_tag_website = async (user_id, tag, name, domain, pages) => {
-  console.log(pages);
+module.exports.get_access_studies_user_tag_websites_data = async (user_id, tag) => {
+  try {
+    const query = `SELECT
+        w.WebsiteId,
+        w.Name,
+        d.Url,
+        p.Uri,
+        e.Score,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        t.Name = "${tag}" AND
+        t.UserId = "${user_id}" AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
+    const websites = await execute_query(query);
+
+    return success(websites);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}
+
+module.exports.add_access_studies_user_tag_existing_website = async (user_id, tag, websitesId) => {
+  try {
+    for (let id of websitesId) {
+      let query = `INSERT INTO TagWebsite (TagId, WebsiteId) 
+        SELECT TagId, "${id}" FROM Tag WHERE Name = "${tag}" AND UserId = "${user_id}"`;
+      await execute_query(query);
+    }
+
+    return await this.get_access_studies_user_tag_websites(user_id, tag);
+  } catch(err) {
+    console.log(err);
+    throw error(error);
+  }
+}
+
+module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, name, domain, pages) => {
   try {
     let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let query = `INSERT INTO Website (UserId, Name, Creation_Date) VALUES ("${user_id}", "${name}", "${date}")`;
@@ -227,7 +341,7 @@ module.exports.add_access_studies_user_tag_website = async (user_id, tag, name, 
   }
 }
 
-module.exports.access_studies_user_remove_tag_websites = async (user_id, tag, websitesId) => {
+module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, websitesId) => {
   try {
     const query = `DELETE FROM Website WHERE WebsiteId IN ("${websitesId}")`;
     await execute_query(query);
