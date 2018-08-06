@@ -47,8 +47,7 @@ module.exports.get_page_id = async (url) => {
 
 module.exports.get_all_pages = async () => {
   try {
-    const query = `SELECT p.* FROM Page as p, Domain as d
-      WHERE d.DomainId = p.PageId AND d.Active = "1"`;
+    const query = `SELECT * FROM Page`;
     
     const pages = await execute_query(query);
     return success(pages);

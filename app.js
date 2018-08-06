@@ -8,6 +8,7 @@ const expressValidator = require('express-validator');
 const cors = require('cors');
 const compression = require('compression');
 
+const adminRouter = require('./routes/admin');
 const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatorio');
 const studiesRouter = require('./routes/studies');
@@ -33,6 +34,7 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/admin', adminRouter);
 app.use('/amp', ampRouter);
 app.use('/obs', obsRouter);
 app.use('/studies', studiesRouter);

@@ -63,6 +63,7 @@ module.exports.get_all_entities = async () => {
     const entities = await execute_query(query);
     return success(entities);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

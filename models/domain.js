@@ -60,6 +60,16 @@ module.exports.get_all_active_domains = async () => {
   }
 }
 
+module.exports.get_all_domains = async () => {
+  try {
+    const query = `SELECT * FROM Domain`;
+    const domains = await execute_query(query);
+    return success(domains);
+  } catch(err) {
+    return error(err);
+  }
+}
+
 module.exports.get_all_domains_info = async () => {
   try {
     const query = `
