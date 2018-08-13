@@ -35,6 +35,9 @@ const {
   get_all_official_websites,
   get_all_websites_without_user,
   get_all_websites_without_entity,
+  get_all_user_websites,
+  get_all_tag_websites,
+  get_all_entity_websites,
   get_website_current_domain,
   website_name_exists,
   create_website
@@ -43,12 +46,14 @@ const {
 const {
   get_all_domains,
   get_all_official_domains,
+  get_all_website_domains,
   domain_exists,
   create_domain
 } = require('../models/domain');
 
 const {
   get_all_pages,
+  get_all_domain_pages,
   create_pages
 } = require('../models/page');
 
@@ -182,6 +187,80 @@ router.post('/websites/allOfficial', async function (req, res, next) {
   }
 });
 
+router.post('/websites/user', async function (req, res, next) {
+  try {
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+
+        get_all_user_websites(user)
+          .then(websites => res.send(websites))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/tag', async function (req, res, next) {
+  try {
+    req.check('tag', 'Invalid tag').exists();
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag = req.body.tag;
+        const user = req.body.user;
+
+        get_all_tag_websites(user, tag)
+          .then(websites => res.send(websites))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/entity', async function (req, res, next) {
+  try {
+    req.check('entity', 'Invalid entity').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity = req.body.entity;
+
+        get_all_entity_websites(entity)
+          .then(websites => res.send(websites))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 router.post('/domains/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -203,6 +282,32 @@ router.post('/domains/all', async function (req, res, next) {
   }
 });
 
+router.post('/domains/website', async function (req, res, next) {
+  try {
+    req.check('user', 'Invalid user').exists();
+    req.check('website', 'Invalid website').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+        const website = req.body.website;
+
+        get_all_website_domains(user, website)
+          .then(domains => res.send(domains))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 router.post('/pages/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -214,6 +319,32 @@ router.post('/pages/all', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         get_all_pages()
+          .then(pages => res.send(pages))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/pages/domain', async function (req, res, next) {
+  try {
+    req.check('user', 'Invalid user').exists();
+    req.check('domain', 'Invalid domain').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+        const domain = decodeURIComponent(req.body.domain);
+
+        get_all_domain_pages(user, domain)
           .then(pages => res.send(pages))
           .catch(err => re.send(err));
       }

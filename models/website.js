@@ -84,16 +84,19 @@ module.exports.get_all_websites = async () => {
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
 
 module.exports.get_all_official_websites = async () => {
   try {
-    const query = `SELECT distinct w.* FROM Website as w, User as u WHERE u.UserId = w.UserId AND u.Type != 'studies' OR w.UserId IS NULL`;
+    const query = `SELECT distinct w.* FROM Website as w, User as u 
+      WHERE u.UserId = w.UserId AND u.Type != 'studies' OR w.UserId IS NULL`;
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -104,6 +107,7 @@ module.exports.get_all_websites_without_entity = async () => {
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -114,6 +118,89 @@ module.exports.get_all_websites_without_user = async () => {
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+
+module.exports.get_all_user_websites = async (user) => {
+  try {
+    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+      FROM 
+        Website as w
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
+        User as u
+      WHERE
+        u.Email = "${user}" AND
+        w.UserId = u.UserId
+      GROUP BY w.WebsiteId`;
+    const websites = await execute_query(query);
+
+    return success(websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_all_tag_websites = async (user, tag) => {
+  try {
+    let query = '';
+    if (user === 'admin') {
+      query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+          Tag as t,
+          TagWebsite as tw
+        WHERE
+          t.Name = "${tag}" AND
+          t.UserId IS NULL AND
+          tw.TagId = t.TagId AND
+          w.WebsiteId = tw.WebsiteId
+        GROUP BY w.WebsiteId`;
+    } else {
+      query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
+          User as u,
+          Tag as t,
+          TagWebsite as tw
+        WHERE
+          t.Name = "${tag}" AND
+          u.Email = "${user}" AND
+          t.UserId = u.UserId AND
+          tw.TagId = t.TagId AND
+          w.WebsiteId = tw.WebsiteId
+        GROUP BY w.WebsiteId`;
+    }
+
+    const websites = await execute_query(query);
+    return success(websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_all_entity_websites = async (entity) => {
+  try {
+    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+      FROM 
+        Website as w
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+        Entity as e
+      WHERE
+        e.EntityId = w.EntityId AND
+        e.Long_Name = "${entity}"
+      GROUP BY w.WebsiteId`;
+    const websites = await execute_query(query);
+    return success(websites);
+  } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -156,7 +243,7 @@ module.exports.get_website_current_domain = async (websiteId) => {
   }
 }
 
-module.exports.get_all_user_websites = async (user_id) => {
+/*module.exports.get_all_user_websites = async (user_id) => {
   try {
     const query = `SELECT w.*, COUNT(distinct p.PageId) as Pages 
       FROM 
@@ -171,7 +258,7 @@ module.exports.get_all_user_websites = async (user_id) => {
   } catch(err) {
     return error(err)
   }
-}
+}*/
 
 /**
  * ACCESS STUDIES

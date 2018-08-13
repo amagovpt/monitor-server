@@ -80,6 +80,76 @@ module.exports.get_all_pages = async () => {
   }
 }
 
+module.exports.get_all_domain_pages = async (user, domain) => {
+  try {
+    let query = '';
+    if (user === 'admin') {
+      query = `SELECT 
+          p.*, 
+          e.Score, 
+          e.Evaluation_Date 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          ),
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp
+        WHERE
+          (
+            u.Type = "monitor" AND
+            w.UserId = u.UserId AND
+            d.WebsiteId = w.WebsiteId AND
+            d.Url = "${domain}" AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId
+          )
+          OR
+          (
+            w.UserId IS NULL AND
+            d.WebsiteId = w.WebsiteId AND
+            d.Url = "${domain}" AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId
+          )
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+    } else {
+      query = `SELECT 
+          p.*, 
+          e.Score, 
+          e.Evaluation_Date 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          ),
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp
+        WHERE
+          u.Email = "${user}" AND
+          w.UserId = u.UserId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Url = "${domain}" AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+    }
+    
+    const pages = await execute_query(query);
+    return success(pages);
+  } catch(err) {
+    return error(err);
+  }
+}
+
 module.exports.get_all_pages_info = async () => {
   try {
     const query = `

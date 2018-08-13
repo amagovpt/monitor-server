@@ -65,8 +65,12 @@ module.exports.get_all_active_domains = async () => {
 
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages FROM Domain as d
-      LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Email as User
+      FROM 
+        Domain as d
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
@@ -97,6 +101,55 @@ module.exports.get_all_official_domains = async () => {
           )
         )
       GROUP BY d.DomainId`;
+    const domains = await execute_query(query);
+    return success(domains);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_all_website_domains = async (user, website) => {
+  try {
+    let query = '';
+    if (user === 'admin') {
+      query = `SELECT 
+          d.*, 
+          COUNT(distinct dp.PageId) as Pages,
+          u2.Email as User
+        FROM 
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
+          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId,
+          Website as w,
+          User as u
+        WHERE
+          w.WebsiteId = d.WebsiteId AND
+          w.Name = "${website}" AND
+          (
+            w.UserId IS NULL OR
+            (
+              u.UserId = w.UserId AND
+              u.Type != 'studies'
+            )
+          )
+        GROUP BY d.DomainId`;
+    } else {
+      query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Email as User 
+        FROM 
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
+          User as u,
+          Website as w
+        WHERE
+          u.Email = "${user}" AND
+          w.UserId = u.UserId AND
+          w.Name = "${website}" AND
+          d.WebsiteId = w.WebsiteId
+        GROUP BY d.DomainId`;
+    }
+    
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
