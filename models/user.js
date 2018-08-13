@@ -7,7 +7,7 @@
 /**
  * Libraries and modules
  */
-const { isEqual, size } = require('lodash');
+const _ = require('lodash');
 const { encrypt, decrypt, generate_password_hash, generate_unique_hash } = require('../lib/_security');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
@@ -51,19 +51,19 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
     let user = await execute_query(query);
     user = user[0];
 
-    if (isEqual(size(user), 0)) {
+    if (_.isEqual(_.size(user), 0)) {
       res.send(error(new UserNotFoundError()));
       return -1;
     }
-    if (!isEqual(user.Type, cookie.Type)) {
+    if (!_.isEqual(user.Type, cookie.Type)) {
       res.send(error(new UserDataCompromisedError()));
       return -1;
     }
-    if (!isEqual(user.Unique_Hash, cookie.Unique_Hash)) {
+    if (!_.isEqual(user.Unique_Hash, cookie.Unique_Hash)) {
       res.send(error(new UserDataCompromisedError()));
       return -1; 
     }
-    if (admin && !isEqual(user.Type, 'nimda')) {
+    if (admin && !_.isEqual(user.Type, 'nimda')) {
       res.send(error(new PermissionDeniedError()));
       return -1;  
     }
@@ -74,6 +74,7 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
 
     return user.UserId;
   } catch(err) {
+    console.log(err);
     res.send(error(err));
     return -1;
   }
@@ -81,14 +82,18 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
 
 module.exports.login_user = async (email, password, app) => {
   try {
-    const query = `SELECT * FROM User WHERE Email = "${email}" AND Type = "${app}" LIMIT 1`;
-    const data = await execute_query(query);
+    let query = `SELECT * FROM User WHERE Email = "${email}" AND Type = "${app}" LIMIT 1`;
+    const users = await execute_query(query);
 
-    if (size(data) === 0) {
+    if (_.size(users) === 0) {
       return error(new UserNotFoundError());
     } else {
-      let user = data[0];
-      if (isEqual(user.Password, generate_password_hash(password))) {
+      let user = users[0];
+      if (_.isEqual(user.Password, generate_password_hash(password))) {
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        query = `UPDATE User SET Last_Login = "${date}" WHERE UserId = "${user.UserId}"`;
+        await execute_query(query);
+        
         return create_user_cookie(user);
       } else {
         return error(new UserError(null, -2, 'INVALID_PASSWORD'));
@@ -109,19 +114,20 @@ module.exports.create_user = async (email, password, type, websites) => {
     const password_hash = generate_password_hash(password);
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     const hash = generate_unique_hash();
+
     let query = `INSERT INTO User (Email, Password, Type, Register_Date, Unique_Hash) 
       VALUES ("${email}", "${password_hash}", "${type}", "${date}", "${hash}")`;
     
     const data = await execute_query(query);
 
-    const size = size(websites);
-    for (let i = 0 ; i < size ; i++) {
-      query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${websites[i]}"`;
-      execute_query(query);
+    for (let w of websites) {
+      query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${w}"`;
+      await execute_query(query);
     }
 
-    return success();
+    return success(data.insertId);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -130,11 +136,11 @@ module.exports.create_user = async (email, password, type, websites) => {
  * Get functions
  */
 
-module.exports.email_exists = async (email) => {
+module.exports.user_exists = async (email) => {
   try {
     const query = `SELECT UserId FROM User WHERE Email = "${email}" LIMIT 1`;
     const users = await execute_query(query);
-    return success(size(users) === 1);
+    return success(_.size(users) === 1);
   } catch(err) {
     return error(err);
   } 

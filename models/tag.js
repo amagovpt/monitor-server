@@ -7,47 +7,29 @@
 /**
  * Libraries and modules
  */
-const { size, join, map } = require('lodash');
+const _ = require('lodash');
 const { InvalidTagTypeError } = require('../lib/_error');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 const { evaluate_url_and_save } = require('./evaluation');
 
-module.exports.create_tag = async (name, observatorio, entities, websites, domains, pages) => {
+module.exports.create_official_tag = async (name, observatorio, websites) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     let query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
-      VALUES ("${name}", "${observatorio?1:0}", "${date}")`;
+      VALUES ("${name}", "${observatorio}", "${date}")`;
     
     const tag = await execute_query(query);
-
-    let size = size(entities);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagEntity (TagId, EntityId) VALUES ("${tag.insertId}", "${entities[i]}")`;
-      await execute_query(query);
-    }
-
-    size = size(websites);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag.insertId}", "${websites[i]}")`;
-      await execute_query(query);
-    }
-
-    size = size(domains);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${tag.insertId}", "${domains[i]}")`;
-      await execute_query(query);
-    }
-
-    size = size(pages);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${tag.insertId}", "${pages[i]}")`;
+    
+    for (let w of websites) {
+      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag.insertId}", "${w}")`;
       await execute_query(query);
     }
 
     return success(tag.insertId);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -89,7 +71,7 @@ module.exports.tag_official_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Tag WHERE Name = "${name}" AND UserId IS NULL LIMIT 1`;
     const tag = await execute_query(query);
-    return success(size(tag) === 1);
+    return success(_.size(tag) === 1);
   } catch(err) {
     return error(err);
   }
@@ -97,10 +79,19 @@ module.exports.tag_official_name_exists = async (name) => {
 
 module.exports.get_all_tags = async () => {
   try {
-    const query = `SELECT * FROM Tag`;
+    const query = `SELECT 
+        t.*,
+        u.Email as User,
+        COUNT(distinct tw.WebsiteId) as Websites 
+      FROM 
+        Tag as t
+        LEFT OUTER JOIN User as u ON u.UserId = t.UserId
+        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+      GROUP BY t.TagId`;
     const tags = await execute_query(query);
     return success(tags);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -170,12 +161,12 @@ module.exports.get_access_studies_user_tags = async user_id => {
 module.exports.user_tag_name_exists = async (user_id, name) => {
   const query = `SELECT * FROM Tag WHERE Name = "${name}" AND UserId = "${user_id}" LIMIT 1`;
   const tag = await execute_query(query);
-  return success(size(tag) !== 0);
+  return success(_.size(tag) !== 0);
 }
 
 module.exports.user_remove_tags = async (user_id, tagsId) => {
   try {
-    const _delete = map(tagsId, id => id+'');
+    const _delete = _.map(tagsId, id => id+'');
     let query = `DELETE
         w.*
       FROM

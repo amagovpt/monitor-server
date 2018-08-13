@@ -7,7 +7,7 @@
 /**
  * Libraries and modules
  */
-const { size, map } = require('lodash');
+const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
@@ -22,32 +22,40 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${name}", "${date}")`;
     
-    if (entity_id && user_id) {
+    if (entity_id !== 'null' && user_id !== 'null') {
       query = `INSERT INTO Website (EntityId, UserId, Name, Creation_Date) 
       VALUES ("${entity_id}", "${user_id}", "${name}", "${date}")`;
-    } else if (entity_id) {
+    } else if (entity_id !== 'null') {
        query = `INSERT INTO Website (EntityId, Name, Creation_Date) 
       VALUES ("${entity_id}", "${name}", "${date}")`;
-    } else if (user_id) {
+    } else if (user_id !== 'null') {
        query = `INSERT INTO Website (UserId, Name, Creation_Date) 
       VALUES ("${user_id}", "${name}", "${date}")`;
     }
 
     const website = await execute_query(query);
 
+    domain = _.replace(domain, 'https://', '');
+    domain = _.replace(domain, 'http://', '');
+    domain = _.replace(domain, 'www.', '');
+
+    if (_.endsWith(domain, '/')) {
+      domain = domain.substring(0, _.size(domain)-1);
+    }
+
     query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
       VALUES ("${website.insertId}", "${domain}", "${date}", "1")`;
 
     await execute_query(query);
 
-    const size = size(tags);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tags[i]}", "${website.insertId}")`;
+    for (let t of tags) {
+      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${t}", "${website.insertId}")`;
       await execute_query(query);
     }
 
     return success(website.insertId);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -60,7 +68,7 @@ module.exports.website_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Website WHERE Name = "${name}" LIMIT 1`;
     const website = await execute_query(query);
-    return success(size(website) === 1);
+    return success(_.size(website) === 1);
   } catch(err) {
     return error(err);
   }
@@ -68,7 +76,21 @@ module.exports.website_name_exists = async (name) => {
 
 module.exports.get_all_websites = async () => {
   try {
-    const query = `SELECT * FROM Website`;
+    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+      FROM Website as w
+      LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+      LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+      GROUP BY w.WebsiteId`;
+    const websites = await execute_query(query);
+    return success(websites);
+  } catch(err) {
+    return error(err);
+  }
+}
+
+module.exports.get_all_official_websites = async () => {
+  try {
+    const query = `SELECT distinct w.* FROM Website as w, User as u WHERE u.UserId = w.UserId AND u.Type != 'studies' OR w.UserId IS NULL`;
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
@@ -124,11 +146,11 @@ module.exports.get_all_websites_info = async () => {
   }
 }
 
-module.exports.get_website_active_domain = async (id) => {
+module.exports.get_website_current_domain = async (websiteId) => {
   try {
-    const query = `SELECT Url FROM Domain WHERE WebsiteId = "${id}" AND Active = 1 LIMIT 1`;
+    const query = `SELECT Url FROM Domain WHERE WebsiteId = "${websiteId}" AND Active = 1 LIMIT 1`;
     const domain = await execute_query(query);
-    return success(domain);
+    return success(_.size(domain) > 0 ? domain[0].Url : '');
   } catch(err) {
     return error(err)
   }
@@ -315,7 +337,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
     query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) VALUES ("${website.insertId}", "${domain}", "${date}", "1")`;
     const _domain = await execute_query(query);
 
-    const _size = size(pages);
+    const _size = _.size(pages);
     for (let i = 0 ; i < _size ; i++) {
       query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
@@ -419,7 +441,7 @@ module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag,
       LIMIT 1`;
     const domain = await execute_query(query);
 
-    return success(size(domain) > 0 ? domain[0].Url : null);
+    return success(_.size(domain) > 0 ? domain[0].Url : null);
   } catch(err) {
     console.log(err);
     throw error(err);

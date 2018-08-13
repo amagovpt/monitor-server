@@ -7,28 +7,47 @@
 /**
  * Libraries and modules
  */
-const { size } = require('lodash');
+const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
 const { evaluate_url_and_save } = require('./evaluation');
 
-module.exports.create_page = async (domain_id, uri, tags) => {
+module.exports.create_pages = async (domain_id, uris) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-    let query = `INSERT INTO Page (DomainId, Uri, Creation_Date) 
-      VALUES ("${domain_id}", "${uri}", "${date}")`;
-    
-    const page = await execute_query(query);
+    let pagesId = [];
 
-    const tsize = size(tags);
-    for (let i = 0 ; i < tsize ; i++) {
-      query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${tags[i]}", "${page.insertId}")`;
-      await execute_query(query);
+    for (let u of uris) {
+      u = _.replace(u, 'https://', '');
+      u = _.replace(u, 'http://', '');
+      u = _.replace(u, 'www.', '');
+
+      let query = `SELECT PageId FROM Page WHERE Uri = "${u} LIMIT 1"`;
+      let page = await execute_query(query);
+
+      if (_.size(page) > 0) {
+        query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
+        let domain_page = await execute_query(query);
+        if (_.size(domain_page) === 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${page[0].PageId}")`;
+          await execute_query(query);
+          pagesId.push(page[0].PageId);
+        }
+      } else {
+        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${u}", "${date}")`;
+        let newPage = await execute_query(query);
+        
+        await evaluate_url_and_save(newPage.insertId, u);
+
+        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
+        await execute_query(query);
+        pagesId.push(newPage.insertId);
+      }
     }
 
-    return success(page.insertId);
+    return success(pagesId);
   } catch(err) {
     return error(err);
   }
@@ -47,7 +66,12 @@ module.exports.get_page_id = async (url) => {
 
 module.exports.get_all_pages = async () => {
   try {
-    const query = `SELECT * FROM Page`;
+    const query = `SELECT p.*, e.Score, e.Evaluation_Date FROM Page as p
+      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+        SELECT Evaluation_Date FROM Evaluation 
+        WHERE PageId = p.PageId 
+        ORDER BY Evaluation_Date DESC LIMIT 1
+      ) GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
     
     const pages = await execute_query(query);
     return success(pages);

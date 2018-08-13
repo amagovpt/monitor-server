@@ -7,12 +7,11 @@
 /**
  * Libraries and modules
  */
-const { size } = require('lodash');
-const { each } = require('async');
+const _ = require('lodash');
 const { success } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
-module.exports.create_domain = async (website_id, url, tags) => {
+module.exports.create_domain = async (website_id, url) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -21,31 +20,34 @@ module.exports.create_domain = async (website_id, url, tags) => {
 
     await execute_query(query);
 
+    url = _.replace(url, 'https://', '');
+    url = _.replace(url, 'http://', '');
+    url = _.replace(url, 'www.', '');
+
     query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
       VALUES ("${website_id}", "${url}", "${date}", "1")`;
     
     const domain = await execute_query(query);
 
-    const size = size(tags);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagDomain (TagId, DomainId) VALUES ("${tags[i]}", "${domain.insertId}")`;
-      await execute_query(query);
-    }
-
     return success(domain.insertId);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
 
 module.exports.domain_exists = async (url) => {
   try {
-    url = decodeURIComponent(url);
+    url = _.replace(url, 'https://', '');
+    url = _.replace(url, 'http://', '');
+    url = _.replace(url, 'www.', '');
+
     const query = `SELECT * FROM Domain WHERE Url = "${url}" LIMIT 1`;
 
     const domain = await execute_query(query);
-    return success(size(domain) === 1);
+    return success(_.size(domain) === 1);
   } catch(err) {
+    console.log(err);
     return error(err);
   } 
 }
@@ -56,16 +58,49 @@ module.exports.get_all_active_domains = async () => {
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
 
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT * FROM Domain`;
+    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages FROM Domain as d
+      LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+      GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_all_official_domains = async () => {
+  try {
+    const query = `SELECT 
+        d.*, 
+        COUNT(distinct dp.PageId) as Pages 
+      FROM 
+        Domain as d
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
+        Website as w,
+        User as u
+      WHERE
+        d.Active = '1' AND
+        w.WebsiteId = d.WebsiteId AND
+        (
+          w.UserId IS NULL OR
+          (
+            u.UserId = w.UserId AND
+            u.Type != 'studies'
+          )
+        )
+      GROUP BY d.DomainId`;
+    const domains = await execute_query(query);
+    return success(domains);
+  } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -92,6 +127,7 @@ module.exports.get_all_domains_info = async () => {
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

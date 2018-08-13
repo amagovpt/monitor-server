@@ -7,11 +7,11 @@
 /**
  * Libraries and modules
  */
-const { size } = require('lodash');
+const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
-module.exports.create_entity = async (shortName, longName, websites, tags) => {
+module.exports.create_entity = async (shortName, longName, websites) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let query = `INSERT INTO Entity (Short_Name, Long_Name, Creation_Date) 
@@ -19,15 +19,8 @@ module.exports.create_entity = async (shortName, longName, websites, tags) => {
     
     const entity = await execute_query(query);
 
-    let size = size(websites);
-    for (let i = 0 ; i < size ; i++) {
-      query = `UPDATE Website SET EntityId = ${entity.insertId} WHERE WebsiteId = ${websites[i]}`;
-      await execute_query(query);
-    }
-
-    size = size(tags);
-    for (let i = 0 ; i < size ; i++) {
-      query = `INSERT INTO TagEntity (TagId, EntityId) VALUES ("${tags[i]}", "${entity.insertId}")`;
+    for (let w of websites) {
+      query = `UPDATE Website SET EntityId = ${entity.insertId} WHERE WebsiteId = ${w}`;
       await execute_query(query);
     }
 
@@ -41,7 +34,7 @@ module.exports.entity_short_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Entity WHERE Short_Name = "${name}" LIMIT 1`;
     const entity = await execute_query(query);
-    return success(size(entity) === 1);
+    return success(_.size(entity) === 1);
   } catch(err) {
     return error(err);
   }
@@ -51,7 +44,7 @@ module.exports.entity_long_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Entity WHERE Long_Name = "${name}" LIMIT 1`;
     const entity = await execute_query(query);
-    return success(size(entity) === 1);
+    return success(_.size(entity) === 1);
   } catch(err) {
     return error(err);
   }
@@ -59,7 +52,9 @@ module.exports.entity_long_name_exists = async (name) => {
 
 module.exports.get_all_entities = async () => {
   try {
-    const query = `SELECT * FROM Entity`;  
+    const query = `SELECT e.*, COUNT(distinct w.WebsiteId) as Websites 
+      FROM Entity as e LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
+      GROUP BY e.EntityId`;  
     const entities = await execute_query(query);
     return success(entities);
   } catch(err) {
