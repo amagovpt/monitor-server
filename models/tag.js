@@ -67,12 +67,35 @@ module.exports.create_user_tag = async (user_id, type, official_tag_id, user_tag
  * Get functions
  */
 
+module.exports.get_number_of_access_studies_tags = async () => {
+  try {
+    const query = `SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE u.Type = "studies" AND t.UserId = u.UserId`;
+    const tags = await execute_query(query);
+    return success(tags[0].Tags);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_number_of_observatorio_tags = async () => {
+  try {
+    const query = `SELECT COUNT(*) as Tags FROM Tag WHERE Show_in_Observatorio = "1"`;
+    const tags = await execute_query(query);
+    return success(tags[0].Tags);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.tag_official_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Tag WHERE Name = "${name}" AND UserId IS NULL LIMIT 1`;
     const tag = await execute_query(query);
     return success(_.size(tag) === 1);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

@@ -96,3 +96,54 @@ module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
     throw error(err);
   }
 } 
+
+module.exports.get_all_page_evaluations = async (page) => {
+  try {
+    const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+      FROM
+        Page as p,
+        Evaluation as e
+      WHERE
+        p.Uri = "${page}" AND
+        e.PageId = p.PageId
+      ORDER BY e.Evaluation_Date DESC`;
+    const evaluations = await execute_query(query);
+
+    return success(evaluations);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}
+
+module.exports.get_evaluation = async (url, date) => {
+  try {
+    let newDate = new Date(date);
+    newDate.setHours(newDate.getHours() + 1);
+    newDate = newDate.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+    const query = `SELECT e.* FROM Evaluation as e, Page as p 
+      WHERE p.Uri = "${url}" AND e.PageId = p.PageId AND e.Evaluation_Date = "${newDate}"`;
+    
+    let evaluation = await execute_query(query);
+    evaluation = evaluation[0];
+   
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+
+    return success(
+      { pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        data: {
+          title: evaluation.Title,
+          score: evaluation.Score,
+          rawUrl: url,
+          tot: tot,
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+          elems: tot.elems,
+          date: evaluation.Evaluation_Date
+    }});
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}

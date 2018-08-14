@@ -64,12 +64,47 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
  * Get functions
  */
 
+module.exports.get_number_of_access_studies_websites = async () => {
+  try {
+    const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "studies" AND w.UserId = u.UserId`;
+    const websites = await execute_query(query);
+    return success(websites[0].Websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_number_of_my_monitor_websites = async () => {
+  try {
+    const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "monitor" AND w.UserId = u.UserId`;
+    const websites = await execute_query(query);
+    return success(websites[0].Websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_number_of_observatorio_websites = async () => {
+  try {
+    const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
+      WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`;
+    const websites = await execute_query(query);
+    return success(websites[0].Websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.website_name_exists = async (name) => {
   try {
     const query = `SELECT * FROM Website WHERE Name = "${name}" LIMIT 1`;
     const website = await execute_query(query);
     return success(_.size(website) === 1);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

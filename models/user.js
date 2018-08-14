@@ -136,12 +136,35 @@ module.exports.create_user = async (email, password, type, websites) => {
  * Get functions
  */
 
+module.exports.get_number_of_access_studies_users = async () => {
+  try {
+    const query = `SELECT COUNT(*) as Users FROM User WHERE Type = "studies";`;
+    const users = await execute_query(query);
+    return success(users[0].Users);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  } 
+}
+
+module.exports.get_number_of_my_monitor_users = async () => {
+  try {
+    const query = `SELECT COUNT(*) as Users FROM User WHERE Type = "monitor";`;
+    const users = await execute_query(query);
+    return success(users[0].Users);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  } 
+}
+
 module.exports.user_exists = async (email) => {
   try {
     const query = `SELECT UserId FROM User WHERE Email = "${email}" LIMIT 1`;
     const users = await execute_query(query);
     return success(_.size(users) === 1);
   } catch(err) {
+    console.log(err);
     return error(err);
   } 
 }

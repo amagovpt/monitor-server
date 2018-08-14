@@ -11,13 +11,17 @@ const { error } = require('../lib/_response');
 
 const { 
   verify_user,
+  get_number_of_access_studies_users,
+  get_number_of_my_monitor_users,
   get_all_users,
   get_all_monitor_users,
   create_user,
   user_exists
 } = require('../models/user');
 
-const { 
+const {
+  get_number_of_access_studies_tags,
+  get_number_of_observatorio_tags,
   get_all_tags,
   tag_official_name_exists,
   create_official_tag
@@ -32,6 +36,9 @@ const {
 
 const {
   get_all_websites,
+  get_number_of_access_studies_websites,
+  get_number_of_my_monitor_websites,
+  get_number_of_observatorio_websites,
   get_all_official_websites,
   get_all_websites_without_user,
   get_all_websites_without_entity,
@@ -57,9 +64,161 @@ const {
   create_pages
 } = require('../models/page');
 
+const {
+  get_all_page_evaluations,
+  get_evaluation
+} =  require('../models/evaluation');
+
 /**
  * GET
  */
+
+router.post('/users/studies/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_access_studies_users()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/users/monitor/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_my_monitor_users()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/tags/studies/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_access_studies_tags()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/tags/observatorio/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_observatorio_tags()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/studies/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_access_studies_websites()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/monitor/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_my_monitor_websites()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/observatorio/total', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        get_number_of_observatorio_websites()
+          .then(total => res.send(total))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
 
 router.post('/users/all', async function (req, res, next) {
   try {
@@ -354,6 +513,58 @@ router.post('/pages/domain', async function (req, res, next) {
     res.send(error(new ServerError(err))); 
   }
 });
+
+router.post('/evaluations/page', async function (req, res, next) {
+  try {
+    req.check('page', 'Invalid page').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+        const page = decodeURIComponent(req.body.page);
+
+        get_all_page_evaluations(page)
+          .then(evaluations => res.send(evaluations))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/page/evaluation', async function (req, res, next) {
+  try {
+    req.check('url', 'Invalid url').exists();
+    req.check('evaluation_date', 'Invalid evaluation_date').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const url = decodeURIComponent(req.body.url);
+        const evaluation_date = req.body.evaluation_date;
+        
+        get_evaluation(url, evaluation_date)
+          .then(evaluation => res.send(evaluation))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 
 router.post('/websites/withoutUser', async function (req, res, next) {
   try {
