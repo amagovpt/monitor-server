@@ -29,9 +29,12 @@ const {
 
 const {
   get_all_entities,
+  get_entity_info,
   entity_short_name_exists,
   entity_long_name_exists,
-  create_entity
+  create_entity,
+  update_entity,
+  delete_entity
 } = require('../models/entity');
 
 const {
@@ -295,6 +298,29 @@ router.post('/entities/all', async function (req, res, next) {
       if (user_id !== -1) {
         get_all_entities()
           .then(entities => res.send(entities))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/entities/info', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+    req.check('entityId', 'Invalid parameter EntityId').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity_id = req.body.entityId;
+        get_entity_info(entity_id)
+          .then(entity => res.send(entity))
           .catch(err => res.send(res));
       }
     }
@@ -935,8 +961,64 @@ router.post('/pages/create', async function (req, res, next) {
  * UPDATE
  */
 
+router.post('/entities/update', async function (req, res, next) {
+  try {
+    req.check('entityId', 'Invalid parameter EntityId').exists();
+    req.check('shortName', 'Invalid parameter ShortName').exists();
+    req.check('longName', 'Invalid parameter LongName').exists();
+    req.check('defaultWebsites', 'Invalid parameter DefaultWebsites').exists();
+    req.check('websites', 'Invalid parameter Websites').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity_id = req.body.entityId;
+        const short_name = req.body.shortName;
+        const long_name = req.body.longName;
+        const default_websites = JSON.parse(req.body.defaultWebsites);
+        const websites = JSON.parse(req.body.websites);
+
+        update_entity(entity_id, short_name, long_name, default_websites, websites)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 /**
- * REMOVE
+ * DELETE
  */
+
+router.post('/entities/delete', async function (req, res, next) {
+  try {
+    req.check('entityId', 'Invalid parameter EntityId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity_id = req.body.entityId;
+
+        delete_entity(entity_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
 
 module.exports = router;

@@ -8,6 +8,7 @@
  * Libraries and modules
  */
 const _ = require('lodash');
+const { EntityNotFoundError } = require('../lib/_error');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
@@ -75,6 +76,71 @@ module.exports.get_all_entities_info = async () => {
     const entities = await execute_query(query);
     return success(entities);
   } catch(err) {
+    return error(err);
+  }
+}
+
+module.exports.get_entity_info = async (entity_id) => {
+  try {
+    let query = `SELECT * FROM Entity WHERE EntityId = "${entity_id}" LIMIT 1`;
+
+    let entity = await execute_query(query);
+
+    if (_.size(entity) === 0) {
+      throw new EntityNotFoundError();
+    } else {
+      entity = entity[0];
+
+      query = `SELECT * FROM Website WHERE EntityId = "${entity_id}"`;
+      const websites = await execute_query(query);
+
+      entity.websites = websites;
+    }
+
+    return success(entity);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.update_entity = async (entity_id, short_name, long_name, default_websites, websites) => {
+  try {
+    let query = `UPDATE Entity SET Short_Name = "${short_name}", Long_Name = "${long_name}" WHERE EntityId = "${entity_id}"`;
+    await execute_query(query);
+
+    for (let website_id of default_websites) {
+      if (!_.includes(websites, website_id)) {
+        query = `UPDATE Website SET EntityId = NULL WHERE WebsiteId = "${website_id}"`;
+        await execute_query(query);
+      }
+    }
+
+    for (let website_id of websites) {
+      if (!_.includes(default_websites, website_id)) {
+        query = `UPDATE Website SET EntityId = "${entity_id}" WHERE WebsiteId = "${website_id}"`;
+        await execute_query(query);
+      }
+    }
+
+    return success(entity_id);
+  } catch(err) {
+    console.log(err)
+    return error(err);
+  }
+}
+
+module.exports.delete_entity = async (entity_id) => {
+  try {
+    let query = `UPDATE Website SET EntityId = NULL WHERE EntityId = "${entity_id}"`;
+    await execute_query(query);
+
+    query = `DELETE FROM Entity WHERE EntityId = "${entity_id}"`;
+    await execute_query(query);
+
+    return success(entity_id);
+  } catch(err) {
+    console.log(err)
     return error(err);
   }
 }
