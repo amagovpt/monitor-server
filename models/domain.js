@@ -184,3 +184,15 @@ module.exports.get_all_domains_info = async () => {
     return error(err);
   }
 }
+
+module.exports.delete_domain = async (domain_id) => {
+  try {
+    const query = `DELETE FROM Domain WHERE DomainId = "${domain_id}"`;
+    await execute_query(query);
+
+    return success(domain_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}

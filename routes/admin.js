@@ -64,7 +64,8 @@ const {
   get_all_official_domains,
   get_all_website_domains,
   domain_exists,
-  create_domain
+  create_domain,
+  delete_domain
 } = require('../models/domain');
 
 const {
@@ -1183,6 +1184,30 @@ router.post('/entities/delete', async function (req, res, next) {
         const entity_id = req.body.entityId;
 
         delete_entity(entity_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/domains/delete', async function (req, res, next) {
+  try {
+    req.check('domainId', 'Invalid parameter DomainId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const domain_id = req.body.domainId;
+
+        delete_domain(domain_id)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
