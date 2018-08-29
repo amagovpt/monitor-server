@@ -16,7 +16,10 @@ const {
   get_all_users,
   get_all_monitor_users,
   create_user,
-  user_exists
+  user_exists,
+  get_user_info,
+  update_user,
+  delete_user
 } = require('../models/user');
 
 const {
@@ -257,6 +260,30 @@ router.post('/users/monitor', async function (req, res, next) {
         get_all_monitor_users()
           .then(users => res.send(users))
           .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/users/info', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+    req.check('userId', 'Invalid parameter userId').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const edit_user_id = req.body.userId;
+
+        get_user_info(edit_user_id)
+          .then(user => res.send(user))
+          .catch(err => res.send(res));
       }
     }
   } catch (err) {
@@ -961,6 +988,39 @@ router.post('/pages/create', async function (req, res, next) {
  * UPDATE
  */
 
+router.post('/users/update', async function (req, res, next) {
+  try {
+    req.check('userId', 'Invalid parameter EntityId').exists();
+    req.check('password', 'Invalid parameter Password').exists();
+    req.check('confirmPassword', 'Invalid parameter ConfirmPassword').exists().equals(req.body.password);
+    req.check('app', 'Invalid parameter App').exists();
+    req.check('defaultWebsites', 'Invalid parameter DefaultWebsites').exists();
+    req.check('websites', 'Invalid parameter Websites').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const edit_user_id = req.body.userId;
+        const password = req.body.password;
+        const app = req.body.app;
+        const default_websites = JSON.parse(req.body.defaultWebsites);
+        const websites = JSON.parse(req.body.websites);
+
+        update_user(edit_user_id, password, app, default_websites, websites)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 router.post('/entities/update', async function (req, res, next) {
   try {
     req.check('entityId', 'Invalid parameter EntityId').exists();
@@ -996,6 +1056,32 @@ router.post('/entities/update', async function (req, res, next) {
 /**
  * DELETE
  */
+
+router.post('/users/delete', async function (req, res, next) {
+  try {
+    req.check('userId', 'Invalid parameter UserId').exists();
+    req.check('app', 'Invalid parameter App').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const delete_user_id = req.body.userId;
+        const app = req.body.app;
+
+        delete_user(delete_user_id, app)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
 
 router.post('/entities/delete', async function (req, res, next) {
   try {

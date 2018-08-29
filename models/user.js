@@ -196,10 +196,95 @@ module.exports.get_all_monitor_users = async () => {
   }
 }
 
+module.exports.get_user_info = async (user_id) => {
+  try {
+    let query = `SELECT * FROM User WHERE UserId = "${user_id}" LIMIT 1`;
+
+    let user = await execute_query(query);
+
+    if (_.size(user) === 0) {
+      throw new UserNotFoundError();
+    } else {
+      user = user[0];
+
+      if (user.Type === 'monitor') {
+        query = `SELECT * FROM Website WHERE UserId = "${user_id}"`;
+        const websites = await execute_query(query);
+
+        user.websites = websites;
+      }
+    }
+
+    delete user.Password;
+
+    return success(user);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 /**
  * Update functions
  */
 
+module.exports.update_user = async (user_id, password, app, default_websites, websites) => {
+  try {
+    let query = '';
+
+    if (password !== '') {
+      query = `UPDATE User SET Password = "${generate_password_hash(password)}" WHERE UserId = "${user_id}"`;
+      await execute_query(query);
+    }
+
+    if (app === 'monitor') {
+      for (let website_id of default_websites) {
+        if (!_.includes(websites, website_id)) {
+          query = `UPDATE Website SET UserId = NULL WHERE WebsiteId = "${website_id}"`;
+          await execute_query(query);
+        }
+      }
+
+      for (let website_id of websites) {
+        if (!_.includes(default_websites, website_id)) {
+          query = `UPDATE Website SET UserId = "${user_id}" WHERE WebsiteId = "${website_id}"`;
+          await execute_query(query);
+        }
+      }
+    }
+
+    return success(user_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 /**
  * Delete functions
  */
+
+module.exports.delete_user = async (user_id, app) => {
+  try {
+    let query = '';
+
+    if (app === 'monitor') {
+      query = `UPDATE Website SET UserId = NULL WHERE UserId = "${user_id}"`;
+      await execute_query(query);
+    } else {
+      query = `DELETE FROM Tag WHERE UserId = "${user_id}" AND TagId <> 0`;
+      await execute_query(query);
+
+      query = `DELETE FROM Website WHERE UserId = "${user_id}" AND WebsiteId <> 0`;
+      await execute_query(query);
+    }
+
+    query = `DELETE FROM User WHERE UserId = "${user_id}"`;
+    await execute_query(query);
+
+    return success(user_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
