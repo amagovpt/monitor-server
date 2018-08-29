@@ -405,3 +405,15 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
     throw error(err);
   } 
 }
+
+module.exports.delete_page = async (page_id) => {
+  try {
+    const query = `DELETE FROM Page WHERE PageId = "${page_id}"`;
+    await execute_query(query);
+
+    return success(page_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}

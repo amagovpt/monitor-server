@@ -147,3 +147,15 @@ module.exports.get_evaluation = async (url, date) => {
     throw error(err);
   }
 }
+
+module.exports.delete_evaluation = async (evaluation_id) => {
+  try {
+    const query = `DELETE FROM Evaluation WHERE EvaluationId = "${evaluation_id}"`;
+    await execute_query(query);
+
+    return success(evaluation_id);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}

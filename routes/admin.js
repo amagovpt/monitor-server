@@ -70,12 +70,14 @@ const {
 const {
   get_all_pages,
   get_all_domain_pages,
-  create_pages
+  create_pages,
+  delete_page
 } = require('../models/page');
 
 const {
   get_all_page_evaluations,
-  get_evaluation
+  get_evaluation,
+  delete_evaluation
 } =  require('../models/evaluation');
 
 /**
@@ -1190,5 +1192,54 @@ router.post('/entities/delete', async function (req, res, next) {
     res.send(error(new ServerError(err))); 
   }
 });
+
+router.post('/pages/delete', async function (req, res, next) {
+  try {
+    req.check('pageId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const page_id = req.body.pageId;
+
+        delete_page(page_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/evaluations/delete', async function (req, res, next) {
+  try {
+    req.check('evaluationId', 'Invalid parameter EvaluationId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const evaluation_id = req.body.evaluationId;
+
+        delete_evaluation(evaluation_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 
 module.exports = router;
