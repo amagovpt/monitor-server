@@ -27,7 +27,10 @@ const {
   get_number_of_observatorio_tags,
   get_all_tags,
   tag_official_name_exists,
-  create_official_tag
+  create_official_tag,
+  get_tag_info,
+  update_tag,
+  delete_tag
 } = require('../models/tag');
 
 const {
@@ -305,6 +308,30 @@ router.post('/tags/all', async function (req, res, next) {
         get_all_tags()
           .then(tags => res.send(tags))
           .catch(res => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/tags/info', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+    req.check('tagId', 'Invalid parameter TagId').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+
+        get_tag_info(tag_id)
+          .then(tag => res.send(tag))
+          .catch(err => res.send(res));
       }
     }
   } catch (err) {
@@ -1021,6 +1048,39 @@ router.post('/users/update', async function (req, res, next) {
   }
 });
 
+router.post('/tags/update', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter TagId').exists();
+    req.check('name', 'Invalid parameter Name').exists();
+    req.check('observatorio', 'Invalid parameter Observatorio').exists();
+    req.check('defaultWebsites', 'Invalid parameter DefaultWebsites').exists();
+    req.check('websites', 'Invalid parameter Websites').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+        const name = req.body.name;
+        const observatorio = req.body.observatorio;
+        const default_websites = JSON.parse(req.body.defaultWebsites);
+        const websites = JSON.parse(req.body.websites);
+
+        update_tag(tag_id, name, observatorio, default_websites, websites)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+
 router.post('/entities/update', async function (req, res, next) {
   try {
     req.check('entityId', 'Invalid parameter EntityId').exists();
@@ -1073,6 +1133,30 @@ router.post('/users/delete', async function (req, res, next) {
         const app = req.body.app;
 
         delete_user(delete_user_id, app)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/tags/delete', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter EntityId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+
+        delete_tag(tag_id)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }

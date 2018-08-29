@@ -207,3 +207,71 @@ module.exports.user_remove_tags = async (user_id, tagsId) => {
     throw error(err);
   }
 }
+
+module.exports.get_tag_info = async (tag_id) => {
+  try {
+    let query = `SELECT t.*, u.Email FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = "${tag_id}" LIMIT 1`;
+
+    let tag = await execute_query(query);
+
+    if (_.size(tag) === 0) {
+      throw new EntityNotFoundError();
+    } else {
+      tag = tag[0];
+
+      query = `SELECT w.* 
+        FROM
+          TagWebsite as tw,
+          Website as w 
+        WHERE
+          tw.TagId = "${tag_id}" AND 
+          w.WebsiteId = tw.WebsiteId`;
+      const websites = await execute_query(query);
+
+      tag.websites = websites;
+    }
+
+    return success(tag);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.update_tag = async (tag_id, name, observatorio, default_websites, websites) => {
+  try {
+    let query = `UPDATE Tag SET Name = "${name}", Show_in_Observatorio = "${observatorio}" WHERE TagId = "${tag_id}"`;
+    await execute_query(query);
+
+    for (let website_id of default_websites) {
+      if (!_.includes(websites, website_id)) {
+        query = `DELETE FROM TagWebsite WHERE TagId = "${tag_id}" AND WebsiteId = "${website_id}"`;
+        await execute_query(query);
+      }
+    }
+
+    for (let website_id of websites) {
+      if (!_.includes(default_websites, website_id)) {
+        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag_id}", "${website_id}")`;
+        await execute_query(query);
+      }
+    }
+
+    return success(tag_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.delete_tag = async (tag_id) => {
+  try {
+    const query = `DELETE FROM Tag WHERE TagId = "${tag_id}"`;
+    await execute_query(query);
+
+    return success(tag_id); 
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
