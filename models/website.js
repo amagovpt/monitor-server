@@ -285,7 +285,7 @@ module.exports.get_website_info = async (website_id) => {
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = "${website_id}"
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = "${website_id}" AND d.Active = 1
       WHERE 
         w.WebsiteId = "${website_id}"
       GROUP BY w.WebsiteId, d.Url 

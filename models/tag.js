@@ -44,13 +44,35 @@ module.exports.create_user_tag = async (user_id, type, official_tag_id, user_tag
     const tag = await execute_query(query);
 
     if (type === 'official') {
-      query = `SELECT PageId FROM TagPage WHERE TagId = "${official_tag_id}"`;
-      const tags = await execute_query(query);
+      query = `SELECT w.Name, d.DomainId, d.Url, d.Start_Date 
+        FROM 
+          TagWebsite as tw,
+          Website as w
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1 
+        WHERE 
+          tw.TagId = "${official_tag_id}" AND
+          w.WebsiteId = tw.WebsiteId
+        GROUP BY w.WebsiteId, d.DomainId, d.Url, d.Start_Date`;
+      const websites = await execute_query(query);
 
-      for (let i = 0 ; i < tags.length ; i++) {
-        let _tag = tags[i];
-        query = `INSERT INTO TagPage (TagId, PageId) VALUES ("${tag.insertId}", "${_tag.PageId}")`;
-        await execute_query(query);
+      for (let website of websites) {
+        query = `INSERT INTO Website (Name, UserId, Creation_Date) VALUES ("${website.Name}", "${user_id}", "${date}")`;
+        let new_website = await execute_query(query);
+
+        query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
+          VALUES ("${new_website.insertId}", "${website.Url}", "${new Date(website.Start_Date).toISOString().replace(/T/, ' ').replace(/\..+/, '')}", "1")`;
+        let new_domain = await execute_query(query);
+
+        query = `SELECT * FROM DomainPage WHERE DomainId = "${website.DomainId}"`;
+        let pages = await execute_query(query);
+
+        for (let page of pages) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${new_domain.insertId}", "${page.PageId}")`;
+          await execute_query(query);
+        }
+
+        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag.insertId}", "${new_website.insertId}")`;
+        await execute_query(query);   
       }
     } else if (type !== 'user') {
       throw new InvalidTagTypeError(err); 
@@ -201,7 +223,7 @@ module.exports.user_remove_tags = async (user_id, tagsId) => {
     query = `DELETE FROM Tag WHERE TagId IN (${_delete})`;
     await execute_query(query);
 
-    return await get_user_tags(user_id);
+    return await get_access_studies_user_tags(user_id);
   } catch(err) {
     console.log(err);
     throw error(err);
