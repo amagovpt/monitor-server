@@ -296,14 +296,14 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
   }
 }
 
-module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, pages) => {
+module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
   try {
-    const _size = size(pages);
+    const _size = _.size(pages);
     for (let i = 0 ; i < _size ; i++) {
       let query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
-      if (size(page) > 0) {
+      if (_.size(page) > 0) {
         query = `SELECT 
             dp.* 
           FROM
@@ -369,6 +369,30 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
             w.UserId = "${user_id}" AND
             d.WebsiteId = w.WebsiteId`;
         await execute_query(query);
+
+        query = `SELECT distinct d.DomainId, d.Url 
+                  FROM
+                    User as u,
+                    Website as w,
+                    Domain as d
+                  WHERE
+                    d.Url = "lodash.com" AND
+                    d.WebsiteId = w.WebsiteId AND
+                    (
+                      w.UserId IS NULL OR
+                      (
+                        u.UserId = w.UserId AND
+                        u.Type = 'monitor'
+                      )
+                    )
+                  LIMIT 1`;
+
+        const exisitng_domain = await execute_query(query);
+
+        if (_.size(exisitng_domain) > 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${exisitng_domain[0].DomainId}", "${newPage.insertId}")`;
+          await execute_query(query);
+        }
       }
     }
 

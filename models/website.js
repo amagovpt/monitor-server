@@ -591,7 +591,7 @@ module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag,
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = "${user_id}" AND
         w.Name = "${website}" AND
-        d.DomainId = w.WebsiteId
+        d.WebsiteId = w.WebsiteId
       LIMIT 1`;
     const domain = await execute_query(query);
 

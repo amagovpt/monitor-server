@@ -384,6 +384,7 @@ router.post('/user/tag/website/addPages', async function(req, res, next) {
   try {
     req.check('tag', 'Invalid tag parameter').exists();
     req.check('website', 'Invalid website parameter').exists();
+    req.check('domain', 'Invalid website parameter').exists();
     req.check('pages', 'Invalid pages parameter').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -395,9 +396,10 @@ router.post('/user/tag/website/addPages', async function(req, res, next) {
       if (user_id !== -1) {
         const tag = req.body.tag;
         const website = req.body.website;
+        const domain = req.body.domain;
         const pages = JSON.parse(req.body.pages);
 
-        add_access_studies_user_tag_website_pages(user_id, tag, website, pages)
+        add_access_studies_user_tag_website_pages(user_id, tag, website, domain, pages)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }
