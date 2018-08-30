@@ -278,6 +278,38 @@ module.exports.get_website_current_domain = async (websiteId) => {
   }
 }
 
+module.exports.get_website_info = async (website_id) => {
+  try {
+    let query = `SELECT w.*, u.Email as User, e.Long_Name as Entity, d.Url as Domain
+      FROM 
+        Website as w
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = "${website_id}"
+      WHERE 
+        w.WebsiteId = "${website_id}"
+      GROUP BY w.WebsiteId, d.Url 
+      LIMIT 1`;
+    let website = await execute_query(query);
+
+    if (_.size(website) === 0) {
+      //throw new WebsiteNotFoundError();
+    } else {
+      website = website[0];
+
+      query = `SELECT t.* FROM Tag as t, TagWebsite as tw WHERE tw.WebsiteId = "${website_id}" AND t.TagId = tw.TagId`;
+      const tags = await execute_query(query);
+
+      website.tags = tags;
+    }
+
+    return success(website);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 /*module.exports.get_all_user_websites = async (user_id) => {
   try {
     const query = `SELECT w.*, COUNT(distinct p.PageId) as Pages 
@@ -568,4 +600,45 @@ module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag,
     console.log(err);
     throw error(err);
   } 
+}
+
+module.exports.update_website = async (website_id, name, entity_id, user_id, default_tags, tags) => {
+  try {
+    let query = `UPDATE Website SET Name = "${name}", EntityId = "${entity_id}", UserId = "${user_id}" WHERE WebsiteId = "${website_id}"`;
+    await execute_query(query);
+
+    for (let tag_id of default_tags) {
+      if (!_.includes(tags, tag_id)) {
+        query = `DELETE FROM TagWebsite WHERE TagId = "${tag_id}" AND WebsiteId = "${website_id}"`;
+        await execute_query(query);
+      }
+    }
+
+    for (let tag_id of tags) {
+      if (!_.includes(default_tags, tag_id)) {
+        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag_id}", "${website_id}")`;
+        await execute_query(query);
+      }
+    }
+
+    return success(website_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.delete_website = async (website_id) => {
+  try {
+    let query = `DELETE FROM Domain WHERE WebsiteId = "${website_id}" AND DomainId <> 0`;
+    await execute_query(query);
+
+    query = `DELETE FROM Website WHERE WebsiteId = "${website_id}"`;
+    await execute_query(query);
+
+    return success(website_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
 }

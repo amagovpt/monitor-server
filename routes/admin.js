@@ -55,8 +55,11 @@ const {
   get_all_tag_websites,
   get_all_entity_websites,
   get_website_current_domain,
+  get_website_info,
   website_name_exists,
-  create_website
+  create_website,
+  update_website,
+  delete_website
 } = require('../models/website');
 
 const {
@@ -495,6 +498,30 @@ router.post('/websites/entity', async function (req, res, next) {
         get_all_entity_websites(entity)
           .then(websites => res.send(websites))
           .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/info', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+    req.check('websiteId', 'Invalid parameter WebsiteId').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const website_id = req.body.websiteId;
+
+        get_website_info(website_id)
+          .then(website => res.send(website))
+          .catch(err => res.send(res));
       }
     }
   } catch (err) {
@@ -1116,6 +1143,41 @@ router.post('/entities/update', async function (req, res, next) {
   }
 });
 
+router.post('/websites/update', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter WebsiteId').exists();
+    req.check('name', 'Invalid parameter Name').exists();
+    req.check('domain', 'Invalid parameter Domain').exists();
+    req.check('entityId', 'Invalid parameter EntityId').exists();
+    req.check('userId', 'Invalid parameter UserId').exists();
+    req.check('defaultTags', 'Invalid parameter DefaultTags').exists();
+    req.check('tags', 'Invalid parameter Tags').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const website_id = req.body.websiteId;
+        const name = req.body.name;
+        const entity_id = req.body.entityId;
+        const edit_user_id = req.body.userId;
+        const default_tags = JSON.parse(req.body.defaultTags);
+        const tags = JSON.parse(req.body.tags);
+
+        update_website(website_id, name, entity_id, edit_user_id, default_tags, tags)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 /**
  * DELETE
  */
@@ -1184,6 +1246,30 @@ router.post('/entities/delete', async function (req, res, next) {
         const entity_id = req.body.entityId;
 
         delete_entity(entity_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/websites/delete', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter WebsiteId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const website_id = req.body.websiteId;
+
+        delete_website(website_id)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
