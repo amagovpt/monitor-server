@@ -376,7 +376,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
                     Website as w,
                     Domain as d
                   WHERE
-                    d.Url = "lodash.com" AND
+                    d.Url = "${domain}" AND
                     d.WebsiteId = w.WebsiteId AND
                     (
                       w.UserId IS NULL OR

@@ -7,7 +7,7 @@
 /**
  * Libraries and modules
  */
-const { split } = require('lodash');
+const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 const { execute_evaluation } = require('../lib/_middleware');
@@ -29,7 +29,7 @@ module.exports.evaluate_url_and_save = async (page_id, url) => {
     const webpage = Buffer.from(evaluation.pagecode).toString('base64');
     const data = evaluation.data;
 
-    const conform = split(data.conform, '@');
+    const conform = _.split(data.conform, '@');
     const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
     const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
     const elems = Buffer.from(JSON.stringify(data.elems)).toString('base64');
@@ -155,6 +155,86 @@ module.exports.delete_evaluation = async (evaluation_id) => {
 
     return success(evaluation_id);
   } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.save_url_evaluation = async (url, evaluation) => {
+  try {
+    evaluation = evaluation.result;
+
+    url = _.replace(url, 'http://', '');
+    url = _.replace(url, 'https://', '');
+    url = _.replace(url, 'www.', '');
+
+    let domain = '';
+    if (_.includes(url, '/')) {
+      domain = _.split(url, '/')[0];
+    } else {
+      domain = url;
+    }
+
+    let query = `SELECT distinct d.DomainId, d.Url 
+                  FROM
+                    User as u,
+                    Website as w,
+                    Domain as d
+                  WHERE
+                    d.Url = "${domain}" AND
+                    d.WebsiteId = w.WebsiteId AND
+                    (
+                      w.UserId IS NULL OR
+                      (
+                        u.UserId = w.UserId AND
+                        u.Type = 'monitor'
+                      )
+                    )
+                  LIMIT 1`;
+    const domains = await execute_query(query);
+
+    if (_.size(domains) > 0) {
+      let existing_domain = domains[0];
+
+      query = `SELECT PageId FROM Page WHERE Uri = "${url}" LIMIT 1`;
+      let pages = await execute_query(query);
+
+      let page_id = -1;
+
+      if (_.size(pages) > 0) {
+        page_id = pages[0].PageId;
+      } else {
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${url}", "${date}")`;
+        let newPage = await execute_query(query);
+
+        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${existing_domain.DomainId}", "${newPage.insertId}")`;
+        await execute_query(query);
+
+        page_id = newPage.insertId;
+      }
+
+      const webpage = Buffer.from(evaluation.pagecode).toString('base64');
+      const data = evaluation.data;
+
+      const conform = _.split(data.conform, '@');
+      const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
+      const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
+      const elems = Buffer.from(JSON.stringify(data.elems)).toString('base64');
+
+      query = `
+        INSERT INTO 
+          Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
+        VALUES 
+          ("${page_id}", "${data.title}", "${data.score}", "${webpage}", "${tot}", "${nodes}", "${elems}", "${conform[0]}", 
+           "${conform[1]}", "${conform[2]}", "${data.date}")`;
+
+      await execute_query(query);
+    }
+
+    return success();
+  } catch(err) {
     console.log(err);
     return error(err);
   }
