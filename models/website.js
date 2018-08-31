@@ -303,7 +303,7 @@ module.exports.get_website_info = async (website_id) => {
       website.tags = tags;
     }
 
-    return success(website);
+    return success(website);q
   } catch(err) {
     console.log(err);
     return error(err);
@@ -326,6 +326,29 @@ module.exports.get_website_info = async (website_id) => {
     return error(err)
   }
 }*/
+
+/**
+ * MY MONITOR
+ */
+
+module.exports.get_my_monitor_user_websites = async (user_id) => {
+  try {
+    const query = `SELECT w.*, d.Url as Domain, COUNT(distinct dp.PageId) as Pages
+      FROM
+        Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+      WHERE
+        w.UserId = "${user_id}"
+      GROUP BY w.WebsiteId, d.Url`;
+    const websites = await execute_query(query);
+
+    return success(websites);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
 
 /**
  * ACCESS STUDIES

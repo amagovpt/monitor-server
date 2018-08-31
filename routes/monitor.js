@@ -4,9 +4,9 @@ const express = require('express');
 const router = express.Router();
 const { ServerError, ParamsError } = require('../lib/_error');
 const { error } = require('../lib/_response');
-const { verify } = require('../models/user');
-const { get_all_user_websites } = require('../lib/website');
-const { get_user_website_pages } = require('../lib/page');
+const { verify_user } = require('../models/user');
+const { get_my_monitor_user_websites } = require('../models/website');
+const { get_user_website_pages } = require('../models/page');
 
 router.post('/user/websites', async function(req, res, next) {
   try {
@@ -16,14 +16,15 @@ router.post('/user/websites', async function(req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      const user_id = await verify(res, req.body.cookie, false);
+      const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
-        get_all_user_websites(user_id)
+        get_my_monitor_user_websites(user_id)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });
@@ -37,7 +38,7 @@ router.post('/user/website/pages', async function(req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      const user_id = await verify(res, req.body.cookie, false);
+      const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
         const website_id = req.body.website_id;
 
