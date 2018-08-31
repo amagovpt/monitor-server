@@ -350,6 +350,26 @@ module.exports.get_my_monitor_user_websites = async (user_id) => {
   }
 }
 
+module.exports.get_my_monitor_user_website_domain = async (user_id, website) => {
+  try {
+    const query = `SELECT d.Url FROM 
+        Website as w,
+        Domain as d
+      WHERE
+        w.UserId = "${user_id}" AND
+        w.Name = "${website}" AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+      LIMIT 1`;
+    const domain = await execute_query(query);
+
+    return success(_.size(domain) > 0 ? domain[0].Url : null);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  } 
+}
+
 /**
  * ACCESS STUDIES
  */
@@ -527,6 +547,30 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
 
         query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${_domain.insertId}", "${newPage.insertId}")`;
         await execute_query(query);
+
+        query = `SELECT distinct d.DomainId, d.Url 
+                  FROM
+                    User as u,
+                    Website as w,
+                    Domain as d
+                  WHERE
+                    d.Url = "${domain}" AND
+                    d.WebsiteId = w.WebsiteId AND
+                    (
+                      w.UserId IS NULL OR
+                      (
+                        u.UserId = w.UserId AND
+                        u.Type = 'monitor'
+                      )
+                    )
+                  LIMIT 1`;
+
+        const exisitng_domain = await execute_query(query);
+
+        if (_.size(exisitng_domain) > 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${exisitng_domain[0].DomainId}", "${newPage.insertId}")`;
+          await execute_query(query);
+        }
       } else {
         query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${_domain.insertId}", "${page[0].PageId}")`;
         await execute_query(query);

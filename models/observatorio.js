@@ -35,8 +35,13 @@ module.exports.get_observatorio_data = async () => {
         t.Show_in_Observatorio,
         t.Creation_Date as Tag_Creation_Date
       FROM
-        Evaluation as e,
-        Page as p,
+        Page as p
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+        ),
+        DomainPage as dp,
         Domain as d,
         Website as w
         LEFT OUTER JOIN Entity as en ON en.EntityId = w.EntityId,
@@ -48,12 +53,13 @@ module.exports.get_observatorio_data = async () => {
         w.WebsiteId = tw.WebsiteId AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
-        p.DomainId = d.DomainId AND
-        e.PageId = p.PageId`;
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId`;
 
     const data = await execute_query(query);
     return success(data);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

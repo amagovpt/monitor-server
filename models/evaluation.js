@@ -95,6 +95,48 @@ module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
     console.log(err);
     throw error(err);
   }
+}
+
+module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) => {
+  try {
+    const query = `SELECT e.* 
+      FROM
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        w.Name = "${website}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Uri = "${url}" AND 
+        e.PageId = p.PageId
+      ORDER BY e.Evaluation_Date DESC 
+      LIMIT 1`;
+    let evaluation = await execute_query(query);
+    evaluation = evaluation[0];
+    
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+
+    return success(
+      { pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        data: {
+          title: evaluation.Title,
+          score: evaluation.Score,
+          rawUrl: url,
+          tot: tot,
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+          elems: tot.elems,
+          date: evaluation.Evaluation_Date
+    }});
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
 } 
 
 module.exports.get_all_page_evaluations = async (page) => {

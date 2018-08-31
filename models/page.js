@@ -216,6 +216,112 @@ module.exports.get_user_website_pages = async (user_id, website_id) => {
 }
 
 /**
+ * MY MONITOR
+ */
+
+module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
+  try {
+    const query = `SELECT 
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Errors,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        w.Name = "${website}" AND
+        w.UserId = "${user_id}" AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
+    const pages = await execute_query(query);
+
+    return success(pages);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  } 
+}
+
+module.exports.add_my_monitor_user_website_pages = async (user_id, website, domain, pages) => {
+  try {
+    const _size = _.size(pages);
+    for (let i = 0 ; i < _size ; i++) {
+      let query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
+      let page = await execute_query(query);
+
+      if (_.size(page) > 0) {
+        query = `SELECT 
+            dp.* 
+          FROM
+            Website as w,
+            Domain as d,
+            DomainPage as dp
+          WHERE 
+            w.Name = "${website}" AND
+            w.UserId = "${user_id}" AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            dp.PageId = "${page[0].PageId}"`;
+        
+        let domainPage = await execute_query(query);
+        if (size(domainPage) === 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              "${page[0].PageId}" 
+            FROM
+              Website as w,
+              Domain as d
+            WHERE 
+              w.Name = "${website}" AND
+              w.UserId = "${user_id}" AND
+              d.WebsiteId = w.WebsiteId AND
+              d.Url = "${domain}" AND
+              d.Active = 1`;
+          await execute_query(query);
+        }
+      } else {
+        let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${pages[i]}", "${date}")`;
+        let newPage = await execute_query(query);
+        
+        await evaluate_url_and_save(newPage.insertId, pages[i]);
+
+        query = `INSERT INTO DomainPage (DomainId, PageId) 
+          SELECT 
+            d.DomainId, 
+            "${newPage.insertId}" 
+          FROM
+            Website as w,
+            Domain as d
+          WHERE 
+            w.Name = "${website}" AND
+            w.UserId = "${user_id}" AND
+            d.WebsiteId = w.WebsiteId AND
+            d.Url = "${domain}" AND
+            d.Active = 1`;
+        await execute_query(query);
+      }
+    }
+
+    return this.get_my_monitor_user_website_pages(user_id, website);
+  } catch(err) {
+    console.log(err);
+    throw error(err);
+  }
+}
+
+/**
  * ACCESS STUDIES
  */
 

@@ -12,6 +12,7 @@ router.get('/', async function(req, res, next) {
       .then(data => res.send(data))
       .catch(err => res.send(err));
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });
