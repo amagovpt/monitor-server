@@ -16,7 +16,7 @@ router.get('/eval/:url', function(req, res, next) {
     } else {
       const url = decodeURIComponent(req.params.url);
 
-      evaluate_url(url, 'examinator')
+      evaluate_url(url, 'qualweb')
         .then(evaluation => {
           res.send(evaluation);
 

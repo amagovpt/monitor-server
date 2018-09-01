@@ -1,12 +1,13 @@
-"use strict";
+'use strict';
 
-const args = process.argv;
+const qualweb = require(__dirname + '/../../../qualweb/qualweb_server/core');
 
-let url = args[2];
-
-console.log({
-  engine: "Qualweb",
-  metadata: "ola",
-  url: url,
-  some: "blabla"
-});
+module.exports.init = async (url) => {
+  const check = {
+    '--html': '',
+    '-url': encodeURIComponent(url)
+  };
+  const evaluation = await qualweb.run(check, true);
+  
+  return evaluation;
+}
