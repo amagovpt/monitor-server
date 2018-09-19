@@ -138,7 +138,8 @@ module.exports.get_all_official_websites = async () => {
 
 module.exports.get_all_websites_without_entity = async () => {
   try {
-    const query = `SELECT * FROM Website WHERE EntityId IS NULL`;
+    const query = `SELECT w.* FROM Website as w, User as u 
+      WHERE w.EntityId IS NULL AND u.UserId = w.UserId AND u.Type != 'studies' OR w.UserId IS NULL`;
     const websites = await execute_query(query);
     return success(websites);
   } catch(err) {
@@ -539,7 +540,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
       query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
-      if (size(page) === 0) {
+      if (_.size(page) === 0) {
         query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${pages[i]}", "${date}")`;
         let newPage = await execute_query(query);
         
@@ -612,7 +613,7 @@ module.exports.access_studies_user_tag_website_name_exists = async (user_id, tag
       LIMIT 1`;
     const websites = await execute_query(query);
 
-    return success(size(websites) > 0);
+    return success(_.size(websites) > 0);
   } catch(err) {
     console.log(err);
     throw error(err);
@@ -637,7 +638,7 @@ module.exports.access_studies_user_tag_website_domain_exists = async (user_id, t
       LIMIT 1`;
     const websites = await execute_query(query);
 
-    return success(size(websites) > 0);
+    return success(_.size(websites) > 0);
   } catch(err) {
     console.log(err);
     throw error(err);

@@ -8,17 +8,12 @@ const expressValidator = require('express-validator');
 const cors = require('cors');
 const compression = require('compression');
 
+const sessionRouter = require('./routes/session');
 const adminRouter = require('./routes/admin');
 const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatorio');
 const studiesRouter = require('./routes/studies');
 const monitorRouter = require('./routes/monitor');
-const tagsRouter = require('./routes/tags');
-const usersRouter = require('./routes/users');
-const websitesRouter = require('./routes/websites');
-const entitiesRouter = require('./routes/entities');
-const domainsRouter = require('./routes/domains');
-const pagesRouter = require('./routes/pages');
 
 const app = express();
 app.use(compression());
@@ -35,17 +30,12 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/session', sessionRouter);
 app.use('/admin', adminRouter);
 app.use('/amp', ampRouter);
 app.use('/obs', obsRouter);
 app.use('/studies', studiesRouter);
 app.use('/monitor', monitorRouter);
-app.use('/users', usersRouter);
-app.use('/entities', entitiesRouter);
-app.use('/websites', websitesRouter);
-app.use('/domains', domainsRouter);
-app.use('/pages', pagesRouter);
-app.use('/tags', tagsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

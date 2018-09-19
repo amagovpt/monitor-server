@@ -430,7 +430,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
             dp.PageId = "${page[0].PageId}"`;
         
         let domainPage = await execute_query(query);
-        if (size(domainPage) === 0) {
+        if (_.size(domainPage) === 0) {
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
               d.DomainId, 
@@ -475,7 +475,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
             w.UserId = "${user_id}" AND
             d.WebsiteId = w.WebsiteId`;
         await execute_query(query);
-
+        
         query = `SELECT distinct d.DomainId, d.Url 
                   FROM
                     User as u,

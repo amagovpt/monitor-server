@@ -9,7 +9,8 @@ const { verify_user } = require('../models/user');
 const { get_page_id } = require('../models/page');
 const { evaluate_url_and_save, get_newest_evaluation } = require('../models/evaluation');
 
-const { 
+const {
+  get_all_official_tags,
   create_user_tag, 
   get_access_studies_user_tags,
   user_tag_name_exists,
@@ -34,6 +35,27 @@ const {
   add_access_studies_user_tag_website_pages,
   remove_access_studies_user_tag_website_pages
 } = require('../models/page');
+
+router.post('/tags/allOfficial', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, false);
+      if (user_id !== -1) {
+        get_all_official_tags(user_id)
+          .then(tags => res.send(tags))
+          .catch(res => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
 
 router.post('/user/tags', async function(req, res, next) {
   try {

@@ -141,6 +141,17 @@ module.exports.get_all_tags = async () => {
   }
 }
 
+module.exports.get_all_official_tags = async () => {
+  try {
+    const query = `SELECT * FROM Tag WHERE UserId IS NULL`;
+    const tags = await execute_query(query);
+    return success(tags);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.get_all_official_tags = async user_id => {
   try {
     const query = `SELECT t.* 
@@ -223,7 +234,7 @@ module.exports.user_remove_tags = async (user_id, tagsId) => {
     query = `DELETE FROM Tag WHERE TagId IN (${_delete})`;
     await execute_query(query);
 
-    return await get_access_studies_user_tags(user_id);
+    return await this.get_access_studies_user_tags(user_id);
   } catch(err) {
     console.log(err);
     throw error(err);
