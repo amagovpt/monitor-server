@@ -80,6 +80,7 @@ const {
 } = require('../models/page');
 
 const {
+  evaluate_url_and_save,
   get_all_page_evaluations,
   get_evaluation,
   delete_evaluation
@@ -697,6 +698,29 @@ router.post('/page/evaluation', async function (req, res, next) {
   }
 });
 
+router.post('/page/evaluate', async function(req, res, next) {
+  try {
+    req.check('url', 'Invalid url parameter').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, false);
+      if (user_id !== -1) {
+        const url = decodeURIComponent(req.body.url);
+        const page_id = await get_page_id(url);
+
+        evaluate_url_and_save(page_id.result, url)
+          .then(evaluation => res.send(evaluation))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    res.send(error(new ServerError(err)));
+  }
+});
 
 router.post('/websites/withoutUser', async function (req, res, next) {
   try {
@@ -1373,6 +1397,5 @@ router.post('/evaluations/delete', async function (req, res, next) {
     res.send(error(new ServerError(err))); 
   }
 });
-
 
 module.exports = router;
