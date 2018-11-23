@@ -158,14 +158,9 @@ module.exports.get_all_page_evaluations = async (page) => {
   }
 }
 
-module.exports.get_evaluation = async (url, date) => {
+module.exports.get_evaluation = async (url, id) => {
   try {
-    let newDate = new Date(date);
-    newDate.setHours(newDate.getHours() + 1);
-    newDate = newDate.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-
-    const query = `SELECT e.* FROM Evaluation as e, Page as p 
-      WHERE p.Uri = "${url}" AND e.PageId = p.PageId AND e.Evaluation_Date = "${newDate}"`;
+    const query = `SELECT * FROM Evaluation WHERE EvaluationId = "${id}" LIMIT 1`;
     
     let evaluation = await execute_query(query);
     evaluation = evaluation[0];
@@ -248,7 +243,7 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
       } else {
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-        query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${url}", "${date}")`;
+        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${url}", "none", "${date}")`;
         let newPage = await execute_query(query);
 
         query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${existing_domain.DomainId}", "${newPage.insertId}")`;

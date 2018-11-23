@@ -45,6 +45,10 @@ const create_user_cookie = async (user) => {
 
 module.exports.verify_user = async (res, cookie, admin=false) => {
   try {
+    if (cookie === 'null') {
+      return -1;
+    }
+
     cookie = JSON.parse(await decrypt(cookie));
 
     const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
@@ -255,6 +259,28 @@ module.exports.update_user = async (user_id, password, app, default_websites, we
 
     return success(user_id);
   } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.change_user_password = async (user_id, password, new_password) => {
+  try {
+    let query = `SELECT * FROM User WHERE UserId = "${user_id}" LIMIT 1`;
+    let user = await execute_query(query);
+
+    if (_.size(user) === 1) {
+      if (generate_password_hash(password) === user[0].Password) {
+        query = `UPDATE User SET Password = "${generate_password_hash(new_password)}" WHERE UserId = "${user_id}"`;
+        await execute_query(query);
+        return success(true);
+      } else {
+        return error({ code: -1, message: 'WRONG_USER_PASSWORD' });
+      }
+    } else {
+      throw new UserNotFoundError();
+    }
+  } catch (err) {
     console.log(err);
     return error(err);
   }

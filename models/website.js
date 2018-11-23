@@ -334,11 +334,12 @@ module.exports.get_website_info = async (website_id) => {
 
 module.exports.get_my_monitor_user_websites = async (user_id) => {
   try {
-    const query = `SELECT w.*, d.Url as Domain, COUNT(distinct dp.PageId) as Pages
+    const query = `SELECT w.*, d.Url as Domain, COUNT(distinct p.PageId) as Pages
       FROM
         Website as w
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND (p.Show_In = "user" OR p.Show_In = "both")
       WHERE
         w.UserId = "${user_id}"
       GROUP BY w.WebsiteId, d.Url`;

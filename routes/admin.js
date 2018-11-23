@@ -73,9 +73,13 @@ const {
 } = require('../models/domain');
 
 const {
+  get_page_id,
   get_all_pages,
   get_all_domain_pages,
+  get_website_pages,
   create_pages,
+  update_page,
+  update_observatorio_pages,
   delete_page
 } = require('../models/page');
 
@@ -553,6 +557,30 @@ router.post('/websites/info', async function (req, res, next) {
   }
 });
 
+router.post('/website/allPages', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter WebsiteId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const website_id = req.body.websiteId;
+
+        get_website_pages(website_id)
+          .then(pages => res.send(pages))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
 router.post('/domains/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -675,7 +703,7 @@ router.post('/evaluations/page', async function (req, res, next) {
 router.post('/page/evaluation', async function (req, res, next) {
   try {
     req.check('url', 'Invalid url').exists();
-    req.check('evaluation_date', 'Invalid evaluation_date').exists();
+    req.check('evaluation_id', 'Invalid evaluation_id').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -685,9 +713,9 @@ router.post('/page/evaluation', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const url = decodeURIComponent(req.body.url);
-        const evaluation_date = req.body.evaluation_date;
+        const evaluation_id = req.body.evaluation_id;
         
-        get_evaluation(url, evaluation_date)
+        get_evaluation(url, evaluation_id)
           .then(evaluation => res.send(evaluation))
           .catch(err => re.send(err));
       }
@@ -711,13 +739,14 @@ router.post('/page/evaluate', async function(req, res, next) {
       if (user_id !== -1) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
-
+        
         evaluate_url_and_save(page_id.result, url)
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
     }
   } catch (err) {
+    console.log(err)
     res.send(error(new ServerError(err)));
   }
 });
@@ -1214,6 +1243,58 @@ router.post('/websites/update', async function (req, res, next) {
         const tags = JSON.parse(req.body.tags);
 
         update_website(website_id, name, entity_id, edit_user_id, default_tags, tags)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/pages/update', async function (req, res, next) {
+  try {
+    req.check('pageId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const page_id = req.body.pageId;
+        const checked = req.body.checked;
+
+        update_page(page_id, checked)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/pages/updateObservatorio', async function (req, res, next) {
+  try {
+    req.check('pages', 'Invalid parameter Pages').exists();
+    req.check('pagesId', 'Invalid parameter PagesId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const pages = JSON.parse(req.body.pages);
+        const pages_id = JSON.parse(req.body.pagesId);
+
+        update_observatorio_pages(pages, pages_id)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
