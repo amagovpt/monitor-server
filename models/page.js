@@ -381,7 +381,14 @@ module.exports.remove_my_monitor_user_website_pages = async (user_id, website, p
 
 module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, website) => {
   try {
-    const query = `SELECT 
+    let query = `SELECT * FROM Website WHERE UserId = "${user_id}" AND Name = "${website}" LIMIT 1`;
+    const websiteExists = await execute_query(query);
+
+    if (_.size(websiteExists) === 0) {
+      return error({code: -1, message: 'USER_WEBSITE_INEXISTENT', err: null});
+    }
+
+    query = `SELECT 
         distinct p.*,
         e.Score,
         e.A,
@@ -563,7 +570,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
   }
 }
 
-module.exports.remove_access_studies_user_tag_website_pages = async (user_id, tag, website, pagesId) => {
+module.exports.remove_access_studies_user_tag_website_pages = async (user_id, tag, website, pages_id) => {
   try {
     const query = `
       DELETE 
@@ -575,11 +582,11 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
         DomainPage as dp
       WHERE 
         t.Name = "${tag}" AND
-        t.UserId = "${user_id}" AND 
-        tw.TagId = t.TagId AND 
+        t.UserId = "${user_id}" AND
+        tw.TagId = t.TagId AND
         d.WebsiteId = tw.WebsiteId AND
         dp.DomainId = d.DomainId AND
-        dp.PageId IN ("${pagesId}")`;
+        dp.PageId IN (${pages_id})`;
 
     await execute_query(query);
 
@@ -594,7 +601,7 @@ module.exports.update_page = async (page_id, checked) => {
   try {
     let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
     let page = await execute_query(query);
-    console.log(checked);
+    
     if (_.size(page) > 0) {
       let show = null;
 

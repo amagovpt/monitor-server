@@ -176,6 +176,7 @@ router.post('/user/tag/website/pagesData', async function(req, res, next) {
 router.post('/create/tag', async function(req, res, next) {
   try {
     req.check('type', 'Tag type invalid').exists();
+    req.check('user_tag_name', 'Tag name invalid').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -185,10 +186,10 @@ router.post('/create/tag', async function(req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
         const type = req.body.type;
-        const official_tag_id = req.body.official_tag_id;
+        const tags_id = JSON.parse(req.body.tagsId);
         const user_tag_name = req.body.user_tag_name;
 
-        create_user_tag(user_id, type, official_tag_id, user_tag_name)
+        create_user_tag(user_id, type, tags_id, user_tag_name)
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }
@@ -442,9 +443,9 @@ router.post('/user/removeTags', async function(req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
-        const tagsId = split(req.body.tagsId, ',');
+        const tags_id = JSON.parse(req.body.tagsId);
 
-        user_remove_tags(user_id, tagsId)
+        user_remove_tags(user_id, tags_id)
           .then(tags => res.send(tags))
           .catch(err => res.send(err));
       }
@@ -468,9 +469,9 @@ router.post('/user/tag/removeWebsites', async function(req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
         const tag = req.body.tag;
-        const websitesId = split(req.body.websitesId, ',');
+        const websites_id = JSON.parse(req.body.websitesId);
 
-        remove_access_studies_user_tag_websites(user_id, tag, websitesId)
+        remove_access_studies_user_tag_websites(user_id, tag, websites_id)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -496,9 +497,9 @@ router.post('/user/tag/website/removePages', async function(req, res, next) {
       if (user_id !== -1) {
         const tag = req.body.tag;
         const website = req.body.website;
-        const pagesId = split(req.body.pagesId, ',');
+        const pages_id = JSON.parse(req.body.pagesId);
         
-        remove_access_studies_user_tag_website_pages(user_id, tag, website, pagesId)
+        remove_access_studies_user_tag_website_pages(user_id, tag, website, pages_id)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }

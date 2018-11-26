@@ -111,7 +111,7 @@ module.exports.website_name_exists = async (name) => {
 
 module.exports.get_all_websites = async () => {
   try {
-    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User, u.Type as Type
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
@@ -435,7 +435,14 @@ module.exports.get_access_studies_user_websites_from_other_tags = async (user_id
 
 module.exports.get_access_studies_user_tag_websites = async (user_id, tag) => {
   try {
-    const query = `SELECT 
+    let query = `SELECT * FROM Tag WHERE UserId = "${user_id}" AND Name = "${tag}" LIMIT 1`;
+    const tagExist = await execute_query(query);
+
+    if (_.size(tagExist) === 0) {
+      return error({code: -1, message: 'USER_TAG_INEXISTENT', err: null});
+    }
+
+    query = `SELECT 
         w.WebsiteId,
         w.Name,
         d.Url,
@@ -586,9 +593,9 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
   }
 }
 
-module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, websitesId) => {
+module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, websites_id) => {
   try {
-    const query = `DELETE FROM Website WHERE WebsiteId IN ("${websitesId}")`;
+    const query = `DELETE FROM Website WHERE WebsiteId IN (${websites_id})`;
     await execute_query(query);
 
     return await this.get_access_studies_user_tag_websites(user_id, tag);
@@ -673,7 +680,7 @@ module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag,
 
 module.exports.update_website = async (website_id, name, entity_id, user_id, default_tags, tags) => {
   try {
-    let query = `UPDATE Website SET Name = "${name}", EntityId = "${entity_id}", UserId = "${user_id}" WHERE WebsiteId = "${website_id}"`;
+    let query = `UPDATE Website SET Name = "${name}", ${entity_id ? "EntityId = " + entity_id : ""}, ${user_id ? "UserId = " + user_id : "" } WHERE WebsiteId = "${website_id}"`;
     await execute_query(query);
 
     for (let tag_id of default_tags) {
