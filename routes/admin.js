@@ -1094,6 +1094,7 @@ router.post('/pages/create', async function (req, res, next) {
   try {
     req.check('domainId', 'Invalid DomainId').exists();
     req.check('uris', 'Invalid Uris').exists();
+    req.check('observatorio', 'Invalid Observaotrio Uris').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1104,8 +1105,9 @@ router.post('/pages/create', async function (req, res, next) {
       if (user_id !== -1) {
         const domain_id = req.body.domainId;
         const uris = JSON.parse(req.body.uris);
+        const observatorio_uris = JSON.parse(req.body.observatorio);
 
-        create_pages(domain_id, uris)
+        create_pages(domain_id, uris, observatorio_uris)
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }

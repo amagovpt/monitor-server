@@ -8,7 +8,7 @@ const app = require('../app');
 const debug = require('debug')('am-server:server');
 //const https = require('https');
 const http = require('http');
-const fs = require('fs');
+//const fs = require('fs');
 //const { PRIVATE_KEY, CERTIFICATE } = require('../lib/_constants');
 
 //const privateKey = fs.readFileSync(PRIVATE_KEY, 'utf8');

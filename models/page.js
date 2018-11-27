@@ -13,7 +13,7 @@ const { execute_query } = require('../lib/_database');
 
 const { evaluate_url_and_save } = require('./evaluation');
 
-module.exports.create_pages = async (domain_id, uris) => {
+module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -24,7 +24,7 @@ module.exports.create_pages = async (domain_id, uris) => {
       u = _.replace(u, 'http://', '');
       u = _.replace(u, 'www.', '');
 
-      let query = `SELECT PageId FROM Page WHERE Uri = "${u}" LIMIT 1`;
+      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${u}" LIMIT 1`;
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
@@ -35,8 +35,30 @@ module.exports.create_pages = async (domain_id, uris) => {
           await execute_query(query);
           pagesId.push(page[0].PageId);
         }
+        let show = null;
+
+        if (_.includes(observatorio_uris, u)) {
+          if (page[0].Show_In === 'none') {
+            show = 'observatorio';
+          } else if (page[0].Show_In === 'user') {
+            show = 'both';
+          }
+        } else {
+          show = page[0].Show_In;
+        }
+
+        query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page[0].PageId}"`;
+        await execute_query(query);
       } else {
-        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "none", "${date}")`;
+        let show = null;
+
+        if (_.includes(observatorio_uris, u)) {
+          show = 'observatorio';
+        } else {
+          show = 'none';
+        }
+
+        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
         let newPage = await execute_query(query);
         
         await evaluate_url_and_save(newPage.insertId, u);
@@ -243,7 +265,14 @@ module.exports.get_user_website_pages = async (user_id, website_id) => {
 
 module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
   try {
-    const query = `SELECT 
+    let query = `SELECT * FROM Website WHERE UserId = "${user_id}" AND Name = "${website}" LIMIT 1`;
+    const websiteExist = await execute_query(query);
+
+    if (_.size(websiteExist) === 0) {
+      return error({code: -1, message: 'USER_WEBSITE_INEXISTENT', err: null});
+    }
+
+    query = `SELECT 
         distinct p.*,
         e.Score,
         e.A,
