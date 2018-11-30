@@ -17,6 +17,7 @@ module.exports.evaluate_url = async (url, evaluator) => {
     const evaluation = await execute_evaluation(url, evaluator);
     return success(JSON.parse(evaluation));
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }
@@ -212,22 +213,23 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
       domain = url;
     }
 
-    let query = `SELECT distinct d.DomainId, d.Url 
-                  FROM
-                    User as u,
-                    Website as w,
-                    Domain as d
-                  WHERE
-                    d.Url = "${domain}" AND
-                    d.WebsiteId = w.WebsiteId AND
-                    (
-                      w.UserId IS NULL OR
-                      (
-                        u.UserId = w.UserId AND
-                        u.Type = 'monitor'
-                      )
-                    )
-                  LIMIT 1`;
+    let query = `
+      SELECT distinct d.DomainId, d.Url 
+      FROM
+        User as u,
+        Website as w,
+        Domain as d
+      WHERE
+        d.Url = "${domain}" AND
+        d.WebsiteId = w.WebsiteId AND
+        (
+          w.UserId IS NULL OR
+          (
+            u.UserId = w.UserId AND
+            u.Type = 'monitor'
+          )
+        )
+      LIMIT 1`;
     const domains = await execute_query(query);
 
     if (_.size(domains) > 0) {
@@ -271,6 +273,34 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
     }
 
     return success();
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.save_page_evaluation = async (page_id, evaluation) => {
+  try {
+    evaluation = evaluation.result;
+
+    const webpage = Buffer.from(evaluation.pagecode).toString('base64');
+    const data = evaluation.data;
+
+    const conform = _.split(data.conform, '@');
+    const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
+    const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
+    const elems = Buffer.from(JSON.stringify(data.elems)).toString('base64');
+
+    query = `
+      INSERT INTO 
+        Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
+      VALUES 
+        ("${page_id}", "${data.title}", "${data.score}", "${webpage}", "${tot}", "${nodes}", "${elems}", "${conform[0]}", 
+          "${conform[1]}", "${conform[2]}", "${data.date}")`;
+
+    const newEvaluation = await execute_query(query);
+
+    return success(newEvaluation.insertId);
   } catch(err) {
     console.log(err);
     return error(err);

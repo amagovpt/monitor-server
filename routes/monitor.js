@@ -6,7 +6,7 @@ const { ServerError, ParamsError } = require('../lib/_error');
 const { error } = require('../lib/_response');
 const { verify_user, change_user_password } = require('../models/user');
 const { get_my_monitor_user_websites, get_my_monitor_user_website_domain } = require('../models/website');
-const { get_my_monitor_user_website_pages, add_my_monitor_user_website_pages, remove_my_monitor_user_website_pages } = require('../models/page');
+const { get_my_monitor_user_website_pages, add_my_monitor_user_website_pages, remove_my_monitor_user_website_pages, get_page_id } = require('../models/page');
 const { get_my_monitor_newest_evaluation, evaluate_url_and_save } = require('../models/evaluation');
 
 router.post('/user/websites', async function(req, res, next) {
@@ -173,6 +173,7 @@ router.post('/evaluate', async function(req, res, next) {
       }
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });

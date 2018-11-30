@@ -11,13 +11,14 @@ const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
-const { evaluate_url_and_save } = require('./evaluation');
+const { evaluate_url_and_save, evaluate_url, save_page_evaluation } = require('./evaluation');
 
 module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     let pagesId = [];
+    const errors = {};
 
     for (let u of uris) {
       u = _.replace(u, 'https://', '');
@@ -36,7 +37,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           pagesId.push(page[0].PageId);
         }
         let show = null;
-
+        
         if (_.includes(observatorio_uris, u)) {
           if (page[0].Show_In === 'none') {
             show = 'observatorio';
@@ -45,6 +46,10 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           }
         } else {
           show = page[0].Show_In;
+        }
+        
+        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
+          show = 'none';
         }
 
         query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page[0].PageId}"`;
@@ -58,18 +63,37 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           show = 'none';
         }
 
-        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
-        let newPage = await execute_query(query);
-        
-        await evaluate_url_and_save(newPage.insertId, u);
+        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
+          show = 'none';
+        }
 
-        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
-        await execute_query(query);
-        pagesId.push(newPage.insertId);
+        let evaluation = null;
+        try {
+          evaluation = await evaluate_url(u, 'examinator');
+        } catch(e) {
+          errors[u] = -1;
+        }
+
+        if (evaluation !== null && evaluation.result !== null) {
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
+          let newPage = await execute_query(query);
+
+          await save_page_evaluation(newPage.insertId, evaluation);
+
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
+          await execute_query(query);
+          pagesId.push(newPage.insertId);
+        } else {
+          errors[u] = -1;
+        }
       }
     }
 
-    return success(pagesId);
+    if (_.size(_.keys(errors)) > 0) {
+      return error({ code: 0, message: 'SOME_PAGES_ERRORS', err: errors}, pagesId);
+    } else {
+      return success(pagesId);
+    }
   } catch(err) {
     console.log(err);
     return error(err);
@@ -306,8 +330,9 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
 
 module.exports.add_my_monitor_user_website_pages = async (user_id, website, domain, pages) => {
   try {
-    const _size = _.size(pages);
-    for (let i = 0 ; i < _size ; i++) {
+    const errors = {};
+    const size = _.size(pages);
+    for (let i = 0 ; i < size ; i++) {
       let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
@@ -351,30 +376,47 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           await execute_query(query);
         }
       } else {
-        let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "user", "${date}")`;
-        let newPage = await execute_query(query);
-        
-        await evaluate_url_and_save(newPage.insertId, pages[i]);
+        let evaluation = null;
+        try {
+          evaluation = await evaluate_url(pages[i], 'examinator');
+        } catch(e) {
+          errors[pages[i]] = -1;
+        }
 
-        query = `INSERT INTO DomainPage (DomainId, PageId) 
-          SELECT 
-            d.DomainId, 
-            "${newPage.insertId}" 
-          FROM
-            Website as w,
-            Domain as d
-          WHERE 
-            w.Name = "${website}" AND
-            w.UserId = "${user_id}" AND
-            d.WebsiteId = w.WebsiteId AND
-            d.Url = "${domain}" AND
-            d.Active = 1`;
-        await execute_query(query);
+        if (evaluation !== null && evaluation.result !== null) {
+          let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "user", "${date}")`;
+          let newPage = await execute_query(query);
+          
+          await save_page_evaluation(newPage.insertId, evaluation);
+
+          query = `INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              "${newPage.insertId}" 
+            FROM
+              Website as w,
+              Domain as d
+            WHERE 
+              w.Name = "${website}" AND
+              w.UserId = "${user_id}" AND
+              d.WebsiteId = w.WebsiteId AND
+              d.Url = "${domain}" AND
+              d.Active = 1`;
+          await execute_query(query);
+        } else {
+          errors[pages[i]] = -1;
+        }
       }
     }
+    
+    const newPages = await this.get_my_monitor_user_website_pages(user_id, website);
 
-    return this.get_my_monitor_user_website_pages(user_id, website);
+    if (_.size(_.keys(errors)) > 0) {
+      return error({ code: 0, message: 'SOME_PAGES_ERRORS', err: errors}, newPages.result);
+    } else {
+      return newPages;
+    }
   } catch(err) {
     console.log(err);
     throw error(err);
@@ -494,8 +536,9 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
 
 module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
   try {
-    const _size = _.size(pages);
-    for (let i = 0 ; i < _size ; i++) {
+    const errors = {};
+    const size = _.size(pages);
+    for (let i = 0 ; i < size ; i++) {
       let query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
@@ -541,58 +584,76 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
           await execute_query(query);
         }
       } else {
-        let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
-        let newPage = await execute_query(query);
-        
-        await evaluate_url_and_save(newPage.insertId, pages[i]);
+        let evaluation = null;
 
-        query = `INSERT INTO DomainPage (DomainId, PageId) 
-          SELECT 
-            d.DomainId, 
-            "${newPage.insertId}" 
-          FROM
-            Tag as t,
-            TagWebsite as tw,
-            Website as w,
-            Domain as d
-          WHERE 
-            t.Name = "${tag}" AND
-            t.UserId = "${user_id}" AND 
-            tw.TagId = t.TagId AND
-            w.WebsiteId = tw.WebsiteId AND
-            w.Name = "${website}" AND
-            w.UserId = "${user_id}" AND
-            d.WebsiteId = w.WebsiteId`;
-        await execute_query(query);
-        
-        query = `SELECT distinct d.DomainId, d.Url 
-                  FROM
-                    User as u,
-                    Website as w,
-                    Domain as d
-                  WHERE
-                    d.Url = "${domain}" AND
-                    d.WebsiteId = w.WebsiteId AND
-                    (
-                      w.UserId IS NULL OR
-                      (
-                        u.UserId = w.UserId AND
-                        u.Type = 'monitor'
-                      )
-                    )
-                  LIMIT 1`;
+        try {
+          evaluation = await evaluate_url(pages[i], 'examinator');
+        } catch(e) {
+          errors[pages[i]] = -1;
+        }
 
-        const exisitng_domain = await execute_query(query);
+        if (evaluation !== null && evaluation.rsult !== null) {
+          let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
+          let newPage = await execute_query(query);
+          
+          await save_page_evaluation(newPage.insertId, evaluation);
 
-        if (_.size(exisitng_domain) > 0) {
-          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${exisitng_domain[0].DomainId}", "${newPage.insertId}")`;
+          query = `INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              "${newPage.insertId}" 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d
+            WHERE 
+              t.Name = "${tag}" AND
+              t.UserId = "${user_id}" AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              w.Name = "${website}" AND
+              w.UserId = "${user_id}" AND
+              d.WebsiteId = w.WebsiteId`;
           await execute_query(query);
+          
+          query = `SELECT distinct d.DomainId, d.Url 
+                    FROM
+                      User as u,
+                      Website as w,
+                      Domain as d
+                    WHERE
+                      d.Url = "${domain}" AND
+                      d.WebsiteId = w.WebsiteId AND
+                      (
+                        w.UserId IS NULL OR
+                        (
+                          u.UserId = w.UserId AND
+                          u.Type = 'monitor'
+                        )
+                      )
+                    LIMIT 1`;
+
+          const existing_domain = await execute_query(query);
+
+          if (_.size(existing_domain) > 0) {
+            query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${existing_domain[0].DomainId}", "${newPage.insertId}")`;
+            await execute_query(query);
+          }
+        } else {
+          errors[pages[i]] = -1;
         }
       }
     }
 
-    return this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+    const newPages = await this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+
+    if (_.size(_.keys(errors)) > 0) {
+      return error({ code: 0, message: 'SOME_PAGES_ERRORS', err: errors}, newPages.result);
+    } else {
+      return newPages;
+    }
   } catch(err) {
     console.log(err);
     throw error(err);
