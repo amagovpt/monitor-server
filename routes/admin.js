@@ -31,6 +31,7 @@ const {
   create_official_tag,
   get_tag_info,
   update_tag,
+  copy_tag,
   delete_tag
 } = require('../models/tag');
 
@@ -1177,6 +1178,32 @@ router.post('/tags/update', async function (req, res, next) {
         const websites = JSON.parse(req.body.websites);
 
         update_tag(tag_id, name, observatorio, default_websites, websites)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/tags/update/copy', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter TagId').exists();
+    req.check('name', 'Invalid parameter Name').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+        const name = req.body.name;
+
+        copy_tag(tag_id, name)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }

@@ -51,7 +51,7 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
 
     cookie = JSON.parse(await decrypt(cookie));
 
-    const query = `SELECT * FROM User WHERE Email = "${cookie.Email}" LIMIT 1`;
+    const query = `SELECT * FROM User WHERE LOWER(Email) = "${_.toLower(cookie.Email)}" LIMIT 1`;
     let user = await execute_query(query);
     user = user[0];
 
@@ -86,7 +86,8 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
 
 module.exports.login_user = async (email, password, app) => {
   try {
-    let query = `SELECT * FROM User WHERE Email = "${email}" AND Type = "${app}" LIMIT 1`;
+    let query = `SELECT * FROM User WHERE LOWER(Email) = "${_.toLower(email)}" AND 
+      LOWER(Type) = "${_.toLower(app)}" LIMIT 1`;
     const users = await execute_query(query);
 
     if (_.size(users) === 0) {
@@ -142,7 +143,7 @@ module.exports.create_user = async (email, password, type, websites) => {
 
 module.exports.get_number_of_access_studies_users = async () => {
   try {
-    const query = `SELECT COUNT(*) as Users FROM User WHERE Type = "studies";`;
+    const query = `SELECT COUNT(*) as Users FROM User WHERE LOWER(Type) = "studies";`;
     const users = await execute_query(query);
     return success(users[0].Users);
   } catch(err) {
@@ -153,7 +154,7 @@ module.exports.get_number_of_access_studies_users = async () => {
 
 module.exports.get_number_of_my_monitor_users = async () => {
   try {
-    const query = `SELECT COUNT(*) as Users FROM User WHERE Type = "monitor";`;
+    const query = `SELECT COUNT(*) as Users FROM User WHERE LOWER(Type) = "monitor";`;
     const users = await execute_query(query);
     return success(users[0].Users);
   } catch(err) {
@@ -164,7 +165,7 @@ module.exports.get_number_of_my_monitor_users = async () => {
 
 module.exports.user_exists = async (email) => {
   try {
-    const query = `SELECT UserId FROM User WHERE Email = "${email}" LIMIT 1`;
+    const query = `SELECT UserId FROM User WHERE LOWER(Email) = "${_.toLower(email)}" LIMIT 1`;
     const users = await execute_query(query);
     return success(_.size(users) === 1);
   } catch(err) {
@@ -181,7 +182,7 @@ module.exports.get_all_users = async () => {
         COUNT(distinct w.WebsiteId) as Websites
       FROM User as u
       LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
-      WHERE u.Type != "nimda"
+      WHERE LOWER(u.Type) != "nimda"
       GROUP BY u.UserId`;
     const users = await execute_query(query);
     return success(users);
@@ -192,7 +193,7 @@ module.exports.get_all_users = async () => {
 
 module.exports.get_all_monitor_users = async () => {
   try {
-    const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE Type = "monitor"`;
+    const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE LOWER(Type) = "monitor"`;
     const users = await execute_query(query);
     return success(users);
   } catch(err) {

@@ -42,7 +42,16 @@ module.exports.domain_exists = async (url) => {
     url = _.replace(url, 'http://', '');
     url = _.replace(url, 'www.', '');
 
-    const query = `SELECT * FROM Domain WHERE Url = "${url}" LIMIT 1`;
+    const query = `SELECT d.* 
+      FROM 
+        Domain as d,
+        Website as w,
+        User as u
+      WHERE 
+        LOWER(d.Url) = "${_.toLower(url)}" AND
+        w.WebsiteId = d.WebsiteId AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+      LIMIT 1`;
 
     const domain = await execute_query(query);
     return success(_.size(domain) === 1);
@@ -97,7 +106,7 @@ module.exports.get_all_official_domains = async () => {
           w.UserId IS NULL OR
           (
             u.UserId = w.UserId AND
-            u.Type != 'studies'
+            LOWER(u.Type) != 'studies'
           )
         )
       GROUP BY d.DomainId`;
@@ -126,12 +135,12 @@ module.exports.get_all_website_domains = async (user, website) => {
           User as u
         WHERE
           w.WebsiteId = d.WebsiteId AND
-          w.Name = "${website}" AND
+          LOWER(w.Name) = "${_.toLower(website)}" AND
           (
             w.UserId IS NULL OR
             (
               u.UserId = w.UserId AND
-              u.Type != 'studies'
+              LOWER(u.Type) != 'studies'
             )
           )
         GROUP BY d.DomainId`;
@@ -143,9 +152,9 @@ module.exports.get_all_website_domains = async (user, website) => {
           User as u,
           Website as w
         WHERE
-          u.Email = "${user}" AND
+          LOWER(u.Email) = "${_.toLower(user)}" AND
           w.UserId = u.UserId AND
-          w.Name = "${website}" AND
+          LOWER(w.Name) = "${_.toLower(website)}" AND
           d.WebsiteId = w.WebsiteId
         GROUP BY d.DomainId`;
     }

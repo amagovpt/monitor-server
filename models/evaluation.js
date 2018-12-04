@@ -15,7 +15,7 @@ const { execute_evaluation } = require('../lib/_middleware');
 module.exports.evaluate_url = async (url, evaluator) => {
   try {
     const evaluation = await execute_evaluation(url, evaluator);
-    return success(JSON.parse(evaluation));
+    return success(evaluation);
   } catch(err) {
     console.log(err);
     return error(err);
@@ -62,16 +62,16 @@ module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
         Page as p,
         Evaluation as e
       WHERE
-        t.Name = "${tag}" AND
+        LOWER(t.Name) = "${_.toLower(tag)}" AND
         t.UserId = "${user_id}" AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        w.Name = "${website}" AND
+        LOWER(w.Name) = "${_.toLower(website)}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        p.Uri = "${url}" AND 
+        LOWER(p.Uri) = "${_.toLower(url)}" AND 
         e.PageId = p.PageId
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
@@ -108,12 +108,12 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
         Page as p,
         Evaluation as e
       WHERE
-        w.Name = "${website}" AND
+        LOWER(w.Name) = "${_.toLower(website)}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        p.Uri = "${url}" AND 
+        LOWER(p.Uri) = "${_.toLower(url)}" AND 
         e.PageId = p.PageId
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
@@ -147,7 +147,7 @@ module.exports.get_all_page_evaluations = async (page) => {
         Page as p,
         Evaluation as e
       WHERE
-        p.Uri = "${page}" AND
+        LOWER(p.Uri) = "${_.toLower(page)}" AND
         e.PageId = p.PageId
       ORDER BY e.Evaluation_Date DESC`;
     const evaluations = await execute_query(query);
@@ -220,13 +220,13 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
         Website as w,
         Domain as d
       WHERE
-        d.Url = "${domain}" AND
+        LOWER(d.Url) = "${_.toLower(domain)}" AND
         d.WebsiteId = w.WebsiteId AND
         (
           w.UserId IS NULL OR
           (
             u.UserId = w.UserId AND
-            u.Type = 'monitor'
+            LOWER(u.Type) = 'monitor'
           )
         )
       LIMIT 1`;
@@ -235,7 +235,7 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
     if (_.size(domains) > 0) {
       let existing_domain = domains[0];
 
-      query = `SELECT PageId FROM Page WHERE Uri = "${url}" LIMIT 1`;
+      query = `SELECT PageId FROM Page WHERE LOWER(Uri) = "${_.toLower(url)}" LIMIT 1`;
       let pages = await execute_query(query);
 
       let page_id = -1;
@@ -291,7 +291,7 @@ module.exports.save_page_evaluation = async (page_id, evaluation) => {
     const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
     const elems = Buffer.from(JSON.stringify(data.elems)).toString('base64');
 
-    query = `
+    const query = `
       INSERT INTO 
         Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
       VALUES 

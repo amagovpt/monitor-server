@@ -33,7 +33,7 @@ module.exports.create_entity = async (shortName, longName, websites) => {
 
 module.exports.entity_short_name_exists = async (name) => {
   try {
-    const query = `SELECT * FROM Entity WHERE Short_Name = "${name}" LIMIT 1`;
+    const query = `SELECT * FROM Entity WHERE LOWER(Short_Name) = "${_.toLower(name)}" LIMIT 1`;
     const entity = await execute_query(query);
     return success(_.size(entity) === 1);
   } catch(err) {
@@ -43,7 +43,7 @@ module.exports.entity_short_name_exists = async (name) => {
 
 module.exports.entity_long_name_exists = async (name) => {
   try {
-    const query = `SELECT * FROM Entity WHERE Long_Name = "${name}" LIMIT 1`;
+    const query = `SELECT * FROM Entity WHERE LOWER(Long_Name) = "${_.toLower(name)}" LIMIT 1`;
     const entity = await execute_query(query);
     return success(_.size(entity) === 1);
   } catch(err) {
@@ -54,7 +54,9 @@ module.exports.entity_long_name_exists = async (name) => {
 module.exports.get_all_entities = async () => {
   try {
     const query = `SELECT e.*, COUNT(distinct w.WebsiteId) as Websites 
-      FROM Entity as e LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
+      FROM 
+        Entity as e 
+        LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
       GROUP BY e.EntityId`;  
     const entities = await execute_query(query);
     return success(entities);
@@ -68,9 +70,10 @@ module.exports.get_all_entities_info = async () => {
   try {
     const query = `
       SELECT e.*, COUNT(distinct w.WebsiteId) as Websites, COUNT(distinct te.TagId) as Tags 
-      FROM Entity as e
-      LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
-      LEFT OUTER JOIN TagEntity as te ON te.EntityId = e.EntityId
+      FROM 
+        Entity as e
+        LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
+        LEFT OUTER JOIN TagEntity as te ON te.EntityId = e.EntityId
       GROUP BY e.EntityId`;
     
     const entities = await execute_query(query);

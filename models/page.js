@@ -11,7 +11,7 @@ const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
 
-const { evaluate_url_and_save, evaluate_url, save_page_evaluation } = require('./evaluation');
+const { evaluate_url, save_page_evaluation } = require('./evaluation');
 
 module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
   try {
@@ -25,7 +25,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
       u = _.replace(u, 'http://', '');
       u = _.replace(u, 'www.', '');
 
-      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${u}" LIMIT 1`;
+      let query = `SELECT PageId, Show_In FROM Page WHERE LOWER(Uri) = "${_.toLower(u)}" LIMIT 1`;
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
@@ -102,7 +102,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
 
 module.exports.get_page_id = async (url) => {
   try {
-    const query = `SELECT PageId FROM Page WHERE Uri = "${url}"`;
+    const query = `SELECT PageId FROM Page WHERE LOWER(Uri) = "${_.toLower(url)}"`;
     
     const page = await execute_query(query);
     return success(page[0].PageId);
@@ -169,10 +169,10 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           DomainPage as dp
         WHERE
           (
-            u.Type = "monitor" AND
+            LOWER(u.Type) = "monitor" AND
             w.UserId = u.UserId AND
             d.WebsiteId = w.WebsiteId AND
-            d.Url = "${domain}" AND
+            LOWER(d.Url) = "${_.toLower(domain)}" AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId
           )
@@ -180,7 +180,7 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           (
             w.UserId IS NULL AND
             d.WebsiteId = w.WebsiteId AND
-            d.Url = "${domain}" AND
+            LOWER(d.Url) = "${_.toLower(domain)}" AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId
           )
@@ -202,10 +202,10 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           Domain as d,
           DomainPage as dp
         WHERE
-          u.Email = "${user}" AND
+          LOWER(u.Email) = "${_.toLower(user)}" AND
           w.UserId = u.UserId AND
           d.WebsiteId = w.WebsiteId AND
-          d.Url = "${domain}" AND
+          LOWER(d.Url) = "${_.toLower(domain)}" AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId
         GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
@@ -311,13 +311,13 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         DomainPage as dp,
         Evaluation as e
       WHERE
-        w.Name = "${website}" AND
+        LOWER(w.Name) = "${_.toLower(website)}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        (p.Show_In = "user" OR p.Show_In = "both") AND
+        (LOWER(p.Show_In) = "user" OR LOWER(p.Show_In) = "both") AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
 
@@ -344,7 +344,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
             Domain as d,
             DomainPage as dp
           WHERE 
-            w.Name = "${website}" AND
+            LOWER(w.Name) = "${_.toLower(website)}" AND
             w.UserId = "${user_id}" AND
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
@@ -360,7 +360,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               Website as w,
               Domain as d
             WHERE 
-              w.Name = "${website}" AND
+              LOWER(w.Name) = "${_.toLower(website)}" AND
               w.UserId = "${user_id}" AND
               d.WebsiteId = w.WebsiteId AND
               d.Url = "${domain}" AND
@@ -398,10 +398,10 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               Website as w,
               Domain as d
             WHERE 
-              w.Name = "${website}" AND
+              LOWER(w.Name) = "${_.toLower(website)}" AND
               w.UserId = "${user_id}" AND
               d.WebsiteId = w.WebsiteId AND
-              d.Url = "${domain}" AND
+              LOWER(d.Url) = "${_.toLower(domain)}" AND
               d.Active = 1`;
           await execute_query(query);
         } else {
@@ -452,7 +452,7 @@ module.exports.remove_my_monitor_user_website_pages = async (user_id, website, p
 
 module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, website) => {
   try {
-    let query = `SELECT * FROM Website WHERE UserId = "${user_id}" AND Name = "${website}" LIMIT 1`;
+    let query = `SELECT * FROM Website WHERE UserId = "${user_id}" AND LOWER(Name) = "${_.toLower(website)}" LIMIT 1`;
     const websiteExists = await execute_query(query);
 
     if (_.size(websiteExists) === 0) {
@@ -475,11 +475,11 @@ module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, 
         DomainPage as dp,
         Evaluation as e
       WHERE
-        t.Name = "${tag}" AND
+        LOWER(t.Name) = "${_.toLower(tag)}" AND
         t.UserId = "${user_id}" AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        w.Name = "${website}" AND
+        LOWER(w.Name) = "${_.toLower(website)}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
@@ -514,11 +514,11 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
         DomainPage as dp,
         Evaluation as e
       WHERE
-        t.Name = "${tag}" AND
+        LOWER(t.Name) = "${_.toLower(tag)}" AND
         t.UserId = "${user_id}" AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        w.Name = "${website}" AND
+        LOWER(w.Name) = "${_.toLower(website)}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
@@ -552,11 +552,11 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
             Domain as d,
             DomainPage as dp
           WHERE 
-            t.Name = "${tag}" AND
+            LOWER(t.Name) = "${_.toLower(tag)}" AND
             t.UserId = "${user_id}" AND 
             tw.TagId = t.TagId AND
             w.WebsiteId = tw.WebsiteId AND
-            w.Name = "${website}" AND
+            LOWER(w.Name) = "${_.toLower(website)}" AND
             w.UserId = "${user_id}" AND
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
@@ -574,11 +574,11 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
               Website as w,
               Domain as d
             WHERE 
-              t.Name = "${tag}" AND
+              LOWER(t.Name) = "${_.toLower(tag)}" AND
               t.UserId = "${user_id}" AND 
               tw.TagId = t.TagId AND
               w.WebsiteId = tw.WebsiteId AND
-              w.Name = "${website}" AND
+              LOWER(w.Name) = "${_.toLower(website)}" AND
               w.UserId = "${user_id}" AND
               d.WebsiteId = w.WebsiteId`;
           await execute_query(query);
@@ -592,7 +592,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
           errors[pages[i]] = -1;
         }
 
-        if (evaluation !== null && evaluation.rsult !== null) {
+        if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
           let newPage = await execute_query(query);
@@ -609,11 +609,11 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
               Website as w,
               Domain as d
             WHERE 
-              t.Name = "${tag}" AND
+              LOWER(t.Name) = "${_.toLower(tag)}" AND
               t.UserId = "${user_id}" AND 
               tw.TagId = t.TagId AND
               w.WebsiteId = tw.WebsiteId AND
-              w.Name = "${website}" AND
+              LOWER(w.Name) = "${_.toLower(website)}" AND
               w.UserId = "${user_id}" AND
               d.WebsiteId = w.WebsiteId`;
           await execute_query(query);
@@ -624,13 +624,13 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
                       Website as w,
                       Domain as d
                     WHERE
-                      d.Url = "${domain}" AND
+                      LOWER(d.Url) = "${_.toLower(domain)}" AND
                       d.WebsiteId = w.WebsiteId AND
                       (
                         w.UserId IS NULL OR
                         (
                           u.UserId = w.UserId AND
-                          u.Type = 'monitor'
+                          LOWER(u.Type) = 'monitor'
                         )
                       )
                     LIMIT 1`;
@@ -671,7 +671,7 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
         Domain as d,
         DomainPage as dp
       WHERE 
-        t.Name = "${tag}" AND
+        LOWER(t.Name) = "${_.toLower(tag)}" AND
         t.UserId = "${user_id}" AND
         tw.TagId = t.TagId AND
         d.WebsiteId = tw.WebsiteId AND
