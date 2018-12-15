@@ -10,7 +10,7 @@
     $url = $argv[1];
     
     $webpage = get_webpage($url);
-    
+    //echo $webpage;
     if ($webpage) {
       $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
       if ($data) {

@@ -969,8 +969,8 @@ router.post('/users/create', async function (req, res, next) {
         const email = req.body.email;
         const password = req.body.password;
         const type = req.body.app;
-        const websites = req.body.websites;
-
+        const websites = JSON.parse(req.body.websites);
+        
         create_user(email, password, type, websites)
           .then(success => res.send(success))
           .catch(err => res.send(err));

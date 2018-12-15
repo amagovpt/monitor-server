@@ -25,7 +25,7 @@ module.exports.evaluate_url = async (url, evaluator) => {
 module.exports.evaluate_url_and_save = async (page_id, url) => {
   try {
     let evaluation = await execute_evaluation(url, 'examinator');
-    evaluation = JSON.parse(evaluation);
+    //evaluation = JSON.parse(evaluation);
 
     const webpage = Buffer.from(evaluation.pagecode).toString('base64');
     const data = evaluation.data;

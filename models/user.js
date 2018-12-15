@@ -20,7 +20,7 @@ const {
 } = require('../lib/_error');
 
 /**
- * Authtentication functions
+ * Authentication functions
  */
 
 const create_user_cookie = async (user) => {
@@ -127,6 +127,14 @@ module.exports.create_user = async (email, password, type, websites) => {
 
     for (let w of websites) {
       query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${w}"`;
+      await execute_query(query);
+
+      query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "both" 
+        WHERE
+          d.WebsiteId = "${w}" AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          LOWER(p.Show_In) = "observatorio"`;
       await execute_query(query);
     }
 
@@ -236,8 +244,7 @@ module.exports.get_user_info = async (user_id) => {
 module.exports.update_user = async (user_id, password, app, default_websites, websites) => {
   try {
     let query = '';
-
-    if (password !== '') {
+    if (password !== 'null' && password !== '') {
       query = `UPDATE User SET Password = "${generate_password_hash(password)}" WHERE UserId = "${user_id}"`;
       await execute_query(query);
     }
@@ -245,6 +252,34 @@ module.exports.update_user = async (user_id, password, app, default_websites, we
     if (app === 'monitor') {
       for (let website_id of default_websites) {
         if (!_.includes(websites, website_id)) {
+          query = `
+            UPDATE
+              Domain as d, 
+              DomainPage as dp, 
+              Page as p 
+            SET 
+              p.Show_In = "observatorio" 
+            WHERE
+              d.WebsiteId = "${website_id}" AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              LOWER(p.Show_In) = "both"`;
+          await execute_query(query);
+
+          query = `
+            UPDATE 
+              Domain as d, 
+              DomainPage as dp, 
+              Page as p 
+            SET 
+              p.Show_In = "none" 
+            WHERE
+              d.WebsiteId = "${website_id}" AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              LOWER(p.Show_In) = "user"`;
+          await execute_query(query);
+
           query = `UPDATE Website SET UserId = NULL WHERE WebsiteId = "${website_id}"`;
           await execute_query(query);
         }
@@ -253,6 +288,14 @@ module.exports.update_user = async (user_id, password, app, default_websites, we
       for (let website_id of websites) {
         if (!_.includes(default_websites, website_id)) {
           query = `UPDATE Website SET UserId = "${user_id}" WHERE WebsiteId = "${website_id}"`;
+          await execute_query(query);
+
+          query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "both" 
+            WHERE
+              d.WebsiteId = "${website_id}" AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              LOWER(p.Show_In) = "observatorio"`;
           await execute_query(query);
         }
       }
@@ -296,6 +339,38 @@ module.exports.delete_user = async (user_id, app) => {
     let query = '';
 
     if (app === 'monitor') {
+      query = `
+        UPDATE 
+          Website as w,
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p 
+        SET 
+          p.Show_In = "observatorio" 
+        WHERE
+          w.UserId = "${user_id}" AND
+          d.WebsiteId = w.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          LOWER(p.Show_In) = "both"`;
+      await execute_query(query);
+
+      query = `
+        UPDATE 
+          Website as w,
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p 
+        SET 
+          p.Show_In = "none" 
+        WHERE
+          w.UserId = "${user_id}" AND
+          d.WebsiteId = w.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          LOWER(p.Show_In) = "user"`;
+      await execute_query(query);
+
       query = `UPDATE Website SET UserId = NULL WHERE UserId = "${user_id}"`;
       await execute_query(query);
     } else {

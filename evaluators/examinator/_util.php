@@ -19,6 +19,7 @@
         $curl->getPage();
         
         if ($curl->error != "") {
+          //echo $curl->error;
           return null;
         } else {
           if ((count($curl->info) == 0) || ($curl->pagecode == "")) {

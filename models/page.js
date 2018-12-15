@@ -153,7 +153,10 @@ module.exports.get_all_domain_pages = async (user, domain) => {
     let query = '';
     if (user === 'admin') {
       query = `SELECT 
-          p.*, 
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
           e.Score, 
           e.Evaluation_Date 
         FROM 
@@ -184,10 +187,13 @@ module.exports.get_all_domain_pages = async (user, domain) => {
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId
           )
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Evaluation_Date`;
     } else {
       query = `SELECT 
-          p.*, 
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
           e.Score, 
           e.Evaluation_Date 
         FROM 
@@ -208,7 +214,7 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           LOWER(d.Url) = "${_.toLower(domain)}" AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Evaluation_Date`;
     }
     
     const pages = await execute_query(query);

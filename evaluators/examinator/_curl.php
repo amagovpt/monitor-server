@@ -151,14 +151,14 @@ class myCurl {
 		}
 
 		curl_setopt($this->ch,CURLOPT_CONNECTTIMEOUT,30);
-		//curl_setopt($this->ch,CURLOPT_COOKIEJAR,CURLCOOKIE);
-		//curl_setopt($this->ch,CURLOPT_COOKIEFILE,CURLCOOKIE);
+		curl_setopt($this->ch,CURLOPT_COOKIEJAR, "cookie.txt");
+		curl_setopt($this->ch,CURLOPT_COOKIEFILE, "cookie.txt");
 		curl_setopt($this->ch,CURLOPT_ENCODING,'gzip,deflate');
 		curl_setopt($this->ch,CURLOPT_FAILONERROR,true);
-		@curl_setopt($this->ch,CURLOPT_FOLLOWLOCATION,true);
+		@curl_setopt($this->ch,CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($this->ch,CURLOPT_HEADER,false);
 		curl_setopt($this->ch,CURLOPT_HTTPHEADER,$header);
-		curl_setopt($this->ch,CURLOPT_MAXREDIRS,3);
+		//curl_setopt($this->ch,CURLOPT_MAXREDIRS, 3);
 		curl_setopt($this->ch,CURLOPT_NOBODY,false);
 		curl_setopt($this->ch,CURLOPT_REFERER,'http://www.google.com');
 		curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,true);

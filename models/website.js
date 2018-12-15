@@ -141,8 +141,12 @@ module.exports.get_all_websites = async () => {
 
 module.exports.get_all_official_websites = async () => {
   try {
-    const query = `SELECT distinct w.* FROM Website as w, User as u 
-      WHERE u.UserId = w.UserId AND LOWER(u.Type) != 'studies' OR w.UserId IS NULL`;
+    const query = `SELECT distinct w.* 
+      FROM 
+        Website as w, 
+        User as u 
+      WHERE 
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`;
     const websites = await execute_query(query);
     return success(websites);
   } catch (err) {
@@ -153,8 +157,13 @@ module.exports.get_all_official_websites = async () => {
 
 module.exports.get_all_websites_without_entity = async () => {
   try {
-    const query = `SELECT w.* FROM Website as w, User as u 
-      WHERE w.EntityId IS NULL AND u.UserId = w.UserId AND LOWER(u.Type) != 'studies' OR w.UserId IS NULL`;
+    const query = `SELECT distinct w.* 
+      FROM 
+        Website as w, 
+        User as u 
+      WHERE 
+        w.EntityId IS NULL AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`;
     const websites = await execute_query(query);
     return success(websites);
   } catch (err) {
