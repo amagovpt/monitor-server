@@ -126,7 +126,7 @@ module.exports.website_name_exists = async (name) => {
 
 module.exports.get_all_websites = async () => {
   try {
-    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User, u.Type as Type
+    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User, u.Type as Type
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
@@ -186,7 +186,7 @@ module.exports.get_all_websites_without_user = async () => {
 
 module.exports.get_all_user_websites = async (user) => {
   try {
-    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
@@ -208,7 +208,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
   try {
     let query = '';
     if (user === 'admin') {
-      query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+      query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
@@ -248,7 +248,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
 
 module.exports.get_all_entity_websites = async (entity) => {
   try {
-    const query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
@@ -272,7 +272,7 @@ module.exports.get_all_websites_info = async () => {
         w.WebsiteId,
         w.Name, 
         w.Creation_Date,
-        e.Long_Name as Entity,
+        e.Short_Name as Entity,
         u.Email as User,
         d.Url as Current_Domain,
         COUNT(distinct p.PageId) as Pages,
@@ -305,7 +305,7 @@ module.exports.get_website_current_domain = async (websiteId) => {
 
 module.exports.get_website_info = async (website_id) => {
   try {
-    let query = `SELECT w.*, u.Email as User, e.Long_Name as Entity, d.Url as Domain
+    let query = `SELECT w.*, u.Email as User, e.Short_Name as Entity, d.Url as Domain
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId

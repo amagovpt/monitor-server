@@ -147,11 +147,11 @@ class eXaminator {
 				}
 			}
 		}
-		if (defined('VALIDATOR')) {
+		//if (defined('VALIDATOR')) {
 			if ((substr($info['url'], 0, 7) != 'file://') && ($info['url'] != 'input')) {
 				$this->HtmlValidationUmic();
 			}
-		}
+		//}
 		$this->Complete();
 		if ($this->stylesheet != '') {
 			$this->Check_CSS($this->stylesheet);
@@ -1746,13 +1746,19 @@ class eXaminator {
 		}
 	} // check_attr
 	
-	function HtmlValidationUmic() {		
-		file_get_contents(VALIDATOR.'check?uri='.urlencode($this->tot['info']['url']).'&output=json');
+	function HtmlValidationUmic() {
+		/*$result = file_get_contents('http://validador-html.fccn.pt/check?uri='.urlencode($this->tot['info']['url']).'&output=json');
 		$headers = $http_response_header;
+    echo var_dump($result);
+    $split = explode('{', $result);
+
+    $headers = preg_split('/\r\n|\r|\n/', trim($split[0]));
+
 		if (!is_array($headers)) {
 			$this->tot['elems']['w3cValidatorFail'] = 'Error';
 			return;
 		}
+    
 		foreach($headers as $key => $head){
 			$a = "";
 			$b = "";
@@ -1772,7 +1778,51 @@ class eXaminator {
 					}
 				}
 			}
-		} // foreach
+		} // foreach*/
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'http://validador-html.fccn.pt/check?uri='.urlencode($this->tot['info']['url']).'&output=json'); 
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+    $output = curl_exec($ch);   
+    //echo var_dump($output);
+    // convert response
+    //$output = json_decode($output);
+
+    // handle error; error output
+    if(curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 400) {
+      $split = explode('{', $output);
+
+      $headers = preg_split('/\r\n|\r|\n/', trim($split[0]));
+
+      if (!is_array($headers)) {
+        $this->tot['elems']['w3cValidatorFail'] = 'Error';
+        return;
+      }
+      
+      foreach($headers as $key => $head){
+        $a = "";
+        $b = "";
+        if (stripos($head, ":") !== FALSE) {
+          list($a, $b) = explode(":", $head, 2);
+          if (strtolower(trim($a)) == 'x-w3c-validator-status') {
+            $status = strtolower(trim($b));
+            if ($status == 'valid') {
+              $this->tot['elems']['w3cValidator'] = 'true';
+            } else if ($status == 'invalid') {
+              $this->tot['elems']['w3cValidator'] = 'false';
+            }
+          }
+          if (strtolower(trim($a)) == 'x-w3c-validator-errors') {
+            if (trim($b) != 0) {
+              $this->tot['elems']['w3cValidatorErrors'] = trim($b);
+            }
+          }
+        }
+      }
+    }
+
+    curl_close($ch);
+    
 		return;
 	} // HtmlValidationUmic
 

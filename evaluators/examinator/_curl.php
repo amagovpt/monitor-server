@@ -131,6 +131,7 @@ class myCurl {
 		}
 		$new['date'] = gmdate('Y-m-d H:i:s');
 		$this->info = $new;
+    
 		return;
 	} // getInfo
 

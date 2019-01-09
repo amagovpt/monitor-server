@@ -954,7 +954,7 @@ router.get('/websites/currentDomain/:websiteId', async function (req, res, next)
 
 router.post('/users/create', async function (req, res, next) {
   try {
-    req.check('email', 'Invalid Email').exists();
+    req.check('email', 'Invalid Email').exists().isEmail();
     req.check('password', 'Invalid Password').exists();
     req.check('confirmPassword', 'Invalid Password Confirmation').exists().equals(req.body.password);
     req.check('app', 'Invalid user Type').exists();
