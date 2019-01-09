@@ -157,7 +157,8 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           e.A,
           e.AA,
           e.AAA,
-          e.Score, 
+          e.Score,
+          e.Errors,
           e.Evaluation_Date 
         FROM 
           Page as p
@@ -187,14 +188,15 @@ module.exports.get_all_domain_pages = async (user, domain) => {
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId
           )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Evaluation_Date`;
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
     } else {
       query = `SELECT 
           p.*,
           e.A,
           e.AA,
           e.AAA,
-          e.Score, 
+          e.Score,
+          e.Errors,
           e.Evaluation_Date 
         FROM 
           Page as p
@@ -214,12 +216,13 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           LOWER(d.Url) = "${_.toLower(domain)}" AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Evaluation_Date`;
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
     }
     
     const pages = await execute_query(query);
     return success(pages);
   } catch(err) {
+    console.log(err);
     return error(err);
   }
 }

@@ -648,7 +648,7 @@ module.exports.access_studies_user_tag_website_name_exists = async (user_id, tag
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = "${user_id}" AND
-        LOWER(w.Name) = "${_toLower(name)}"
+        LOWER(w.Name) = "${_.toLower(name)}"
       LIMIT 1`;
     const websites = await execute_query(query);
 
