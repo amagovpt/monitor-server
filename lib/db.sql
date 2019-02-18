@@ -10,7 +10,7 @@ CREATE TABLE `User` (
   UNIQUE KEY `UserId_UNIQUE` (`UserId`),
   UNIQUE KEY `Email_UNIQUE` (`Email`),
   UNIQUE KEY `Unique_Hash_UNIQUE` (`Unique_Hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Tag` (
   `TagId` int(11) NOT NULL AUTO_INCREMENT,
@@ -23,7 +23,7 @@ CREATE TABLE `Tag` (
   UNIQUE KEY `UserTag` (`UserId`,`Name`),
   KEY `UserId_fk_idx` (`UserId`),
   CONSTRAINT `UserId_fk` FOREIGN KEY (`UserId`) REFERENCES `User` (`UserId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Entity` (
   `EntityId` int(11) NOT NULL AUTO_INCREMENT,
@@ -34,7 +34,7 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `EntityId_UNIQUE` (`EntityId`),
   UNIQUE KEY `Long_Name_UNIQUE` (`Long_Name`),
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Entity` (
   `EntityId` int(11) NOT NULL AUTO_INCREMENT,
@@ -45,7 +45,7 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `EntityId_UNIQUE` (`EntityId`),
   UNIQUE KEY `Long_Name_UNIQUE` (`Long_Name`),
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
@@ -57,7 +57,7 @@ CREATE TABLE `Website` (
   UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`),
   KEY `fk_Website_1_idx` (`EntityId`),
   CONSTRAINT `EntityId_fk` FOREIGN KEY (`EntityId`) REFERENCES `Entity` (`EntityId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Domain` (
   `DomainId` int(11) NOT NULL AUTO_INCREMENT,
@@ -70,15 +70,16 @@ CREATE TABLE `Domain` (
   UNIQUE KEY `DomainId_UNIQUE` (`DomainId`),
   KEY `WebsiteId_fk_idx` (`WebsiteId`),
   CONSTRAINT `WebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Page` (
   `PageId` int(11) NOT NULL AUTO_INCREMENT,
   `Uri` varchar(255) NOT NULL,
+  `Show_In` varchar(15) NOT NULL,
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Evaluation` (
   `EvaluationId` int(11) NOT NULL AUTO_INCREMENT,
@@ -97,7 +98,7 @@ CREATE TABLE `Evaluation` (
   UNIQUE KEY `EvalautionId_UNIQUE` (`EvaluationId`),
   KEY `PageId_fk_idx` (`PageId`),
   CONSTRAINT `PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `DomainPage` (
   `DomainId` int(11) NOT NULL,

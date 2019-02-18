@@ -954,9 +954,11 @@ router.get('/websites/currentDomain/:websiteId', async function (req, res, next)
 
 router.post('/users/create', async function (req, res, next) {
   try {
-    req.check('email', 'Invalid Email').exists().isEmail();
+    req.check('username', 'Invalid Username').exists();
     req.check('password', 'Invalid Password').exists();
     req.check('confirmPassword', 'Invalid Password Confirmation').exists().equals(req.body.password);
+    req.check('names', 'Inavlid Contact Names').exists();
+    req.check('emails', 'Inavlid Contact E-mails').exists();
     req.check('app', 'Invalid user Type').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -966,12 +968,14 @@ router.post('/users/create', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const email = req.body.email;
+        const username = req.body.username;
         const password = req.body.password;
+        const names = req.body.names;
+        const emails = req.body.emails;
         const type = req.body.app;
         const websites = JSON.parse(req.body.websites);
         
-        create_user(email, password, type, websites)
+        create_user(username, password, names, emails, type, websites)
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }
@@ -1128,6 +1132,8 @@ router.post('/users/update', async function (req, res, next) {
     req.check('userId', 'Invalid parameter EntityId').exists();
     req.check('password', 'Invalid parameter Password').exists();
     req.check('confirmPassword', 'Invalid parameter ConfirmPassword').exists().equals(req.body.password);
+    req.check('names', 'Invalid Contact Names').exists();
+    req.check('emails', 'Invalid Contact E-mails').exists();
     req.check('app', 'Invalid parameter App').exists();
     req.check('defaultWebsites', 'Invalid parameter DefaultWebsites').exists();
     req.check('websites', 'Invalid parameter Websites').exists();
@@ -1141,11 +1147,13 @@ router.post('/users/update', async function (req, res, next) {
       if (user_id !== -1) {
         const edit_user_id = req.body.userId;
         const password = req.body.password;
+        const names = req.body.names;
+        const emails = req.body.emails;
         const app = req.body.app;
         const default_websites = JSON.parse(req.body.defaultWebsites);
         const websites = JSON.parse(req.body.websites);
 
-        update_user(edit_user_id, password, app, default_websites, websites)
+        update_user(edit_user_id, password, names, emails, app, default_websites, websites)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }

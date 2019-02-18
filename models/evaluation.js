@@ -10,11 +10,21 @@
 const _ = require('lodash');
 const { success, error } = require('../lib/_response');
 const { execute_query } = require('../lib/_database');
-const { execute_evaluation } = require('../lib/_middleware');
+const { execute_url_evaluation, execute_html_evaluation } = require('../lib/_middleware');
 
 module.exports.evaluate_url = async (url, evaluator) => {
   try {
-    const evaluation = await execute_evaluation(url, evaluator);
+    const evaluation = await execute_url_evaluation(url, evaluator);
+    return success(evaluation);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.evaluate_html = async (html, evaluator) => {
+  try {
+    const evaluation = await execute_html_evaluation(html, evaluator);
     return success(evaluation);
   } catch(err) {
     console.log(err);
@@ -24,7 +34,7 @@ module.exports.evaluate_url = async (url, evaluator) => {
 
 module.exports.evaluate_url_and_save = async (page_id, url) => {
   try {
-    let evaluation = await execute_evaluation(url, 'examinator');
+    let evaluation = await execute_url_evaluation(url, 'examinator');
     //evaluation = JSON.parse(evaluation);
 
     const webpage = Buffer.from(evaluation.pagecode).toString('base64');

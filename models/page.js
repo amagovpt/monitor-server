@@ -210,7 +210,7 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           Domain as d,
           DomainPage as dp
         WHERE
-          LOWER(u.Email) = "${_.toLower(user)}" AND
+          LOWER(u.Username) = "${_.toLower(user)}" AND
           w.UserId = u.UserId AND
           d.WebsiteId = w.WebsiteId AND
           LOWER(d.Url) = "${_.toLower(domain)}" AND

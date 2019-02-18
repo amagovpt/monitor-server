@@ -27,6 +27,8 @@ const create_user_cookie = async (user) => {
   try {
     delete user.UserId;
     delete user.Password;
+    delete user.Names;
+    delete user.Emails;
     delete user.Register_Date;
     delete user.Last_Login;
     
@@ -51,7 +53,7 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
 
     cookie = JSON.parse(await decrypt(cookie));
 
-    const query = `SELECT * FROM User WHERE LOWER(Email) = "${_.toLower(cookie.Email)}" LIMIT 1`;
+    const query = `SELECT * FROM User WHERE LOWER(Username) = "${_.toLower(cookie.Username)}" LIMIT 1`;
     let user = await execute_query(query);
     user = user[0];
 
@@ -84,9 +86,9 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
   }
 }
 
-module.exports.login_user = async (email, password, app) => {
+module.exports.login_user = async (username, password, app) => {
   try {
-    let query = `SELECT * FROM User WHERE LOWER(Email) = "${_.toLower(email)}" AND 
+    let query = `SELECT * FROM User WHERE LOWER(Username) = "${_.toLower(username)}" AND 
       LOWER(Type) = "${_.toLower(app)}" LIMIT 1`;
     const users = await execute_query(query);
 
@@ -114,14 +116,14 @@ module.exports.login_user = async (email, password, app) => {
  * Create functions
  */
 
-module.exports.create_user = async (email, password, type, websites) => {
+module.exports.create_user = async (username, password, names, emails, type, websites) => {
   try {
     const password_hash = generate_password_hash(password);
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     const hash = generate_unique_hash();
 
-    let query = `INSERT INTO User (Email, Password, Type, Register_Date, Unique_Hash) 
-      VALUES ("${email}", "${password_hash}", "${type}", "${date}", "${hash}")`;
+    let query = `INSERT INTO User (Username, Password, Names, Emails, Type, Register_Date, Unique_Hash) 
+      VALUES ("${username}", "${password_hash}", "${names}", "${emails}", "${type}", "${date}", "${hash}")`;
     
     const data = await execute_query(query);
 
@@ -171,9 +173,9 @@ module.exports.get_number_of_my_monitor_users = async () => {
   } 
 }
 
-module.exports.user_exists = async (email) => {
+module.exports.user_exists = async (username) => {
   try {
-    const query = `SELECT UserId FROM User WHERE LOWER(Email) = "${_.toLower(email)}" LIMIT 1`;
+    const query = `SELECT UserId FROM User WHERE LOWER(Username) = "${_.toLower(username)}" LIMIT 1`;
     const users = await execute_query(query);
     return success(_.size(users) === 1);
   } catch(err) {
@@ -186,7 +188,7 @@ module.exports.get_all_users = async () => {
   try {
     const query = `
       SELECT 
-        u.UserId, u.Email, u.Type, u.Register_Date, u.Last_Login, 
+        u.UserId, u.Username, u.Type, u.Register_Date, u.Last_Login, 
         COUNT(distinct w.WebsiteId) as Websites
       FROM User as u
       LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
@@ -201,7 +203,7 @@ module.exports.get_all_users = async () => {
 
 module.exports.get_all_monitor_users = async () => {
   try {
-    const query = `SELECT UserId, Email, Type, Register_Date, Last_Login FROM User WHERE LOWER(Type) = "monitor"`;
+    const query = `SELECT UserId, Username, Type, Register_Date, Last_Login FROM User WHERE LOWER(Type) = "monitor"`;
     const users = await execute_query(query);
     return success(users);
   } catch(err) {
@@ -241,9 +243,13 @@ module.exports.get_user_info = async (user_id) => {
  * Update functions
  */
 
-module.exports.update_user = async (user_id, password, app, default_websites, websites) => {
+module.exports.update_user = async (user_id, password, names, emails, app, default_websites, websites) => {
   try {
     let query = '';
+
+    query = `UPDATE User SET Names = "${names}", Emails = "${emails}" WHERE UserId = "${user_id}"`;
+    await execute_query(query);
+
     if (password !== 'null' && password !== '') {
       query = `UPDATE User SET Password = "${generate_password_hash(password)}" WHERE UserId = "${user_id}"`;
       await execute_query(query);

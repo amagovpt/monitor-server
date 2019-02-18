@@ -151,7 +151,7 @@ module.exports.get_all_tags = async () => {
   try {
     const query = `SELECT 
         t.*,
-        u.Email as User,
+        u.Username as User,
         COUNT(distinct tw.WebsiteId) as Websites 
       FROM 
         Tag as t
@@ -267,7 +267,7 @@ module.exports.user_remove_tags = async (user_id, tags_id) => {
 
 module.exports.get_tag_info = async (tag_id) => {
   try {
-    let query = `SELECT t.*, u.Email FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = "${tag_id}" LIMIT 1`;
+    let query = `SELECT t.*, u.Username FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = "${tag_id}" LIMIT 1`;
 
     let tag = await execute_query(query);
 

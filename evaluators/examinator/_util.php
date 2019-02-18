@@ -47,7 +47,7 @@
   {
     try {
       $rawUrl = str_replace("http://", "", $url);
-
+      
       $examinator = new eXaminator();
       $examinator->parserPage($info, $pagecode, $start);
       $tot = $examinator->tot;
@@ -57,6 +57,36 @@
         "title" => $tot["info"]["title"],
         "score" => $tot["info"]["score"],
         "rawUrl" => $rawUrl,
+        "tot" => $tot,
+        "nodes" => $nodes,
+        "conform" => $tot["info"]["conform"],
+        "elems" => $tot["elems"],
+        "date" => date("Y-m-d H:i:s")
+      );
+
+      return $data;
+    } catch (Exception $e) {
+      echo $e->getMessage();
+      return null;
+    } 
+  }
+
+  function evaluate_html($html)
+  {
+    try {
+      $info = array();
+      $info['url'] = "";
+      $start = microtime(true);
+
+      $examinator = new eXaminator();
+      $examinator->parserPage($info, $html, $start);
+      $tot = $examinator->tot;
+      $nodes = $examinator->nodes;
+
+      $data = array(
+        "title" => $tot["info"]["title"],
+        "score" => $tot["info"]["score"],
+        "rawUrl" => "",
         "tot" => $tot,
         "nodes" => $nodes,
         "conform" => $tot["info"]["conform"],

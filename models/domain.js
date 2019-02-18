@@ -24,9 +24,9 @@ module.exports.create_domain = async (website_id, url) => {
     url = _.replace(url, 'http://', '');
     url = _.replace(url, 'www.', '');
 
-    query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
+    query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active)
       VALUES ("${website_id}", "${url}", "${date}", "1")`;
-    
+
     const domain = await execute_query(query);
 
     return success(domain.insertId);
@@ -42,12 +42,12 @@ module.exports.domain_exists = async (url) => {
     url = _.replace(url, 'http://', '');
     url = _.replace(url, 'www.', '');
 
-    const query = `SELECT d.* 
-      FROM 
+    const query = `SELECT d.*
+      FROM
         Domain as d,
         Website as w,
         User as u
-      WHERE 
+      WHERE
         LOWER(d.Url) = "${_.toLower(url)}" AND
         w.WebsiteId = d.WebsiteId AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
@@ -58,7 +58,7 @@ module.exports.domain_exists = async (url) => {
   } catch(err) {
     console.log(err);
     return error(err);
-  } 
+  }
 }
 
 module.exports.get_all_active_domains = async () => {
@@ -74,8 +74,8 @@ module.exports.get_all_active_domains = async () => {
 
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Email as User
-      FROM 
+    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
+      FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
@@ -91,10 +91,10 @@ module.exports.get_all_domains = async () => {
 
 module.exports.get_all_official_domains = async () => {
   try {
-    const query = `SELECT 
-        d.*, 
-        COUNT(distinct dp.PageId) as Pages 
-      FROM 
+    const query = `SELECT
+        d.*,
+        COUNT(distinct dp.PageId) as Pages
+      FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
         Website as w,
@@ -122,11 +122,11 @@ module.exports.get_all_website_domains = async (user, website) => {
   try {
     let query = '';
     if (user === 'admin') {
-      query = `SELECT 
-          d.*, 
+      query = `SELECT
+          d.*,
           COUNT(distinct dp.PageId) as Pages,
-          u2.Email as User
-        FROM 
+          u2.Username as User
+        FROM
           Domain as d
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
@@ -145,20 +145,20 @@ module.exports.get_all_website_domains = async (user, website) => {
           )
         GROUP BY d.DomainId`;
     } else {
-      query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Email as User 
-        FROM 
+      query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
+        FROM
           Domain as d
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
           User as u,
           Website as w
         WHERE
-          LOWER(u.Email) = "${_.toLower(user)}" AND
+          LOWER(u.Username) = "${_.toLower(user)}" AND
           w.UserId = u.UserId AND
           LOWER(w.Name) = "${_.toLower(website)}" AND
           d.WebsiteId = w.WebsiteId
         GROUP BY d.DomainId`;
     }
-    
+
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
@@ -170,7 +170,7 @@ module.exports.get_all_website_domains = async (user, website) => {
 module.exports.get_all_domains_info = async () => {
   try {
     const query = `
-      SELECT 
+      SELECT
         d.DomainId,
         d.Url,
         d.Active,
@@ -179,7 +179,7 @@ module.exports.get_all_domains_info = async () => {
         w.Name as Website,
         COUNT(distinct p.PageId) as Pages,
         COUNT(distinct td.TagId) as Tags
-      FROM 
+      FROM
         Domain as d
       LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
       LEFT OUTER JOIN Page as p ON p.DomainId = d.DomainId
@@ -194,9 +194,27 @@ module.exports.get_all_domains_info = async () => {
   }
 }
 
-module.exports.delete_domain = async (domain_id) => {
+module.exports.delete_domain = async domain_id => {
   try {
-    const query = `DELETE FROM Domain WHERE DomainId = "${domain_id}"`;
+    let query = `DELETE p FROM Page as p WHERE p.PageId IN (
+      SELECT
+        dp.PageId
+      FROM
+        DomainPage as dp
+      WHERE
+        dp.DomainId = "${domain_id}" AND
+        (
+          SELECT
+            COUNT(dp2.PageId) as PageCount
+          FROM
+            DomainPage as dp2
+          WHERE
+            dp2.PageId = dp.PageId
+          HAVING PageCount = 1
+        ))`;
+    await execute_query(query);
+
+    query = `DELETE FROM Domain WHERE DomainId = "${domain_id}"`;
     await execute_query(query);
 
     return success(domain_id);

@@ -126,7 +126,7 @@ module.exports.website_name_exists = async (name) => {
 
 module.exports.get_all_websites = async () => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User, u.Type as Type
+    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, u.Type as Type
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
@@ -186,13 +186,13 @@ module.exports.get_all_websites_without_user = async () => {
 
 module.exports.get_all_user_websites = async (user) => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
+    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
         User as u
       WHERE
-        LOWER(u.Email) = "${_.toLower(user)}" AND
+        LOWER(u.Username) = "${_.toLower(user)}" AND
         w.UserId = u.UserId
       GROUP BY w.WebsiteId`;
     const websites = await execute_query(query);
@@ -208,7 +208,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
   try {
     let query = '';
     if (user === 'admin') {
-      query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
+      query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
@@ -222,7 +222,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
           w.WebsiteId = tw.WebsiteId
         GROUP BY w.WebsiteId`;
     } else {
-      query = `SELECT w.*, e.Long_Name as Entity, u.Email as User 
+      query = `SELECT w.*, e.Long_Name as Entity, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
@@ -231,7 +231,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
           TagWebsite as tw
         WHERE
           LOWER(t.Name) = "${_.toLower(tag)}" AND
-          u.Email = "${user}" AND
+          u.Username = "${user}" AND
           t.UserId = u.UserId AND
           tw.TagId = t.TagId AND
           w.WebsiteId = tw.WebsiteId
@@ -248,7 +248,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
 
 module.exports.get_all_entity_websites = async (entity) => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, u.Email as User 
+    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
@@ -273,7 +273,7 @@ module.exports.get_all_websites_info = async () => {
         w.Name, 
         w.Creation_Date,
         e.Short_Name as Entity,
-        u.Email as User,
+        u.Username as User,
         d.Url as Current_Domain,
         COUNT(distinct p.PageId) as Pages,
         COUNT(distinct tw.TagId) as Tags
@@ -305,7 +305,7 @@ module.exports.get_website_current_domain = async (websiteId) => {
 
 module.exports.get_website_info = async (website_id) => {
   try {
-    let query = `SELECT w.*, u.Email as User, e.Short_Name as Entity, d.Url as Domain
+    let query = `SELECT w.*, u.Username as User, e.Long_Name as Entity, d.Url as Domain
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
@@ -737,7 +737,36 @@ module.exports.update_website = async (website_id, name, entity_id, user_id, def
 
 module.exports.delete_website = async (website_id) => {
   try {
-    let query = `DELETE FROM Domain WHERE WebsiteId = "${website_id}" AND DomainId <> 0`;
+    /*let query = `SELECT dp.* 
+      FROM 
+        DomainPage as dp,
+        Domain as d 
+      WHERE
+        d.WebsiteId = "${website_id}" AND
+        dp.DomainId = d.DomainId`;
+    const results = await execute_query(query);*/
+
+    let query = `DELETE p FROM Page as p WHERE p.PageId IN (
+      SELECT 
+        dp.PageId
+      FROM
+        DomainPage as dp,
+          Domain as d
+      WHERE
+        d.WebsiteId = "1" AND
+          dp.DomainId = d.DomainId AND
+          (
+            SELECT 
+              COUNT(dp2.PageId) as PageCount 
+            FROM 
+              DomainPage as dp2 
+            WHERE 
+              dp2.PageId = dp.PageId 
+            HAVING PageCount = 1
+          ))`;
+    await execute_query(query);
+
+    query = `DELETE FROM Domain WHERE WebsiteId = "${website_id}" AND DomainId <> 0`;
     await execute_query(query);
 
     query = `DELETE FROM Website WHERE WebsiteId = "${website_id}"`;
