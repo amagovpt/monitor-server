@@ -14,6 +14,7 @@ const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatorio');
 const studiesRouter = require('./routes/studies');
 const monitorRouter = require('./routes/monitor');
+const digitalSealRouter = require('./routes/digital-seal');
 
 const app = express();
 app.use(compression());
@@ -36,6 +37,7 @@ app.use('/amp', ampRouter);
 app.use('/obs', obsRouter);
 app.use('/studies', studiesRouter);
 app.use('/monitor', monitorRouter);
+app.use('/digitalSeal', digitalSealRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

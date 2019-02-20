@@ -778,3 +778,79 @@ module.exports.delete_website = async (website_id) => {
     return error(err);
   }
 }
+
+var fs = require('fs')
+  , gm = require('gm').subClass({imageMagick: true});
+
+module.exports.get_website_seal_information = async domain => {
+  try {
+    const query = `SELECT
+      p.PageId,
+      e.A,
+      e.AA,
+      e.AAA,
+      e.Score
+    FROM
+      User as u,
+      Website as w,
+      Domain as d,
+      DomainPage as dp,
+      Page as p
+      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+        SELECT Evaluation_Date FROM Evaluation 
+        WHERE PageId = p.PageId 
+        ORDER BY Evaluation_Date DESC LIMIT 1
+      )
+    WHERE
+      d.Url = "${domain}" AND
+      w.WebsiteId = d.WebsiteId AND
+      (
+        w.UserId IS NULL OR
+        (
+          u.UserId = w.UserId AND
+          LOWER(u.Type) != 'studies'
+        )
+      ) AND
+      dp.DomainId = d.DomainId AND
+      p.PageId = dp.PageId
+    GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score`;
+    const result = await execute_query(query);
+
+    const n_pages = _.size(result);
+
+    const hasLevelError = {
+      'A': 0,
+      'AA': 0,
+      'AAA': 0
+    };
+
+    let score = 0;
+
+    for (const page of result) {
+      if (page.A > 0) {
+        hasLevelError.A++;
+      }
+      if (page.AA > 0) {
+        hasLevelError.AA++;
+      }
+      if (page.AAA > 0) {
+        hasLevelError.AAA++;
+      }
+
+      score += page.Score;
+    }
+
+    score = (score / 3).toFixed(1);
+
+    gm(200, 400, "#ddff99f3")
+      .drawText(10, 50, "from scratch")
+      .write(__dirname+"../public/images/seal.jpg", function (err) {
+        if (err) console.log(err);
+      });
+
+    return success(score);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
