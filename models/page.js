@@ -768,3 +768,8 @@ module.exports.delete_page = async (page_id) => {
     return error(err);
   }
 }
+
+module.exports.get_urls = async (page,max_depth,max_pages) => {
+
+
+};
