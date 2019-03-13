@@ -801,7 +801,7 @@ module.exports.set_crawler_settings = async (max_depth, max_pages) => {
         settings["max_depth"] = max_depth;
         settings["max_pages"] = max_pages;
 
-        fs.writeFile(_dirname + "/crawler/settings.json", settings, function (err) {
+        fs.writeFile(_dirname + "/crawler/settings.json", JSON.stringify(settings), function (err) {
             if (err) {
                 throw (err);
             }
