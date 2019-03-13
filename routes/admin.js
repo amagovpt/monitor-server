@@ -1530,7 +1530,26 @@ router.post('/page/crawler', async function (req, res, next) {
         } else {
             let result = await get_urls(req.body.url, req.body.max_depth, req.body.max_pages);
             res.send(success);
-            create_pages(req.body.id, result, []);
+            await create_pages(req.body.id, result, []);
+
+        }
+    } catch (err) {
+        console.log(err)
+        res.send(error(new ServerError(err)));
+    }
+});
+
+router.post('/page/crawlerSettings', async function (req, res, next) {
+    try {
+        req.check('max_depth', 'Invalid depth number').exists();
+        req.check('max_pages', 'Invalid max page number').exists();
+
+        const errors = req.validationErrors();
+        if (errors) {
+            res.send(error(new ParamsError(errors)));
+        } else {
+            let result = await setSettings( req.body.max_depth, req.body.max_pages);
+            res.send(success);
 
         }
     } catch (err) {

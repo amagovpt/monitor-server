@@ -769,8 +769,7 @@ module.exports.delete_page = async (page_id) => {
         return error(err);
     }
 }
-//dar retrun com finish
-//acrescenta links em cada run
+//como lidar com return de eventos
 module.exports.get_urls = async (domain, max_depth, max_pages) => {
 
     var crawler = Crawler('https://' + page);
@@ -778,16 +777,39 @@ module.exports.get_urls = async (domain, max_depth, max_pages) => {
 
     crawler.on("discoverycomplete", function (q, r) {
         console.log(r);
-        if (r.includes(domain))
+        if (r.includes(domain) && (r.length < max_pages || max_pages == 0))
             urlList.push(r);
     });
 
-    crawler.on("complete", function (q, r) {
+    crawler.on("complete", function () {
         crawler.close();
     });
     crawler.maxDepth = max_depth;
     crawler.start();
     return urlList;
+
+
+};
+
+//preciso de fazer isto?
+//como fazer standard
+module.exports.set_crawler_settings = async (max_depth, max_pages) => {
+    try {
+        const fs = require('fs');
+        let settings = {};
+
+        settings["max_depth"] = max_depth;
+        settings["max_pages"] = max_pages;
+
+        fs.writeFile(_dirname + "/crawler/settings.json", settings, function (err) {
+            if (err) {
+                throw (err);
+            }
+        });
+    } catch (err) {
+        console.log(err);
+        return error(err);
+    }
 
 
 };
