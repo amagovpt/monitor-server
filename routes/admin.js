@@ -1548,7 +1548,25 @@ router.post('/page/crawlerSettings', async function (req, res, next) {
         if (errors) {
             res.send(error(new ParamsError(errors)));
         } else {
-            let result = await setSettings( req.body.max_depth, req.body.max_pages);
+            let result = await set_crawler_settings( req.body.max_depth, req.body.max_pages);
+            res.send(success);
+
+        }
+    } catch (err) {
+        console.log(err)
+        res.send(error(new ServerError(err)));
+    }
+});
+
+router.post('/page/odf', async function (req, res, next) {
+    try {
+        req.check('odf', 'Invalid depth number').exists();
+
+        const errors = req.validationErrors();
+        if (errors) {
+            res.send(error(new ParamsError(errors)));
+        } else {
+            let result = await add_evaluation( req.body.odf);
             res.send(success);
 
         }

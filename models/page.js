@@ -769,30 +769,63 @@ module.exports.delete_page = async (page_id) => {
         return error(err);
     }
 }
-//como lidar com return de eventos
+
+function crawl(domain, max_pages, max_depth) {
+    return new Promise((resolve, reject) => {
+        let crawler = Crawler('https://' + domain);
+        let urlList = [];
+        let pageNumber = 0;
+
+        crawler.on("fetchcomplete", function (q, r) {
+            console.log(r);
+            let contentType = r["stateData"]["contentType"];
+
+            if((contentType === "text/html"||contentType === "image/svg+xml")&&  pageNumber<=max_pages){
+                urlList.push(r[url]);
+                pageNumber++;
+            }
+
+
+        });
+
+        crawler.on("complete", function () {
+            crawler.close();
+            resolve(urlList);
+        });
+        crawler.maxDepth = max_depth+1;
+        crawler.start();
+    });
+}
+
+//perguntar se domino tar la eh relvante
+//var Crawler = require("simplecrawler")
+//
+//  var crawler = Crawler('https://www.google.pt');
+//
+//         crawler.on("fetchcomplete", function (q, r,t) {
+//             console.log(r);
+//             console.log("separador")
+//             console.log(q);
+//
+//
+//         });
+//         crawler.maxDepth = 2;
+//         crawler.start();
+//
+//
+//
 module.exports.get_urls = async (domain, max_depth, max_pages) => {
 
-    var crawler = Crawler('https://' + page);
-    var urlList = [];
+    let list = await crawl(domain, max_depth, max_pages);
 
-    crawler.on("discoverycomplete", function (q, r) {
-        console.log(r);
-        if (r.includes(domain) && (r.length < max_pages || max_pages == 0))
-            urlList.push(r);
-    });
-
-    crawler.on("complete", function () {
-        crawler.close();
-    });
-    crawler.maxDepth = max_depth;
-    crawler.start();
-    return urlList;
+    return list;
 
 
 };
 
 //preciso de fazer isto?
 //como fazer standard
+//por ficheiro a mao
 module.exports.set_crawler_settings = async (max_depth, max_pages) => {
     try {
         const fs = require('fs');
@@ -801,11 +834,21 @@ module.exports.set_crawler_settings = async (max_depth, max_pages) => {
         settings["max_depth"] = max_depth;
         settings["max_pages"] = max_pages;
 
-        fs.writeFile(_dirname + "/crawler/settings.json", JSON.stringify(settings), function (err) {
+        fs.writeFile(_dirname + "/lib/crawler.json", JSON.stringify(settings), function (err) {
             if (err) {
                 throw (err);
             }
         });
+    } catch (err) {
+        console.log(err);
+        return error(err);
+    }
+};
+
+
+module.exports.add_evaluation = async (odf) => {
+    try {
+        //TODO
     } catch (err) {
         console.log(err);
         return error(err);
