@@ -798,6 +798,7 @@ function crawl(domain, max_pages, max_depth) {
 }
 
 //perguntar se domino tar la eh relvante
+//acrescentar predefinicoes com -1 max pages e -1 para ir buscar a json
 //var Crawler = require("simplecrawler")
 //
 //  var crawler = Crawler('https://www.google.pt');
