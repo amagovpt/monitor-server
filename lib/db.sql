@@ -1,15 +1,17 @@
 CREATE TABLE `User` (
   `UserId` int(11) NOT NULL AUTO_INCREMENT,
-  `Email` varchar(255) NOT NULL,
+  `Username` varchar(255) NOT NULL,
   `Password` varchar(255) NOT NULL,
   `Type` varchar(45) NOT NULL,
+  `Names` varchar(255) DEFAULT NULL,
+  `Emails` varchar(255) DEFAULT NULL,
   `Register_Date` datetime NOT NULL,
   `Last_Login` datetime DEFAULT NULL,
   `Unique_Hash` varchar(255) NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE KEY `UserId_UNIQUE` (`UserId`),
-  UNIQUE KEY `Email_UNIQUE` (`Email`),
-  UNIQUE KEY `Unique_Hash_UNIQUE` (`Unique_Hash`)
+  UNIQUE KEY `Unique_Hash_UNIQUE` (`Unique_Hash`),
+  UNIQUE KEY `Username_UNIQUE` (`Username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Tag` (
