@@ -770,27 +770,29 @@ module.exports.delete_page = async (page_id) => {
     }
 }
 
-function crawl(domain, max_pages, max_depth) {
+function crawl(domain, max_depth, max_pages) {
     return new Promise((resolve, reject) => {
         let crawler = Crawler('https://' + domain);
         let urlList = [];
         let pageNumber = 0;
 
-        crawler.on("fetchcomplete", function (q, r) {
+        crawler.on("fetchcomplete", function (r, q) {
+          console.log("mp"+max_pages);
             console.log(r);
             let contentType = r["stateData"]["contentType"];
-
-            if((contentType === "text/html"||contentType === "image/svg+xml")&&  pageNumber<=max_pages){
-                urlList.push(r[url]);
+            if((contentType.includes("text/html") || contentType.includes("image/svg+xml")) && ((pageNumber <= Number(max_pages) )|| (Number(max_pages) === 0))){
+                urlList.push(r['url']);
                 pageNumber++;
             }
-
+          console.log(urlList);
+          console.log(pageNumber);
 
         });
 
         crawler.on("complete", function () {
-            crawler.close();
+          console.log(urlList);
             resolve(urlList);
+            console.log("done");
         });
         crawler.maxDepth = max_depth+1;
         crawler.start();
