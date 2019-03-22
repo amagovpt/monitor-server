@@ -1543,6 +1543,29 @@ router.post('/page/crawler', async function (req, res, next) {
     }
 });
 
+router.post('/page/select_page', async function (req, res, next) {
+    try {
+        req.check('domain', 'Invalid domain parameter').exists();
+        req.check('max_depth', 'Invalid depth number').exists();
+        req.check('max_pages', 'Invalid max page number').exists();
+
+        const errors = req.validationErrors();
+        console.log(req.body);
+        console.log(errors);
+        if (errors) {
+            res.send(error(new ParamsError(errors)));
+        } else {
+            let result = await get_urls(req.body.domain, req.body.max_depth, req.body.max_pages);
+            console.log(result);
+            res.send(success(result));
+
+        }
+    } catch (err) {
+        console.log(err)
+        res.send(error(new ServerError(err)));
+    }
+});
+
 router.post('/page/crawlerSettings', async function (req, res, next) {
     try {
         req.check('max_depth', 'Invalid depth number').exists();
@@ -1553,7 +1576,7 @@ router.post('/page/crawlerSettings', async function (req, res, next) {
             res.send(error(new ParamsError(errors)));
         } else {
             let result = await set_crawler_settings( req.body.max_depth, req.body.max_pages);
-            res.send(success);
+            res.send(success());
 
         }
     } catch (err) {
@@ -1571,7 +1594,7 @@ router.post('/page/odf', async function (req, res, next) {
             res.send(error(new ParamsError(errors)));
         } else {
             let result = await add_evaluation( req.body.odf);
-            res.send(success);
+            res.send(success());
 
         }
     } catch (err) {
