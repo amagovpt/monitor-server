@@ -47,7 +47,8 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         } else {
           show = page[0].Show_In;
         }
-        
+
+        //AQUI
         if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
           show = 'none';
         }
@@ -304,7 +305,7 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
     if (_.size(websiteExist) === 0) {
       return error({code: -1, message: 'USER_WEBSITE_INEXISTENT', err: null});
     }
-
+  //AQUI
     query = `SELECT 
         distinct p.*,
         e.Score,
@@ -376,6 +377,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               d.Active = 1`;
           await execute_query(query);
         }
+        //AQUI
 
         if (page[0].Show_In === 'none') {
           query = `UPDATE Page SET Show_In = "user" WHERE PageId = "${page[0].PageId}"`;
@@ -434,6 +436,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
 module.exports.remove_my_monitor_user_website_pages = async (user_id, website, pages_id) => {
   try {
+    //AQUI
     for (let id of pages_id) {
       let query = `SELECT Show_In FROM Page WHERE PageId = "${id}" LIMIT 1`;
       let page = await execute_query(query);
@@ -697,6 +700,7 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
 }
 
 module.exports.update_page = async (page_id, checked) => {
+  //AQUI
   try {
     let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
     let page = await execute_query(query);
@@ -733,6 +737,7 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
   try {
     for (let page of pages) {
       let show = null;
+      //AQUI
 
       if (page.Show_In === 'both' && !_.includes(pages_id, page.PageId)) {
         show = 'user';

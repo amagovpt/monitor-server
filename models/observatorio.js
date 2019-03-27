@@ -11,6 +11,7 @@ const { execute_query } = require('../lib/_database');
 const { success, error } = require('../lib/_response');
 
 module.exports.get_observatorio_data = async () => {
+  //AQUI
   try {
     const query = `
       SELECT

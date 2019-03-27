@@ -95,6 +95,7 @@ module.exports.get_number_of_my_monitor_websites = async () => {
 }
 
 module.exports.get_number_of_observatorio_websites = async () => {
+
   try {
     const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
       WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`;
@@ -341,6 +342,8 @@ module.exports.get_website_info = async (website_id) => {
  */
 
 module.exports.get_my_monitor_user_websites = async (user_id) => {
+  //AQUI
+
   try {
     const query = `SELECT w.*, d.Url as Domain, COUNT(distinct p.PageId) as Pages
       FROM
