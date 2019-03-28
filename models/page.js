@@ -42,7 +42,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           if (page[0].Show_In === "000") {
             show = "001";
           } else if (page[0].Show_In[1] === '1') {
-            show = Show_In[0]+"11";
+            show = page[0].Show_In+"11";
           }
         } else {
           show = page[0].Show_In;
@@ -61,9 +61,9 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         let show = null;
 
         if (_.includes(observatorio_uris, u)) {
-          show = Show_In[0]+"01";
+          show ="001";
         } else {
-          show = Show_In[0]+"00";
+          show = "000";
         }
         let re = new RegExp("[0-1]{3}");
 
