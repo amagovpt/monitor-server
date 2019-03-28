@@ -56,7 +56,7 @@ module.exports.get_observatorio_data = async () => {
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        (p.Show_In = "both" || p.Show_In = "observatorio")`;
+        (p.Show_In LIKE "__1")`;
 
     const data = await execute_query(query);
     return success(data);

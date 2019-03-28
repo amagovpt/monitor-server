@@ -1326,8 +1326,8 @@ router.post('/pages/updateObservatorio', async function (req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      const user_id = await verify_user(res, req.body.cookie, true);
-      if (user_id !== -1) {
+     // const user_id = await verify_user(res, req.body.cookie, true);
+      //if (user_id !== -1) {
         const pages = JSON.parse(req.body.pages);
         const pages_id = JSON.parse(req.body.pagesId);
 
@@ -1335,7 +1335,7 @@ router.post('/pages/updateObservatorio', async function (req, res, next) {
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
-    }
+    //}
   } catch (err) {
     console.log(err);
     res.send(error(new ServerError(err))); 

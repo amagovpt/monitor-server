@@ -39,18 +39,20 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         let show = null;
         
         if (_.includes(observatorio_uris, u)) {
-          if (page[0].Show_In === 'none') {
-            show = 'observatorio';
-          } else if (page[0].Show_In === 'user') {
-            show = 'both';
+          if (page[0].Show_In === "000") {
+            show = "001";
+          } else if (page[0].Show_In[1] === '1') {
+            show = Show_In[0]+"11";
           }
         } else {
           show = page[0].Show_In;
         }
+        let re = new RegExp("[0-1]{3}");
+
 
         //AQUI
-        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
-          show = 'none';
+        if (!re.test(show)) {
+          show = "000";
         }
 
         query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page[0].PageId}"`;
@@ -59,12 +61,15 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         let show = null;
 
         if (_.includes(observatorio_uris, u)) {
-          show = 'observatorio';
+          show = Show_In[0]+"01";
         } else {
-          show = 'none';
+          show = Show_In[0]+"00";
         }
+        let re = new RegExp("[0-1]{3}");
 
-        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
+
+        //AQUI
+        if (!re.test(show)) {
           show = 'none';
         }
 
@@ -327,7 +332,7 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        (LOWER(p.Show_In) = "user" OR LOWER(p.Show_In) = "both") AND
+        (LOWER(p.Show_In) LIKE '_1%' AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
 
@@ -378,12 +383,18 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           await execute_query(query);
         }
         //AQUI
+        let none = new RegExp("[0-1][0][0]");
+        let observatorio = new RegExp("[0-1][1][0-1]");
 
-        if (page[0].Show_In === 'none') {
-          query = `UPDATE Page SET Show_In = "user" WHERE PageId = "${page[0].PageId}"`;
+
+        //AQUI
+        if (none.test(page[0].Show_In )) {
+          let show_in = page[0].Show_In[0]+"10";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
-        } else if (page[0].Show_In === 'observatorio') {
-          query = `UPDATE Page SET Show_In = "both" WHERE PageId = "${page[0].PageId}"`;
+        } else if (observatorio.test(page[0].Show_In)){
+          let show_in = page[0].Show_In[0]+"11";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
         }
       } else {
@@ -396,7 +407,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
         if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "user", "${date}")`;
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "010", "${date}")`;
           let newPage = await execute_query(query);
           
           await save_page_evaluation(newPage.insertId, evaluation);
@@ -440,12 +451,17 @@ module.exports.remove_my_monitor_user_website_pages = async (user_id, website, p
     for (let id of pages_id) {
       let query = `SELECT Show_In FROM Page WHERE PageId = "${id}" LIMIT 1`;
       let page = await execute_query(query);
+
+      let both = new RegExp("[0-1][1][1]");
+
       if (_.size(page) > 0) {
-        if (page[0].Show_In === 'user') {
-          query = `UPDATE Page SET Show_In = "none" WHERE PageId = "${id}"`;
+        if (page[0].Show_In[1] === '1') {
+          let show_in = page[0].Show_In[0]+"00";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
           await execute_query(query);
-        } else if (page[0].Show_In === 'both') {
-          query = `UPDATE Page SET Show_In = "observatorio" WHERE PageId = "${id}"`;
+        } else if (both.test(page[0].Show_In)) {
+          let show_in = page[0].Show_In[0]+"01";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
           await execute_query(query);
         }
       }
@@ -704,22 +720,27 @@ module.exports.update_page = async (page_id, checked) => {
   try {
     let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
     let page = await execute_query(query);
+
+
+    let both = new RegExp("[0-1][1][1]");
+    let none = new RegExp("[0-1][0][0]");
+
     
     if (_.size(page) > 0) {
       let show = null;
 
-      if (page[0].Show_In === 'both') {
-        show = 'user';
-      } else if (page[0].Show_In === 'user' && checked === 'true') {
-        show = 'both';
-      } else if (page[0].Show_In === 'user' && checked === 'false') {
-        show = 'none';
-      } else if (page[0].Show_In === 'observatorio' && checked === 'true') {
-        show = 'both';
-      } else if (page[0].Show_In === 'observatorio' && checked === 'false') {
-        show = 'none';
-      } else if (page[0].Show_In === 'none') {
-        show = 'observatorio';
+      if (both.test(page[0].Show_In)) {
+        show = page[0].Show_In[0]+"10";
+      } else if (page[0].Show_In[1] === '1' && checked === 'true') {
+        show = page[0].Show_In[0]+"11";
+      } else if (page[0].Show_In[1] ==='1' && checked === 'false') {
+        show = page[0].Show_In[0]+"00";
+      } else if (page[0].Show_In[2] === '1' && checked === 'true') {
+        show = page[0].Show_In[0]+"11";
+      } else if (page[0].Show_In [2] ==='1' && checked === 'false') {
+        show = page[0].Show_In[0]+"00";
+      } else if ( none.test(page[0].Show_In)) {
+        show = page[0].Show_In[0]+"01";
       }
 
       query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
@@ -739,14 +760,17 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
       let show = null;
       //AQUI
 
-      if (page.Show_In === 'both' && !_.includes(pages_id, page.PageId)) {
-        show = 'user';
-      } else if (page.Show_In === 'user' && _.includes(pages_id, page.PageId)) {
-        show = 'both';
-      } else if (page.Show_In === 'observatorio' && !_.includes(pages_id, page.PageId)) {
-        show = 'none';
-      } else if (page.Show_In === 'none' && _.includes(pages_id, page.PageId)) {
-        show = 'observatorio';
+      let both = new RegExp("[0-1][1][1]");
+      let none = new RegExp("[0-1][0][0]");
+
+      if (both.test(page[0].Show_In) && !_.includes(pages_id, page.PageId)) {
+        show = page[0].Show_In[0]+"10";
+      } else if (page[0].Show_In[1] === '1' && _.includes(pages_id, page.PageId)) {
+        show = page[0].Show_In[0]+"11";
+      } else if (page[0].Show_In[2] === '1' && !_.includes(pages_id, page.PageId)) {
+        show = page[0].Show_In[0]+"00";
+      } else if (none.test(page[0].Show_In) && _.includes(pages_id, page.PageId)) {
+        show = page[0].Show_In[0]+"01";
       } else {
         show = page.Show_In;
       }
