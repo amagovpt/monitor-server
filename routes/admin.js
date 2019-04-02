@@ -1094,7 +1094,7 @@ router.post('/domains/create', async function (req, res, next) {
     res.send(error(new ServerError(err))); 
   }
 });
-
+//AQUI
 router.post('/pages/create', async function (req, res, next) {
   try {
     req.check('domainId', 'Invalid DomainId').exists();
@@ -1112,7 +1112,7 @@ router.post('/pages/create', async function (req, res, next) {
         const uris = JSON.parse(req.body.uris);
         const observatorio_uris = JSON.parse(req.body.observatorio);
 
-        create_pages(domain_id, uris, observatorio_uris)
+        create_pages(domain_id, uris, observatorio_uris,"100")
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }

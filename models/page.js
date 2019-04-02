@@ -13,7 +13,7 @@ const { execute_query } = require('../lib/_database');
 
 const { evaluate_url, save_page_evaluation } = require('./evaluation');
 
-module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
+module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -39,18 +39,14 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         let show = null;
         
         if (_.includes(observatorio_uris, u)) {
-          if (page[0].Show_In === "000") {
-            show = "001";
-          } else if (page[0].Show_In[1] === '1') {
-            show = Show_In[0]+"11";
-          }
+          show = Math.max(Number(Show_In[0]),Number(show_In[0]))+Math.max(Number(Show_In[1]),Number(show_In[1]))+"1";
         } else {
-          show = page[0].Show_In;
+          show = Math.max(Number(Show_In[0]),Number(show_In[0]))+Math.max(Number(Show_In[1]),Number(show_In[1]))+Math.max(Number(Show_In[2]),Number(show_In[2]));
         }
         let re = new RegExp("[0-1]{3}");
 
 
-        //AQUI
+        //?
         if (!re.test(show)) {
           show = "000";
         }
@@ -61,17 +57,11 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
         let show = null;
 
         if (_.includes(observatorio_uris, u)) {
-          show = Show_In[0]+"01";
+          show = show_in.substring(0,1)+"1";
         } else {
-          show = Show_In[0]+"00";
+          show = show_in;
         }
-        let re = new RegExp("[0-1]{3}");
 
-
-        //AQUI
-        if (!re.test(show)) {
-          show = 'none';
-        }
 
         let evaluation = null;
         try {
