@@ -77,7 +77,7 @@ CREATE TABLE `Domain` (
 CREATE TABLE `Page` (
   `PageId` int(11) NOT NULL AUTO_INCREMENT,
   `Uri` varchar(255) NOT NULL,
-  `Show_In` varchar(3) NOT NULL,
+  `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
