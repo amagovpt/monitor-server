@@ -43,13 +43,6 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
         } else {
           show = Math.max(Number(Show_In[0]),Number(show_In[0]))+Math.max(Number(Show_In[1]),Number(show_In[1]))+Math.max(Number(Show_In[2]),Number(show_In[2]));
         }
-        let re = new RegExp("[0-1]{3}");
-
-
-        //?
-        if (!re.test(show)) {
-          show = "000";
-        }
 
         query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page[0].PageId}"`;
         await execute_query(query);
