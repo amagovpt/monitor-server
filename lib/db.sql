@@ -96,6 +96,7 @@ CREATE TABLE `Evaluation` (
   `AA` int(11) NOT NULL,
   `AAA` int(11) NOT NULL,
   `Evaluation_Date` datetime NOT NULL,
+  `Show_To` varchar(2) NOT NULL DEFAULT '00',
   PRIMARY KEY (`EvaluationId`),
   UNIQUE KEY `EvalautionId_UNIQUE` (`EvaluationId`),
   KEY `PageId_fk_idx` (`PageId`),
