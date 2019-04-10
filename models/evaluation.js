@@ -152,6 +152,7 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
   }
 }
 //AQUI
+//perguntar se 11 eh possivel
 module.exports.get_all_page_evaluations = async (page,show_To) => {
   try {
     const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
@@ -210,7 +211,7 @@ module.exports.delete_evaluation = async (evaluation_id) => {
     return error(err);
   }
 }
-//AQUI
+//AQUIAQUI
 module.exports.save_url_evaluation = async (url, evaluation,show_To) => {
   try {
     evaluation = evaluation.result;
@@ -293,6 +294,7 @@ module.exports.save_url_evaluation = async (url, evaluation,show_To) => {
   }
 }
 //AQUI
+//perguntar se adiciono outro atributo
 module.exports.save_page_evaluation = async (page_id, evaluation,show_To) => {
   try {
     evaluation = evaluation.result;

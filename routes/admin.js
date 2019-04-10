@@ -690,7 +690,7 @@ router.post('/evaluations/page', async function (req, res, next) {
         const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
 
-        get_all_page_evaluations(page)
+        get_all_page_evaluations(page,"10")
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }
