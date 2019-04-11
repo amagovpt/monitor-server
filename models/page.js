@@ -29,6 +29,10 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
+
+        query = `UPDATE Page SET Delete = "0" WHERE PageId = "${page[0].PageId}"`;
+        await execute_query(query);
+
         query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
         let domain_page = await execute_query(query);
         if (_.size(domain_page) === 0) {
@@ -771,7 +775,7 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
 
 module.exports.delete_page = async (page_id) => {
   try {
-    const query = `DELETE FROM Page WHERE PageId = "${page_id}"`;
+    const query = `UPDATE Page SET Delete = "1" WHERE PageId = "${page.PageId}"`;
     await execute_query(query);
 
     return success(page_id);

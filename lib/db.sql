@@ -38,16 +38,6 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `Entity` (
-  `EntityId` int(11) NOT NULL AUTO_INCREMENT,
-  `Short_Name` varchar(45) NOT NULL,
-  `Long_Name` varchar(255) NOT NULL,
-  `Creation_Date` datetime NOT NULL,
-  PRIMARY KEY (`EntityId`),
-  UNIQUE KEY `EntityId_UNIQUE` (`EntityId`),
-  UNIQUE KEY `Long_Name_UNIQUE` (`Long_Name`),
-  UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
@@ -79,6 +69,7 @@ CREATE TABLE `Page` (
   `Uri` varchar(255) NOT NULL,
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
+  `Delete` tinyint(1) NOT NULL DEFAULT '0' ,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

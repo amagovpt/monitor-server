@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4b85e6a7-e7e5-4372-a608-16f49c4d9574" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/lib/db.sql" beforeDir="false" afterPath="$PROJECT_DIR$/lib/db.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/page.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/website.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/website.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -17,11 +17,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/page.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1096">
-              <caret line="610" column="16" selection-start-line="610" selection-start-column="16" selection-end-line="610" selection-end-column="16" />
+            <state relative-caret-position="345">
+              <caret line="32" column="71" selection-start-line="32" selection-start-column="71" selection-end-line="32" selection-end-column="71" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/db.sql">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="184">
+              <caret line="59" column="9" selection-start-line="59" selection-start-column="3" selection-end-line="59" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -29,26 +38,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models/evaluation.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="297" column="35" selection-start-line="297" selection-start-column="15" selection-end-line="297" selection-end-column="35" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/models/website.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="579" column="69" selection-start-line="579" selection-start-column="69" selection-end-line="579" selection-end-column="69" />
+            <state relative-caret-position="-225">
+              <caret line="30" column="22" lean-forward="true" selection-start-line="30" selection-start-column="22" selection-end-line="30" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/routes/admin.js">
+        <entry file="file://$PROJECT_DIR$/models/website.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16710">
-              <caret line="1114" column="8" selection-start-line="1114" selection-start-column="8" selection-end-line="1114" selection-end-column="8" />
+            <state relative-caret-position="483">
+              <caret line="570" column="63" selection-start-line="570" selection-start-column="53" selection-end-line="570" selection-end-column="63" />
             </state>
           </provider>
         </entry>
@@ -115,6 +115,9 @@
       <find>10</find>
       <find>save_page_evaluation</find>
       <find>show_in</find>
+      <find>delete</find>
+      <find>Active</find>
+      <find>tinyint</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -123,14 +126,14 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/lib/db.sql" />
         <option value="$PROJECT_DIR$/lib/_constants.js" />
         <option value="$PROJECT_DIR$/routes/studies.js" />
         <option value="$PROJECT_DIR$/routes/amp.js" />
         <option value="$PROJECT_DIR$/routes/admin.js" />
-        <option value="$PROJECT_DIR$/models/evaluation.js" />
-        <option value="$PROJECT_DIR$/models/page.js" />
         <option value="$PROJECT_DIR$/models/website.js" />
+        <option value="$PROJECT_DIR$/models/evaluation.js" />
+        <option value="$PROJECT_DIR$/lib/db.sql" />
+        <option value="$PROJECT_DIR$/models/page.js" />
       </list>
     </option>
   </component>
@@ -189,6 +192,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554981055767" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
@@ -224,12 +228,12 @@
       <workItem from="1554373652242" duration="1665000" />
       <workItem from="1554658525688" duration="1637000" />
       <workItem from="1554918745071" duration="830000" />
-      <workItem from="1554978829618" duration="647000" />
+      <workItem from="1554978829618" duration="2226000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17139000" />
+    <option name="totallyTimeSpent" value="18718000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1922" height="1056" extended-state="6" />
@@ -323,13 +327,6 @@
     <entry file="file://$PROJECT_DIR$/lib/_database.js">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/db.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1170">
-          <caret line="78" column="30" selection-start-line="78" selection-start-column="30" selection-end-line="78" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/routes/amp.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -374,24 +371,31 @@
     <entry file="file://$PROJECT_DIR$/lib/tests_colors.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/models/website.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="570" column="63" selection-start-line="570" selection-start-column="53" selection-end-line="570" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/models/evaluation.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="297" column="35" selection-start-line="297" selection-start-column="15" selection-end-line="297" selection-end-column="35" />
+        <state relative-caret-position="-225">
+          <caret line="30" column="22" lean-forward="true" selection-start-line="30" selection-start-column="22" selection-end-line="30" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/db.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="59" column="9" selection-start-line="59" selection-start-column="3" selection-end-line="59" selection-end-column="9" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/models/page.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1096">
-          <caret line="610" column="16" selection-start-line="610" selection-start-column="16" selection-end-line="610" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/website.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="579" column="69" selection-start-line="579" selection-start-column="69" selection-end-line="579" selection-end-column="69" />
+        <state relative-caret-position="345">
+          <caret line="32" column="71" selection-start-line="32" selection-start-column="71" selection-end-line="32" selection-end-column="71" />
         </state>
       </provider>
     </entry>
