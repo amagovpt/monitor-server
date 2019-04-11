@@ -67,7 +67,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
           let newPage = await execute_query(query);
 
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"10");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
           await execute_query(query);
@@ -393,7 +393,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "010", "${date}")`;
           let newPage = await execute_query(query);
           
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"01");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -608,7 +608,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
           let newPage = await execute_query(query);
           
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"01");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 

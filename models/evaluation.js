@@ -294,7 +294,6 @@ module.exports.save_url_evaluation = async (url, evaluation,show_To) => {
   }
 }
 //AQUI
-//perguntar se adiciono outro atributo
 module.exports.save_page_evaluation = async (page_id, evaluation,show_To) => {
   try {
     evaluation = evaluation.result;

@@ -577,7 +577,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
           let newPage = await execute_query(query);
           
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"01");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${_domain.insertId}", "${newPage.insertId}")`;
           await execute_query(query);
