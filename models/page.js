@@ -2,6 +2,8 @@
 
 /**
  * Page Model
+ *
+ *
  */
 
 /**
@@ -773,9 +775,22 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
   }
 }
 
-module.exports.delete_page = async (page_id) => {
+module.exports.delete_page = async (page_id,show_in) => {
   try {
-    const query = `UPDATE Page SET Delete = "1" WHERE PageId = "${page.PageId}"`;
+    let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
+    let page = await execute_query(query);
+
+    let new_show_in = page[0].Show_In;
+
+    for(let i = 0 ; i < page[0].Show_In.length;i++){
+
+      if(show_in[i]===1)
+        new_show_in = replaceAt(new_show_in,i,0);
+    }
+
+
+
+    query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page.PageId}"`;
     await execute_query(query);
 
     return success(page_id);
@@ -783,4 +798,11 @@ module.exports.delete_page = async (page_id) => {
     console.log(err);
     return error(err);
   }
+
+
 }
+
+function replaceAt(string, index, replace) {
+  return string.substring(0, index) + replace + string.substring(index + 1);
+}
+
