@@ -1481,7 +1481,7 @@ router.post('/pages/delete', async function (req, res, next) {
       if (user_id !== -1) {
         const page_id = req.body.pageId;
 
-        delete_page(page_id)
+        delete_page(page_id,"100")
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }

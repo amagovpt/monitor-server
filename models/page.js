@@ -435,23 +435,17 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
 module.exports.remove_my_monitor_user_website_pages = async (user_id, website, pages_id) => {
   try {
-    //AQUI
+    //OTIMIZAR
     for (let id of pages_id) {
       let query = `SELECT Show_In FROM Page WHERE PageId = "${id}" LIMIT 1`;
       let page = await execute_query(query);
 
-      let both = new RegExp("[0-1][1][1]");
+      let show_in;
 
       if (_.size(page) > 0) {
-        if (page[0].Show_In[1] === '1') {
-          let show_in = page[0].Show_In[0]+"00";
-          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
-          await execute_query(query);
-        } else if (both.test(page[0].Show_In)) {
-          let show_in = page[0].Show_In[0]+"01";
-          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
-          await execute_query(query);
-        }
+        show_in =  page[0].Show_In[0]+"0"+page[0].Show_In[2];
+        query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
+        await execute_query(query);
       }
     }
 
@@ -748,19 +742,10 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
       let show = null;
       //AQUI
 
-      let both = new RegExp("[0-1][1][1]");
-      let none = new RegExp("[0-1][0][0]");
-
-      if (both.test(page[0].Show_In) && !_.includes(pages_id, page.PageId)) {
-        show = page[0].Show_In[0]+"10";
-      } else if (page[0].Show_In[1] === '1' && _.includes(pages_id, page.PageId)) {
-        show = page[0].Show_In[0]+"11";
-      } else if (page[0].Show_In[2] === '1' && !_.includes(pages_id, page.PageId)) {
-        show = page[0].Show_In[0]+"00";
-      } else if (none.test(page[0].Show_In) && _.includes(pages_id, page.PageId)) {
-        show = page[0].Show_In[0]+"01";
+      if (!_.includes(pages_id, page.PageId)) {
+        show = page.Show_In[0]+"0"+page.Show_In[2];
       } else {
-        show = page.Show_In;
+        show = page.Show_In[0]+"1"+page.Show_In[2];
       }
 
       let query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page.PageId}"`;

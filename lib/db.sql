@@ -69,7 +69,6 @@ CREATE TABLE `Page` (
   `Uri` varchar(255) NOT NULL,
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
-  `Delete` tinyint(1) NOT NULL DEFAULT '0' ,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
