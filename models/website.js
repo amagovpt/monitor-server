@@ -350,7 +350,7 @@ module.exports.get_my_monitor_user_websites = async (user_id) => {
         Website as w
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND (LOWER(p.Show_In) = "user" OR LOWER(p.Show_In) = "both")
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND LOWER(p.Show_In) LIKE '_1%'
       WHERE
         w.UserId = "${user_id}"
       GROUP BY w.WebsiteId, d.Url`;

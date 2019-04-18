@@ -321,10 +321,9 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        (LOWER(p.Show_In) LIKE '_1%' AND
+        LOWER(p.Show_In) LIKE '_1%' AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
-
     return success(pages);
   } catch(err) {
     console.log(err);
