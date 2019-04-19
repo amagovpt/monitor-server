@@ -33,6 +33,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
       u = _.replace(u, 'https://', '');
       u = _.replace(u, 'http://', '');
       u = _.replace(u, 'www.', '');
+      u = decodeURIComponent(u);
 
       let query = `SELECT PageId, Show_In FROM Page WHERE LOWER(Uri) = "${_.toLower(u)}" LIMIT 1`;
       let page = await execute_query(query);
@@ -359,7 +360,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
     const errors = {};
     const size = _.size(pages);
     for (let i = 0; i < size; i++) {
-      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
+      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${decodeURIComponent(pages[i])}" LIMIT 1`;
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
@@ -411,7 +412,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
         if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "user", "${date}")`;
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${decodeURIComponent(pages[i])}", "user", "${date}")`;
           let newPage = await execute_query(query);
 
           await save_page_evaluation(newPage.insertId, evaluation);
@@ -573,7 +574,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
     const errors = {};
     const size = _.size(pages);
     for (let i = 0; i < size; i++) {
-      let query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
+      let query = `SELECT PageId FROM Page WHERE Uri = "${decodeURIComponent(pages[i])}" LIMIT 1`;
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
@@ -628,7 +629,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
 
         if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${decodeURIComponent(pages[i])}", "none", "${date}")`;
           let newPage = await execute_query(query);
 
           await save_page_evaluation(newPage.insertId, evaluation);
