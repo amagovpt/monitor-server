@@ -626,8 +626,23 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
 
 module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, websites_id) => {
   try {
-    const query = `DELETE FROM Website WHERE WebsiteId IN (${websites_id})`;
-    await execute_query(query);
+    let query = ``;
+    for (const id of websites_id) {
+      query = `SELECT * FROM TagWebsite WHERE WebsiteId = "${id}" AND TagId <> -1`;
+      const relations = await execute_query(query);
+      if (_.size(relations) > 1) {
+        query = `
+          DELETE tw FROM Tag as t, TagWebsite as tw 
+          WHERE 
+            LOWER(t.Name) = "${_.toLower(tag)}" AND
+            tw.TagId = t.TagId AND
+            tw.WebsiteId = "${id}"`;
+        await execute_query(query);
+      } else {
+        query = `DELETE FROM Website WHERE WebsiteId = "${id}"`;
+        await execute_query(query);
+      }
+    }
 
     return await this.get_access_studies_user_tag_websites(user_id, tag);
   } catch (err) {

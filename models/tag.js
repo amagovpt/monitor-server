@@ -55,26 +55,26 @@ module.exports.create_user_tag = async (user_id, type, tags_id, user_tag_name) =
     if (type === 'official') {
       if (_.size(tags_id) > 1) {
         query = `SELECT w.Name, d.DomainId, d.Url, d.Start_Date
-            FROM 
-              TagWebsite as tw
-              LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
-              LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-            WHERE 
-              tw.TagId IN (${_.join(tags_id, ', ')})
-            GROUP BY
-              w.Name, d.DomainId, d.Url, d.Start_Date
-            HAVING
-              COUNT(tw.WebsiteId) > 1 `;
+          FROM 
+            TagWebsite as tw
+            LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
+            LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+          WHERE 
+            tw.TagId IN (${tags_id})
+          GROUP BY
+            w.Name, d.DomainId, d.Url, d.Start_Date
+          HAVING
+            COUNT(tw.WebsiteId) = "${_.size(tags_id)}"`;
       } else {
         query = `SELECT w.Name, d.DomainId, d.Url, d.Start_Date
-                FROM 
-                  TagWebsite as tw
-                  LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
-                  LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-                WHERE 
-                  tw.TagId = "${tags_id[0]}"
-                GROUP BY
-                  w.Name, d.DomainId, d.Url, d.Start_Date`;
+          FROM 
+            TagWebsite as tw
+            LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
+            LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+          WHERE 
+            tw.TagId = "${tags_id[0]}"
+          GROUP BY
+            w.Name, d.DomainId, d.Url, d.Start_Date`;
       }
       const websites = await execute_query(query);
 
@@ -177,7 +177,7 @@ module.exports.get_all_official_tags = async () => {
   }
 }
 
-module.exports.get_all_official_tags = async user_id => {
+/*module.exports.get_all_official_tags = async user_id => {
   try {
     const query = `SELECT t.* 
       FROM 
@@ -191,7 +191,7 @@ module.exports.get_all_official_tags = async user_id => {
     console.log(err);
     return error(err);
   }
-}
+}*/
 
 module.exports.get_all_tags_info = async () => {
   try {
@@ -247,13 +247,28 @@ module.exports.user_tag_name_exists = async (user_id, name) => {
 
 module.exports.user_remove_tags = async (user_id, tags_id) => {
   try {
-    let query = `DELETE
-        w.*
-      FROM
-        Website as w
-      WHERE
-        w.WebsiteId IN (SELECT WebsiteId FROM TagWebsite WHERE TagId IN (${tags_id}))`;
-    await execute_query(query);
+    let query = ``;
+    for (const tid of tags_id) {
+      query = `SELECT * FROM TagWebsite WHERE TagId = "${tid}" AND WebsiteId <> -1`;
+      const relations = await execute_query(query);
+      if (_.size(relations) > 0) {
+        for (const rel of relations) {
+          query = `SELECT * FROM TagWebsite WHERE WebsiteId = "${rel.WebsiteId}" AND TagId <> -1`;
+          const relations2 = await execute_query(query);
+          if (_.size(relations2) > 1) {
+            query = `
+              DELETE tw FROM TagWebsite as tw 
+              WHERE 
+                tw.TagId = "${tid}" AND
+                tw.WebsiteId = "${rel.WebsiteId}"`;
+            await execute_query(query);
+          } else {
+            query = `DELETE FROM Website WHERE WebsiteId = "${rel.WebsiteId}"`;
+            await execute_query(query);
+          }
+        }
+      }
+    }
 
     query = `DELETE FROM Tag WHERE TagId IN (${tags_id})`;
     await execute_query(query);
