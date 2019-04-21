@@ -80,6 +80,7 @@ const {
   get_website_pages,
   create_pages,
   update_page,
+  update_page_admin,
   update_observatorio_pages,
   delete_page
 } = require('../models/page');
@@ -1313,6 +1314,32 @@ router.post('/pages/update', async function (req, res, next) {
   } catch (err) {
     console.log(err);
     res.send(error(new ServerError(err))); 
+  }
+});
+
+router.post('/pages/updateAdmin', async function (req, res, next) {
+  try {
+    req.check('pageId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const page_id = req.body.pageId;
+        const checked = req.body.checked;
+
+        update_page_admin(page_id, checked)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
   }
 });
 
