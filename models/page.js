@@ -108,12 +108,17 @@ module.exports.get_page_id = async (url) => {
 
 module.exports.get_all_pages = async () => {
   try {
-    const query = `SELECT p.*, e.Score, e.Evaluation_Date FROM Page as p
-      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-        SELECT Evaluation_Date FROM Evaluation 
-        WHERE PageId = p.PageId 
-        ORDER BY Evaluation_Date DESC LIMIT 1
-      ) GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+    const query = `SELECT p.*, e.Score, e.Evaluation_Date 
+        FROM 
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+                SELECT Evaluation_Date FROM Evaluation 
+                WHERE PageId = p.PageId
+                ORDER BY Evaluation_Date DESC LIMIT 1
+            ) 
+        WHERE
+            LOWER(p.Show_In) LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
     
     const pages = await execute_query(query);
     return success(pages);
@@ -749,8 +754,6 @@ module.exports.update_page_admin = async (page_id, checked) => {
       } else if (page[0].Show_In[0] ==='0' && checked === 'true') {
         show = "1"+page[0].Show_In[1]+page[0].Show_In[2];
       }
-      console.log(checked);
-      console.log(show);
       query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
       await execute_query(query);
     }
@@ -787,20 +790,19 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
 
 module.exports.delete_page = async (page_id,show_in) => {
   try {
+
     let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
     let page = await execute_query(query);
 
     let new_show_in = page[0].Show_In;
-
+/*
+  TODO clear
     for(let i = 0 ; i < page[0].Show_In.length;i++){
+      if(show_in[i] === 1)
+*/
+    new_show_in = replaceAt(new_show_in,0,0);
 
-      if(show_in[i]===1)
-        new_show_in = replaceAt(new_show_in,i,0);
-    }
-
-
-
-    query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page.PageId}"`;
+    query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page_id}"`;
     await execute_query(query);
 
     return success(page_id);
