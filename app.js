@@ -1,7 +1,5 @@
 const createError = require('http-errors');
 const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const expressValidator = require('express-validator');
@@ -11,7 +9,7 @@ const compression = require('compression');
 const sessionRouter = require('./routes/session');
 const adminRouter = require('./routes/admin');
 const ampRouter = require('./routes/amp');
-const obsRouter = require('./routes/observatorio');
+const obsRouter = require('./routes/observatory');
 const studiesRouter = require('./routes/studies');
 const monitorRouter = require('./routes/monitor');
 const digitalSealRouter = require('./routes/digital-seal');
@@ -20,21 +18,15 @@ const app = express();
 app.use(compression());
 app.use(cors());
 
-// view engine setup
-//app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
 app.use(logger('dev'));
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({ extended: false, limit: '2mb' }));
 app.use(expressValidator());
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/session', sessionRouter);
 app.use('/admin', adminRouter);
 app.use('/amp', ampRouter);
-app.use('/obs', obsRouter);
+app.use('/observatory', obsRouter);
 app.use('/studies', studiesRouter);
 app.use('/monitor', monitorRouter);
 app.use('/digitalSeal', digitalSealRouter);
@@ -52,7 +44,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({ success: err.status || 500, message: 'SERVICE_NOT_FOUND', errors: null, results: null });
 });
 
 module.exports = app;
