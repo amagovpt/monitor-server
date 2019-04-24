@@ -72,6 +72,7 @@ module.exports.get_all_active_domains = async () => {
   }
 }
 
+//TODO Mudar query para apenas enviar dominios do admin e numero de paginas do admin
 module.exports.get_all_domains = async () => {
   try {
     const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User

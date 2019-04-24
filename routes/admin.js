@@ -11,6 +11,7 @@ const { error } = require('../lib/_response');
 
 const { 
   verify_user,
+  get_user_type,
   get_number_of_access_studies_users,
   get_number_of_my_monitor_users,
   get_all_users,
@@ -666,6 +667,18 @@ router.post('/pages/domain', async function (req, res, next) {
         const user = req.body.user;
         const domain = decodeURIComponent(req.body.domain);
 
+        //TODO acabar isto mas.. e o studymonitor?
+        const type = await get_user_type(user_id);
+        let flags;
+        switch (type) {
+          case 'nidma':
+            flags = '100';
+            break;
+          case 'monitor':
+            flags = '010';
+        }
+
+        //TODO meter flags como argumento deste metodo?
         get_all_domain_pages(user, domain)
           .then(pages => res.send(pages))
           .catch(err => re.send(err));
@@ -1508,7 +1521,7 @@ router.post('/pages/delete', async function (req, res, next) {
       if (user_id !== -1) {
         const page_id = req.body.pageId;
 
-        delete_page(page_id,"100")
+        delete_page(page_id,"101")
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
