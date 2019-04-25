@@ -116,7 +116,7 @@ module.exports.login_user = async (username, password, app) => {
  * Create functions
  */
 
-module.exports.create_user = async (username, password, names, emails, type, websites) => {
+module.exports.create_user = async (username, password, names, emails, type, websites, transfer) => {
     //AQUI
   try {
     const password_hash = generate_password_hash(password);
@@ -128,18 +128,20 @@ module.exports.create_user = async (username, password, names, emails, type, web
     
     const data = await execute_query(query);
 
-    for (let w of websites) {
-      query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${w}"`;
-      await execute_query(query);
+      for (let w of websites) {
+          query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${w}"`;
+          await execute_query(query);
 
-      query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "both" 
-        WHERE
-          d.WebsiteId = "${w}" AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId AND
-          LOWER(p.Show_In) = "observatorio"`;
-      await execute_query(query);
-    }
+          if(transfer) {
+              query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = '111'
+                WHERE
+                d.WebsiteId = "${w}" AND
+                dp.DomainId = d.DomainId AND
+                p.PageId = dp.PageId AND
+                p.Show_In LIKE '1_1'`;
+              await execute_query(query);
+          }
+      }
 
     return success(data.insertId);
   } catch(err) {
