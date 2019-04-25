@@ -549,6 +549,7 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
   }
 }
 
+//TODO eh preciso ser tao grande???...
 module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
   try {
     const errors = {};
@@ -609,8 +610,9 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
 
         if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
+          query = `INSERT INTO Page (Uri, Creation_Date) VALUES ("${pages[i]}", "${date}")`;
           let newPage = await execute_query(query);
+          //TODO um destes insert no domainPage estah mal...
           
           await save_page_evaluation(newPage.insertId, evaluation,"01");
 
@@ -795,12 +797,11 @@ module.exports.delete_page = async (page_id,show_in) => {
     let page = await execute_query(query);
 
     let new_show_in = page[0].Show_In;
-/*
-  TODO clear
-    for(let i = 0 ; i < page[0].Show_In.length;i++){
-      if(show_in[i] === 1)
-*/
-    new_show_in = replaceAt(new_show_in,0,0);
+    for(let i = 0 ; i < page[0].Show_In.length;i++) {
+      if (show_in[i] === '1') {
+        new_show_in = replaceAt(new_show_in, i, 0);
+      }
+    }
 
     query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page_id}"`;
     await execute_query(query);
