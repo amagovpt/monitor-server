@@ -75,12 +75,16 @@ module.exports.get_all_active_domains = async () => {
 //TODO Mudar query para apenas enviar dominios do admin e numero de paginas do admin
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
+    const query = `SELECT d.*, COUNT(dp.PageId) as Pages, u.Username as User
       FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        Page as p
+        WHERE
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE '1__'
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
