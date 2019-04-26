@@ -6,10 +6,10 @@
 
 const express = require('express');
 const router = express.Router();
-const { ServerError, ParamsError } = require('../lib/_error');
-const { error } = require('../lib/_response');
+const {ServerError, ParamsError} = require('../lib/_error');
+const {error} = require('../lib/_response');
 
-const { 
+const {
   verify_user,
   get_user_type,
   get_number_of_access_studies_users,
@@ -82,8 +82,9 @@ const {
   create_pages,
   update_page,
   update_page_admin,
+  update_tag_admin,
   update_observatorio_pages,
-  delete_page
+  delete_page,
 } = require('../models/page');
 
 const {
@@ -91,7 +92,7 @@ const {
   get_all_page_evaluations,
   get_evaluation,
   delete_evaluation
-} =  require('../models/evaluation');
+} = require('../models/evaluation');
 
 /**
  * GET
@@ -114,7 +115,7 @@ router.post('/users/studies/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -135,7 +136,7 @@ router.post('/users/monitor/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -156,7 +157,7 @@ router.post('/tags/studies/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -177,7 +178,7 @@ router.post('/tags/observatorio/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -198,7 +199,7 @@ router.post('/websites/studies/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -219,7 +220,7 @@ router.post('/websites/monitor/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -240,7 +241,7 @@ router.post('/websites/observatorio/total', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -261,7 +262,7 @@ router.post('/users/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -282,7 +283,7 @@ router.post('/users/monitor', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -306,7 +307,7 @@ router.post('/users/info', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -327,7 +328,7 @@ router.post('/tags/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -348,7 +349,7 @@ router.post('/tags/allOfficial', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -372,7 +373,7 @@ router.post('/tags/info', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -393,7 +394,7 @@ router.post('/entities/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -416,7 +417,7 @@ router.post('/entities/info', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -437,7 +438,7 @@ router.post('/websites/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -458,7 +459,7 @@ router.post('/websites/allOfficial', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -482,7 +483,7 @@ router.post('/websites/user', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -508,7 +509,7 @@ router.post('/websites/tag', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -532,7 +533,7 @@ router.post('/websites/entity', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -556,7 +557,7 @@ router.post('/websites/info', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -580,7 +581,7 @@ router.post('/website/allPages', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -601,7 +602,7 @@ router.post('/domains/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -641,7 +642,7 @@ router.post('/domains/website', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -662,7 +663,7 @@ router.post('/pages/all', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -703,7 +704,7 @@ router.post('/pages/domain', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -721,14 +722,14 @@ router.post('/evaluations/page', async function (req, res, next) {
         const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
 
-        get_all_page_evaluations(page,"10")
+        get_all_page_evaluations(page, "10")
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -746,7 +747,7 @@ router.post('/page/evaluation', async function (req, res, next) {
       if (user_id !== -1) {
         const url = decodeURIComponent(req.body.url);
         const evaluation_id = req.body.evaluation_id;
-        
+
         get_evaluation(url, evaluation_id)
           .then(evaluation => res.send(evaluation))
           .catch(err => re.send(err));
@@ -754,11 +755,11 @@ router.post('/page/evaluation', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
-router.post('/page/evaluate', async function(req, res, next) {
+router.post('/page/evaluate', async function (req, res, next) {
   try {
     req.check('url', 'Invalid url parameter').exists();
     req.check('cookie', 'User not logged in').exists();
@@ -771,8 +772,8 @@ router.post('/page/evaluate', async function(req, res, next) {
       if (user_id !== -1) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
-        
-        evaluate_url_and_save(page_id.result, url,"10")
+
+        evaluate_url_and_save(page_id.result, url, "10")
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
@@ -800,7 +801,7 @@ router.post('/websites/withoutUser', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -821,7 +822,7 @@ router.post('/websites/withoutEntity', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -842,7 +843,7 @@ router.post('/domains/allOfficial', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -857,11 +858,11 @@ router.get('/users/exists/:email', async function (req, res, next) {
       const email = req.params.email;
       user_exists(email)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -876,11 +877,11 @@ router.get('/tags/exists/:name', async function (req, res, next) {
       const name = req.params.name;
       tag_official_name_exists(name)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -895,11 +896,11 @@ router.get('/entities/exists/shortName/:name', async function (req, res, next) {
       const name = req.params.name;
       entity_short_name_exists(name)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -914,11 +915,11 @@ router.get('/entities/exists/longName/:name', async function (req, res, next) {
       const name = req.params.name;
       entity_long_name_exists(name)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -933,11 +934,11 @@ router.get('/websites/exists/:name', async function (req, res, next) {
       const name = req.params.name;
       website_name_exists(name)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -952,11 +953,11 @@ router.get('/domains/exists/:domain', async function (req, res, next) {
       const domain = decodeURIComponent(req.params.domain);
       domain_exists(domain)
         .then(exists => res.send(exists))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -971,11 +972,11 @@ router.get('/websites/currentDomain/:websiteId', async function (req, res, next)
       const websiteId = req.params.websiteId;
       get_website_current_domain(websiteId)
         .then(domain => res.send(domain))
-        .catch(err => res.send(err)); 
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1013,7 +1014,7 @@ router.post('/users/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1040,7 +1041,7 @@ router.post('/tags/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1067,7 +1068,7 @@ router.post('/entities/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1096,7 +1097,7 @@ router.post('/websites/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1122,7 +1123,7 @@ router.post('/domains/create', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 //AQUI
@@ -1143,14 +1144,14 @@ router.post('/pages/create', async function (req, res, next) {
         const uris = JSON.parse(req.body.uris);
         const observatorio_uris = JSON.parse(req.body.observatorio);
 
-        create_pages(domain_id, uris, observatorio_uris,"100")
+        create_pages(domain_id, uris, observatorio_uris, "100")
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1191,7 +1192,7 @@ router.post('/users/update', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1223,7 +1224,7 @@ router.post('/tags/update', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1249,7 +1250,7 @@ router.post('/tags/update/copy', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1282,7 +1283,7 @@ router.post('/entities/update', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1317,7 +1318,7 @@ router.post('/websites/update', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1343,7 +1344,7 @@ router.post('/pages/update', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1361,7 +1362,16 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
       if (user_id !== -1) {
         const page_id = req.body.pageId;
         const checked = req.body.checked;
-        console.log(req.body);
+
+        const username = req.body.user;
+        const type = await get_user_type(username);
+
+        if (type === 'studies') {
+          //method to tag from selected page of studymonitor
+          update_tag_admin(page_id, checked)
+            .catch(err => res.send(res));
+        }
+
         update_page_admin(page_id, checked)
           .then(success => res.send(success))
           .catch(err => res.send(res));
@@ -1383,19 +1393,19 @@ router.post('/pages/updateObservatorio', async function (req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-     // const user_id = await verify_user(res, req.body.cookie, true);
+      // const user_id = await verify_user(res, req.body.cookie, true);
       //if (user_id !== -1) {
-        const pages = JSON.parse(req.body.pages);
-        const pages_id = JSON.parse(req.body.pagesId);
+      const pages = JSON.parse(req.body.pages);
+      const pages_id = JSON.parse(req.body.pagesId);
 
-        update_observatorio_pages(pages, pages_id)
-          .then(success => res.send(success))
-          .catch(err => res.send(res));
-      }
+      update_observatorio_pages(pages, pages_id)
+        .then(success => res.send(success))
+        .catch(err => res.send(res));
+    }
     //}
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1425,7 +1435,7 @@ router.post('/users/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1449,7 +1459,7 @@ router.post('/tags/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1473,7 +1483,7 @@ router.post('/entities/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1497,7 +1507,7 @@ router.post('/websites/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1521,7 +1531,7 @@ router.post('/domains/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1530,6 +1540,7 @@ router.post('/pages/delete', async function (req, res, next) {
     req.check('pageId', 'Invalid parameter PageId').exists();
     req.check('cookie', 'User not logged in').exists();
 
+    //TODO verificar se eh a "ultima pagina" da tag
     const errors = req.validationErrors();
     if (errors) {
       res.send(error(new ParamsError(errors)));
@@ -1538,14 +1549,14 @@ router.post('/pages/delete', async function (req, res, next) {
       if (user_id !== -1) {
         const page_id = req.body.pageId;
 
-        delete_page(page_id,"101")
+        delete_page(page_id, "101")
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 
@@ -1569,7 +1580,7 @@ router.post('/evaluations/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    res.send(error(new ServerError(err))); 
+    res.send(error(new ServerError(err)));
   }
 });
 

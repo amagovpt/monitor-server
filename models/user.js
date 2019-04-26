@@ -51,7 +51,6 @@ module.exports.verify_user = async (res, cookie, admin = false) => {
       return -1;
     }
     cookie = JSON.parse(await decrypt(cookie));
-    console.log(cookie.Username);
     const query = `SELECT * FROM User WHERE LOWER(Username) = "${_.toLower(cookie.Username)}" LIMIT 1`;
     let user = await execute_query(query);
     user = user[0];

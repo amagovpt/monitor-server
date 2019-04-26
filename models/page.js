@@ -770,6 +770,64 @@ module.exports.update_page_admin = async (page_id, checked) => {
   }
 }
 
+//method to import website, domain and tag from selected page of studymonitor
+module.exports.update_tag_admin = async (page_id, checked) => {
+  try {
+    let query;
+    if(checked === 'true') {
+       query = `SELECT t.*, w.WebsiteId as wID
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp 
+            WHERE 
+            p.PageId = "${page_id}" AND 
+            dp.PageId = p.PageId AND
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+            t.TagId = tw.TagId`;
+      let tag = await execute_query(query);
+
+      if (_.size(tag) > 0) {
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
+                VALUES ("${tag[0].Name}", "0", "${date}")`;
+        let result = await execute_query(query);
+
+        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${result.insertId}", "${tag[0].wID}")`;
+        await execute_query(query);
+      }
+    } else {
+      query = `DELETE t
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp
+            WHERE 
+            p.PageId = "${page_id}" AND 
+            dp.PageId = p.PageId AND
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+            t.TagId = tw.TagId AND
+            t.UserId IS NULL`;
+      await execute_query(query);
+    }
+
+    return success(page_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.update_observatorio_pages = async (pages, pages_id) => {
   try {
     for (let page of pages) {
