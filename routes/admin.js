@@ -425,6 +425,7 @@ router.post('/websites/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
 
+    //TODO corrigir select para apenas aparecer os websites do admin (juntamente com os mymonitor)
     const errors = req.validationErrors();
     if (errors) {
       res.send(error(new ParamsError(errors)));
