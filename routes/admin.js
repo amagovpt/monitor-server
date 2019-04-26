@@ -620,7 +620,21 @@ router.post('/domains/website', async function (req, res, next) {
         const user = req.body.user;
         const website = req.body.website;
 
-        get_all_website_domains(user, website)
+        const type = await get_user_type(user);
+        let flags;
+        switch (type) {
+          case 'nidma':
+            flags = '1__';
+            break;
+          case 'monitor':
+            flags = '_1_';
+            break;
+          default:
+            //TODO verificar studymonitor
+            flags = '%';
+            break;
+        }
+        get_all_website_domains(user, website, flags)
           .then(domains => res.send(domains))
           .catch(err => re.send(err));
       }
@@ -667,19 +681,22 @@ router.post('/pages/domain', async function (req, res, next) {
         const user = req.body.user;
         const domain = decodeURIComponent(req.body.domain);
 
-        //TODO acabar isto mas.. e o studymonitor?
-        const type = await get_user_type(user_id);
+        const type = await get_user_type(user);
         let flags;
         switch (type) {
           case 'nidma':
-            flags = '100';
+            flags = '1__';
             break;
           case 'monitor':
-            flags = '010';
+            flags = '_1_';
+            break;
+          default:
+            //TODO verificar studymonitor
+            flags = '%';
+            break;
         }
 
-        //TODO meter flags como argumento deste metodo?
-        get_all_domain_pages(user, domain)
+        get_all_domain_pages(user, domain, flags)
           .then(pages => res.send(pages))
           .catch(err => re.send(err));
       }
@@ -1344,7 +1361,7 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
       if (user_id !== -1) {
         const page_id = req.body.pageId;
         const checked = req.body.checked;
-
+        console.log(req.body);
         update_page_admin(page_id, checked)
           .then(success => res.send(success))
           .catch(err => res.send(res));

@@ -72,19 +72,19 @@ module.exports.get_all_active_domains = async () => {
   }
 }
 
-//TODO Mudar query para apenas enviar dominios do admin e numero de paginas do admin
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT d.*, COUNT(dp.PageId) as Pages, u.Username as User
+    const query = `SELECT d.*, SUM(CASE WHEN(p.Show_In LIKE '1__') THEN 1 ELSE 0 END) as Pages, u.Username as User
       FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-        Page as p
-        WHERE
-        p.PageId = dp.PageId AND
-        p.Show_In LIKE '1__'
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId
+        LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
+            WHERE 
+            t.UserId IS NULL
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
@@ -123,19 +123,20 @@ module.exports.get_all_official_domains = async () => {
   }
 }
 
-module.exports.get_all_website_domains = async (user, website) => {
+module.exports.get_all_website_domains = async (user, website, flags) => {
   try {
     let query = '';
     if (user === 'admin') {
       query = `SELECT
           d.*,
-          COUNT(distinct dp.PageId) as Pages,
+          SUM(CASE WHEN(p.Show_In LIKE "${flags}") THEN 1 ELSE 0 END) as Pages,
           u2.Username as User
         FROM
           Domain as d
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
-          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId,
+          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId,
           Website as w,
           User as u
         WHERE
@@ -150,10 +151,11 @@ module.exports.get_all_website_domains = async (user, website) => {
           )
         GROUP BY d.DomainId`;
     } else {
-      query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
+      query = `SELECT d.*, SUM(CASE WHEN(p.Show_In LIKE "${flags}") THEN 1 ELSE 0 END) as Pages, u.Username as User
         FROM
           Domain as d
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId,
           User as u,
           Website as w
         WHERE

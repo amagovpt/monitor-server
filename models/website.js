@@ -574,7 +574,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
         }
 
         if (evaluation !== null && evaluation.result !== null) {
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "000", "${date}")`;
           let newPage = await execute_query(query);
           
           await save_page_evaluation(newPage.insertId, evaluation,"01");

@@ -148,7 +148,7 @@ module.exports.get_website_pages = async (website_id) => {
   }
 }
 
-module.exports.get_all_domain_pages = async (user, domain) => {
+module.exports.get_all_domain_pages = async (user, domain, flags) => {
   try {
     let query = '';
     if (user === 'admin') {
@@ -178,7 +178,8 @@ module.exports.get_all_domain_pages = async (user, domain) => {
             d.WebsiteId = w.WebsiteId AND
             LOWER(d.Url) = "${_.toLower(domain)}" AND
             dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "${flags}"
           )
           OR
           (
@@ -186,7 +187,8 @@ module.exports.get_all_domain_pages = async (user, domain) => {
             d.WebsiteId = w.WebsiteId AND
             LOWER(d.Url) = "${_.toLower(domain)}" AND
             dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "${flags}"
           )
         GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
     } else {
@@ -215,7 +217,8 @@ module.exports.get_all_domain_pages = async (user, domain) => {
           d.WebsiteId = w.WebsiteId AND
           LOWER(d.Url) = "${_.toLower(domain)}" AND
           dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE "${flags}"
         GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
     }
     

@@ -85,9 +85,9 @@ module.exports.verify_user = async (res, cookie, admin = false) => {
   }
 }
 
-module.exports.get_user_type = async (user_id) => {
+module.exports.get_user_type = async (username) => {
   try {
-    let query = `SELECT * FROM User WHERE UserId = "${user_id}" LIMIT 1`;
+    let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;
 
     let user = await execute_query(query);
 
