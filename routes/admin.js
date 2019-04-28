@@ -12,6 +12,7 @@ const {error} = require('../lib/_response');
 const {
   verify_user,
   get_user_type,
+  get_user_id,
   get_number_of_access_studies_users,
   get_number_of_my_monitor_users,
   get_all_users,
@@ -1366,6 +1367,7 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
 
         const username = req.body.user;
         const type = await get_user_type(username);
+        const user_id = await get_user_id(username);
 
         update_page_admin(page_id, checked)
             .then(success => res.send(success))
@@ -1373,7 +1375,7 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
 
         if (type === 'studies') {
           //method to tag from selected page of studymonitor
-          update_tag_admin(page_id, checked)
+          update_tag_admin(page_id, checked, user_id)
             .catch(err => res.send(res));
         }
 
