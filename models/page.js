@@ -2,6 +2,8 @@
 
 /**
  * Page Model
+ *
+ *
  */
 
 /**
@@ -22,7 +24,7 @@ const {
   save_page_evaluation
 } = require('./evaluation');
 
-module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
+module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -39,6 +41,10 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
+
+        //query = `UPDATE Page SET Delete = "0" WHERE PageId = "${page[0].PageId}"`;
+        //await execute_query(query);
+
         query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
         let domain_page = await execute_query(query);
         if (_.size(domain_page) === 0) {
@@ -46,36 +52,31 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           await execute_query(query);
           pagesId.push(page[0].PageId);
         }
-        let show = null;
+        let new_show_in = '100';
 
         if (_.includes(observatorio_uris, u)) {
-          if (page[0].Show_In === 'none') {
-            show = 'observatorio';
-          } else if (page[0].Show_In === 'user') {
-            show = 'both';
+          if (page[0].Show_In[1] === '1') {
+            new_show_in = '111';
+          } else {
+            new_show_in = '101';
           }
         } else {
-          show = page[0].Show_In;
+          if (page[0].Show_In[1] === '1') {
+            new_show_in = '110';
+          }
         }
 
-        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
-          show = 'none';
-        }
-
-        query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page[0].PageId}"`;
+        query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page[0].PageId}"`;
         await execute_query(query);
       } else {
         let show = null;
 
         if (_.includes(observatorio_uris, u)) {
-          show = 'observatorio';
+          show = show_in.substring(0,1) + '1';
         } else {
-          show = 'none';
+          show = show_in;
         }
 
-        if (!_.includes(['none', 'user', 'observatorio', 'both'], show)) {
-          show = 'none';
-        }
 
         let evaluation = null;
         try {
@@ -88,7 +89,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris) => {
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
           let newPage = await execute_query(query);
 
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"10");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
           await execute_query(query);
@@ -127,13 +128,18 @@ module.exports.get_page_id = async (url) => {
 
 module.exports.get_all_pages = async () => {
   try {
-    const query = `SELECT p.*, e.Score, e.Evaluation_Date FROM Page as p
-      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-        SELECT Evaluation_Date FROM Evaluation 
-        WHERE PageId = p.PageId 
-        ORDER BY Evaluation_Date DESC LIMIT 1
-      ) GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
-
+    const query = `SELECT p.*, e.Score, e.Evaluation_Date 
+        FROM 
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+                SELECT Evaluation_Date FROM Evaluation 
+                WHERE PageId = p.PageId
+                ORDER BY Evaluation_Date DESC LIMIT 1
+            ) 
+        WHERE
+            LOWER(p.Show_In) LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date`;
+    
     const pages = await execute_query(query);
     return success(pages);
   } catch (err) {
@@ -152,7 +158,8 @@ module.exports.get_website_pages = async (website_id) => {
       d.WebsiteId = "${website_id}" AND
       d.Active = "1" AND
       dp.DomainId = d.DomainId AND
-      p.PageId = dp.PageId`;
+      p.PageId = dp.PageId AND
+      p.Show_In LIKE "1%"`;
     const pages = await execute_query(query);
 
     return success(pages);
@@ -355,7 +362,7 @@ module.exports.get_observatory_data = async () => {
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        (p.Show_In = "both" || p.Show_In = "observatorio")`;
+        p.Show_In LIKE '%1'`;
 
     const data = await execute_query(query);
     return success(data);
@@ -381,7 +388,7 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         err: null
       });
     }
-
+  //AQUI
     query = `SELECT 
         distinct p.*,
         e.Score,
@@ -403,10 +410,9 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        (LOWER(p.Show_In) = "user" OR LOWER(p.Show_In) = "both") AND
+        LOWER(p.Show_In) LIKE '_1%' AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`;
     const pages = await execute_query(query);
-
     return success(pages);
   } catch (err) {
     console.log(err);
@@ -453,12 +459,19 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               d.Active = 1`;
           await execute_query(query);
         }
+        //AQUI
+        let none = new RegExp('[0-1][0][0]');
+        let observatorio = new RegExp('[0-1][1][0-1]');
 
-        if (page[0].Show_In === 'none') {
-          query = `UPDATE Page SET Show_In = "user" WHERE PageId = "${page[0].PageId}"`;
+
+        //AQUI
+        if (none.test(page[0].Show_In )) {
+          let show_in = page[0].Show_In[0]+"10";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
-        } else if (page[0].Show_In === 'observatorio') {
-          query = `UPDATE Page SET Show_In = "both" WHERE PageId = "${page[0].PageId}"`;
+        } else if (observatorio.test(page[0].Show_In)){
+          let show_in = page[0].Show_In[0]+"11";
+          query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
         }
       } else {
@@ -471,10 +484,11 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
         if (evaluation !== null && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${decodeURIComponent(pages[i])}", "user", "${date}")`;
-          let newPage = await execute_query(query);
 
-          await save_page_evaluation(newPage.insertId, evaluation);
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "010", "${date}")`;
+          let newPage = await execute_query(query);
+          
+          await save_page_evaluation(newPage.insertId, evaluation, '01');
 
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -515,17 +529,17 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
 module.exports.remove_my_monitor_user_website_pages = async (user_id, website, pages_id) => {
   try {
+    //OTIMIZAR
     for (let id of pages_id) {
       let query = `SELECT Show_In FROM Page WHERE PageId = "${id}" LIMIT 1`;
       let page = await execute_query(query);
+
+      let show_in;
+
       if (_.size(page) > 0) {
-        if (page[0].Show_In === 'user') {
-          query = `UPDATE Page SET Show_In = "none" WHERE PageId = "${id}"`;
-          await execute_query(query);
-        } else if (page[0].Show_In === 'both') {
-          query = `UPDATE Page SET Show_In = "observatorio" WHERE PageId = "${id}"`;
-          await execute_query(query);
-        }
+        show_in =  page[0].Show_In[0]+"0"+page[0].Show_In[2];
+        query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
+        await execute_query(query);
       }
     }
 
@@ -690,8 +704,8 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${decodeURIComponent(pages[i])}", "none", "${date}")`;
           let newPage = await execute_query(query);
-
-          await save_page_evaluation(newPage.insertId, evaluation);
+          
+          await save_page_evaluation(newPage.insertId, evaluation, '01');
 
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -786,25 +800,29 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
 }
 
 module.exports.update_page = async (page_id, checked) => {
+  //AQUI
   try {
     let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
     let page = await execute_query(query);
 
+    let both = new RegExp('[0-1][1][1]');
+    let none = new RegExp('[0-1][0][0]');
+
     if (_.size(page) > 0) {
       let show = null;
 
-      if (page[0].Show_In === 'both') {
-        show = 'user';
-      } else if (page[0].Show_In === 'user' && checked === 'true') {
-        show = 'both';
-      } else if (page[0].Show_In === 'user' && checked === 'false') {
-        show = 'none';
-      } else if (page[0].Show_In === 'observatorio' && checked === 'true') {
-        show = 'both';
-      } else if (page[0].Show_In === 'observatorio' && checked === 'false') {
-        show = 'none';
-      } else if (page[0].Show_In === 'none') {
-        show = 'observatorio';
+      if (both.test(page[0].Show_In)) {
+        show = page[0].Show_In[0]+"10";
+      } else if (page[0].Show_In[1] === '1' && checked === 'true') {
+        show = page[0].Show_In[0]+"11";
+      } else if (page[0].Show_In[1] ==='1' && checked === 'false') {
+        show = page[0].Show_In[0]+"00";
+      } else if (page[0].Show_In[2] === '1' && checked === 'true') {
+        show = page[0].Show_In[0]+"11";
+      } else if (page[0].Show_In [2] ==='1' && checked === 'false') {
+        show = page[0].Show_In[0]+"00";
+      } else if ( none.test(page[0].Show_In)) {
+        show = page[0].Show_In[0]+"01";
       }
 
       query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
@@ -818,21 +836,40 @@ module.exports.update_page = async (page_id, checked) => {
   }
 }
 
-module.exports.update_observatorio_pages = async (pages, pages_id) => {
+module.exports.update_page_admin = async (page_id, checked) => {
   try {
-    for (let page of pages) {
-      let show = null;
+    let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
+    let page = await execute_query(query);
 
-      if (page.Show_In === 'both' && !_.includes(pages_id, page.PageId)) {
-        show = 'user';
-      } else if (page.Show_In === 'user' && _.includes(pages_id, page.PageId)) {
-        show = 'both';
-      } else if (page.Show_In === 'observatorio' && !_.includes(pages_id, page.PageId)) {
-        show = 'none';
-      } else if (page.Show_In === 'none' && _.includes(pages_id, page.PageId)) {
-        show = 'observatorio';
+    if (_.size(page) > 0) {
+      let show = page[0].Show_In;
+
+      if (page[0].Show_In[0] === '1' && checked === 'false') {
+        show = "0"+page[0].Show_In[1]+page[0].Show_In[2];
+      } else if (page[0].Show_In[0] ==='0' && checked === 'true') {
+        show = "1"+page[0].Show_In[1]+page[0].Show_In[2];
+      }
+      query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
+      await execute_query(query);
+    }
+
+    return success(page_id);
+  } catch(err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.update_observatory_pages = async (pages, pages_id) => {
+  try {
+    for (const page of pages) {
+      let show = null;
+      //AQUI
+
+      if (!_.includes(pages_id, page.PageId)) {
+        show = page.Show_In[0] + page.Show_In[2] + '0';
       } else {
-        show = page.Show_In;
+        show = page.Show_In[0] + page.Show_In[2] + '1';
       }
 
       let query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page.PageId}"`;
@@ -846,12 +883,21 @@ module.exports.update_observatorio_pages = async (pages, pages_id) => {
   }
 }
 
-module.exports.delete_page = async (page_id) => {
+module.exports.delete_pages = async (pages) => {
   try {
-    const query = `DELETE FROM Page WHERE PageId = "${page_id}"`;
-    await execute_query(query);
+    for (const page_id of pages) {
+      let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
+      let page = await execute_query(query);
+      let show_in = page[0].Show_In;
+      let new_show_in = '000';
+      if (show_in[1] === '1') {
+        new_show_in = '010';
+      }
+      query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page_id}"`;
+      await execute_query(query);
+    }
 
-    return success(page_id);
+    return success();
   } catch (err) {
     console.log(err);
     return error(err);
@@ -941,4 +987,8 @@ module.exports.add_evaluation = async odf => {
     console.log(err);
     return error(err);
   }
-};
+}
+
+function replaceAt(string, index, replace) {
+  return string.substring(0, index) + replace + string.substring(index + 1);
+}

@@ -117,6 +117,7 @@ module.exports.login_user = async (username, password, app) => {
  */
 
 module.exports.create_user = async (username, password, names, emails, type, websites) => {
+    //AQUI
   try {
     const password_hash = generate_password_hash(password);
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -244,6 +245,7 @@ module.exports.get_user_info = async (user_id) => {
  */
 
 module.exports.update_user = async (user_id, password, names, emails, app, default_websites, websites) => {
+    //AQUI
   try {
     let query = '';
 
@@ -254,7 +256,7 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
       query = `UPDATE User SET Password = "${generate_password_hash(password)}" WHERE UserId = "${user_id}"`;
       await execute_query(query);
     }
-
+    //AQUI
     if (app === 'monitor') {
       for (let website_id of default_websites) {
         if (!_.includes(websites, website_id)) {
@@ -342,6 +344,7 @@ module.exports.change_user_password = async (user_id, password, new_password) =>
 
 module.exports.delete_user = async (user_id, app) => {
   try {
+      //AQUI
     let query = '';
 
     if (app === 'monitor') {

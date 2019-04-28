@@ -217,7 +217,7 @@ router.post('/evaluation', async function(req, res, next) {
         const website = req.body.website;
         const url = decodeURIComponent(req.body.url);
 
-        get_newest_evaluation(user_id, tag, website, url)
+        get_newest_evaluation(user_id, tag, website, url,"10")
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }

@@ -20,7 +20,7 @@ router.get('/eval/:url', function(req, res, next) {
         .then(evaluation => {
           res.send(evaluation);
 
-          save_url_evaluation(url, evaluation);
+          save_url_evaluation(url, evaluation,"01");
         })
         .catch(err => res.send(err));
     }

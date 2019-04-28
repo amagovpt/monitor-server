@@ -95,6 +95,7 @@ module.exports.get_number_of_my_monitor_websites = async () => {
 }
 
 module.exports.get_number_of_observatorio_websites = async () => {
+
   try {
     const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
       WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`;
@@ -341,13 +342,15 @@ module.exports.get_website_info = async (website_id) => {
  */
 
 module.exports.get_my_monitor_user_websites = async (user_id) => {
+  //AQUI
+
   try {
     const query = `SELECT w.*, d.Url as Domain, COUNT(distinct p.PageId) as Pages
       FROM
         Website as w
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND (LOWER(p.Show_In) = "user" OR LOWER(p.Show_In) = "both")
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND LOWER(p.Show_In) LIKE '_1%'
       WHERE
         w.UserId = "${user_id}"
       GROUP BY w.WebsiteId, d.Url`;
@@ -574,7 +577,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
           let newPage = await execute_query(query);
           
-          await save_page_evaluation(newPage.insertId, evaluation);
+          await save_page_evaluation(newPage.insertId, evaluation,"01");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${_domain.insertId}", "${newPage.insertId}")`;
           await execute_query(query);

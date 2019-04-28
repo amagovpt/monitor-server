@@ -31,8 +31,8 @@ module.exports.evaluate_html = async (html, evaluator) => {
     return error(err);
   }
 }
-
-module.exports.evaluate_url_and_save = async (page_id, url) => {
+//AQUI
+module.exports.evaluate_url_and_save = async (page_id, url,show_To) => {
   try {
     let evaluation = await execute_url_evaluation(url, 'examinator');
     //evaluation = JSON.parse(evaluation);
@@ -47,10 +47,10 @@ module.exports.evaluate_url_and_save = async (page_id, url) => {
 
     const query = `
       INSERT INTO 
-        Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
+        Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date,Show_To)
       VALUES 
         ("${page_id}", "${data.title}", "${data.score}", "${webpage}", "${tot}", "${nodes}", "${elems}", "${conform[0]}", 
-         "${conform[1]}", "${conform[2]}", "${data.date}")`;
+         "${conform[1]}", "${conform[2]}", "${data.date}","${show_To}")`;
 
     await execute_query(query);
     return success(evaluation);
@@ -59,8 +59,8 @@ module.exports.evaluate_url_and_save = async (page_id, url) => {
     throw error(err);
   }
 }
-
-module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
+//AQUI diferenca entre este e de baixo
+module.exports.get_newest_evaluation = async (user_id, tag, website, url,show_To) => {
   try {
     const query = `SELECT e.* 
       FROM
@@ -82,7 +82,8 @@ module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         LOWER(p.Uri) = "${_.toLower(url)}" AND 
-        e.PageId = p.PageId
+        e.PageId = p.PageId AND
+        e.Show_To = "${show_To}"
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
     let evaluation = await execute_query(query);
@@ -107,7 +108,7 @@ module.exports.get_newest_evaluation = async (user_id, tag, website, url) => {
     throw error(err);
   }
 }
-
+//AQUI
 module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) => {
   try {
     const query = `SELECT e.* 
@@ -124,7 +125,8 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         LOWER(p.Uri) = "${_.toLower(url)}" AND 
-        e.PageId = p.PageId
+        e.PageId = p.PageId AND 
+         e.Show_To LIKE '_1'
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
     let evaluation = await execute_query(query);
@@ -148,9 +150,10 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
     console.log(err);
     throw error(err);
   }
-} 
-
-module.exports.get_all_page_evaluations = async (page) => {
+}
+//AQUI
+//perguntar se 11 eh possivel
+module.exports.get_all_page_evaluations = async (page,show_To) => {
   try {
     const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
       FROM
@@ -158,7 +161,8 @@ module.exports.get_all_page_evaluations = async (page) => {
         Evaluation as e
       WHERE
         LOWER(p.Uri) = "${_.toLower(page)}" AND
-        e.PageId = p.PageId
+        e.PageId = p.PageId AND
+        e.Show_To = "${show_To}"
       ORDER BY e.Evaluation_Date DESC`;
     const evaluations = await execute_query(query);
 
@@ -207,8 +211,8 @@ module.exports.delete_evaluation = async (evaluation_id) => {
     return error(err);
   }
 }
-
-module.exports.save_url_evaluation = async (url, evaluation) => {
+//AQUIAQUI
+module.exports.save_url_evaluation = async (url, evaluation,show_To) => {
   try {
     evaluation = evaluation.result;
 
@@ -231,6 +235,7 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
         Domain as d
       WHERE
         LOWER(d.Url) = "${_.toLower(domain)}" AND
+        e.Show_To = "${show_To}" AND
         d.WebsiteId = w.WebsiteId AND
         (
           w.UserId IS NULL OR
@@ -288,8 +293,8 @@ module.exports.save_url_evaluation = async (url, evaluation) => {
     return error(err);
   }
 }
-
-module.exports.save_page_evaluation = async (page_id, evaluation) => {
+//AQUI
+module.exports.save_page_evaluation = async (page_id, evaluation,show_To) => {
   try {
     evaluation = evaluation.result;
 
@@ -303,10 +308,10 @@ module.exports.save_page_evaluation = async (page_id, evaluation) => {
 
     const query = `
       INSERT INTO 
-        Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
+        Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date,Show_To)
       VALUES 
         ("${page_id}", "${data.title}", "${data.score}", "${webpage}", "${tot}", "${nodes}", "${elems}", "${conform[0]}", 
-          "${conform[1]}", "${conform[2]}", "${data.date}")`;
+          "${conform[1]}", "${conform[2]}", "${data.date}","${show_To}")`;
 
     const newEvaluation = await execute_query(query);
 

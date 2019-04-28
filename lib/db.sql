@@ -38,16 +38,6 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `Entity` (
-  `EntityId` int(11) NOT NULL AUTO_INCREMENT,
-  `Short_Name` varchar(45) NOT NULL,
-  `Long_Name` varchar(255) NOT NULL,
-  `Creation_Date` datetime NOT NULL,
-  PRIMARY KEY (`EntityId`),
-  UNIQUE KEY `EntityId_UNIQUE` (`EntityId`),
-  UNIQUE KEY `Long_Name_UNIQUE` (`Long_Name`),
-  UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
@@ -77,7 +67,7 @@ CREATE TABLE `Domain` (
 CREATE TABLE `Page` (
   `PageId` int(11) NOT NULL AUTO_INCREMENT,
   `Uri` varchar(255) NOT NULL,
-  `Show_In` varchar(15) NOT NULL,
+  `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
@@ -96,6 +86,7 @@ CREATE TABLE `Evaluation` (
   `AA` int(11) NOT NULL,
   `AAA` int(11) NOT NULL,
   `Evaluation_Date` datetime NOT NULL,
+  `Show_To` varchar(2) NOT NULL DEFAULT '00',
   PRIMARY KEY (`EvaluationId`),
   UNIQUE KEY `EvalautionId_UNIQUE` (`EvaluationId`),
   KEY `PageId_fk_idx` (`PageId`),

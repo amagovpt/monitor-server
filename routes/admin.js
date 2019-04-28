@@ -86,8 +86,9 @@ const {
   get_website_pages,
   create_pages,
   update_page,
-  update_observatorio_pages,
-  delete_page,
+  update_page_admin,
+  update_observatory_pages,
+  delete_pages,
   get_urls
 } = require('../models/page');
 
@@ -697,7 +698,7 @@ router.post('/evaluations/page', async function (req, res, next) {
         const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
 
-        get_all_page_evaluations(page)
+        get_all_page_evaluations(page, '10')
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }
@@ -748,7 +749,7 @@ router.post('/page/evaluate', async function (req, res, next) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
 
-        evaluate_url_and_save(page_id.result, url)
+        evaluate_url_and_save(page_id.result, url, '10')
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
@@ -964,8 +965,8 @@ router.post('/users/create', async function (req, res, next) {
     req.check('username', 'Invalid Username').exists();
     req.check('password', 'Invalid Password').exists();
     req.check('confirmPassword', 'Invalid Password Confirmation').exists().equals(req.body.password);
-    req.check('names', 'Inavlid Contact Names').exists();
-    req.check('emails', 'Inavlid Contact E-mails').exists();
+    req.check('names', 'Invalid Contact Names').exists();
+    req.check('emails', 'Invalid Contact E-mails').exists();
     req.check('app', 'Invalid user Type').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -1101,12 +1102,12 @@ router.post('/domains/create', async function (req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
+//AQUI
 router.post('/pages/create', async function (req, res, next) {
   try {
     req.check('domainId', 'Invalid DomainId').exists();
     req.check('uris', 'Invalid Uris').exists();
-    req.check('observatorio', 'Invalid Observaotrio Uris').exists();
+    req.check('observatorio', 'Invalid Observatory Uris').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1119,7 +1120,7 @@ router.post('/pages/create', async function (req, res, next) {
         const uris = JSON.parse(req.body.uris);
         const observatorio_uris = JSON.parse(req.body.observatorio);
 
-        create_pages(domain_id, uris, observatorio_uris)
+        create_pages(domain_id, uris, observatorio_uris, '100')
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }
@@ -1323,7 +1324,33 @@ router.post('/pages/update', async function (req, res, next) {
   }
 });
 
-router.post('/pages/updateObservatorio', async function (req, res, next) {
+router.post('/pages/updateAdmin', async function (req, res, next) {
+  try {
+    req.check('pageId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const page_id = req.body.pageId;
+        const checked = req.body.checked;
+
+        update_page_admin(page_id, checked)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateObservatory', async function (req, res, next) {
   try {
     req.check('pages', 'Invalid parameter Pages').exists();
     req.check('pagesId', 'Invalid parameter PagesId').exists();
@@ -1333,16 +1360,16 @@ router.post('/pages/updateObservatorio', async function (req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      const user_id = await verify_user(res, req.body.cookie, true);
-      if (user_id !== -1) {
+     // const user_id = await verify_user(res, req.body.cookie, true);
+      //if (user_id !== -1) {
         const pages = JSON.parse(req.body.pages);
         const pages_id = JSON.parse(req.body.pagesId);
 
-        update_observatorio_pages(pages, pages_id)
+        update_observatory_pages(pages, pages_id)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
-    }
+    //}
   } catch (err) {
     console.log(err);
     res.send(error(new ServerError(err)));
@@ -1477,7 +1504,7 @@ router.post('/domains/delete', async function (req, res, next) {
 
 router.post('/pages/delete', async function (req, res, next) {
   try {
-    req.check('pageId', 'Invalid parameter PageId').exists();
+    req.check('pages', 'Invalid parameter pages').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1486,11 +1513,11 @@ router.post('/pages/delete', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const page_id = req.body.pageId;
+        const pages = req.body.pages;
 
-        delete_page(page_id)
+        delete_pages(pages)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -1514,7 +1541,7 @@ router.post('/evaluations/delete', async function (req, res, next) {
 
         delete_evaluation(evaluation_id)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
