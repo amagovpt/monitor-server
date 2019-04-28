@@ -771,11 +771,11 @@ module.exports.update_page_admin = async (page_id, checked) => {
 }
 
 //method to import website, domain and tag from selected page of studymonitor
-module.exports.update_tag_admin = async (page_id, checked) => {
+module.exports.update_tag_admin = async (page_id, checked,user_id) => {
   try {
     let query;
     if(checked === 'true') {
-       query = `SELECT t.*, w.WebsiteId as wID
+       query = `SELECT t.*, w.*,d.*
             FROM 
             Tag as t, 
             Page as p, 
@@ -792,17 +792,46 @@ module.exports.update_tag_admin = async (page_id, checked) => {
             t.TagId = tw.TagId`;
       let tag = await execute_query(query);
 
+
       if (_.size(tag) > 0) {
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+
+        query =  `INSERT INTO Website (UserId, Name, Creation_Date) VALUES ("{user_id}", "${tag[0].Name}", "${date}")`;
+         const website = await execute_query(query);
+
+
+        query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "{website.insertId}","${tag[0].Url}", "${date}", "1")`;
+        let domain = await execute_query(query);
+
+        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${pageId}")`;
+        await execute_query(query);
+
+
+
         query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
                 VALUES ("${tag[0].Name}", "0", "${date}")`;
-        let result = await execute_query(query);
+        let tag = await execute_query(query);
 
-        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${result.insertId}", "${tag[0].wID}")`;
+        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${website.insertId}", "${tag.insertId}")`;
         await execute_query(query);
       }
     } else {
-      query = `DELETE t
+
+      query = `SELECT DISTINCT p.*
+            FROM 
+            Page as p, 
+            Domain as d, 
+            WHERE 
+            p.PageId = "${page_id}" AND 
+            dp.PageId = p.PageId AND
+            dp.DomainId = d.DomainId`;
+      let pages = await execute_query(query);
+
+
+      if(_.size(pages)>1){
+
+        query = `DELETE t
             FROM 
             Tag as t, 
             Page as p, 
@@ -818,7 +847,32 @@ module.exports.update_tag_admin = async (page_id, checked) => {
             tw.WebsiteId = w.WebsiteId AND 
             t.TagId = tw.TagId AND
             t.UserId IS NULL`;
-      await execute_query(query);
+        await execute_query(query);
+
+      }else{
+
+        query = `DELETE t,d,w
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp
+            WHERE 
+            p.PageId = "${page_id}" AND 
+            dp.PageId = p.PageId AND
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+            t.TagId = tw.TagId AND
+            t.UserId IS NULL`;
+        await execute_query(query);
+
+
+
+      }
+
     }
 
     return success(page_id);

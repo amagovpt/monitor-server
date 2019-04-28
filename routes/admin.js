@@ -1367,15 +1367,16 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
         const username = req.body.user;
         const type = await get_user_type(username);
 
+        update_page_admin(page_id, checked)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));
+
         if (type === 'studies') {
           //method to tag from selected page of studymonitor
           update_tag_admin(page_id, checked)
             .catch(err => res.send(res));
         }
 
-        update_page_admin(page_id, checked)
-          .then(success => res.send(success))
-          .catch(err => res.send(res));
       }
     }
   } catch (err) {
