@@ -982,8 +982,9 @@ router.post('/users/create', async function (req, res, next) {
         const emails = req.body.emails;
         const type = req.body.app;
         const websites = JSON.parse(req.body.websites);
+        const transfer = req.body.transfer === 'true';
 
-        create_user(username, password, names, emails, type, websites)
+        create_user(username, password, names, emails, type, websites, transfer)
           .then(success => res.send(success))
           .catch(err => res.send(err));
       }
@@ -1145,6 +1146,7 @@ router.post('/users/update', async function (req, res, next) {
     req.check('app', 'Invalid parameter App').exists();
     req.check('defaultWebsites', 'Invalid parameter DefaultWebsites').exists();
     req.check('websites', 'Invalid parameter Websites').exists();
+    req.check('transfer', 'Invalid parameter Transfer').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1159,9 +1161,10 @@ router.post('/users/update', async function (req, res, next) {
         const emails = req.body.emails;
         const app = req.body.app;
         const default_websites = JSON.parse(req.body.defaultWebsites);
+        const transfer = req.body.transfer === 'true';
         const websites = JSON.parse(req.body.websites);
 
-        update_user(edit_user_id, password, names, emails, app, default_websites, websites)
+        update_user(edit_user_id, password, names, emails, app, default_websites, websites, transfer)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
@@ -1270,6 +1273,8 @@ router.post('/websites/update', async function (req, res, next) {
     req.check('domain', 'Invalid parameter Domain').exists();
     req.check('entityId', 'Invalid parameter EntityId').exists();
     req.check('userId', 'Invalid parameter UserId').exists();
+    req.check('olderUserId', 'Invalid parameter OlderUserId').exists();
+    req.check('transfer', 'Invalid parameter Transfer').exists();
     req.check('defaultTags', 'Invalid parameter DefaultTags').exists();
     req.check('tags', 'Invalid parameter Tags').exists();
     req.check('cookie', 'User not logged in').exists();
@@ -1284,10 +1289,12 @@ router.post('/websites/update', async function (req, res, next) {
         const name = req.body.name;
         const entity_id = req.body.entityId;
         const edit_user_id = req.body.userId;
+        const older_user_id = req.body.olderUserId;
+        const transfer = req.body.transfer === 'true';
         const default_tags = JSON.parse(req.body.defaultTags);
         const tags = JSON.parse(req.body.tags);
 
-        update_website(website_id, name, entity_id, edit_user_id, default_tags, tags)
+        update_website(website_id, name, entity_id, edit_user_id, older_user_id, transfer, default_tags, tags)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }

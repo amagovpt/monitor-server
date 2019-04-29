@@ -727,10 +727,72 @@ module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag,
   }
 }
 
-module.exports.update_website = async (website_id, name, entity_id, user_id, default_tags, tags) => {
+module.exports.update_website = async (website_id, name, entity_id, user_id, older_user_id, transfer, default_tags, tags) => {
   try {
     let query = `UPDATE Website SET Name = "${name}", ${entity_id ? "EntityId = " + entity_id : ""}, ${user_id ? "UserId = " + user_id : "" } WHERE WebsiteId = "${website_id}"`;
     await execute_query(query);
+    
+    if (older_user_id === 'null' && user_id !== 'null') {
+      if (transfer) {
+        query = `
+          UPDATE
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p 
+          SET 
+            p.Show_In = "111" 
+          WHERE
+            d.WebsiteId = "${website_id}" AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "101"`;
+        await execute_query(query);
+      }
+    } else if ((older_user_id !== 'null' && user_id !== 'null' && older_user_id !== user_id) || older_user_id !== 'null' && user_id === 'null') {
+      if (!transfer || (older_user_id && !user_id)) {
+        query = `
+          UPDATE
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p 
+          SET 
+            p.Show_In = "101" 
+          WHERE
+            d.WebsiteId = "${website_id}" AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In = "111"`;
+        await execute_query(query);
+      }
+
+      query = `
+        UPDATE 
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p 
+        SET 
+          p.Show_In = "100" 
+        WHERE
+          d.WebsiteId = "${website_id}" AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In = "110"`;
+      await execute_query(query);
+
+      query = `
+        UPDATE 
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p 
+        SET 
+          p.Show_In = "000" 
+        WHERE
+          d.WebsiteId = "${website_id}" AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In = "010"`;
+      await execute_query(query);
+    }
 
     for (let tag_id of default_tags) {
       if (!_.includes(tags, tag_id)) {

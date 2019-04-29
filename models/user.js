@@ -116,7 +116,7 @@ module.exports.login_user = async (username, password, app) => {
  * Create functions
  */
 
-module.exports.create_user = async (username, password, names, emails, type, websites) => {
+module.exports.create_user = async (username, password, names, emails, type, websites, transfer) => {
     //AQUI
   try {
     const password_hash = generate_password_hash(password);
@@ -127,18 +127,20 @@ module.exports.create_user = async (username, password, names, emails, type, web
       VALUES ("${username}", "${password_hash}", "${names}", "${emails}", "${type}", "${date}", "${hash}")`;
     
     const data = await execute_query(query);
-
-    for (let w of websites) {
-      query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId = "${w}"`;
+    
+    if (type === 'monitor') {
+      query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId IN (${websites})`;
       await execute_query(query);
 
-      query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "both" 
-        WHERE
-          d.WebsiteId = "${w}" AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId AND
-          LOWER(p.Show_In) = "observatorio"`;
-      await execute_query(query);
+      if (transfer) {
+        query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "111" 
+          WHERE
+            d.WebsiteId IN (${websites}) AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "101"`;
+        await execute_query(query);
+      }
     }
 
     return success(data.insertId);
@@ -244,7 +246,7 @@ module.exports.get_user_info = async (user_id) => {
  * Update functions
  */
 
-module.exports.update_user = async (user_id, password, names, emails, app, default_websites, websites) => {
+module.exports.update_user = async (user_id, password, names, emails, app, default_websites, websites, transfer) => {
     //AQUI
   try {
     let query = '';
@@ -266,12 +268,12 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
               DomainPage as dp, 
               Page as p 
             SET 
-              p.Show_In = "observatorio" 
+              p.Show_In = "101" 
             WHERE
               d.WebsiteId = "${website_id}" AND
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
-              LOWER(p.Show_In) = "both"`;
+              p.Show_In = "111"`;
           await execute_query(query);
 
           query = `
@@ -280,12 +282,26 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
               DomainPage as dp, 
               Page as p 
             SET 
-              p.Show_In = "none" 
+              p.Show_In = "100" 
             WHERE
               d.WebsiteId = "${website_id}" AND
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
-              LOWER(p.Show_In) = "user"`;
+              p.Show_In = "110"`;
+          await execute_query(query);
+
+          query = `
+            UPDATE 
+              Domain as d, 
+              DomainPage as dp, 
+              Page as p 
+            SET 
+              p.Show_In = "000" 
+            WHERE
+              d.WebsiteId = "${website_id}" AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              p.Show_In = "010"`;
           await execute_query(query);
 
           query = `UPDATE Website SET UserId = NULL WHERE WebsiteId = "${website_id}"`;
@@ -298,13 +314,15 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
           query = `UPDATE Website SET UserId = "${user_id}" WHERE WebsiteId = "${website_id}"`;
           await execute_query(query);
 
-          query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "both" 
-            WHERE
-              d.WebsiteId = "${website_id}" AND
-              dp.DomainId = d.DomainId AND
-              p.PageId = dp.PageId AND
-              LOWER(p.Show_In) = "observatorio"`;
-          await execute_query(query);
+          if (transfer) {
+            query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "111" 
+              WHERE
+                d.WebsiteId = "${website_id}" AND
+                dp.DomainId = d.DomainId AND
+                p.PageId = dp.PageId AND
+                p.Show_In = "101"`;
+            await execute_query(query);
+          }
         }
       }
     }
@@ -344,7 +362,6 @@ module.exports.change_user_password = async (user_id, password, new_password) =>
 
 module.exports.delete_user = async (user_id, app) => {
   try {
-      //AQUI
     let query = '';
 
     if (app === 'monitor') {
@@ -355,13 +372,13 @@ module.exports.delete_user = async (user_id, app) => {
           DomainPage as dp, 
           Page as p 
         SET 
-          p.Show_In = "observatorio" 
+          p.Show_In = "101" 
         WHERE
           w.UserId = "${user_id}" AND
           d.WebsiteId = w.WebsiteId AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
-          LOWER(p.Show_In) = "both"`;
+          p.Show_In LIKE "111"`;
       await execute_query(query);
 
       query = `
@@ -371,13 +388,29 @@ module.exports.delete_user = async (user_id, app) => {
           DomainPage as dp, 
           Page as p 
         SET 
-          p.Show_In = "none" 
+          p.Show_In = "100" 
         WHERE
           w.UserId = "${user_id}" AND
           d.WebsiteId = w.WebsiteId AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
-          LOWER(p.Show_In) = "user"`;
+          LOWER(p.Show_In) = "110"`;
+      await execute_query(query);
+
+      query = `
+        UPDATE 
+          Website as w,
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p 
+        SET 
+          p.Show_In = "000" 
+        WHERE
+          w.UserId = "${user_id}" AND
+          d.WebsiteId = w.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          LOWER(p.Show_In) = "100"`;
       await execute_query(query);
 
       query = `UPDATE Website SET UserId = NULL WHERE UserId = "${user_id}"`;
