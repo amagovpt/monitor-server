@@ -860,4 +860,106 @@ module.exports.get_website_seal_information = async domain => {
     console.log(err);
     return error(err);
   }
-}
+};
+
+
+//method to import website, domain and tag from selected page of studymonitor
+module.exports.update_website_admin = async (website_id, checked, user_id) => {
+  try {
+    let query;
+    if (checked === 'true') {
+      query = `SELECT  w.*, d.*
+            FROM 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            DomainPage as dp 
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}"`;
+
+
+      let webDomain = await execute_query(query);
+
+
+      query = `SELECT  p.*
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp 
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}"AND 
+            dp.domainId= d.domainId`;
+
+
+      let pages = await execute_query(query);
+      let websiteName = webDomain[0].Name;
+      let domainUrl = webDomain[0].Url;
+
+      if (_.size(webDomain) > 0) {
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+        query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+        let website = await execute_query(query);
+
+        query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+        let domain = await execute_query(query);
+
+        for (let page of pages) {
+          query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page.PageId}"`;
+          await execute_query(query);
+
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
+          await execute_query(query);
+
+        }
+
+      }
+    } else {
+
+      query = `DELETE d,w
+            FROM 
+            Domain as d, 
+            Website as w,
+            WHERE 
+             w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}"`;
+      await execute_query(query);
+
+
+      query = `SELECT  p.*
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp 
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}"AND 
+            dp.DomainId= d.DomainId AND 
+            dp:PageId = PageID`;
+
+
+      let pages = await execute_query(query);
+
+
+      for (let page of pages) {
+        await update_page_admin(page.PageId, false);
+      }
+
+
+    }
+
+    return success(website_id);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};
+

@@ -35,7 +35,8 @@ const {
   get_tag_info,
   update_tag,
   copy_tag,
-  delete_tag
+  delete_tag,
+  update_tag_admin
 } = require('../models/tag');
 
 const {
@@ -64,7 +65,8 @@ const {
   website_name_exists,
   create_website,
   update_website,
-  delete_website
+  delete_website,
+  update_website_admin
 } = require('../models/website');
 
 const {
@@ -86,6 +88,7 @@ const {
   update_page_admin,
   update_tag_admin,
   update_observatorio_pages,
+  update_page_study_admin,
   delete_page,
 } = require('../models/page');
 
@@ -1373,7 +1376,7 @@ router.post('/pages/update', async function (req, res, next) {
   }
 });
 
-router.post('/pages/updateAdmin', async function (req, res, next) {
+router.post('/pages/updateAdminPage', async function (req, res, next) {
   try {
     req.check('pageId', 'Invalid parameter PageId').exists();
     req.check('checked', 'Invalid parameter Checked').exists();
@@ -1398,8 +1401,103 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
 
         if (type === 'studies') {
           //method to tag from selected page of studymonitor
-          update_tag_admin(page_id, checked, user_id)
+          update_page_study_admin(page_id, checked, user_id)
             .catch(err => res.send(res));
+        }
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateAdminWebsite', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const websiteId = req.body.websiteId;
+        const checked = req.body.checked;
+
+        const username = req.body.user;
+        const type = await get_user_type(username);
+        const user_id = await get_user_id(username);
+
+        update_website_admin(websiteId, checked)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateAdminTag', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+        const checked = req.body.checked;
+
+        update_tag_admin(tag_id, checked)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateAdminStudyPage', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter PageId').exists();
+    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const page_id = req.body.pageId;
+        const checked = req.body.checked;
+
+        const username = req.body.user;
+        const type = await get_user_type(username);
+        const user_id = await get_user_id(username);
+
+        update_page_admin(page_id, checked)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));
+
+        if (type === 'studies') {
+          //method to tag from selected page of studymonitor
+          update_tag_admin(page_id, checked, user_id)
+              .catch(err => res.send(res));
         }
 
       }
