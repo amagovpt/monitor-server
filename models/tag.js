@@ -297,6 +297,25 @@ module.exports.get_tag_info = async (tag_id) => {
   }
 }
 
+module.exports.get_all_user_tags = async (user) => {
+  try {
+    const query = `SELECT t.*, u.Username as User 
+      FROM 
+        Tag as t,
+        User as u
+      WHERE
+        LOWER(u.Username) = "${_.toLower(user)}" AND
+        t.UserId = u.UserId
+      GROUP BY t.TagId`;
+    const tags = await execute_query(query);
+
+    return success(tags);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.update_tag = async (tag_id, name, observatorio, default_websites, websites) => {
   try {
     let query = `UPDATE Tag SET Name = "${name}", Show_in_Observatorio = "${observatorio}" WHERE TagId = "${tag_id}"`;

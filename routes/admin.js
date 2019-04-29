@@ -29,6 +29,7 @@ const {
   get_number_of_access_studies_tags,
   get_number_of_observatorio_tags,
   get_all_tags,
+  get_all_user_tags,
   get_all_official_tags,
   tag_official_name_exists,
   create_official_tag,
@@ -394,6 +395,30 @@ router.post('/tags/info', async function (req, res, next) {
         get_tag_info(tag_id)
           .then(tag => res.send(tag))
           .catch(err => res.send(res));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/tags/user', async function (req, res, next) {
+  try {
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+
+        get_all_user_tags(user)
+          .then(tags => res.send(tags))
+          .catch(err => re.send(err));
       }
     }
   } catch (err) {
