@@ -414,4 +414,122 @@ module.exports.delete_tag = async (tag_id) => {
     console.log(err);
     return error(err);
   }
-}
+};
+
+//method to import website, domain and tag from selected page of studymonitor
+module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
+  try {
+    let query;
+    if (checked === 'true') {
+      query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
+            FROM 
+            Tag as t, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw
+            WHERE 
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+             tw.TagId = T.TagId AND 
+            t.TagId = "${tag_id}"`;
+      let tag = await execute_query(query);
+      let websiteName = tag[0].Name;
+      let tagName = tag[0].tagName;
+      let domainUrl = tag[0].Url;
+
+
+      query = `SELECT  p.*
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp 
+            WHERE 
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+             tw.TagId = T.TagId AND 
+            t.TagId = "${tag_id}"`;
+
+
+      let pages = await execute_query(query);
+
+      if (_.size(webDomain) > 0) {
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+        query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+        let website = await execute_query(query);
+
+        query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+        let domain = await execute_query(query);
+
+        for (let page of pages) {
+          query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page.PageId}"`;
+          await execute_query(query);
+
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
+          await execute_query(query);
+
+          query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
+                VALUES ("${tagName}", "0", "${date}")`;
+          let tag = await execute_query(query);
+
+          query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${website.insertId}", "${tag.insertId}")`;
+          await execute_query(query);
+
+        }
+
+      }
+    } else {
+
+      query = `DELETE d,w
+             FROM 
+            Tag as t, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw
+            WHERE 
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+             tw.TagId = T.TagId AND 
+            t.TagId = "${tag_id}"`;
+      await execute_query(query);
+
+
+      query = `SELECT  p.*
+            FROM 
+            Tag as t, 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            TagWebsite as tw,
+            DomainPage as dp 
+            WHERE 
+            p.PageId = dp.PageId
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+             tw.TagId = T.TagId AND 
+            t.TagId = "${tag_id}"`;
+
+
+      let pages = await execute_query(query);
+
+
+      for (let page of pages) {
+        await update_page_admin(page.PageId, false);
+      }
+
+
+    }
+
+    return success(website_id);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};
