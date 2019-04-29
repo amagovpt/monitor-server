@@ -101,6 +101,23 @@ module.exports.get_user_type = async (username) => {
   }
 }
 
+module.exports.get_user_type_success = async (username) => {
+  try {
+    let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;
+
+    let user = await execute_query(query);
+
+    if (_.size(user) === 0) {
+      throw new UserNotFoundError();
+    } else {
+      return success(user[0].Type);
+    }
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
 module.exports.get_user_id = async (username) => {
   try {
     let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;

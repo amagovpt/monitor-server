@@ -12,6 +12,7 @@ const {error} = require('../lib/_response');
 const {
   verify_user,
   get_user_type,
+  get_user_type_success,
   get_user_id,
   get_number_of_access_studies_users,
   get_number_of_my_monitor_users,
@@ -258,6 +259,29 @@ router.post('/users/all', async function (req, res, next) {
       if (user_id !== -1) {
         get_all_users()
           .then(users => res.send(users))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/users/type', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const username = req.body.username;
+        console.log(username);
+        get_user_type_success(username)
+          .then(type => res.send(type))
           .catch(err => res.send(err));
       }
     }
