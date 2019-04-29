@@ -131,6 +131,10 @@ module.exports.get_all_websites = async () => {
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+      LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+      LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
+      WHERE 
+        t.UserId IS NULL
       GROUP BY w.WebsiteId`;
     const websites = await execute_query(query);
     return success(websites);

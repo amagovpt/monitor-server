@@ -157,6 +157,8 @@ module.exports.get_all_tags = async () => {
         Tag as t
         LEFT OUTER JOIN User as u ON u.UserId = t.UserId
         LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+      WHERE
+        t.UserId IS NULL  
       GROUP BY t.TagId`;
     const tags = await execute_query(query);
     return success(tags);
