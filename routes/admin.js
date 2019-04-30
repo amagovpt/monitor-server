@@ -75,6 +75,7 @@ const {
   get_all_official_domains,
   get_all_website_domains,
   domain_exists,
+  domain_exists_in_admin,
   create_domain,
   delete_domain
 } = require('../models/domain');
@@ -87,7 +88,6 @@ const {
   create_pages,
   update_page,
   update_page_admin,
-  update_tag_admin,
   update_observatorio_pages,
   update_page_study_admin,
   delete_page,
@@ -684,7 +684,6 @@ router.post('/domains/website', async function (req, res, next) {
             flags = '_1_';
             break;
           default:
-            //TODO verificar studymonitor
             flags = '%';
             break;
         }
@@ -692,6 +691,25 @@ router.post('/domains/website', async function (req, res, next) {
           .then(domains => res.send(domains))
           .catch(err => re.send(err));
       }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/domains/existsAdmin/:websiteid', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid WebsiteID').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+        const wId = decodeURIComponent(req.params.websiteid);
+        domain_exists_in_admin(wId)
+          .then(exists => res.send(exists))
+          .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
@@ -745,7 +763,6 @@ router.post('/pages/domain', async function (req, res, next) {
             flags = '_1_';
             break;
           default:
-            //TODO verificar studymonitor
             flags = '%';
             break;
         }
