@@ -445,7 +445,6 @@ module.exports.update_tag_admin = async (tag_id) => {
     let webDate;
 
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    console.log(date);
     query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
                 VALUES ("${tagName}", "0", "${date}")`;
     let tag = await execute_query(query);
@@ -487,7 +486,6 @@ module.exports.update_tag_admin = async (tag_id) => {
                       t.TagId = tw.TagId AND 
                       t.UserId IS NULL `;
       let domainWebsite = await execute_query(query);
-      console.log(domainWebsite);
 
       if (_.size(domainWebsite) === 0) {
         query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${webDate}")`;
@@ -511,7 +509,6 @@ module.exports.update_tag_admin = async (tag_id) => {
         await execute_query(query);
 
         for (let page of pages) {
-          console.log(page);
           if (page.Show_In[0] === '0') {
             await update_page_admin(page.PageId);
             query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainWebsite[0].DomainId}", "${page.PageId}")`;

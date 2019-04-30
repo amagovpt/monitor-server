@@ -285,7 +285,6 @@ router.post('/users/type', async function (req, res, next) {
             const user_id = await verify_user(res, req.body.cookie, true);
             if (user_id !== -1) {
                 const username = req.body.username;
-                console.log(username);
                 get_user_type_success(username)
                     .then(type => res.send(type))
                     .catch(err => res.send(err));
@@ -568,7 +567,6 @@ router.post('/websites/studyTag', async function (req, res, next) {
                     if (_.size(websiteAdmin) === 1) {
                         website ["webName"] = websiteAdmin[0].Name;
                     }
-                    console.log(website);
                 }
                 res.send(websites);
             }
