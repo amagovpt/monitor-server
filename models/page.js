@@ -552,7 +552,6 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
     }
 }
 
-//TODO eh preciso ser tao grande???...
 module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
     try {
         const errors = {};
@@ -755,7 +754,19 @@ module.exports.update_page_admin = async (page_id) => {
             let show = page[0].Show_In;
             show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
             query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
-            await execute_query(query);
+
+            query = `SELECT  e.EvaluationId,e.Show_To FROM Evaluation as e WHERE e.PageId = "${page_id}" ORDER BY e.Evaluation_Date  DESC LIMIT 1`;
+            let evaluation = await execute_query(query);
+            let evalId = evaluation[0].EvaluationId;
+            let showTo = evaluation[0].Show_To;
+
+            if(_.size(evaluation)>0){
+                let newShowTo = "1"+showTo[1];
+                query = `UPDATE  Evaluation SET Show_To = "${newShowTo}" WHERE e.EvaluationId = "${evalId}" `;
+                await execute_query(query);
+            }
+
+
         }
 
         return success(page_id);

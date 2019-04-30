@@ -967,7 +967,7 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
 };
 
 
-/method to import website, domain and tag from selected page of studymonitor
+//FIXME adicionar website
 module.exports.verify_update_website_admin = async (website_id) => {
     try {
 
