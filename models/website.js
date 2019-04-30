@@ -932,7 +932,7 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
             if (_.size(domain) > 0) {
 
                 for (let page of pages) {
-                    await update_page_admin(page.PageId, false);
+                    await update_page_admin(page.PageId);
 
                     query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.domainId}", "${page.PageId}")`;
                     await execute_query(query);
@@ -946,7 +946,7 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
                 let domain = await execute_query(query);
 
                 for (let page of pages) {
-                    await update_page_admin(page.PageId, false);
+                    await update_page_admin(page.PageId);
 
                     query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
                     await execute_query(query);
@@ -959,6 +959,39 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
 
 
         return success(website_id);
+    } catch
+        (err) {
+        console.log(err);
+        return error(err);
+    }
+};
+
+
+/method to import website, domain and tag from selected page of studymonitor
+module.exports.verify_update_website_admin = async (website_id) => {
+    try {
+
+        let query = `SELECT  p.PageId
+            FROM  
+            Page as p, 
+            Domain as d, 
+            TagWebsite as tw,
+            DomainPage as dp,
+            Website as w
+            TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+            Tag as t ON t.TagId = tw.TagId
+            WHERE 
+            tw.WebsiteId = w.WebsiteId AND 
+            w.WebsiteId = "${website_id}" AND 
+            d.WebsiteId = w.WebsiteId AND
+            t.UserId IS NOT NULL AND 
+            dp.DomainId = d.DomainId AND
+            dp.PageId = p.PageId AND
+            p.Show_IN LIKE "0_1" `;
+        let studyP = await execute_query(query);
+
+
+        return success(_.size(studyP) === 0);
     } catch
         (err) {
         console.log(err);

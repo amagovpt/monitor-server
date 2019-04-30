@@ -500,7 +500,7 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
                 await execute_query(query);
 
                 for (let page of pages) {
-                    await update_page_admin(page.PageId, false);
+                    await update_page_admin(page.PageId);
 
                     query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
                     await execute_query(query);
@@ -512,7 +512,7 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
                 await execute_query(query);
 
                 for (let page of pages) {
-                    await update_page_admin(page.PageId, false);
+                    await update_page_admin(page.PageId);
 
                     query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page.PageId}")`;
                     await execute_query(query);
@@ -533,110 +533,33 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
 
 
 /method to import website, domain and tag from selected page of studymonitor
-module.exports.verify_update_tag_admin = async (tag_id, checked, user_id) => {
-    // try {
-    //     let query;
-    //
-    //     query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
-    //         FROM
-    //         Tag as t,
-    //         Domain as d,
-    //         Website as w,
-    //         TagWebsite as tw
-    //         WHERE
-    //         dp.DomainId = d.DomainId AND
-    //         d.WebsiteId = w.WebsiteId AND
-    //         tw.WebsiteId = w.WebsiteId AND
-    //          tw.TagId = T.TagId AND
-    //         t.TagId = "${tag_id}"`;
-    //     let tagResult = await execute_query(query);
-    //     let tagName = tag[0].tagName;
-    //
-    //     query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date)
-    //             VALUES ("${tagName}", "0", "${date}")`;
-    //     let tag = await execute_query(query);
-    //
-    //     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    //
-    //
-    //     for (let website of tagResult) {
-    //         let websiteName = website.Name;
-    //         let domainUrl = website.Url;
-    //
-    //         query = `SELECT
-    //                     FROM
-    //                     Tag as t,
-    //                     Page as p,
-    //                     Domain as d,
-    //                     Domain as d1,
-    //                     Website as w,
-    //                     TagWebsite as tw,
-    //                     DomainPage as dp
-    //                     WHERE
-    //                     dp.DomainId = d.DomainId AND
-    //                     d.WebsiteId = w.WebsiteId AND
-    //                     d.Url = "${domainUrl}"`;
-    //
-    //         let pages = await execute_query(query);
-    //
-    //         query = `SELECT  d.DomainId,w,WebsiteId
-    //         FROM
-    //         Page as p,
-    //         Domain as d,
-    //         TagWebsite as tw,
-    //         DomainPage as dp,
-    //         Website as w
-    //         LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-    //         LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
-    //         WHERE
-    //         dp.PageId = p.PageId AND
-    //         dp.DomainId = d.DomainId AND
-    //         d.WebsiteId = w.WebsiteId AND
-    //         d.Uri = "${domainUrl}" AND
-    //         tw.WebsiteId = w.WebsiteId AND
-    //         t.TagId = tw.TagId AND
-    //         t.UserId IS NULL `;
-    //         let domainP = await execute_query(query);
-    //
-    //
-    //         if (_.size(domain) === 0) {
-    //
-    //             query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
-    //             let website = await execute_query(query);
-    //
-    //             query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
-    //             let domain = await execute_query(query);
-    //
-    //             query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${website.insertId}", "${tag.insertId}")`;
-    //             await execute_query(query);
-    //
-    //             for (let page of pages) {
-    //                 await update_page_admin(page.PageId, false);
-    //
-    //                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
-    //                 await execute_query(query);
-    //             }
-    //         } else {
-    //
-    //
-    //             query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${domainP.WebsiteId}", "${tag.insertId}")`;
-    //             await execute_query(query);
-    //
-    //             for (let page of pages) {
-    //                 await update_page_admin(page.PageId, false);
-    //
-    //                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page.PageId}")`;
-    //                 await execute_query(query);
-    //             }
-    //
-    //
-    //         }
-    //     }
-    //
-    //     return success(tag_id);
-    // } catch
-    //     (err) {
-    //     console.log(err);
-    //     return error(err);
-    // }
+module.exports.verify_update_tag_admin = async (tag_id) => {
+    try {
+
+            let query = `SELECT  p.PageId
+            FROM  
+            Page as p, 
+            Domain as d, 
+            TagWebsite as tw,
+            DomainPage as dp,
+            Website as w
+            TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+            Tag as t ON t.TagId = tw.TagId
+            WHERE 
+            dp.PageId = p.PageId AND
+            p.Show_IN LIKE "0_1"
+            dp.DomainId = d.DomainId AND
+            d.WebsiteId = w.WebsiteId AND
+            tw.WebsiteId = w.WebsiteId AND 
+            t.TagId = "${tag_id}" AND 
+            t.UserId IS NOT NULL `;
+            let studyP = await execute_query(query);
+
+
+        return success(_.size(studyP) === 0);
+    } catch
+        (err) {
+        console.log(err);
+        return error(err);
+    }
 };

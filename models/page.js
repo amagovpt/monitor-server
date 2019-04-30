@@ -746,7 +746,7 @@ module.exports.update_page = async (page_id, checked) => {
     }
 }
 
-module.exports.update_page_admin = async (page_id, checked) => {
+module.exports.update_page_admin = async (page_id) => {
     try {
         let query = `SELECT Show_In FROM Page WHERE PageId = "${page_id}" LIMIT 1`;
         let page = await execute_query(query);
