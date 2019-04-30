@@ -133,12 +133,16 @@ module.exports.create_user = async (username, password, names, emails, type, web
       await execute_query(query);
 
       if (transfer) {
-        query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "111" 
+        query = `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
+          SET 
+            p.Show_In = "111",
+            e.Show_To = "11" 
           WHERE
             d.WebsiteId IN (${websites}) AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            p.Show_In LIKE "101"`;
+            p.Show_In LIKE "101" AND
+            e.PageId = p.PageId`;
         await execute_query(query);
       }
     }
@@ -266,42 +270,51 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
             UPDATE
               Domain as d, 
               DomainPage as dp, 
-              Page as p 
+              Page as p,
+              Evaluation as e
             SET 
-              p.Show_In = "101" 
+              p.Show_In = "101",
+              e.Show_To = "10" 
             WHERE
               d.WebsiteId = "${website_id}" AND
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
-              p.Show_In = "111"`;
+              p.Show_In = "111" AND
+              e.PageId = p.PageId`;
           await execute_query(query);
 
           query = `
             UPDATE 
               Domain as d, 
               DomainPage as dp, 
-              Page as p 
+              Page as p,
+              Evaluation as e
             SET 
-              p.Show_In = "100" 
+              p.Show_In = "100",
+              e.Show_To = "10"
             WHERE
               d.WebsiteId = "${website_id}" AND
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
-              p.Show_In = "110"`;
+              p.Show_In = "110" AND
+              e.PageId = p.PageId`;
           await execute_query(query);
 
           query = `
             UPDATE 
               Domain as d, 
               DomainPage as dp, 
-              Page as p 
+              Page as p,
+              Evaluation as e
             SET 
-              p.Show_In = "000" 
+              p.Show_In = "000",
+              e.Show_To = "10" 
             WHERE
               d.WebsiteId = "${website_id}" AND
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
-              p.Show_In = "010"`;
+              p.Show_In = "010" AND
+              e.PageId = p.PageId`;
           await execute_query(query);
 
           query = `UPDATE Website SET UserId = NULL WHERE WebsiteId = "${website_id}"`;
@@ -315,12 +328,13 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
           await execute_query(query);
 
           if (transfer) {
-            query = `UPDATE Domain as d, DomainPage as dp, Page as p SET p.Show_In = "111" 
+            query = `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
               WHERE
                 d.WebsiteId = "${website_id}" AND
                 dp.DomainId = d.DomainId AND
                 p.PageId = dp.PageId AND
-                p.Show_In = "101"`;
+                p.Show_In = "101" AND
+                e.PageId = e.PageId`;
             await execute_query(query);
           }
         }

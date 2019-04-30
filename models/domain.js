@@ -50,7 +50,8 @@ module.exports.domain_exists = async (url) => {
       WHERE
         LOWER(d.Url) = "${_.toLower(url)}" AND
         w.WebsiteId = d.WebsiteId AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+        w.Deleted = "0"
       LIMIT 1`;
 
     const domain = await execute_query(query);
@@ -63,7 +64,12 @@ module.exports.domain_exists = async (url) => {
 
 module.exports.get_all_active_domains = async () => {
   try {
-    const query = `SELECT * FROM Domain WHERE Active = "1"`;
+    const query = `SELECT d.* FROM Website as w, Domain as d 
+      WHERE
+        d.Active = "1" AND
+        w.WebsiteId = d.WebsiteId AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        w.Deleted = "0"`;
     const domains = await execute_query(query);
     return success(domains);
   } catch(err) {
@@ -74,12 +80,16 @@ module.exports.get_all_active_domains = async () => {
 
 module.exports.get_all_domains = async () => {
   try {
-    const query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
+    const query = `SELECT d.*, COUNT(distinct p.PageId) as Pages, u.Username as User
       FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1%%"
         LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+      WHERE
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        w.Deleted = "0"
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
@@ -118,46 +128,32 @@ module.exports.get_all_official_domains = async () => {
   }
 }
 
-module.exports.get_all_website_domains = async (user, website) => {
+module.exports.get_all_website_domains = async website => {
   try {
-    let query = '';
-    if (user === 'admin') {
-      query = `SELECT
-          d.*,
-          COUNT(distinct dp.PageId) as Pages,
-          u2.Username as User
-        FROM
-          Domain as d
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-          LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
-          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId,
-          Website as w,
-          User as u
-        WHERE
-          w.WebsiteId = d.WebsiteId AND
-          LOWER(w.Name) = "${_.toLower(website)}" AND
-          (
-            w.UserId IS NULL OR
-            (
-              u.UserId = w.UserId AND
-              LOWER(u.Type) != 'studies'
-            )
-          )
-        GROUP BY d.DomainId`;
-    } else {
-      query = `SELECT d.*, COUNT(distinct dp.PageId) as Pages, u.Username as User
-        FROM
-          Domain as d
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
-          User as u,
-          Website as w
-        WHERE
-          LOWER(u.Username) = "${_.toLower(user)}" AND
-          w.UserId = u.UserId AND
-          LOWER(w.Name) = "${_.toLower(website)}" AND
-          d.WebsiteId = w.WebsiteId
-        GROUP BY d.DomainId`;
-    }
+    const query = `SELECT
+      d.*,
+      COUNT(distinct p.PageId) as Pages,
+      u2.Username as User
+    FROM
+      Domain as d
+      LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+      LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1%%"
+      LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
+      LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId,
+      Website as w,
+      User as u
+    WHERE
+      w.WebsiteId = d.WebsiteId AND
+      LOWER(w.Name) = "${_.toLower(website)}" AND
+      (
+        w.UserId IS NULL OR
+        (
+          u.UserId = w.UserId AND
+          LOWER(u.Type) != 'studies'
+        )
+      )
+    GROUP BY d.DomainId`;
+    
 
     const domains = await execute_query(query);
     return success(domains);

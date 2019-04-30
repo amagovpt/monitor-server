@@ -495,7 +495,6 @@ router.post('/websites/user', async function (req, res, next) {
 router.post('/websites/tag', async function (req, res, next) {
   try {
     req.check('tag', 'Invalid tag').exists();
-    req.check('user', 'Invalid user').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -505,9 +504,8 @@ router.post('/websites/tag', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const tag = req.body.tag;
-        const user = req.body.user;
 
-        get_all_tag_websites(user, tag)
+        get_all_tag_websites(tag)
           .then(websites => res.send(websites))
           .catch(err => re.send(err));
       }
@@ -613,7 +611,6 @@ router.post('/domains/all', async function (req, res, next) {
 
 router.post('/domains/website', async function (req, res, next) {
   try {
-    req.check('user', 'Invalid user').exists();
     req.check('website', 'Invalid website').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -623,10 +620,9 @@ router.post('/domains/website', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const user = req.body.user;
         const website = req.body.website;
 
-        get_all_website_domains(user, website)
+        get_all_website_domains(website)
           .then(domains => res.send(domains))
           .catch(err => re.send(err));
       }
@@ -660,7 +656,6 @@ router.post('/pages/all', async function (req, res, next) {
 
 router.post('/pages/domain', async function (req, res, next) {
   try {
-    req.check('user', 'Invalid user').exists();
     req.check('domain', 'Invalid domain').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -670,10 +665,9 @@ router.post('/pages/domain', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const user = req.body.user;
         const domain = decodeURIComponent(req.body.domain);
 
-        get_all_domain_pages(user, domain)
+        get_all_domain_pages(domain)
           .then(pages => res.send(pages))
           .catch(err => re.send(err));
       }
@@ -698,7 +692,7 @@ router.post('/evaluations/page', async function (req, res, next) {
         const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
 
-        get_all_page_evaluations(page, '10')
+        get_all_page_evaluations(page)
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }

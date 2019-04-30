@@ -27,22 +27,6 @@ const {
 
 module.exports.create_website = async (name, domain, entity_id, user_id, tags) => {
   try {
-    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    let query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${name}", "${date}")`;
-
-    if (entity_id !== 'null' && user_id !== 'null') {
-      query = `INSERT INTO Website (EntityId, UserId, Name, Creation_Date) 
-      VALUES ("${entity_id}", "${user_id}", "${name}", "${date}")`;
-    } else if (entity_id !== 'null') {
-      query = `INSERT INTO Website (EntityId, Name, Creation_Date) 
-      VALUES ("${entity_id}", "${name}", "${date}")`;
-    } else if (user_id !== 'null') {
-      query = `INSERT INTO Website (UserId, Name, Creation_Date) 
-      VALUES ("${user_id}", "${name}", "${date}")`;
-    }
-
-    const website = await execute_query(query);
-
     domain = _.replace(domain, 'https://', '');
     domain = _.replace(domain, 'http://', '');
     domain = _.replace(domain, 'www.', '');
@@ -51,17 +35,72 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
       domain = domain.substring(0, _.size(domain) - 1);
     }
 
-    query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
-      VALUES ("${website.insertId}", "${domain}", "${date}", "1")`;
+    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-    await execute_query(query);
+    let query = `
+      SELECT 
+        w.*, d.Active 
+      FROM 
+        Website as w,
+        Domain as d
+      WHERE
+        d.Url = "${domain}" AND
+        w.WebsiteId = d.WebsiteId AND
+        w.Deleted = "1"
+      LIMIT 1
+      `;
+    const website = await execute_query(query);
+    let website_id = -1;
 
-    for (let t of tags) {
-      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${t}", "${website.insertId}")`;
+    if (_.size(website) > 0) {
+      website_id = website[0].WebsiteId;
+
+      query = `UPDATE Website 
+        SET 
+          Name = "${name}", Deleted = "0"
+          ${entity_id !== "null" ? ", EntityId = " + entity_id : "" }
+          ${user_id !== "null" ? ", UserId = " + user_id : "" }
+        WHERE WebsiteId = "${website_id}"
+        `;
+      await execute_query(query);
+      
+      if (website[0].Active === 0) {
+        
+        query = `UPDATE Domain SET Active = "0", End_Date = "${date}" WHERE WebsiteId = "${website_id}" AND Active = "1"`;
+        await execute_query(query);
+
+        query = `UPDATE Domain SET Active = "1", End_Date = NULL WHERE WebsiteId = "${website_id}" AND Url = "${domain}"`;
+        await execute_query(query);
+      }
+    } else {
+      query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${name}", "${date}")`;
+
+      if (entity_id !== 'null' && user_id !== 'null') {
+        query = `INSERT INTO Website (EntityId, UserId, Name, Creation_Date) 
+        VALUES ("${entity_id}", "${user_id}", "${name}", "${date}")`;
+      } else if (entity_id !== 'null') {
+        query = `INSERT INTO Website (EntityId, Name, Creation_Date) 
+        VALUES ("${entity_id}", "${name}", "${date}")`;
+      } else if (user_id !== 'null') {
+        query = `INSERT INTO Website (UserId, Name, Creation_Date) 
+        VALUES ("${user_id}", "${name}", "${date}")`;
+      }
+
+      const new_website = await execute_query(query);
+      website_id = new_website.insertId;
+
+      query = `INSERT INTO Domain (WebsiteId, Url, Start_Date, Active) 
+        VALUES ("${new_website.insertId}", "${domain}", "${date}", "1")`;
+
       await execute_query(query);
     }
 
-    return success(website.insertId);
+    for (let t of tags) {
+      query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${t}", "${website_id}")`;
+      await execute_query(query);
+    }
+
+    return success(website_id);
   } catch (err) {
     console.log(err);
     return error(err);
@@ -115,7 +154,8 @@ module.exports.website_name_exists = async (name) => {
         User as u 
       WHERE 
         LOWER(w.Name) = "${_.toLower(name)}" AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        w.Deleted = "0"
       LIMIT 1`;
     const website = await execute_query(query);
     return success(_.size(website) === 1);
@@ -131,6 +171,9 @@ module.exports.get_all_websites = async () => {
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+      WHERE 
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        w.Deleted = "0"
       GROUP BY w.WebsiteId`;
     const websites = await execute_query(query);
     return success(websites);
@@ -147,7 +190,8 @@ module.exports.get_all_official_websites = async () => {
         Website as w, 
         User as u 
       WHERE 
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`;
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        w.Deleted = "0"`;
     const websites = await execute_query(query);
     return success(websites);
   } catch (err) {
@@ -205,39 +249,21 @@ module.exports.get_all_user_websites = async (user) => {
   }
 }
 
-module.exports.get_all_tag_websites = async (user, tag) => {
+module.exports.get_all_tag_websites = async tag => {
   try {
-    let query = '';
-    if (user === 'admin') {
-      query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
-        FROM 
-          Website as w
-          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
-          LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
-          Tag as t,
-          TagWebsite as tw
-        WHERE
-          LOWER(t.Name) = "${_.toLower(tag)}" AND
-          t.UserId IS NULL AND
-          tw.TagId = t.TagId AND
-          w.WebsiteId = tw.WebsiteId
-        GROUP BY w.WebsiteId`;
-    } else {
-      query = `SELECT w.*, e.Long_Name as Entity, u.Username as User 
-        FROM 
-          Website as w
-          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
-          User as u,
-          Tag as t,
-          TagWebsite as tw
-        WHERE
-          LOWER(t.Name) = "${_.toLower(tag)}" AND
-          u.Username = "${user}" AND
-          t.UserId = u.UserId AND
-          tw.TagId = t.TagId AND
-          w.WebsiteId = tw.WebsiteId
-        GROUP BY w.WebsiteId`;
-    }
+    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+      FROM 
+        Website as w
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+        Tag as t,
+        TagWebsite as tw
+      WHERE
+        LOWER(t.Name) = "${_.toLower(tag)}" AND
+        t.UserId IS NULL AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId
+      GROUP BY w.WebsiteId`;
 
     const websites = await execute_query(query);
     return success(websites);
@@ -738,14 +764,17 @@ module.exports.update_website = async (website_id, name, entity_id, user_id, old
           UPDATE
             Domain as d, 
             DomainPage as dp, 
-            Page as p 
+            Page as p,
+            Evaluation as e
           SET 
-            p.Show_In = "111" 
+            p.Show_In = "111",
+            e.Show_To = "11" 
           WHERE
             d.WebsiteId = "${website_id}" AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            p.Show_In LIKE "101"`;
+            p.Show_In LIKE "101" AND
+            e.PageId = p.PageId`;
         await execute_query(query);
       }
     } else if ((older_user_id !== 'null' && user_id !== 'null' && older_user_id !== user_id) || older_user_id !== 'null' && user_id === 'null') {
@@ -754,14 +783,17 @@ module.exports.update_website = async (website_id, name, entity_id, user_id, old
           UPDATE
             Domain as d, 
             DomainPage as dp, 
-            Page as p 
+            Page as p,
+            Evaluation as e
           SET 
-            p.Show_In = "101" 
+            p.Show_In = "101",
+            e.Show_To = "10" 
           WHERE
             d.WebsiteId = "${website_id}" AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            p.Show_In = "111"`;
+            p.Show_In = "111" AND
+            e.PageId = p.PageId`;
         await execute_query(query);
       }
 
@@ -769,28 +801,34 @@ module.exports.update_website = async (website_id, name, entity_id, user_id, old
         UPDATE 
           Domain as d, 
           DomainPage as dp, 
-          Page as p 
+          Page as p,
+          Evaluation as e
         SET 
-          p.Show_In = "100" 
+          p.Show_In = "100",
+          e.Show_To = "10"
         WHERE
           d.WebsiteId = "${website_id}" AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
-          p.Show_In = "110"`;
+          p.Show_In = "110" AND
+          e.PageId = p.PageId`;
       await execute_query(query);
 
       query = `
         UPDATE 
           Domain as d, 
           DomainPage as dp, 
-          Page as p 
+          Page as p,
+          Evaluation as e
         SET 
-          p.Show_In = "000" 
+          p.Show_In = "000",
+          e.Show_To = "10"
         WHERE
           d.WebsiteId = "${website_id}" AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
-          p.Show_In = "010"`;
+          p.Show_In = "010" AND
+          e.PageId = p.PageId`;
       await execute_query(query);
     }
 
@@ -817,39 +855,24 @@ module.exports.update_website = async (website_id, name, entity_id, user_id, old
 
 module.exports.delete_website = async (website_id) => {
   try {
-    /*let query = `SELECT dp.* 
-      FROM 
-        DomainPage as dp,
-        Domain as d 
+    let query = `DELETE FROM TagWebsite WHERE WebsiteId = "${website_id}" AND TagId <> 0`;
+    await execute_query(query);
+
+    query = `
+      UPDATE 
+        Domain as d, 
+        DomainPage as dp, 
+        Page as p
+      SET 
+        p.Show_In = "000"
       WHERE
         d.WebsiteId = "${website_id}" AND
-        dp.DomainId = d.DomainId`;
-    const results = await execute_query(query);*/
-
-    let query = `DELETE p FROM Page as p WHERE p.PageId IN (
-      SELECT 
-        dp.PageId
-      FROM
-        DomainPage as dp,
-          Domain as d
-      WHERE
-        d.WebsiteId = "1" AND
-          dp.DomainId = d.DomainId AND
-          (
-            SELECT 
-              COUNT(dp2.PageId) as PageCount 
-            FROM 
-              DomainPage as dp2 
-            WHERE 
-              dp2.PageId = dp.PageId 
-            HAVING PageCount = 1
-          ))`;
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId
+    `;
     await execute_query(query);
 
-    query = `DELETE FROM Domain WHERE WebsiteId = "${website_id}" AND DomainId <> 0`;
-    await execute_query(query);
-
-    query = `DELETE FROM Website WHERE WebsiteId = "${website_id}"`;
+    query = `UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = "${website_id}"`;
     await execute_query(query);
 
     return success(website_id);

@@ -72,9 +72,9 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
         let show = null;
 
         if (_.includes(observatorio_uris, u)) {
-          show = show_in.substring(0,1) + '1';
+          show = '101'
         } else {
-          show = show_in;
+          show = '100';
         }
 
 
@@ -169,77 +169,47 @@ module.exports.get_website_pages = async (website_id) => {
   }
 }
 
-module.exports.get_all_domain_pages = async (user, domain) => {
+module.exports.get_all_domain_pages = async domain => {
   try {
-    let query = '';
-    if (user === 'admin') {
-      query = `SELECT 
-          p.*,
-          e.A,
-          e.AA,
-          e.AAA,
-          e.Score,
-          e.Errors,
-          e.Evaluation_Date 
-        FROM 
-          Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          ),
-          User as u,
-          Website as w,
-          Domain as d,
-          DomainPage as dp
-        WHERE
-          (
-            LOWER(u.Type) = "monitor" AND
-            w.UserId = u.UserId AND
-            d.WebsiteId = w.WebsiteId AND
-            LOWER(d.Url) = "${_.toLower(domain)}" AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId
-          )
-          OR
-          (
-            w.UserId IS NULL AND
-            d.WebsiteId = w.WebsiteId AND
-            LOWER(d.Url) = "${_.toLower(domain)}" AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId
-          )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
-    } else {
-      query = `SELECT 
-          p.*,
-          e.A,
-          e.AA,
-          e.AAA,
-          e.Score,
-          e.Errors,
-          e.Evaluation_Date 
-        FROM 
-          Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          ),
-          User as u,
-          Website as w,
-          Domain as d,
-          DomainPage as dp
-        WHERE
-          LOWER(u.Username) = "${_.toLower(user)}" AND
-          w.UserId = u.UserId AND
-          d.WebsiteId = w.WebsiteId AND
-          LOWER(d.Url) = "${_.toLower(domain)}" AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
-    }
-
+    const query = `SELECT 
+      p.*,
+      e.A,
+      e.AA,
+      e.AAA,
+      e.Score,
+      e.Errors,
+      e.Evaluation_Date 
+    FROM 
+      Page as p
+      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+        SELECT Evaluation_Date FROM Evaluation 
+        WHERE PageId = p.PageId AND e.Show_To LIKE "1_" 
+        ORDER BY Evaluation_Date DESC LIMIT 1
+      ),
+      User as u,
+      Website as w,
+      Domain as d,
+      DomainPage as dp
+    WHERE
+      (
+        LOWER(u.Type) = "monitor" AND
+        w.UserId = u.UserId AND
+        d.WebsiteId = w.WebsiteId AND
+        LOWER(d.Url) = "${_.toLower(domain)}" AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE "1%%"
+      )
+      OR
+      (
+        w.UserId IS NULL AND
+        d.WebsiteId = w.WebsiteId AND
+        LOWER(d.Url) = "${_.toLower(domain)}" AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE "1%%"
+      )
+    GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`;
     const pages = await execute_query(query);
     return success(pages);
   } catch (err) {
@@ -345,7 +315,7 @@ module.exports.get_observatory_data = async () => {
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
             ORDER BY Evaluation_Date DESC LIMIT 1
         ),
         DomainPage as dp,
@@ -465,15 +435,18 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
 
 
         //AQUI
-        if (none.test(page[0].Show_In )) {
-          let show_in = page[0].Show_In[0]+"10";
+        if (none.test(page[0].Show_In)) {
+          let show_in = page[0].Show_In[0]+'10';
           query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
         } else if (observatorio.test(page[0].Show_In)){
-          let show_in = page[0].Show_In[0]+"11";
+          let show_in = page[0].Show_In[0]+'11';
           query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
         }
+
+        query = `UPDATE Evaluation SET Show_To = "11" WHERE PageId = "${page[0].PageId}" AND Show_To = "1_"`;
+        await execute_query(query);
       } else {
         let evaluation = null;
         try {
@@ -537,8 +510,11 @@ module.exports.remove_my_monitor_user_website_pages = async (user_id, website, p
       let show_in;
 
       if (_.size(page) > 0) {
-        show_in =  page[0].Show_In[0]+"0"+page[0].Show_In[2];
+        show_in =  page[0].Show_In[0]+'0'+page[0].Show_In[2];
         query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${id}"`;
+        await execute_query(query);
+
+        query = `UPDATE Evaluation SET Show_To = "10" WHERE PageId = "${id}" AND Show_To LIKE "11"`;
         await execute_query(query);
       }
     }

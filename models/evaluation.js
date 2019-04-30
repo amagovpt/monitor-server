@@ -32,7 +32,7 @@ module.exports.evaluate_html = async (html, evaluator) => {
   }
 }
 //AQUI
-module.exports.evaluate_url_and_save = async (page_id, url,show_To) => {
+module.exports.evaluate_url_and_save = async (page_id, url, show_To) => {
   try {
     let evaluation = await execute_url_evaluation(url, 'examinator');
     //evaluation = JSON.parse(evaluation);
@@ -60,7 +60,7 @@ module.exports.evaluate_url_and_save = async (page_id, url,show_To) => {
   }
 }
 //AQUI diferenca entre este e de baixo
-module.exports.get_newest_evaluation = async (user_id, tag, website, url,show_To) => {
+module.exports.get_newest_evaluation = async (user_id, tag, website, url, show_To) => {
   try {
     const query = `SELECT e.* 
       FROM
@@ -126,7 +126,7 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
         p.PageId = dp.PageId AND
         LOWER(p.Uri) = "${_.toLower(url)}" AND 
         e.PageId = p.PageId AND 
-         e.Show_To LIKE '_1'
+        e.Show_To LIKE '_1'
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`;
     let evaluation = await execute_query(query);
@@ -153,7 +153,7 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
 }
 //AQUI
 //perguntar se 11 eh possivel
-module.exports.get_all_page_evaluations = async (page,show_To) => {
+module.exports.get_all_page_evaluations = async (page) => {
   try {
     const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
       FROM
@@ -162,7 +162,7 @@ module.exports.get_all_page_evaluations = async (page,show_To) => {
       WHERE
         LOWER(p.Uri) = "${_.toLower(page)}" AND
         e.PageId = p.PageId AND
-        e.Show_To = "${show_To}"
+        e.Show_To LIKE "1_"
       ORDER BY e.Evaluation_Date DESC`;
     const evaluations = await execute_query(query);
 

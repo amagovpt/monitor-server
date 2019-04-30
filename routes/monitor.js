@@ -167,7 +167,7 @@ router.post('/evaluate', async function(req, res, next) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
 
-        evaluate_url_and_save(page_id.result, url)
+        evaluate_url_and_save(page_id.result, url, '01')
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
