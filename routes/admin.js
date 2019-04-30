@@ -541,6 +541,36 @@ router.post('/websites/user', async function (req, res, next) {
   }
 });
 
+router.post('/websites/StudyTag', async function (req, res, next) {
+  try {
+    req.check('tag', 'Invalid tag').exists();
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag = req.body.tag;
+        const user = req.body.user;
+
+        let websites = await get_all_tag_websites(user, tag);
+        for (let website in websites){
+
+          website ["import"] = await verify_update_website_admin( website.WebsiteId);
+          //FIXME DOMAIN FUNCTION BRUNO
+          website ["domain"] = await verify_update_website_admin( website.WebsiteId);
+        }
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
 router.post('/websites/tag', async function (req, res, next) {
   try {
     req.check('tag', 'Invalid tag').exists();

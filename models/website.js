@@ -212,7 +212,7 @@ module.exports.get_all_user_websites = async (user) => {
         console.log(err);
         return error(err);
     }
-}
+};
 
 module.exports.get_all_tag_websites = async (user, tag) => {
     try {
