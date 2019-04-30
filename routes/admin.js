@@ -558,18 +558,19 @@ router.post('/websites/StudyTag', async function (req, res, next) {
                 const user = req.body.user;
 
                 let websites = await get_all_tag_websites(user, tag);
-                for (let website of websites) {
+                for (let website of websites["result"]) {
 
-                    website ["result"]["import"] = await verify_update_website_admin(website.WebsiteId);
+                    website ["import"] = await verify_update_website_admin(website.WebsiteId);
 
-                    let websiteAdmin = domain_exists_in_admin(website.WebsiteId);
+                    let websiteAdmin = await  domain_exists_in_admin(website.WebsiteId);
 
-                    website ["result"]["hasDomain"] = _.size(websiteAdmin) === 1;
-                    website ["result"]["domain"] = undefined;
+                    website ["hasDomain"] = _.size(websiteAdmin) === 1;
+                    website ["domain"] = undefined;
 
                     if (_.size(websiteAdmin) === 1)
                         website ["result"]["domain"] = websiteAdmin[0].Name;
                 }
+                res.send(websites);
             }
         }
     } catch (err) {
