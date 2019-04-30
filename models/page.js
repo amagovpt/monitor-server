@@ -24,7 +24,7 @@ const {
   save_page_evaluation
 } = require('./evaluation');
 
-module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in) => {
+module.exports.create_pages = async (domain_id, uris, observatory_uris, show_in) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -41,10 +41,6 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
-
-        //query = `UPDATE Page SET Delete = "0" WHERE PageId = "${page[0].PageId}"`;
-        //await execute_query(query);
-
         query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
         let domain_page = await execute_query(query);
         if (_.size(domain_page) === 0) {
@@ -54,7 +50,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
         }
         let new_show_in = '100';
 
-        if (_.includes(observatorio_uris, u)) {
+        if (_.includes(observatory_uris, u)) {
           if (page[0].Show_In[1] === '1') {
             new_show_in = '111';
           } else {
@@ -71,7 +67,7 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
       } else {
         let show = null;
 
-        if (_.includes(observatorio_uris, u)) {
+        if (_.includes(observatory_uris, u)) {
           show = '101'
         } else {
           show = '100';
@@ -83,9 +79,10 @@ module.exports.create_pages = async (domain_id, uris, observatorio_uris, show_in
           evaluation = await evaluate_url(u, 'examinator');
         } catch (e) {
           errors[u] = -1;
+          evaluation = null;
         }
 
-        if (evaluation !== null && evaluation.result !== null) {
+        if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
           let newPage = await execute_query(query);
 
@@ -453,9 +450,10 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           evaluation = await evaluate_url(pages[i], 'examinator');
         } catch (e) {
           errors[pages[i]] = -1;
+          evaluation = null;
         }
 
-        if (evaluation !== null && evaluation.result !== null) {
+        if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "010", "${date}")`;
@@ -527,10 +525,10 @@ module.exports.remove_my_monitor_user_website_pages = async (user_id, website, p
 }
 
 /**
- * ACCESS STUDIES
+ * STUDY MONITOR
  */
 
-module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, website) => {
+module.exports.get_study_monitor_user_tag_website_pages = async (user_id, tag, website) => {
   try {
     let query = `SELECT * FROM Website WHERE UserId = "${user_id}" AND LOWER(Name) = "${_.toLower(website)}" LIMIT 1`;
     const websiteExists = await execute_query(query);
@@ -579,7 +577,7 @@ module.exports.get_access_studies_user_tag_website_pages = async (user_id, tag, 
   }
 }
 
-module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, tag, website) => {
+module.exports.get_study_monitor_user_tag_website_pages_data = async (user_id, tag, website) => {
   try {
     const query = `SELECT 
         distinct p.*,
@@ -618,7 +616,7 @@ module.exports.get_access_studies_user_tag_website_pages_data = async (user_id, 
   }
 }
 
-module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
+module.exports.add_study_monitor_user_tag_website_pages = async (user_id, tag, website, domain, pages) => {
   try {
     const errors = {};
     const size = _.size(pages);
@@ -669,14 +667,14 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
         }
       } else {
         let evaluation = null;
-
         try {
           evaluation = await evaluate_url(pages[i], 'examinator');
         } catch (e) {
           errors[pages[i]] = -1;
+          evaluation = null;
         }
 
-        if (evaluation !== null && evaluation.result !== null) {
+        if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
           let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${decodeURIComponent(pages[i])}", "none", "${date}")`;
           let newPage = await execute_query(query);
@@ -731,7 +729,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
       }
     }
 
-    const newPages = await this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+    const newPages = await this.get_study_monitor_user_tag_website_pages(user_id, tag, website);
 
     if (_.size(_.keys(errors)) > 0) {
       return error({
@@ -748,7 +746,7 @@ module.exports.add_access_studies_user_tag_website_pages = async (user_id, tag, 
   }
 }
 
-module.exports.remove_access_studies_user_tag_website_pages = async (user_id, tag, website, pages_id) => {
+module.exports.remove_study_monitor_user_tag_website_pages = async (user_id, tag, website, pages_id) => {
   try {
     const query = `
       DELETE 
@@ -768,7 +766,7 @@ module.exports.remove_access_studies_user_tag_website_pages = async (user_id, ta
 
     await execute_query(query);
 
-    return this.get_access_studies_user_tag_website_pages(user_id, tag, website);
+    return this.get_study_monitor_user_tag_website_pages(user_id, tag, website);
   } catch (err) {
     console.log(err);
     throw error(err);

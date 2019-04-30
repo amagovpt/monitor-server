@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-const { split } = require('lodash');
 const { ServerError, ParamsError } = require('../lib/_error');
 const { error } = require('../lib/_response');
 const { verify_user, change_user_password } = require('../models/user');
@@ -12,28 +11,28 @@ const { evaluate_url_and_save, get_newest_evaluation } = require('../models/eval
 const {
   get_all_official_tags,
   create_user_tag, 
-  get_access_studies_user_tags,
+  get_study_monitor_user_tags,
   user_tag_name_exists,
   user_remove_tags
 } = require('../models/tag');
 
 const { 
-  get_access_studies_user_tag_websites,
-  get_access_studies_user_tag_websites_data,
-  add_access_studies_user_tag_new_website,
-  add_access_studies_user_tag_existing_website,
-  access_studies_user_tag_website_name_exists,
-  access_studies_user_tag_website_domain_exists,
-  get_access_studies_user_tag_website_domain,
-  remove_access_studies_user_tag_websites,
-  get_access_studies_user_websites_from_other_tags
+  get_study_monitor_user_tag_websites,
+  get_study_monitor_user_tag_websites_data,
+  add_study_monitor_user_tag_new_website,
+  add_study_monitor_user_tag_existing_website,
+  study_monitor_user_tag_website_name_exists,
+  study_monitor_user_tag_website_domain_exists,
+  get_study_monitor_user_tag_website_domain,
+  remove_study_monitor_user_tag_websites,
+  get_study_monitor_user_websites_from_other_tags
 } = require('../models/website');
 
 const { 
-  get_access_studies_user_tag_website_pages,
-  get_access_studies_user_tag_website_pages_data,
-  add_access_studies_user_tag_website_pages,
-  remove_access_studies_user_tag_website_pages
+  get_study_monitor_user_tag_website_pages,
+  get_study_monitor_user_tag_website_pages_data,
+  add_study_monitor_user_tag_website_pages,
+  remove_study_monitor_user_tag_website_pages
 } = require('../models/page');
 
 router.post('/tags/allOfficial', async function (req, res, next) {
@@ -67,7 +66,7 @@ router.post('/user/tags', async function(req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, false);
       if (user_id !== -1) {
-        get_access_studies_user_tags(user_id)
+        get_study_monitor_user_tags(user_id)
           .then(tags => res.send(tags))
           .catch(err => res.send(err));
       }
@@ -90,7 +89,7 @@ router.post('/user/tag/websites', async function(req, res, next) {
       if (user_id !== -1) {
         const tag = req.body.tag;
 
-        get_access_studies_user_tag_websites(user_id, tag)
+        get_study_monitor_user_tag_websites(user_id, tag)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -113,7 +112,7 @@ router.post('/user/tag/websitesData', async function(req, res, next) {
       if (user_id !== -1) {
         const tag = req.body.tag;
 
-        get_access_studies_user_tag_websites_data(user_id, tag)
+        get_study_monitor_user_tag_websites_data(user_id, tag)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -138,7 +137,7 @@ router.post('/user/tag/website/pages', async function(req, res, next) {
         const tag = req.body.tag;
         const website = req.body.website;
 
-        get_access_studies_user_tag_website_pages(user_id, tag, website)
+        get_study_monitor_user_tag_website_pages(user_id, tag, website)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }
@@ -163,7 +162,7 @@ router.post('/user/tag/website/pagesData', async function(req, res, next) {
         const tag = req.body.tag;
         const website = req.body.website;
 
-        get_access_studies_user_tag_website_pages_data(user_id, tag, website)
+        get_study_monitor_user_tag_website_pages_data(user_id, tag, website)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }
@@ -217,7 +216,7 @@ router.post('/evaluation', async function(req, res, next) {
         const website = req.body.website;
         const url = decodeURIComponent(req.body.url);
 
-        get_newest_evaluation(user_id, tag, website, url,"10")
+        get_newest_evaluation(user_id, tag, website, url)
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
@@ -241,7 +240,7 @@ router.post('/evaluate', async function(req, res, next) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
 
-        evaluate_url_and_save(page_id.result, url)
+        evaluate_url_and_save(page_id.result, url, '00')
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
@@ -289,7 +288,7 @@ router.post('/user/tag/website/nameExists', async function(req, res, next) {
         const tag = req.body.tag;
         const name = req.body.name;
 
-        access_studies_user_tag_website_name_exists(user_id, tag, name)
+        study_monitor_user_tag_website_name_exists(user_id, tag, name)
           .then(exists => res.send(exists))
           .catch(err => res.send(err));
       }
@@ -314,7 +313,7 @@ router.post('/user/tag/website/domainExists', async function(req, res, next) {
         const tag = req.body.tag;
         const domain = req.body.domain;
 
-        access_studies_user_tag_website_domain_exists(user_id, tag, domain)
+        study_monitor_user_tag_website_domain_exists(user_id, tag, domain)
           .then(exists => res.send(exists))
           .catch(err => res.send(err));
       }
@@ -339,7 +338,7 @@ router.post('/user/tag/website/domain', async function(req, res, next) {
         const tag = req.body.tag;
         const website = req.body.website;
 
-        get_access_studies_user_tag_website_domain(user_id, tag, website)
+        get_study_monitor_user_tag_website_domain(user_id, tag, website)
           .then(domain => res.send(domain))
           .catch(err => res.send(err));
       }
@@ -364,7 +363,7 @@ router.post('/user/tag/addExistingWebsite', async function(req, res, next) {
         const tag = req.body.tag;
         const websitesId = JSON.parse(req.body.websitesId);
 
-        add_access_studies_user_tag_existing_website(user_id, tag, websitesId)
+        add_study_monitor_user_tag_existing_website(user_id, tag, websitesId)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -393,7 +392,7 @@ router.post('/user/tag/addNewWebsite', async function(req, res, next) {
         const domain = req.body.domain;
         const pages = JSON.parse(req.body.pages);
 
-        add_access_studies_user_tag_new_website(user_id, tag, name, domain, pages)
+        add_study_monitor_user_tag_new_website(user_id, tag, name, domain, pages)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -422,7 +421,7 @@ router.post('/user/tag/website/addPages', async function(req, res, next) {
         const domain = req.body.domain;
         const pages = JSON.parse(req.body.pages);
 
-        add_access_studies_user_tag_website_pages(user_id, tag, website, domain, pages)
+        add_study_monitor_user_tag_website_pages(user_id, tag, website, domain, pages)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }
@@ -471,7 +470,7 @@ router.post('/user/tag/removeWebsites', async function(req, res, next) {
         const tag = req.body.tag;
         const websites_id = JSON.parse(req.body.websitesId);
 
-        remove_access_studies_user_tag_websites(user_id, tag, websites_id)
+        remove_study_monitor_user_tag_websites(user_id, tag, websites_id)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }
@@ -499,7 +498,7 @@ router.post('/user/tag/website/removePages', async function(req, res, next) {
         const website = req.body.website;
         const pages_id = JSON.parse(req.body.pagesId);
         
-        remove_access_studies_user_tag_website_pages(user_id, tag, website, pages_id)
+        remove_study_monitor_user_tag_website_pages(user_id, tag, website, pages_id)
           .then(pages => res.send(pages))
           .catch(err => res.send(err));
       }
@@ -523,7 +522,7 @@ router.post('/user/websites/otherTags', async function(req, res, next) {
       if (user_id !== -1) {
         const tag = req.body.tag;
 
-        get_access_studies_user_websites_from_other_tags(user_id, tag)
+        get_study_monitor_user_websites_from_other_tags(user_id, tag)
           .then(websites => res.send(websites))
           .catch(err => res.send(err));
       }

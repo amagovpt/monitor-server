@@ -17,7 +17,7 @@ const {
 
 const {
   verify_user,
-  get_number_of_access_studies_users,
+  get_number_of_study_monitor_users,
   get_number_of_my_monitor_users,
   get_all_users,
   get_all_monitor_users,
@@ -29,7 +29,7 @@ const {
 } = require('../models/user');
 
 const {
-  get_number_of_access_studies_tags,
+  get_number_of_study_monitor_tags,
   get_number_of_observatorio_tags,
   get_all_tags,
   get_all_official_tags,
@@ -53,7 +53,7 @@ const {
 
 const {
   get_all_websites,
-  get_number_of_access_studies_websites,
+  get_number_of_study_monitor_websites,
   get_number_of_my_monitor_websites,
   get_number_of_observatorio_websites,
   get_all_official_websites,
@@ -113,7 +113,7 @@ router.post('/users/studies/total', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        get_number_of_access_studies_users()
+        get_number_of_study_monitor_users()
           .then(total => res.send(total))
           .catch(err => res.send(err));
       }
@@ -155,7 +155,7 @@ router.post('/tags/studies/total', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        get_number_of_access_studies_tags()
+        get_number_of_study_monitor_tags()
           .then(total => res.send(total))
           .catch(err => res.send(err));
       }
@@ -197,7 +197,7 @@ router.post('/websites/studies/total', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        get_number_of_access_studies_websites()
+        get_number_of_study_monitor_websites()
           .then(total => res.send(total))
           .catch(err => res.send(err));
       }

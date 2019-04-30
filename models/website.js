@@ -111,7 +111,7 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
  * Get functions
  */
 
-module.exports.get_number_of_access_studies_websites = async () => {
+module.exports.get_number_of_study_monitor_websites = async () => {
   try {
     const query = `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE LOWER(u.Type) = "studies" AND w.UserId = u.UserId`;
     const websites = await execute_query(query);
@@ -413,7 +413,7 @@ module.exports.get_my_monitor_user_website_domain = async (user_id, website) => 
  * ACCESS STUDIES
  */
 
-module.exports.get_access_studies_user_websites_from_other_tags = async (user_id, tag) => {
+module.exports.get_study_monitor_user_websites_from_other_tags = async (user_id, tag) => {
   try {
     const query = `SELECT
         distinct w.*,
@@ -470,7 +470,7 @@ module.exports.get_access_studies_user_websites_from_other_tags = async (user_id
   }
 }
 
-module.exports.get_access_studies_user_tag_websites = async (user_id, tag) => {
+module.exports.get_study_monitor_user_tag_websites = async (user_id, tag) => {
   try {
     let query = `SELECT * FROM Tag WHERE UserId = "${user_id}" AND LOWER(Name) = "${_.toLower(tag)}" LIMIT 1`;
     const tagExist = await execute_query(query);
@@ -516,7 +516,7 @@ module.exports.get_access_studies_user_tag_websites = async (user_id, tag) => {
   }
 }
 
-module.exports.get_access_studies_user_tag_websites_data = async (user_id, tag) => {
+module.exports.get_study_monitor_user_tag_websites_data = async (user_id, tag) => {
   try {
     const query = `SELECT
         w.WebsiteId,
@@ -557,7 +557,7 @@ module.exports.get_access_studies_user_tag_websites_data = async (user_id, tag) 
   }
 }
 
-module.exports.add_access_studies_user_tag_existing_website = async (user_id, tag, websitesId) => {
+module.exports.add_study_monitor_user_tag_existing_website = async (user_id, tag, websitesId) => {
   try {
     for (let id of websitesId) {
       let query = `INSERT INTO TagWebsite (TagId, WebsiteId) 
@@ -565,14 +565,14 @@ module.exports.add_access_studies_user_tag_existing_website = async (user_id, ta
       await execute_query(query);
     }
 
-    return await this.get_access_studies_user_tag_websites(user_id, tag);
+    return await this.get_study_monitor_user_tag_websites(user_id, tag);
   } catch (err) {
     console.log(err);
     throw error(error);
   }
 }
 
-module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, name, domain, pages) => {
+module.exports.add_study_monitor_user_tag_new_website = async (user_id, tag, name, domain, pages) => {
   try {
     let date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let query = `INSERT INTO Website (UserId, Name, Creation_Date) VALUES ("${user_id}", "${name}", "${date}")`;
@@ -586,7 +586,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
 
     const errors = {};
     const size = _.size(pages);
-    for (let i = 0; i < size; i++) {
+    for (let i = 0 ; i < size ; i++) {
       query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
@@ -597,10 +597,11 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
           evaluation = await evaluate_url(pages[i], 'examinator');
         } catch (e) {
           errors[pages[i]] = -1;
+          evaluation = null;
         }
 
-        if (evaluation !== null && evaluation.result !== null) {
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "none", "${date}")`;
+        if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
+          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "000", "${date}")`;
           let newPage = await execute_query(query);
           
           await save_page_evaluation(newPage.insertId, evaluation,"01");
@@ -640,7 +641,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
       }
     }
 
-    const newWebsites = await this.get_access_studies_user_tag_websites(user_id, tag);
+    const newWebsites = await this.get_study_monitor_user_tag_websites(user_id, tag);
 
     if (_.size(_.keys(errors)) > 0) {
       return error({ code: 0, message: 'SOME_PAGES_ERRORS', err: errors}, newWebsites.result);
@@ -653,7 +654,7 @@ module.exports.add_access_studies_user_tag_new_website = async (user_id, tag, na
   }
 }
 
-module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, websites_id) => {
+module.exports.remove_study_monitor_user_tag_websites = async (user_id, tag, websites_id) => {
   try {
     let query = ``;
     for (const id of websites_id) {
@@ -673,14 +674,14 @@ module.exports.remove_access_studies_user_tag_websites = async (user_id, tag, we
       }
     }
 
-    return await this.get_access_studies_user_tag_websites(user_id, tag);
+    return await this.get_study_monitor_user_tag_websites(user_id, tag);
   } catch (err) {
     console.log(err);
     throw error(err);
   }
 }
 
-module.exports.access_studies_user_tag_website_name_exists = async (user_id, tag, name) => {
+module.exports.study_monitor_user_tag_website_name_exists = async (user_id, tag, name) => {
   try {
     const query = `SELECT * FROM 
         Tag as t,
@@ -703,7 +704,7 @@ module.exports.access_studies_user_tag_website_name_exists = async (user_id, tag
   }
 }
 
-module.exports.access_studies_user_tag_website_domain_exists = async (user_id, tag, domain) => {
+module.exports.study_monitor_user_tag_website_domain_exists = async (user_id, tag, domain) => {
   try {
     const query = `SELECT * FROM 
         Tag as t,
@@ -728,7 +729,7 @@ module.exports.access_studies_user_tag_website_domain_exists = async (user_id, t
   }
 }
 
-module.exports.get_access_studies_user_tag_website_domain = async (user_id, tag, website) => {
+module.exports.get_study_monitor_user_tag_website_domain = async (user_id, tag, website) => {
   try {
     const query = `SELECT d.Url FROM 
         Tag as t,

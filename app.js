@@ -10,7 +10,7 @@ const sessionRouter = require('./routes/session');
 const adminRouter = require('./routes/admin');
 const ampRouter = require('./routes/amp');
 const obsRouter = require('./routes/observatory');
-const studiesRouter = require('./routes/studies');
+const studyRouter = require('./routes/study');
 const monitorRouter = require('./routes/monitor');
 const digitalSealRouter = require('./routes/digital-seal');
 
@@ -27,7 +27,7 @@ app.use('/session', sessionRouter);
 app.use('/admin', adminRouter);
 app.use('/amp', ampRouter);
 app.use('/observatory', obsRouter);
-app.use('/studies', studiesRouter);
+app.use('/study', studyRouter);
 app.use('/monitor', monitorRouter);
 app.use('/digitalSeal', digitalSealRouter);
 

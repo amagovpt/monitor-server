@@ -18,16 +18,13 @@ const {
 const {
   execute_query
 } = require('../lib/_database');
-const {
-  evaluate_url_and_save
-} = require('./evaluation');
 
-module.exports.create_official_tag = async (name, observatorio, websites) => {
+module.exports.create_official_tag = async (name, observatory, websites) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     let query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
-      VALUES ("${name}", "${observatorio}", "${date}")`;
+      VALUES ("${name}", "${observatory}", "${date}")`;
 
     const tag = await execute_query(query);
 
@@ -88,7 +85,7 @@ module.exports.create_user_tag = async (user_id, type, tags_id, user_tag_name) =
           VALUES ("${new_website.insertId}", "${website.Url}", "${new Date(website.Start_Date).toISOString().replace(/T/, ' ').replace(/\..+/, '')}", "1")`;
         let new_domain = await execute_query(query);
 
-        query = `SELECT * FROM DomainPage WHERE DomainId = "${website.DomainId}"`;
+        query = `SELECT dp.* FROM DomainPage as dp, Page as p WHERE dp.DomainId = "${website.DomainId}" AND p.PageId = dp.PageId AND p.Show_In LIKE "1_1"`;
         let pages = await execute_query(query);
 
         for (let page of pages) {
@@ -114,7 +111,7 @@ module.exports.create_user_tag = async (user_id, type, tags_id, user_tag_name) =
  * Get functions
  */
 
-module.exports.get_number_of_access_studies_tags = async () => {
+module.exports.get_number_of_study_monitor_tags = async () => {
   try {
     const query = `SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE LOWER(u.Type) = "studies" AND t.UserId = u.UserId`;
     const tags = await execute_query(query);
@@ -218,7 +215,7 @@ module.exports.get_all_tags_info = async () => {
   }
 }
 
-module.exports.get_access_studies_user_tags = async user_id => {
+module.exports.get_study_monitor_user_tags = async user_id => {
   try {
     const query = `SELECT 
         distinct t.*, 
@@ -273,7 +270,7 @@ module.exports.user_remove_tags = async (user_id, tags_id) => {
     query = `DELETE FROM Tag WHERE TagId IN (${tags_id})`;
     await execute_query(query);
 
-    return await this.get_access_studies_user_tags(user_id);
+    return await this.get_study_monitor_user_tags(user_id);
   } catch (err) {
     console.log(err);
     throw error(err);

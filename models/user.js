@@ -158,7 +158,7 @@ module.exports.create_user = async (username, password, names, emails, type, web
  * Get functions
  */
 
-module.exports.get_number_of_access_studies_users = async () => {
+module.exports.get_number_of_study_monitor_users = async () => {
   try {
     const query = `SELECT COUNT(*) as Users FROM User WHERE LOWER(Type) = "studies";`;
     const users = await execute_query(query);
