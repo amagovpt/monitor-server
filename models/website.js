@@ -993,7 +993,7 @@ module.exports.verify_update_website_admin = async (website_id) => {
         let studyP = await execute_query(query);
 
 
-        return success(_.size(studyP) === 0);
+        return _.size(studyP) === 0;
     } catch
         (err) {
         console.log(err);

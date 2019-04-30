@@ -204,19 +204,22 @@ module.exports.get_all_domains_info = async () => {
 module.exports.domain_exists_in_admin = async (website_id) => {
     try {
       const query = `SELECT
-          d.*
+          w2.*
         FROM
           Domain as d,
           Domain as d2,
           Website as w,
+          Website as w2
         WHERE
           w.WebsiteId = "${website_id}" AND
           d.WebsiteId = w.WebsiteId AND 
+          d2.WebsiteId = w2.WebsiteId AND 
           d2.Url = d.Url AND
-          d2.DomainId != d.DomainId
-        GROUP BY d.DomainId`;
-      const domains = await execute_query(query);
-      return success(_.size(domains) > 0);
+          d2.DomainId != d.DomainId`;
+
+
+      const websites = await execute_query(query);
+      return websites;
     } catch(err) {
       console.log(err);
       return error(err);
