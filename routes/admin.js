@@ -1471,42 +1471,6 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
   }
 });
 
-router.post('/pages/updateAdminStudyPage', async function (req, res, next) {
-  try {
-    req.check('tagId', 'Invalid parameter PageId').exists();
-    req.check('checked', 'Invalid parameter Checked').exists();
-    req.check('cookie', 'User not logged in').exists();
-
-    const errors = req.validationErrors();
-    if (errors) {
-      res.send(error(new ParamsError(errors)));
-    } else {
-      const user_id = await verify_user(res, req.body.cookie, true);
-      if (user_id !== -1) {
-        const page_id = req.body.pageId;
-        const checked = req.body.checked;
-
-        const username = req.body.user;
-        const type = await get_user_type(username);
-        const user_id = await get_user_id(username);
-
-        update_page_admin(page_id, checked)
-            .then(success => res.send(success))
-            .catch(err => res.send(res));
-
-        if (type === 'studies') {
-          //method to tag from selected page of studymonitor
-          update_tag_admin(page_id, checked, user_id)
-              .catch(err => res.send(res));
-        }
-
-      }
-    }
-  } catch (err) {
-    console.log(err);
-    res.send(error(new ServerError(err)));
-  }
-});
 
 router.post('/pages/updateObservatorio', async function (req, res, next) {
   try {
