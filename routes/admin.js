@@ -420,9 +420,12 @@ router.post('/tags/user', async function (req, res, next) {
             if (user_id !== -1) {
                 const user = req.body.user;
 
-                get_all_user_tags(user)
-                    .then(tags => res.send(tags))
-                    .catch(err => re.send(err));
+                let tags =  await get_all_user_tags(user);
+
+                for(let tag of tags){
+                    tags["imported"] = await verify_update_tag_admin(tag.TagId);
+                }
+                res.send(tags);
             }
         }
     } catch (err) {
@@ -1494,6 +1497,7 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
     try {
         req.check('websiteId', 'Invalid parameter PageId').exists();
         req.check('cookie', 'User not logged in').exists();
+        req.check('websiteName', 'No website name').exists();
 
         const errors = req.validationErrors();
         if (errors) {
@@ -1502,12 +1506,13 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
             const user_id = await verify_user(res, req.body.cookie, true);
             if (user_id !== -1) {
                 const websiteId = req.body.websiteId;
+                const websiteName = req.body.websiteName;
 
                 const username = req.body.user;
                 const type = await get_user_type(username);
                 const user_id = await get_user_id(username);
 
-                update_website_admin(websiteId)
+                update_website_admin(websiteId,websiteName)
                     .then(success => res.send(success))
                     .catch(err => res.send(res));
 
@@ -1523,6 +1528,7 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
     try {
         req.check('tagId', 'Invalid parameter TagId').exists();
         req.check('cookie', 'User not logged in').exists();
+        req.check('tagName', 'No tag name').exists();
 
         const errors = req.validationErrors();
         if (errors) {
@@ -1531,8 +1537,9 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
             const user_id = await verify_user(res, req.body.cookie, true);
             if (user_id !== -1) {
                 const tag_id = req.body.tagId;
+                const tagName = req.body.tagName;
 
-                update_tag_admin(tag_id)
+                update_tag_admin(tag_id,tagName)
                     .then(success => res.send(success))
                     .catch(err => res.send(res));
 

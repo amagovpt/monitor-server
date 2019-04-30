@@ -423,7 +423,7 @@ module.exports.delete_tag = async (tag_id) => {
 };
 
 //method to import website, domain and tag from selected page of studymonitor
-module.exports.update_tag_admin = async (tag_id) => {
+module.exports.update_tag_admin = async (tag_id,newTagName) => {
   try {
     let query;
 
@@ -439,14 +439,13 @@ module.exports.update_tag_admin = async (tag_id) => {
             tw.TagId = t.TagId AND 
             t.TagId = "${tag_id}"`;
     let tagResult = await execute_query(query);
-    let tagName = tagResult[0].tagName;
 
     let domDate;
     let webDate;
 
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
-                VALUES ("${tagName}", "0", "${date}")`;
+                VALUES ("${newTagName}", "0", "${date}")`;
     let tag = await execute_query(query);
 
     for (let website of tagResult) {
@@ -539,15 +538,16 @@ module.exports.verify_update_tag_admin = async (tag_id) => {
             Tag as t ON t.TagId = tw.TagId
             WHERE 
             dp.PageId = p.PageId AND
-            p.Show_IN LIKE "0_1"
+            p.Show_In LIKE '0%' AND
             dp.DomainId = d.DomainId AND
             d.WebsiteId = w.WebsiteId AND
             tw.WebsiteId = w.WebsiteId AND 
+            tw.TagId = t.TagId AND
             t.TagId = "${tag_id}" AND 
             t.UserId IS NOT NULL `;
     let studyP = await execute_query(query);
 
-
+      console.log(studyP);
     return success(_.size(studyP) === 0);
   } catch
     (err) {

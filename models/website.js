@@ -871,7 +871,7 @@ module.exports.get_website_seal_information = async domain => {
 
 //substituir data
 //method to import website, domain and tag from selected page of studymonitor
-module.exports.update_website_admin = async (website_id, checked, user_id) => {
+module.exports.update_website_admin = async (website_id, newWebsiteName) => {
   try {
     let query;
     query = `SELECT  w.*, d.*
@@ -936,7 +936,7 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
           }
         }
       } else {
-        query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${webDate}")`;
+        query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${newWebsiteName}", "${webDate}")`;
         let website = await execute_query(query);
 
         query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${domDate}", "1")`;

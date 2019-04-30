@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="47961629-fefc-4ea3-b29e-485163b16d10" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/tag.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/tag.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/website.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/website.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
@@ -23,8 +26,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models/page.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="233">
-              <caret line="800" column="8" selection-start-line="800" selection-start-column="8" selection-end-line="802" />
+            <state relative-caret-position="252">
+              <caret line="620" column="71" lean-forward="true" selection-start-line="620" selection-start-column="71" selection-end-line="620" selection-end-column="71" />
             </state>
           </provider>
         </entry>
@@ -38,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/tag.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="451" selection-start-line="451" selection-end-line="451" />
+            <state relative-caret-position="207">
+              <caret line="425" column="58" selection-start-line="425" selection-start-column="48" selection-end-line="425" selection-end-column="58" />
             </state>
           </provider>
         </entry>
@@ -59,17 +62,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models/website.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="387">
-              <caret line="995" column="36" selection-start-line="995" selection-start-column="36" selection-end-line="995" selection-end-column="36" />
+            <state relative-caret-position="1317">
+              <caret line="938" column="84" selection-start-line="938" selection-start-column="84" selection-end-line="938" selection-end-column="84" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/admin.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="570" column="51" selection-start-line="570" selection-start-column="51" selection-end-line="570" selection-end-column="51" />
+            <state relative-caret-position="784">
+              <caret line="1543" column="47" selection-start-line="1543" selection-start-column="47" selection-end-line="1543" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -124,6 +127,8 @@
       <find>user</find>
       <find>get_all_user_websites</find>
       <find>tag_websites</find>
+      <find>tags/user</find>
+      <find>TAGS/US</find>
       <find>update</find>
       <find>get_all_tag_websites</find>
     </findStrings>
@@ -136,8 +141,8 @@
       <list>
         <option value="$PROJECT_DIR$/lib/db.sql" />
         <option value="$PROJECT_DIR$/models/page.js" />
-        <option value="$PROJECT_DIR$/models/tag.js" />
         <option value="$PROJECT_DIR$/models/domain.js" />
+        <option value="$PROJECT_DIR$/models/tag.js" />
         <option value="$PROJECT_DIR$/models/website.js" />
         <option value="$PROJECT_DIR$/routes/admin.js" />
       </list>
@@ -200,7 +205,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1556642525605" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1556657156051" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../admin-monitor-suite" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -255,9 +260,9 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55012000" />
+    <option name="totallyTimeSpent" value="56282000" />
   </component>
-  <component name="TodoView">
+  <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
       <is-autoscroll-to-source value="true" />
     </todo-panel>
@@ -434,8 +439,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/page.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="800" column="8" selection-start-line="800" selection-start-column="8" selection-end-line="802" />
+        <state relative-caret-position="252">
+          <caret line="620" column="71" lean-forward="true" selection-start-line="620" selection-start-column="71" selection-end-line="620" selection-end-column="71" />
         </state>
       </provider>
     </entry>
@@ -446,13 +451,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/tag.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="451" selection-start-line="451" selection-end-line="451" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/models/domain.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="173">
@@ -460,17 +458,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/website.js">
+    <entry file="file://$PROJECT_DIR$/routes/admin.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="387">
-          <caret line="995" column="36" selection-start-line="995" selection-start-column="36" selection-end-line="995" selection-end-column="36" />
+        <state relative-caret-position="784">
+          <caret line="1543" column="47" selection-start-line="1543" selection-start-column="47" selection-end-line="1543" selection-end-column="47" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/routes/admin.js">
+    <entry file="file://$PROJECT_DIR$/models/website.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="570" column="51" selection-start-line="570" selection-start-column="51" selection-end-line="570" selection-end-column="51" />
+        <state relative-caret-position="1317">
+          <caret line="938" column="84" selection-start-line="938" selection-start-column="84" selection-end-line="938" selection-end-column="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/tag.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="425" column="58" selection-start-line="425" selection-start-column="48" selection-end-line="425" selection-end-column="58" />
         </state>
       </provider>
     </entry>
