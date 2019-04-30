@@ -565,10 +565,10 @@ router.post('/websites/StudyTag', async function (req, res, next) {
                     let websiteAdmin = await  domain_exists_in_admin(website.WebsiteId);
 
                     website ["hasDomain"] = _.size(websiteAdmin) === 1;
-                    website ["domain"] = undefined;
+                    website ["webName"] = undefined;
 
                     if (_.size(websiteAdmin) === 1)
-                        website ["result"]["domain"] = websiteAdmin[0].Name;
+                        website ["result"]["webName"] = websiteAdmin[0].Name;
                 }
                 res.send(websites);
             }
