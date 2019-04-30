@@ -18,6 +18,12 @@ const {
 const {
     execute_query
 } = require('../lib/_database');
+
+const {
+    update_page_admin
+} = require('./page');
+
+
 const {
     evaluate_url_and_save
 } = require('./evaluation');
@@ -298,8 +304,8 @@ module.exports.get_tag_info = async (tag_id) => {
 }
 
 module.exports.get_all_user_tags = async (user) => {
-  try {
-    const query = `SELECT t.*, u.Username as User 
+    try {
+        const query = `SELECT t.*, u.Username as User 
       FROM 
         Tag as t,
         User as u
@@ -307,13 +313,13 @@ module.exports.get_all_user_tags = async (user) => {
         LOWER(u.Username) = "${_.toLower(user)}" AND
         t.UserId = u.UserId
       GROUP BY t.TagId`;
-    const tags = await execute_query(query);
+        const tags = await execute_query(query);
 
-    return success(tags);
-  } catch (err) {
-    console.log(err);
-    return error(err);
-  }
+        return success(tags);
+    } catch (err) {
+        console.log(err);
+        return error(err);
+    }
 }
 
 module.exports.update_tag = async (tag_id, name, observatorio, default_websites, websites) => {
@@ -420,8 +426,8 @@ module.exports.delete_tag = async (tag_id) => {
 module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
     try {
         let query;
-        if (checked === 'true') {
-            query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
+
+        query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
             FROM 
             Tag as t, 
             Domain as d, 
@@ -433,21 +439,21 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
             tw.WebsiteId = w.WebsiteId AND 
              tw.TagId = T.TagId AND 
             t.TagId = "${tag_id}"`;
-            let tagResult = await execute_query(query);
-            let tagName = tag[0].tagName;
+        let tagResult = await execute_query(query);
+        let tagName = tag[0].tagName;
 
-            query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
+        query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
                 VALUES ("${tagName}", "0", "${date}")`;
-            let tag = await execute_query(query);
+        let tag = await execute_query(query);
 
-            const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
 
-            for (let website of tagResult) {
-                let websiteName = website.Name;
-                let domainUrl = website.Url;
+        for (let website of tagResult) {
+            let websiteName = website.Name;
+            let domainUrl = website.Url;
 
-                query = `SELECT  p.*
+            query = `SELECT  p.*
                         FROM 
                         Tag as t, 
                         Page as p, 
@@ -460,9 +466,9 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
                         d.WebsiteId = w.WebsiteId AND
                         d.Url = "${domainUrl}"`;
 
-                let pages = await execute_query(query);
+            let pages = await execute_query(query);
 
-                query = `SELECT  d.DomainId,w,WebsiteId
+            query = `SELECT  d.DomainId,w,WebsiteId
             FROM  
             Page as p, 
             Domain as d, 
@@ -479,95 +485,158 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
             tw.WebsiteId = w.WebsiteId AND 
             t.TagId = tw.TagId AND 
             t.UserId IS NULL `;
-                let domainP = await execute_query(query);
+            let domainP = await execute_query(query);
 
 
-                if (_.size(domain) === 0) {
+            if (_.size(domain) === 0) {
 
+                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+                let website = await execute_query(query);
 
-                    query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
-                    let website = await execute_query(query);
+                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+                let domain = await execute_query(query);
 
-                    query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
-                    let domain = await execute_query(query);
+                query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${website.insertId}", "${tag.insertId}")`;
+                await execute_query(query);
 
-                    query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${website.insertId}", "${tag.insertId}")`;
+                for (let page of pages) {
+                    await update_page_admin(page.PageId, false);
+
+                    query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
                     await execute_query(query);
-
-                    for (let page of pages) {
-                        await update_page_admin(page.PageId, false);
-
-                        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
-                        await execute_query(query);}
-                    }else{
+                }
+            } else {
 
 
-                    query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${domainP.WebsiteId}", "${tag.insertId}")`;
+                query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${domainP.WebsiteId}", "${tag.insertId}")`;
+                await execute_query(query);
+
+                for (let page of pages) {
+                    await update_page_admin(page.PageId, false);
+
+                    query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page.PageId}")`;
                     await execute_query(query);
-
-                    for (let page of pages) {
-                        await update_page_admin(page.PageId, false);
-
-                        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page.PageId}")`;
-                        await execute_query(query);}
-
-
-
-                    }
                 }
 
 
-
-
-            } else {
-
-            query = `DELETE d,w
-             FROM 
-            Tag as t, 
-            Domain as d, 
-            Website as w,
-            TagWebsite as tw
-            WHERE 
-            dp.DomainId = d.DomainId AND
-            d.WebsiteId = w.WebsiteId AND
-            tw.WebsiteId = w.WebsiteId AND 
-             tw.TagId = T.TagId AND 
-            t.TagId = "${tag_id}"`;
-            await execute_query(query);
-
-
-            query = `SELECT  p.*
-            FROM 
-            Tag as t, 
-            Page as p, 
-            Domain as d, 
-            Website as w,
-            TagWebsite as tw,
-            DomainPage as dp 
-            WHERE 
-            p.PageId = dp.PageId
-            dp.DomainId = d.DomainId AND
-            d.WebsiteId = w.WebsiteId AND
-            tw.WebsiteId = w.WebsiteId AND 
-             tw.TagId = T.TagId AND 
-            t.TagId = "${tag_id}"`;
-
-
-            let pages = await execute_query(query);
-
-
-            for (let page of pages) {
-                await update_page_admin(page.PageId, false);
             }
-
-
         }
 
-        return success(website_id);
+        return success(tag_id);
     } catch
         (err) {
         console.log(err);
         return error(err);
     }
-}
-;
+};
+
+
+
+/method to import website, domain and tag from selected page of studymonitor
+module.exports.verify_update_tag_admin = async (tag_id, checked, user_id) => {
+    // try {
+    //     let query;
+    //
+    //     query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
+    //         FROM
+    //         Tag as t,
+    //         Domain as d,
+    //         Website as w,
+    //         TagWebsite as tw
+    //         WHERE
+    //         dp.DomainId = d.DomainId AND
+    //         d.WebsiteId = w.WebsiteId AND
+    //         tw.WebsiteId = w.WebsiteId AND
+    //          tw.TagId = T.TagId AND
+    //         t.TagId = "${tag_id}"`;
+    //     let tagResult = await execute_query(query);
+    //     let tagName = tag[0].tagName;
+    //
+    //     query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date)
+    //             VALUES ("${tagName}", "0", "${date}")`;
+    //     let tag = await execute_query(query);
+    //
+    //     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    //
+    //
+    //     for (let website of tagResult) {
+    //         let websiteName = website.Name;
+    //         let domainUrl = website.Url;
+    //
+    //         query = `SELECT
+    //                     FROM
+    //                     Tag as t,
+    //                     Page as p,
+    //                     Domain as d,
+    //                     Domain as d1,
+    //                     Website as w,
+    //                     TagWebsite as tw,
+    //                     DomainPage as dp
+    //                     WHERE
+    //                     dp.DomainId = d.DomainId AND
+    //                     d.WebsiteId = w.WebsiteId AND
+    //                     d.Url = "${domainUrl}"`;
+    //
+    //         let pages = await execute_query(query);
+    //
+    //         query = `SELECT  d.DomainId,w,WebsiteId
+    //         FROM
+    //         Page as p,
+    //         Domain as d,
+    //         TagWebsite as tw,
+    //         DomainPage as dp,
+    //         Website as w
+    //         LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+    //         LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
+    //         WHERE
+    //         dp.PageId = p.PageId AND
+    //         dp.DomainId = d.DomainId AND
+    //         d.WebsiteId = w.WebsiteId AND
+    //         d.Uri = "${domainUrl}" AND
+    //         tw.WebsiteId = w.WebsiteId AND
+    //         t.TagId = tw.TagId AND
+    //         t.UserId IS NULL `;
+    //         let domainP = await execute_query(query);
+    //
+    //
+    //         if (_.size(domain) === 0) {
+    //
+    //             query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+    //             let website = await execute_query(query);
+    //
+    //             query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+    //             let domain = await execute_query(query);
+    //
+    //             query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${website.insertId}", "${tag.insertId}")`;
+    //             await execute_query(query);
+    //
+    //             for (let page of pages) {
+    //                 await update_page_admin(page.PageId, false);
+    //
+    //                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
+    //                 await execute_query(query);
+    //             }
+    //         } else {
+    //
+    //
+    //             query = `INSERT INTO TagWebsite (WebsiteId, TagId) VALUES ("${domainP.WebsiteId}", "${tag.insertId}")`;
+    //             await execute_query(query);
+    //
+    //             for (let page of pages) {
+    //                 await update_page_admin(page.PageId, false);
+    //
+    //                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page.PageId}")`;
+    //                 await execute_query(query);
+    //             }
+    //
+    //
+    //         }
+    //     }
+    //
+    //     return success(tag_id);
+    // } catch
+    //     (err) {
+    //     console.log(err);
+    //     return error(err);
+    // }
+};

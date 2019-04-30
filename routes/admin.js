@@ -87,7 +87,6 @@ const {
   create_pages,
   update_page,
   update_page_admin,
-  update_tag_admin,
   update_observatorio_pages,
   update_page_study_admin,
   delete_page,

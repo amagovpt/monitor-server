@@ -753,12 +753,7 @@ module.exports.update_page_admin = async (page_id, checked) => {
 
         if (_.size(page) > 0) {
             let show = page[0].Show_In;
-
-            if (page[0].Show_In[0] === '1' && checked === 'false') {
-                show = "0" + page[0].Show_In[1] + page[0].Show_In[2];
-            } else if (page[0].Show_In[0] === '0' && checked === 'true') {
-                show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
-            }
+            show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
             query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
             await execute_query(query);
         }
@@ -775,8 +770,7 @@ module.exports.update_page_admin = async (page_id, checked) => {
 module.exports.update_page_study_admin = async (page_id, checked, user_id) => {
     try {
         let query;
-        if (checked === 'true') {
-            query = `SELECT w.*, d.*
+        query = `SELECT w.*, d.*
             FROM 
             Tag as t, 
             Page as p, 
@@ -791,12 +785,12 @@ module.exports.update_page_study_admin = async (page_id, checked, user_id) => {
             d.WebsiteId = w.WebsiteId AND
             tw.WebsiteId = w.WebsiteId AND 
             t.TagId = tw.TagId`;
-            let tag = await execute_query(query);
+        let tag = await execute_query(query);
 
-            let websiteName = tag[0].Name;
-            let domainUrl = tag[0].Url;
+        let websiteName = tag[0].Name;
+        let domainUrl = tag[0].Url;
 
-            query = `SELECT  d.DomainId
+        query = `SELECT  d.DomainId
             FROM  
             Page as p, 
             Domain as d, 
@@ -813,91 +807,30 @@ module.exports.update_page_study_admin = async (page_id, checked, user_id) => {
             tw.WebsiteId = w.WebsiteId AND 
             t.TagId = tw.TagId AND 
             t.UserId IS NULL `;
-            let domainP = await execute_query(query);
+        let domainP = await execute_query(query);
 
 
-            if (_.size(tag) > 0) {
+        if (_.size(tag) > 0) {
 
-                const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-                if (_.size(domain) > 0) {
+            if (_.size(domain) > 0) {
 
-                    query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page_id}")`;
-                    await execute_query(query);
-                } else {
-                    query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
-                    let website = await execute_query(query);
-
-                    query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
-                    let domain = await execute_query(query);
-
-                    query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page_id}")`;
-                    await execute_query(query);
-
-                }
-            }
-        } else {
-            query = `SELECT DISTINCT d.DomainId
-            FROM 
-            Page as p, 
-            Domain as d, 
-            DomainPage as dp
-            WHERE 
-            p.PageId = "${page_id}" AND 
-            dp.PageId = p.PageId AND
-            dp.DomainId = d.DomainId`;
-            let domain_id = await execute_query(query);
-
-            query = `SELECT DISTINCT p.*
-            FROM 
-            Page as p, 
-            DomainPage as dp
-            WHERE 
-            dp.PageId = p.PageId AND
-            dp.DomainId = "${domain_id}" AND 
-            p.Show_In NOT LIKE '000'`;
-            let pages = await execute_query(query);
-
-            if (_.size(pages) > 0) {
-                query = `DELETE t
-            FROM 
-            Tag as t, 
-            Page as p, 
-            Domain as d, 
-            Website as w,
-            TagWebsite as tw,
-            DomainPage as dp
-            WHERE 
-            p.PageId = "${page_id}" AND 
-            dp.PageId = p.PageId AND
-            dp.DomainId = d.DomainId AND
-            d.WebsiteId = w.WebsiteId AND
-            tw.WebsiteId = w.WebsiteId AND 
-            t.TagId = tw.TagId AND
-            t.UserId IS NULL`;
+                query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page_id}")`;
                 await execute_query(query);
-
             } else {
-                query = `DELETE t,d,w
-            FROM 
-            Tag as t, 
-            Page as p, 
-            Domain as d, 
-            Website as w,
-            TagWebsite as tw,
-            DomainPage as dp
-            WHERE 
-            p.PageId = "${page_id}" AND 
-            dp.PageId = p.PageId AND
-            dp.DomainId = d.DomainId AND
-            d.WebsiteId = w.WebsiteId AND
-            tw.WebsiteId = w.WebsiteId AND 
-            t.TagId = tw.TagId AND
-            t.UserId IS NULL`;
-                await execute_query(query);
-            }
+                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+                let website = await execute_query(query);
 
+                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+                let domain = await execute_query(query);
+
+                query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page_id}")`;
+                await execute_query(query);
+
+            }
         }
+
 
         return success(page_id);
     } catch
