@@ -751,10 +751,9 @@ module.exports.update_page_admin = async (page_id) => {
         let page = await execute_query(query);
 
         if (_.size(page) > 0) {
-            let show = page[0].Show_In;
-            show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
+            let show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
             query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page_id}"`;
-
+            await execute_query(query);
             query = `SELECT  e.EvaluationId,e.Show_To FROM Evaluation as e WHERE e.PageId = "${page_id}" ORDER BY e.Evaluation_Date  DESC LIMIT 1`;
             let evaluation = await execute_query(query);
             let evalId = evaluation[0].EvaluationId;

@@ -3,7 +3,7 @@
 /**
  * Admin Router and Controller
  */
-
+const _ = require('lodash');
 const express = require('express');
 const router = express.Router();
 const {ServerError, ParamsError} = require('../lib/_error');
@@ -559,16 +559,16 @@ router.post('/websites/studyTag', async function (req, res, next) {
 
                 let websites = await get_all_tag_websites(user, tag);
                 for (let website of websites["result"]) {
+                    website ["imported"] = await verify_update_website_admin(website.WebsiteId);
 
-                    website ["import"] = await verify_update_website_admin(website.WebsiteId);
-
-                    let websiteAdmin = await  domain_exists_in_admin(website.WebsiteId);
-
+                    let websiteAdmin = await domain_exists_in_admin(website.WebsiteId);
                     website ["hasDomain"] = _.size(websiteAdmin) === 1;
                     website ["webName"] = undefined;
 
-                    if (_.size(websiteAdmin) === 1)
-                        website ["result"]["webName"] = websiteAdmin[0].Name;
+                    if (_.size(websiteAdmin) === 1) {
+                        website ["webName"] = websiteAdmin[0].Name;
+                    }
+                    console.log(website);
                 }
                 res.send(websites);
             }

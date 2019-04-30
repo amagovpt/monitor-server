@@ -217,7 +217,6 @@ module.exports.domain_exists_in_admin = async (website_id) => {
           d2.Url = d.Url AND
           d2.DomainId != d.DomainId`;
 
-
       const websites = await execute_query(query);
       return websites;
     } catch(err) {
