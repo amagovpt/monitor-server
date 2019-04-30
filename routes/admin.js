@@ -542,7 +542,7 @@ router.post('/websites/user', async function (req, res, next) {
     }
 });
 
-router.post('/websites/StudyTag', async function (req, res, next) {
+router.post('/websites/studyTag', async function (req, res, next) {
     try {
         req.check('tag', 'Invalid tag').exists();
         req.check('user', 'Invalid user').exists();
@@ -1523,7 +1523,7 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
 
 router.post('/pages/updateAdminTag', async function (req, res, next) {
     try {
-        req.check('websiteId', 'Invalid parameter PageId').exists();
+        req.check('tagId', 'Invalid parameter TagId').exists();
         req.check('cookie', 'User not logged in').exists();
 
         const errors = req.validationErrors();

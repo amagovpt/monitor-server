@@ -423,34 +423,32 @@ module.exports.delete_tag = async (tag_id) => {
 };
 
 //method to import website, domain and tag from selected page of studymonitor
-module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
+module.exports.update_tag_admin = async (tag_id) => {
     try {
         let query;
 
         query = `SELECT t.UserId, t.Name as tagName, w.*, d.*
             FROM 
             Tag as t, 
-            Domain as d, 
+            Domain as d,
             Website as w,
             TagWebsite as tw
             WHERE 
-            dp.DomainId = d.DomainId AND
             d.WebsiteId = w.WebsiteId AND
             tw.WebsiteId = w.WebsiteId AND 
-             tw.TagId = T.TagId AND 
+            tw.TagId = t.TagId AND 
             t.TagId = "${tag_id}"`;
         let tagResult = await execute_query(query);
-        let tagName = tag[0].tagName;
+        let tagName = tagResult[0].tagName;
 
         let domDate;
         let webDate;
 
+        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
         query = `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
                 VALUES ("${tagName}", "0", "${date}")`;
         let tag = await execute_query(query);
-
-
 
         for (let website of tagResult) {
             let websiteName = website.Name;
@@ -461,7 +459,7 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
 
             query = `SELECT  p.*
                         FROM 
-                        Tag as t, 
+                        Tag as t,
                         Page as p, 
                         Domain as d, 
                         Website as w,
@@ -474,11 +472,10 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
 
             let pages = await execute_query(query);
 
-            query = `SELECT  d.DomainId,w,WebsiteId
+            query = `SELECT  d.DomainId, w.WebsiteId
             FROM  
             Page as p, 
-            Domain as d, 
-            TagWebsite as tw,
+            Domain as d,
             DomainPage as dp,
             Website as w
             LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
@@ -538,11 +535,10 @@ module.exports.update_tag_admin = async (tag_id, checked, user_id) => {
 
 
 
-/method to import website, domain and tag from selected page of studymonitor
+//method to import website, domain and tag from selected page of studymonitor
 module.exports.verify_update_tag_admin = async (tag_id) => {
     try {
-
-            let query = `SELECT  p.PageId
+            let query = `SELECT p.PageId
             FROM  
             Page as p, 
             Domain as d, 

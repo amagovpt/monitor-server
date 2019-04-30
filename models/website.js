@@ -989,7 +989,7 @@ module.exports.verify_update_website_admin = async (website_id) => {
             t.UserId IS NOT NULL AND 
             dp.DomainId = d.DomainId AND
             dp.PageId = p.PageId AND
-            p.Show_IN LIKE "0_1" `;
+            p.Show_In LIKE "0_1" `;
         let studyP = await execute_query(query);
 
 
