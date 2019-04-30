@@ -37,7 +37,8 @@ const {
   update_tag,
   copy_tag,
   delete_tag,
-  update_tag_admin
+  update_tag_admin,
+  verify_update_tag_admin
 } = require('../models/tag');
 
 const {
@@ -67,7 +68,8 @@ const {
   create_website,
   update_website,
   delete_website,
-  update_website_admin
+  update_website_admin,
+  verify_update_website_admin
 } = require('../models/website');
 
 const {
@@ -532,6 +534,36 @@ router.post('/websites/user', async function (req, res, next) {
         get_all_user_websites(user)
           .then(websites => res.send(websites))
           .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/websites/StudyTag', async function (req, res, next) {
+  try {
+    req.check('tag', 'Invalid tag').exists();
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag = req.body.tag;
+        const user = req.body.user;
+
+        let websites = await get_all_tag_websites(user, tag);
+        for (let website of websites){
+
+          website ["import"] = await verify_update_website_admin( website.WebsiteId);
+          //FIXME DOMAIN FUNCTION BRUNO
+          website ["domain"] = await verify_update_website_admin( website.WebsiteId);
+        }
       }
     }
   } catch (err) {
@@ -1421,7 +1453,6 @@ router.post('/pages/update', async function (req, res, next) {
 router.post('/pages/updateAdminPage', async function (req, res, next) {
   try {
     req.check('pageId', 'Invalid parameter PageId').exists();
-    req.check('checked', 'Invalid parameter Checked').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1431,13 +1462,12 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const page_id = req.body.pageId;
-        const checked = req.body.checked;
 
         const username = req.body.user;
         const type = await get_user_type(username);
         const user_id = await get_user_id(username);
 
-        update_page_admin(page_id, checked)
+        update_page_admin(page_id)
             .then(success => res.send(success))
             .catch(err => res.send(res));
 
@@ -1458,7 +1488,6 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
 router.post('/pages/updateAdminWebsite', async function (req, res, next) {
   try {
     req.check('websiteId', 'Invalid parameter PageId').exists();
-    req.check('checked', 'Invalid parameter Checked').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1468,13 +1497,12 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const websiteId = req.body.websiteId;
-        const checked = req.body.checked;
 
         const username = req.body.user;
         const type = await get_user_type(username);
         const user_id = await get_user_id(username);
 
-        update_website_admin(websiteId, checked)
+        update_website_admin(websiteId)
             .then(success => res.send(success))
             .catch(err => res.send(res));
 
@@ -1489,7 +1517,6 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
 router.post('/pages/updateAdminTag', async function (req, res, next) {
   try {
     req.check('websiteId', 'Invalid parameter PageId').exists();
-    req.check('checked', 'Invalid parameter Checked').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1499,9 +1526,8 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const tag_id = req.body.tagId;
-        const checked = req.body.checked;
 
-        update_tag_admin(tag_id, checked)
+        update_tag_admin(tag_id)
             .then(success => res.send(success))
             .catch(err => res.send(res));
 
@@ -1512,6 +1538,56 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
+
+
+router.post('/pages/checkUpdateAdminTag', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+
+        verify_update_tag_admin(tag_id)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/checkupdateAdminWebsite', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const websiteId = req.body.websiteId;
+
+        verify_update_website_admin(websiteId)
+            .then(success => res.send(success))
+            .catch(err => res.send(res));}
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
 
 
 router.post('/pages/updateObservatorio', async function (req, res, next) {
