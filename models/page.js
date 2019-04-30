@@ -798,6 +798,10 @@ module.exports.update_page_study_admin = async (page_id, checked, user_id) => {
             t.TagId = tw.TagId`;
         let tag = await execute_query(query);
 
+        let domDate = tag[0].Start_Date;
+        let webDate = tag[0].Creation_Date;
+
+
         let websiteName = tag[0].Name;
         let domainUrl = tag[0].Url;
 
@@ -830,10 +834,10 @@ module.exports.update_page_study_admin = async (page_id, checked, user_id) => {
                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page_id}")`;
                 await execute_query(query);
             } else {
-                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${webDate}")`;
                 let website = await execute_query(query);
 
-                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${domDate}", "1")`;
                 let domain = await execute_query(query);
 
                 query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page_id}")`;

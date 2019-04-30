@@ -885,6 +885,10 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
 
         let webDomain = await execute_query(query);
 
+        let domDate = webDomain[0].Start_Date;
+        let webDate = webDomain[0].Creation_Date;
+
+
 
         query = `SELECT  p.*
             FROM 
@@ -925,7 +929,7 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
         let websiteName = webDomain[0].Name;
         let domainUrl = webDomain[0].Url;
 
-        const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
 
         if (_.size(webDomain) > 0) {
 
@@ -939,10 +943,10 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
 
                 }
             } else {
-                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${date}")`;
+                query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${websiteName}", "${webDate}")`;
                 let website = await execute_query(query);
 
-                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${date}", "1")`;
+                query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${domDate}", "1")`;
                 let domain = await execute_query(query);
 
                 for (let page of pages) {
@@ -966,8 +970,6 @@ module.exports.update_website_admin = async (website_id, checked, user_id) => {
     }
 };
 
-
-//FIXME adicionar website
 module.exports.verify_update_website_admin = async (website_id) => {
     try {
 

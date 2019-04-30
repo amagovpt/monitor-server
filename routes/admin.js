@@ -557,7 +557,7 @@ router.post('/websites/StudyTag', async function (req, res, next) {
         const user = req.body.user;
 
         let websites = await get_all_tag_websites(user, tag);
-        for (let website in websites){
+        for (let website of websites){
 
           website ["import"] = await verify_update_website_admin( website.WebsiteId);
           //FIXME DOMAIN FUNCTION BRUNO
