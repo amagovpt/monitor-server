@@ -38,13 +38,13 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
   `EntityId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `Name` varchar(255) NOT NULL,
   `Creation_Date` datetime NOT NULL,
+  `Deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`WebsiteId`),
   UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`),
   KEY `fk_Website_1_idx` (`EntityId`),
