@@ -420,11 +420,14 @@ router.post('/tags/user', async function (req, res, next) {
             if (user_id !== -1) {
                 const user = req.body.user;
 
-                let tags =  await get_all_user_tags(user);
+                let tags = await get_all_user_tags(user);
 
-                for(let tag of tags){
-                    tags["imported"] = await verify_update_tag_admin(tag.TagId);
+                for(let tag of tags["result"]){
+                    tag["imported"] = await verify_update_tag_admin(tag.TagId);
+                    tag["Website"] =
+                    console.log(tag);
                 }
+
                 res.send(tags);
             }
         }
@@ -533,9 +536,19 @@ router.post('/websites/user', async function (req, res, next) {
             if (user_id !== -1) {
                 const user = req.body.user;
 
-                get_all_user_websites(user)
-                    .then(websites => res.send(websites))
-                    .catch(err => re.send(err));
+                let websites = await get_all_user_websites(user);
+                for (let website of websites["result"]) {
+                    website ["imported"] = await verify_update_website_admin(website.WebsiteId);
+
+                    let websiteAdmin = await domain_exists_in_admin(website.WebsiteId);
+                    website ["hasDomain"] = _.size(websiteAdmin) === 1;
+                    website ["webName"] = undefined;
+
+                    if (_.size(websiteAdmin) === 1) {
+                        website ["webName"] = websiteAdmin[0].Name;
+                    }
+                }
+                res.send(websites);
             }
         }
     } catch (err) {
@@ -1481,7 +1494,7 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
 
                 if (type === 'studies') {
                     //method to tag from selected page of studymonitor
-                    update_page_study_admin(page_id, checked, user_id)
+                    update_page_study_admin(page_id)
                         .catch(err => res.send(res));
                 }
 

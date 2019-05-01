@@ -196,15 +196,17 @@ module.exports.get_all_websites_without_user = async () => {
 
 module.exports.get_all_user_websites = async (user) => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+    const query = `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
-        User as u
+        User as u,
+        Domain as d
       WHERE
         LOWER(u.Username) = "${_.toLower(user)}" AND
-        w.UserId = u.UserId
-      GROUP BY w.WebsiteId`;
+        w.UserId = u.UserId AND 
+        d.WebsiteId = w.WebsiteId
+      GROUP BY w.WebsiteId, d.Url`;
     const websites = await execute_query(query);
 
     return success(websites);
@@ -218,7 +220,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
   try {
     let query = '';
     if (user === 'admin') {
-      query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+      query = `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId

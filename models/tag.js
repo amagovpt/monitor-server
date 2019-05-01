@@ -305,10 +305,11 @@ module.exports.get_tag_info = async (tag_id) => {
 
 module.exports.get_all_user_tags = async (user) => {
   try {
-    const query = `SELECT t.*, u.Username as User 
+    const query = `SELECT t.*, COUNT(distinct tw.WebsiteId) as Websites, u.Username as User 
       FROM 
-        Tag as t,
-        User as u
+        User as u,
+        Tag as t
+        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
       WHERE
         LOWER(u.Username) = "${_.toLower(user)}" AND
         t.UserId = u.UserId
@@ -533,9 +534,8 @@ module.exports.verify_update_tag_admin = async (tag_id) => {
             Domain as d, 
             TagWebsite as tw,
             DomainPage as dp,
-            Website as w
-            TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-            Tag as t ON t.TagId = tw.TagId
+            Website as w,
+            Tag as t
             WHERE 
             dp.PageId = p.PageId AND
             p.Show_In LIKE '0%' AND
@@ -544,11 +544,10 @@ module.exports.verify_update_tag_admin = async (tag_id) => {
             tw.WebsiteId = w.WebsiteId AND 
             tw.TagId = t.TagId AND
             t.TagId = "${tag_id}" AND 
-            t.UserId IS NOT NULL `;
+            t.UserId IS NOT NULL`;
     let studyP = await execute_query(query);
 
-      console.log(studyP);
-    return success(_.size(studyP) === 0);
+    return (_.size(studyP) === 0);
   } catch
     (err) {
     console.log(err);
