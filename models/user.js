@@ -8,10 +8,20 @@
  * Libraries and modules
  */
 const _ = require('lodash');
-const { encrypt, decrypt, generate_password_hash, generate_unique_hash } = require('../lib/_security');
-const { success, error } = require('../lib/_response');
-const { execute_query } = require('../lib/_database');
-const { 
+const {
+  encrypt,
+  decrypt,
+  generate_password_hash,
+  generate_unique_hash
+} = require('../lib/_security');
+const {
+  success,
+  error
+} = require('../lib/_response');
+const {
+  execute_query
+} = require('../lib/_database');
+const {
   UserError,
   UserNotFoundError,
   UserDataCompromisedError,
@@ -31,28 +41,26 @@ const create_user_cookie = async (user) => {
     delete user.Emails;
     delete user.Register_Date;
     delete user.Last_Login;
-    
+
     const date = new Date();
     date.setTime(date.getTime() + 1 * 86400000);
     user.Expire = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     const cookie = await encrypt(JSON.stringify(user));
-    
+
     return success(cookie);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
 }
 
-module.exports.verify_user = async (res, cookie, admin=false) => {
+module.exports.verify_user = async (res, cookie, admin = false) => {
   try {
     if (cookie === 'null') {
       return -1;
     }
-
     cookie = JSON.parse(await decrypt(cookie));
-
     const query = `SELECT * FROM User WHERE LOWER(Username) = "${_.toLower(cookie.Username)}" LIMIT 1`;
     let user = await execute_query(query);
     user = user[0];
@@ -67,22 +75,82 @@ module.exports.verify_user = async (res, cookie, admin=false) => {
     }
     if (!_.isEqual(user.Unique_Hash, cookie.Unique_Hash)) {
       res.send(error(new UserDataCompromisedError()));
-      return -1; 
+      return -1;
     }
     if (admin && !_.isEqual(user.Type, 'nimda')) {
       res.send(error(new PermissionDeniedError()));
-      return -1;  
+      return -1;
     }
     if (new Date(user.Expire) < new Date()) {
       res.send(error(new SessionExpiredError()));
-      return -1; 
+      return -1;
     }
 
     return user.UserId;
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     res.send(error(err));
     return -1;
+  }
+}
+
+module.exports.get_user_type = async (username) => {
+  try {
+    if (username === 'admin') {
+      return 'nimda';
+    }
+
+    let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;
+
+    let user = await execute_query(query);
+
+    if (_.size(user) === 0) {
+      throw new UserNotFoundError();
+    } else {
+      return user[0].Type;
+    }
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_user_type_success = async (username) => {
+  try {
+
+    if (username === 'admin') {
+      return success('nimda');
+    }
+
+    let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;
+
+    let user = await execute_query(query);
+
+    if (_.size(user) === 0) {
+      throw new UserNotFoundError();
+    } else {
+      return success(user[0].Type);
+    }
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.get_user_id = async (username) => {
+  try {
+    let query = `SELECT * FROM User WHERE Username = "${username}" LIMIT 1`;
+
+    let user = await execute_query(query);
+
+    if (_.size(user) === 0) {
+      throw new UserNotFoundError();
+    } else {
+      return user[0].UserId;
+    }
+  } catch (err) {
+    console.log(err);
+    return error(err);
   }
 }
 
@@ -100,7 +168,7 @@ module.exports.login_user = async (username, password, app) => {
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
         query = `UPDATE User SET Last_Login = "${date}" WHERE UserId = "${user.UserId}"`;
         await execute_query(query);
-        
+
         return create_user_cookie(user);
       } else {
         return error(new UserError(null, -2, 'INVALID_PASSWORD'));
@@ -117,7 +185,7 @@ module.exports.login_user = async (username, password, app) => {
  */
 
 module.exports.create_user = async (username, password, names, emails, type, websites, transfer) => {
-    //AQUI
+  //AQUI
   try {
     const password_hash = generate_password_hash(password);
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -125,9 +193,9 @@ module.exports.create_user = async (username, password, names, emails, type, web
 
     let query = `INSERT INTO User (Username, Password, Names, Emails, Type, Register_Date, Unique_Hash) 
       VALUES ("${username}", "${password_hash}", "${names}", "${emails}", "${type}", "${date}", "${hash}")`;
-    
+
     const data = await execute_query(query);
-    
+
     if (type === 'monitor') {
       query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId IN (${websites})`;
       await execute_query(query);
@@ -148,7 +216,7 @@ module.exports.create_user = async (username, password, names, emails, type, web
     }
 
     return success(data.insertId);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -163,10 +231,10 @@ module.exports.get_number_of_study_monitor_users = async () => {
     const query = `SELECT COUNT(*) as Users FROM User WHERE LOWER(Type) = "studies";`;
     const users = await execute_query(query);
     return success(users[0].Users);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
-  } 
+  }
 }
 
 module.exports.get_number_of_my_monitor_users = async () => {
@@ -174,10 +242,10 @@ module.exports.get_number_of_my_monitor_users = async () => {
     const query = `SELECT COUNT(*) as Users FROM User WHERE LOWER(Type) = "monitor";`;
     const users = await execute_query(query);
     return success(users[0].Users);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
-  } 
+  }
 }
 
 module.exports.user_exists = async (username) => {
@@ -185,10 +253,10 @@ module.exports.user_exists = async (username) => {
     const query = `SELECT UserId FROM User WHERE LOWER(Username) = "${_.toLower(username)}" LIMIT 1`;
     const users = await execute_query(query);
     return success(_.size(users) === 1);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
-  } 
+  }
 }
 
 module.exports.get_all_users = async () => {
@@ -203,7 +271,7 @@ module.exports.get_all_users = async () => {
       GROUP BY u.UserId`;
     const users = await execute_query(query);
     return success(users);
-  } catch(err) {
+  } catch (err) {
     return error(err);
   }
 }
@@ -213,7 +281,7 @@ module.exports.get_all_monitor_users = async () => {
     const query = `SELECT UserId, Username, Type, Register_Date, Last_Login FROM User WHERE LOWER(Type) = "monitor"`;
     const users = await execute_query(query);
     return success(users);
-  } catch(err) {
+  } catch (err) {
     return error(err);
   }
 }
@@ -240,7 +308,7 @@ module.exports.get_user_info = async (user_id) => {
     delete user.Password;
 
     return success(user);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -251,7 +319,7 @@ module.exports.get_user_info = async (user_id) => {
  */
 
 module.exports.update_user = async (user_id, password, names, emails, app, default_websites, websites, transfer) => {
-    //AQUI
+  //AQUI
   try {
     let query = '';
 
@@ -342,7 +410,7 @@ module.exports.update_user = async (user_id, password, names, emails, app, defau
     }
 
     return success(user_id);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -359,7 +427,10 @@ module.exports.change_user_password = async (user_id, password, new_password) =>
         await execute_query(query);
         return success(true);
       } else {
-        return error({ code: -1, message: 'WRONG_USER_PASSWORD' });
+        return error({
+          code: -1,
+          message: 'WRONG_USER_PASSWORD'
+        });
       }
     } else {
       throw new UserNotFoundError();
@@ -441,7 +512,7 @@ module.exports.delete_user = async (user_id, app) => {
     await execute_query(query);
 
     return success(user_id);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }

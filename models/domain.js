@@ -8,8 +8,12 @@
  * Libraries and modules
  */
 const _ = require('lodash');
-const { success } = require('../lib/_response');
-const { execute_query } = require('../lib/_database');
+const {
+  success
+} = require('../lib/_response');
+const {
+  execute_query
+} = require('../lib/_database');
 
 module.exports.create_domain = async (website_id, url) => {
   try {
@@ -30,7 +34,7 @@ module.exports.create_domain = async (website_id, url) => {
     const domain = await execute_query(query);
 
     return success(domain.insertId);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -56,7 +60,7 @@ module.exports.domain_exists = async (url) => {
 
     const domain = await execute_query(query);
     return success(_.size(domain) === 1);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -72,7 +76,7 @@ module.exports.get_all_active_domains = async () => {
         w.Deleted = "0"`;
     const domains = await execute_query(query);
     return success(domains);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -93,7 +97,7 @@ module.exports.get_all_domains = async () => {
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -122,12 +126,13 @@ module.exports.get_all_official_domains = async () => {
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
 }
 
+/*
 module.exports.get_all_website_domains = async website => {
   try {
     const query = `SELECT
@@ -152,12 +157,55 @@ module.exports.get_all_website_domains = async website => {
           LOWER(u.Type) != 'studies'
         )
       )
-    GROUP BY d.DomainId`;
-    
+    GROUP BY d.DomainId`;*/
+
+
+module.exports.get_all_website_domains = async (user, type, website, flags) => {
+  try {
+    let query = '';
+    if (type === 'nimda') {
+      query = `SELECT
+          d.*,
+          COUNT(distinct p.PageId) as Pages,
+          u2.Username as User
+        FROM
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
+          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__",
+          Website as w,
+          User as u
+        WHERE
+          w.WebsiteId = d.WebsiteId AND
+          LOWER(w.Name) = "${_.toLower(website)}" AND
+          (
+            w.UserId IS NULL OR
+            (
+              u.UserId = w.UserId AND
+              LOWER(u.Type) != 'studies'
+            )
+          )
+        GROUP BY d.DomainId`;
+    } else {
+      query = `SELECT d.*, SUM(CASE WHEN(p.Show_In LIKE "${flags}") THEN 1 ELSE 0 END) as Pages, u.Username as User
+        FROM
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId,
+          User as u,
+          Website as w
+        WHERE
+          LOWER(u.Username) = "${_.toLower(user)}" AND
+          w.UserId = u.UserId AND
+          LOWER(w.Name) = "${_.toLower(website)}" AND
+          d.WebsiteId = w.WebsiteId
+        GROUP BY d.DomainId`;
+    }
 
     const domains = await execute_query(query);
     return success(domains);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -184,7 +232,31 @@ module.exports.get_all_domains_info = async () => {
 
     const domains = await execute_query(query);
     return success(domains);
-  } catch(err) {
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.domain_exists_in_admin = async (website_id) => {
+  try {
+    const query = `SELECT
+          w2.*
+        FROM
+          Domain as d,
+          Domain as d2,
+          Website as w,
+          Website as w2
+        WHERE
+          w.WebsiteId = "${website_id}" AND
+          d.WebsiteId = w.WebsiteId AND 
+          d2.WebsiteId = w2.WebsiteId AND 
+          d2.Url = d.Url AND
+          d2.DomainId != d.DomainId`;
+
+    const websites = await execute_query(query);
+    return websites;
+  } catch (err) {
     console.log(err);
     return error(err);
   }
@@ -214,7 +286,7 @@ module.exports.delete_domain = async domain_id => {
     await execute_query(query);
 
     return success(domain_id);
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return error(err);
   }

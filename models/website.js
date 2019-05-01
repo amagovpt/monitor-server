@@ -21,6 +21,11 @@ const {
   save_page_evaluation
 } = require('./evaluation');
 
+
+const {
+  update_page_admin
+} = require('./page');
+
 /**
  * Create functions
  */
@@ -63,9 +68,9 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
         WHERE WebsiteId = "${website_id}"
         `;
       await execute_query(query);
-      
+
       if (website[0].Active === 0) {
-        
+
         query = `UPDATE Domain SET Active = "0", End_Date = "${date}" WHERE WebsiteId = "${website_id}" AND Active = "1"`;
         await execute_query(query);
 
@@ -231,15 +236,18 @@ module.exports.get_all_websites_without_user = async () => {
 
 module.exports.get_all_user_websites = async (user) => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+    const query = `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
-        User as u
+        User as u,
+        Domain as d
       WHERE
         LOWER(u.Username) = "${_.toLower(user)}" AND
-        w.UserId = u.UserId
-      GROUP BY w.WebsiteId`;
+        w.UserId = u.UserId AND 
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = "1"
+      GROUP BY w.WebsiteId, d.Url`;
     const websites = await execute_query(query);
 
     return success(websites);
@@ -247,11 +255,11 @@ module.exports.get_all_user_websites = async (user) => {
     console.log(err);
     return error(err);
   }
-}
+};
 
-module.exports.get_all_tag_websites = async tag => {
+module.exports.get_all_tag_websites = async (user, tag) => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+    /*const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
@@ -263,7 +271,41 @@ module.exports.get_all_tag_websites = async tag => {
         t.UserId IS NULL AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId
-      GROUP BY w.WebsiteId`;
+      GROUP BY w.WebsiteId`;*/
+    
+    let query = '';
+    if (user === 'admin') {
+      query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+          Tag as t,
+          TagWebsite as tw
+        WHERE
+          LOWER(t.Name) = "${_.toLower(tag)}" AND
+          t.UserId IS NULL AND
+          tw.TagId = t.TagId AND
+          w.WebsiteId = tw.WebsiteId
+        GROUP BY w.WebsiteId`;
+    } else {
+      query = `SELECT w.*, d.Url, e.Long_Name as Entity, u.Username as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
+          User as u,
+          Tag as t,
+          TagWebsite as tw,
+          Domain as d
+        WHERE
+          LOWER(t.Name) = "${_.toLower(tag)}" AND
+          u.Username = "${user}" AND
+          t.UserId = u.UserId AND
+          tw.TagId = t.TagId AND
+          w.WebsiteId = tw.WebsiteId AND 
+          d.WebsiteId = w.WebsiteId
+        GROUP BY w.WebsiteId, d.Url`;
+    }
 
     const websites = await execute_query(query);
     return success(websites);
@@ -586,7 +628,7 @@ module.exports.add_study_monitor_user_tag_new_website = async (user_id, tag, nam
 
     const errors = {};
     const size = _.size(pages);
-    for (let i = 0 ; i < size ; i++) {
+    for (let i = 0; i < size; i++) {
       query = `SELECT PageId FROM Page WHERE Uri = "${pages[i]}" LIMIT 1`;
       let page = await execute_query(query);
 
@@ -603,8 +645,8 @@ module.exports.add_study_monitor_user_tag_new_website = async (user_id, tag, nam
         if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${pages[i]}", "000", "${date}")`;
           let newPage = await execute_query(query);
-          
-          await save_page_evaluation(newPage.insertId, evaluation,"01");
+
+          await save_page_evaluation(newPage.insertId, evaluation, "01");
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${_domain.insertId}", "${newPage.insertId}")`;
           await execute_query(query);
@@ -644,7 +686,11 @@ module.exports.add_study_monitor_user_tag_new_website = async (user_id, tag, nam
     const newWebsites = await this.get_study_monitor_user_tag_websites(user_id, tag);
 
     if (_.size(_.keys(errors)) > 0) {
-      return error({ code: 0, message: 'SOME_PAGES_ERRORS', err: errors}, newWebsites.result);
+      return error({
+        code: 0,
+        message: 'SOME_PAGES_ERRORS',
+        err: errors
+      }, newWebsites.result);
     } else {
       return newWebsites;
     }
@@ -756,9 +802,9 @@ module.exports.get_study_monitor_user_tag_website_domain = async (user_id, tag, 
 
 module.exports.update_website = async (website_id, name, entity_id, user_id, older_user_id, transfer, default_tags, tags) => {
   try {
-    let query = `UPDATE Website SET Name = "${name}", ${entity_id ? "EntityId = " + entity_id : ""}, ${user_id ? "UserId = " + user_id : "" } WHERE WebsiteId = "${website_id}"`;
+    let query = `UPDATE Website SET Name = "${name}", ${entity_id ? "EntityId = " + entity_id : ""}, ${user_id ? "UserId = " + user_id : ""} WHERE WebsiteId = "${website_id}"`;
     await execute_query(query);
-    
+
     if (older_user_id === 'null' && user_id !== 'null') {
       if (transfer) {
         query = `
@@ -883,8 +929,10 @@ module.exports.delete_website = async (website_id) => {
   }
 }
 
-var fs = require('fs')
-  , gm = require('gm').subClass({imageMagick: true});
+var fs = require('fs'),
+  gm = require('gm').subClass({
+    imageMagick: true
+  });
 
 module.exports.get_website_seal_information = async domain => {
   try {
@@ -948,7 +996,7 @@ module.exports.get_website_seal_information = async domain => {
 
     gm(200, 400, "#ddff99f3")
       .drawText(10, 50, "from scratch")
-      .write(__dirname+"../public/images/seal.jpg", function (err) {
+      .write(__dirname + "../public/images/seal.jpg", function (err) {
         if (err) console.log(err);
       });
 
@@ -957,4 +1005,120 @@ module.exports.get_website_seal_information = async domain => {
     console.log(err);
     return error(err);
   }
-}
+};
+
+//substituir data
+//method to import website, domain and tag from selected page of studymonitor
+module.exports.update_website_admin = async (website_id, newWebsiteName) => {
+  try {
+    let query = `SELECT distinct w.*, d.*
+            FROM 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            DomainPage as dp 
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}" AND 
+            d.Active = "1"`;
+
+    let webDomain = await execute_query(query);
+
+    let domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    let webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+    query = `SELECT p.*
+            FROM 
+            Page as p, 
+            Domain as d, 
+            Website as w,
+            DomainPage as dp 
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId ="${website_id}"AND 
+            dp.domainId = d.domainId AND
+            dp.PageId = p.PageId`;
+    let pages = await execute_query(query);
+
+    query = `SELECT distinct d.DomainId, w.*
+            FROM  
+              Domain as d,
+              Website as w,
+              User as u
+            WHERE 
+              d.Url = "${webDomain[0].Url}" AND
+              w.WebsiteId = d.WebsiteId AND
+              (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
+            LIMIT 1
+            `;
+    let domainP = await execute_query(query);
+    domainP = domainP[0];
+    
+    let domainUrl = webDomain[0].Url;
+
+    if (_.size(webDomain) > 0) {
+      if (domainP) {
+        for (let page of pages) {
+          if (page.Show_In[0] === '0') {
+            await update_page_admin(page.PageId);
+            try {
+              query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.domainId}", "${page.PageId}")`;
+              await execute_query(query);
+            } catch(err) {
+              
+            }
+          }
+        }
+        if (domainP.Deleted === 1) {
+          query = `UPDATE Website SET Name = "${newWebsiteName || domainP.Name}", Creation_Date = "${webDate}", Deleted = "0" WHERE WebsiteId = "${domainP.WebsiteId}"`;
+          await execute_query(query);
+        } else {
+          query = `UPDATE Website SET Creation_Date = "${webDate}" WHERE WebsiteId = "${domainP.WebsiteId}"`;
+          await execute_query(query);
+        }
+      } else {
+        query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${newWebsiteName}", "${webDate}")`;
+        let website = await execute_query(query);
+
+        query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${domDate}", "1")`;
+        let domain = await execute_query(query);
+
+        for (let page of pages) {
+          if (page.Show_In[0] === '0') {
+            await update_page_admin(page.PageId);
+            query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`;
+            await execute_query(query);
+          }
+        }
+      }
+    }
+    return success(website_id);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};
+
+module.exports.verify_update_website_admin = async (website_id) => {
+  try {
+
+    let query = `SELECT p.PageId
+            FROM  
+            Page as p, 
+            Domain as d,
+            DomainPage as dp,
+            Website as w
+            WHERE 
+            w.WebsiteId = "${website_id}" AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            dp.PageId = p.PageId AND
+            p.Show_In LIKE '0%' `;
+    let studyP = await execute_query(query);
+    
+    return _.size(studyP) === 0;
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};

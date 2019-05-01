@@ -3,9 +3,10 @@
 /**
  * Admin Router and Controller
  */
-
+const _ = require('lodash');
 const express = require('express');
 const router = express.Router();
+
 const {
   ServerError,
   ParamsError
@@ -25,7 +26,10 @@ const {
   user_exists,
   get_user_info,
   update_user,
-  delete_user
+  delete_user,
+  get_user_type,
+  get_user_type_success,
+  get_user_id
 } = require('../models/user');
 
 const {
@@ -38,7 +42,10 @@ const {
   get_tag_info,
   update_tag,
   copy_tag,
-  delete_tag
+  delete_tag,
+  update_tag_admin,
+  verify_update_tag_admin,
+  get_all_user_tags
 } = require('../models/tag');
 
 const {
@@ -67,7 +74,9 @@ const {
   website_name_exists,
   create_website,
   update_website,
-  delete_website
+  delete_website,
+  update_website_admin,
+  verify_update_website_admin
 } = require('../models/website');
 
 const {
@@ -75,6 +84,7 @@ const {
   get_all_official_domains,
   get_all_website_domains,
   domain_exists,
+  domain_exists_in_admin,
   create_domain,
   delete_domain
 } = require('../models/domain');
@@ -89,7 +99,9 @@ const {
   update_page_admin,
   update_observatory_pages,
   delete_pages,
-  get_urls
+  get_urls,
+  get_study_monitor_user_tag_website_pages,
+  get_my_monitor_user_website_pages
 } = require('../models/page');
 
 const {
@@ -250,6 +262,29 @@ router.post('/websites/observatorio/total', async function (req, res, next) {
   }
 });
 
+router.post('/users/type', async function (req, res, next) {
+  try {
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const username = req.body.username;
+        get_user_type_success(username)
+          .then(type => res.send(type))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+
 router.post('/users/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -382,6 +417,35 @@ router.post('/tags/info', async function (req, res, next) {
   }
 });
 
+router.post('/tags/user', async function (req, res, next) {
+  try {
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const user = req.body.user;
+
+        let tags = await get_all_user_tags(user);
+
+        for (let tag of tags["result"]) {
+          tag["imported"] = await verify_update_tag_admin(tag.TagId);
+          //tag["Website"] = console.log(tag);
+        }
+
+        res.send(tags);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
 router.post('/entities/all', async function (req, res, next) {
   try {
     req.check('cookie', 'User not logged in').exists();
@@ -481,9 +545,55 @@ router.post('/websites/user', async function (req, res, next) {
       if (user_id !== -1) {
         const user = req.body.user;
 
-        get_all_user_websites(user)
-          .then(websites => res.send(websites))
-          .catch(err => re.send(err));
+        let websites = await get_all_user_websites(user);
+        for (let website of websites["result"]) {
+          website["imported"] = await verify_update_website_admin(website.WebsiteId);
+
+          let websiteAdmin = await domain_exists_in_admin(website.WebsiteId);
+          website["hasDomain"] = _.size(websiteAdmin) === 1;
+          website["webName"] = undefined;
+
+          if (_.size(websiteAdmin) === 1) {
+            website["webName"] = websiteAdmin[0].Name;
+          }
+        }
+        res.send(websites);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/websites/studyTag', async function (req, res, next) {
+  try {
+    req.check('tag', 'Invalid tag').exists();
+    req.check('user', 'Invalid user').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag = req.body.tag;
+        const user = req.body.user;
+
+        let websites = await get_all_tag_websites(user, tag);
+        for (let website of websites["result"]) {
+          website["imported"] = await verify_update_website_admin(website.WebsiteId);
+
+          let websiteAdmin = await domain_exists_in_admin(website.WebsiteId);
+          website["hasDomain"] = _.size(websiteAdmin) === 1;
+          website["webName"] = undefined;
+
+          if (_.size(websiteAdmin) === 1) {
+            website["webName"] = websiteAdmin[0].Name;
+          }
+        }
+        res.send(websites);
       }
     }
   } catch (err) {
@@ -494,6 +604,7 @@ router.post('/websites/user', async function (req, res, next) {
 
 router.post('/websites/tag', async function (req, res, next) {
   try {
+    req.check('user', 'Invalid user').exists();
     req.check('tag', 'Invalid tag').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -503,9 +614,10 @@ router.post('/websites/tag', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
+        const user = req.body.user;
         const tag = req.body.tag;
 
-        get_all_tag_websites(tag)
+        get_all_tag_websites(user, tag)
           .then(websites => res.send(websites))
           .catch(err => re.send(err));
       }
@@ -611,6 +723,7 @@ router.post('/domains/all', async function (req, res, next) {
 
 router.post('/domains/website', async function (req, res, next) {
   try {
+    req.check('user', 'Invalid user').exists();
     req.check('website', 'Invalid website').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -620,12 +733,45 @@ router.post('/domains/website', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
+        const user = req.body.user;
         const website = req.body.website;
 
-        get_all_website_domains(website)
+        const type = await get_user_type(user);
+        let flags;
+        switch (type) {
+          case 'nimda':
+            flags = '1__';
+            break;
+          case 'monitor':
+            flags = '_1_';
+            break;
+          default:
+            flags = '%';
+            break;
+        }
+        get_all_website_domains(user, type, website, flags)
           .then(domains => res.send(domains))
           .catch(err => re.send(err));
       }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/domains/existsAdmin/:websiteid', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid WebsiteID').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const wId = decodeURIComponent(req.params.websiteid);
+      domain_exists_in_admin(wId)
+        .then(exists => res.send(exists))
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
@@ -654,8 +800,45 @@ router.post('/pages/all', async function (req, res, next) {
   }
 });
 
+router.post('/pages/website', async function (req, res, next) {
+  try {
+    req.check('tag', 'Invalid tag').exists();
+    req.check('user', 'Invalid user').exists();
+    req.check('website', 'Invalid Website').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag = req.body.tag;
+        const user = req.body.user;
+        const website = req.body.website;
+
+        const user_id = await get_user_id(user);
+
+        if (tag !== 'null') {
+          get_study_monitor_user_tag_website_pages(user_id, tag, website)
+            .then(pages => res.send(pages))
+            .catch(err => re.send(err));
+        } else {
+          get_my_monitor_user_website_pages(user_id, website)
+            .then(pages => res.send(pages))
+            .catch(err => re.send(err));
+        }
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
 router.post('/pages/domain', async function (req, res, next) {
   try {
+    req.check('user', 'Invalid user').exists();
     req.check('domain', 'Invalid domain').exists();
     req.check('cookie', 'User not logged in').exists();
 
@@ -665,9 +848,25 @@ router.post('/pages/domain', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
+        const user = req.body.user;
         const domain = decodeURIComponent(req.body.domain);
 
-        get_all_domain_pages(domain)
+        const type = await get_user_type(user);
+
+        let flags;
+        switch (type) {
+          case 'nimda':
+            flags = '1__';
+            break;
+          case 'monitor':
+            flags = '_1_';
+            break;
+          default:
+            flags = '%';
+            break;
+        }
+
+        get_all_domain_pages(user, type, domain, flags)
           .then(pages => res.send(pages))
           .catch(err => re.send(err));
       }
@@ -692,7 +891,7 @@ router.post('/evaluations/page', async function (req, res, next) {
         const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
 
-        get_all_page_evaluations(page)
+        get_all_page_evaluations(page, "10")
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }
@@ -743,7 +942,7 @@ router.post('/page/evaluate', async function (req, res, next) {
         const url = decodeURIComponent(req.body.url);
         const page_id = await get_page_id(url);
 
-        evaluate_url_and_save(page_id.result, url, '10')
+        evaluate_url_and_save(page_id.result, url, "10")
           .then(evaluation => res.send(evaluation))
           .catch(err => res.send(err));
       }
@@ -1290,7 +1489,7 @@ router.post('/websites/update', async function (req, res, next) {
 
         update_website(website_id, name, entity_id, edit_user_id, older_user_id, transfer, default_tags, tags)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -1325,10 +1524,12 @@ router.post('/pages/update', async function (req, res, next) {
   }
 });
 
-router.post('/pages/updateAdmin', async function (req, res, next) {
+router.post('/pages/updateAdminPage', async function (req, res, next) {
   try {
     req.check('pageId', 'Invalid parameter PageId').exists();
-    req.check('checked', 'Invalid parameter Checked').exists();
+    req.check('user', 'Invalid parameter user').exists();
+    req.check('tag', 'Invalid parameter tag').exists();
+    req.check('website', 'Invalid parameter website').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1338,9 +1539,124 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const page_id = req.body.pageId;
-        const checked = req.body.checked;
+        const username = req.body.user;
+        const tag = req.body.tag;
+        const website = req.body.website;
 
-        update_page_admin(page_id, checked)
+        const type = await get_user_type(username);
+
+        update_page_admin(page_id, type)
+          .then(success => res.send(success))
+          .catch(err => res.send(err));
+
+        if (type === 'studies') {
+          //method to tag from selected page of studymonitor
+          update_page_study_admin(page_id, username, tag, website)
+            .catch(err => res.send(res));
+        }
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateAdminWebsite', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+    req.check('websiteName', 'No website name').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const websiteId = req.body.websiteId;
+        const websiteName = req.body.websiteName;
+
+        update_website_admin(websiteId, websiteName)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/updateAdminTag', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter TagId').exists();
+    req.check('cookie', 'User not logged in').exists();
+    req.check('tagName', 'No tag name').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+        const tagName = req.body.tagName;
+
+        update_tag_admin(tag_id, tagName)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+
+router.post('/pages/checkUpdateAdminTag', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+
+        verify_update_tag_admin(tag_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(res));
+
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/pages/checkupdateAdminWebsite', async function (req, res, next) {
+  try {
+    req.check('websiteId', 'Invalid parameter PageId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const websiteId = req.body.websiteId;
+
+        verify_update_website_admin(websiteId)
           .then(success => res.send(success))
           .catch(err => res.send(res));
       }
@@ -1351,7 +1667,8 @@ router.post('/pages/updateAdmin', async function (req, res, next) {
   }
 });
 
-router.post('/pages/updateObservatory', async function (req, res, next) {
+
+router.post('/pages/updateObservatorio', async function (req, res, next) {
   try {
     req.check('pages', 'Invalid parameter Pages').exists();
     req.check('pagesId', 'Invalid parameter PagesId').exists();
@@ -1361,15 +1678,15 @@ router.post('/pages/updateObservatory', async function (req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-     // const user_id = await verify_user(res, req.body.cookie, true);
+      // const user_id = await verify_user(res, req.body.cookie, true);
       //if (user_id !== -1) {
-        const pages = JSON.parse(req.body.pages);
-        const pages_id = JSON.parse(req.body.pagesId);
+      const pages = JSON.parse(req.body.pages);
+      const pages_id = JSON.parse(req.body.pagesId);
 
-        update_observatory_pages(pages, pages_id)
-          .then(success => res.send(success))
-          .catch(err => res.send(res));
-      }
+      update_observatorio_pages(pages, pages_id)
+        .then(success => res.send(success))
+        .catch(err => res.send(res));
+    }
     //}
   } catch (err) {
     console.log(err);
