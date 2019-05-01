@@ -220,7 +220,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
   try {
     let query = '';
     if (user === 'admin') {
-      query = `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+      query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
@@ -888,29 +888,28 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
 
     let webDomain = await execute_query(query);
 
-    let domDate = webDomain[0].Start_Date;
-    let webDate = webDomain[0].Creation_Date;
+    let domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    let webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     query = `SELECT  p.*
             FROM 
-            Tag as t, 
             Page as p, 
             Domain as d, 
             Website as w,
-            TagWebsite as tw,
             DomainPage as dp 
             WHERE 
             w.WebsiteId = "${website_id}" AND
             d.WebsiteId ="${website_id}"AND 
-            dp.domainId= d.domainId`;
-
+            dp.domainId = d.domainId AND
+            dp.PageId = p.PageId`;
     let pages = await execute_query(query);
 
-    query = `SELECT  d.DomainId,w,WebsiteId
+    console.log(pages);
+
+    query = `SELECT  d.DomainId, w.WebsiteId
             FROM  
             Page as p, 
-            Domain as d, 
-            TagWebsite as tw,
+            Domain as d,
             DomainPage as dp,
             Website as w
             LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
@@ -919,17 +918,16 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
             dp.PageId = p.PageId AND
             dp.DomainId = d.DomainId AND
             d.WebsiteId = w.WebsiteId AND
-            d.Uri = "${webDomain.Url}" AND
+            d.Url = "${webDomain.Url}" AND
             tw.WebsiteId = w.WebsiteId AND 
             t.TagId = tw.TagId AND 
             t.UserId IS NULL `;
     let domainP = await execute_query(query);
 
-    let websiteName = webDomain[0].Name;
     let domainUrl = webDomain[0].Url;
 
     if (_.size(webDomain) > 0) {
-      if (_.size(domain) > 0) {
+      if (_.size(domainP) > 0) {
         for (let page of pages) {
           if (page.Show_In[0] === '0') {
             await update_page_admin(page.PageId);

@@ -1486,7 +1486,6 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
 
                 const username = req.body.user;
                 const type = await get_user_type(username);
-                const user_id = await get_user_id(username);
 
                 update_page_admin(page_id)
                     .then(success => res.send(success))
@@ -1520,10 +1519,6 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
             if (user_id !== -1) {
                 const websiteId = req.body.websiteId;
                 const websiteName = req.body.websiteName;
-
-                const username = req.body.user;
-                const type = await get_user_type(username);
-                const user_id = await get_user_id(username);
 
                 update_website_admin(websiteId,websiteName)
                     .then(success => res.send(success))
