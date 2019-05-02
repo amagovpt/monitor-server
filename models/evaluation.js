@@ -285,7 +285,6 @@ module.exports.save_url_evaluation = async (url, evaluation, show_to) => {
         Domain as d
       WHERE
         LOWER(d.Url) = "${_.toLower(domain)}" AND
-        e.Show_To = "${show_to}" AND
         d.WebsiteId = w.WebsiteId AND
         (
           w.UserId IS NULL OR
@@ -329,10 +328,10 @@ module.exports.save_url_evaluation = async (url, evaluation, show_to) => {
 
       query = `
         INSERT INTO 
-          Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date)
+          Evaluation (PageId, Title, Score, Pagecode, Tot, Nodes, Errors, A, AA, AAA, Evaluation_Date, Show_To)
         VALUES 
           ("${page_id}", "${data.title}", "${data.score}", "${webpage}", "${tot}", "${nodes}", "${elems}", "${conform[0]}", 
-           "${conform[1]}", "${conform[2]}", "${data.date}")`;
+           "${conform[1]}", "${conform[2]}", "${data.date}", "${show_to}")`;
 
       await execute_query(query);
     }
