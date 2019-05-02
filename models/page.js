@@ -982,7 +982,7 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
             t.TagId = tw.TagId AND 
             t.UserId IS NULL `;*/
     query = `
-      SELECT d.DomainId
+      SELECT d.DomainId, w.Deleted, w.WebsiteId
       FROM
         User as u,
         Website as w,
@@ -1001,13 +1001,23 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
     `;
     let domainP = await execute_query(query);
 
+    query = `SELECT dp.*
+            FROM 
+            DomainPage as dp
+            WHERE
+            dp.DomainId = "${domainP[0].DomainId}" AND
+            dp.PageId = "${page_id}"`;
+    let domainPageExists = await execute_query(query);
+
     if (_.size(tag) > 0) {
       if (_.size(domainP) > 0) {
-        query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.DomainId}", "${page_id}")`;
-        await execute_query(query);
+        if(_.size(domainPageExists) <= 0) {
+          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP[0].DomainId}", "${page_id}")`;
+          await execute_query(query);
+        }
 
-        if (tag[0].Deleted === '1') {
-          query = `UPDATE Website SET Name = "${website}", Deleted = 0 WHERE WebsiteId = "${tag[0].WebsiteId}"`;
+        if (domainP[0].Deleted === 1) {
+          query = `UPDATE Website SET Name = "${website}", Deleted = 0 WHERE WebsiteId = "${domainP[0].WebsiteId}"`;
           await execute_query(query);
         }
       } else {

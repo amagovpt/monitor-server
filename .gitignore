@@ -8,3 +8,5 @@ package-lock.json
 
 /lib/_constants.js
 lib/_constants.js
+
+bin/
