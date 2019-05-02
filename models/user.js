@@ -195,8 +195,8 @@ module.exports.create_user = async (username, password, names, emails, type, web
       VALUES ("${username}", "${password_hash}", "${names}", "${emails}", "${type}", "${date}", "${hash}")`;
 
     const data = await execute_query(query);
-
-    if (type === 'monitor') {
+    
+    if (type === 'monitor' && _.size(websites) > 0) {
       query = `UPDATE Website SET UserId = "${data.insertId}" WHERE WebsiteId IN (${websites})`;
       await execute_query(query);
 

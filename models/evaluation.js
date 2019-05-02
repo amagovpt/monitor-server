@@ -156,27 +156,64 @@ module.exports.get_my_monitor_newest_evaluation = async (user_id, website, url) 
 }
 //AQUI
 //perguntar se 11 eh possivel
-module.exports.get_all_page_evaluations = async (page) => {
+module.exports.get_all_page_evaluations = async (page, type) => {
   try {
-    const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
-      FROM
-        User as u,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p,
-        Evaluation as e
-      WHERE
-        LOWER(p.Uri) = "${_.toLower(page)}" AND
-        p.Show_In LIKE "1%%" AND
-        e.PageId = p.PageId AND
-        e.Show_To LIKE "1_" AND
-        dp.PageId = p.PageId AND
-        d.DomainId = dp.DomainId AND
-        w.WebsiteId = d.WebsiteId AND
-        w.Deleted = "0" AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
-      ORDER BY e.Evaluation_Date DESC`;
+    let query = '';
+    
+    if (type === 'admin') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = "${_.toLower(page)}" AND
+          p.Show_In LIKE "1%%" AND
+          e.PageId = p.PageId AND
+          e.Show_To LIKE "1_" AND
+          dp.PageId = p.PageId AND
+          d.DomainId = dp.DomainId AND
+          w.WebsiteId = d.WebsiteId AND
+          w.Deleted = "0" AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
+        ORDER BY e.Evaluation_Date DESC`;
+    } else if (type === 'monitor') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = "${_.toLower(page)}" AND
+          p.Show_In LIKE "11%" AND
+          e.PageId = p.PageId AND
+          e.Show_To LIKE "_1" AND
+          dp.PageId = p.PageId AND
+          d.DomainId = dp.DomainId AND
+          w.WebsiteId = d.WebsiteId AND
+          u.UserId = w.UserId AND 
+          LOWER(u.Type) = "monitor"
+        ORDER BY e.Evaluation_Date DESC`;
+    } else if (type === 'studies') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = "${_.toLower(page)}" AND
+          e.PageId = p.PageId
+        ORDER BY e.Evaluation_Date DESC
+        LIMIT 1`;
+    } else {
+      query = `SELECT * FROM Evaluation WHERE EvaluationId = -1`;
+    }
+
     const evaluations = await execute_query(query);
 
     return success(evaluations);

@@ -880,6 +880,7 @@ router.post('/pages/domain', async function (req, res, next) {
 router.post('/evaluations/page', async function (req, res, next) {
   try {
     req.check('page', 'Invalid page').exists();
+    req.check('type', 'Invalid type').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -888,10 +889,11 @@ router.post('/evaluations/page', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const user = req.body.user;
         const page = decodeURIComponent(req.body.page);
+        const type = req.body.type;
 
-        get_all_page_evaluations(page, "10")
+
+        get_all_page_evaluations(page, type)
           .then(evaluations => res.send(evaluations))
           .catch(err => re.send(err));
       }
