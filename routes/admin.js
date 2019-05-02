@@ -1545,7 +1545,7 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
 
         const type = await get_user_type(username);
 
-        conts success = await update_page_admin(page_id, type)
+        const success = await update_page_admin(page_id, type)
           .catch(err => res.send(err));
 
         if (type === 'studies') {
