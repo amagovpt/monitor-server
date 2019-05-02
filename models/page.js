@@ -938,14 +938,15 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
   try {
     let query;
     query = `SELECT w.*, d.*
-            FROM 
+            FROM
+              User as u,
               Tag as t, 
               Page as p, 
               Domain as d, 
               Website as w,
               TagWebsite as tw,
               DomainPage as dp 
-            WHERE 
+            WHERE
               p.PageId = "${page_id}" AND 
               dp.PageId = p.PageId AND
               dp.DomainId = d.DomainId AND
@@ -955,9 +956,9 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
               t.TagId = tw.TagId AND
               t.Name = "${tagName}" AND
               u.UserId = t.UserId AND
-              u.Username = "${username}`;
+              u.Username = "${username}"`;
     let tag = await execute_query(query);
-
+    
     let domDate = tag[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let webDate = tag[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -988,7 +989,7 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
         Domain as d
       WHERE
         d.Url = "${domainUrl}" AND
-        w.WebsiteId = d.DomainId AND
+        w.WebsiteId = d.WebsiteId AND
         (
           w.UserId IS NULL OR
           (

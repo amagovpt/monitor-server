@@ -97,7 +97,7 @@ const {
   create_pages,
   update_page,
   update_page_admin,
-  update_observatory_pages,
+  update_page_study_admin,
   delete_pages,
   get_urls,
   get_study_monitor_user_tag_website_pages,

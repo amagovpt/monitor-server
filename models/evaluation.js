@@ -160,12 +160,22 @@ module.exports.get_all_page_evaluations = async (page) => {
   try {
     const query = `SELECT e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
       FROM
+        User as u,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
         Page as p,
         Evaluation as e
       WHERE
         LOWER(p.Uri) = "${_.toLower(page)}" AND
+        p.Show_In LIKE "1%%" AND
         e.PageId = p.PageId AND
-        e.Show_To LIKE "1_"
+        e.Show_To LIKE "1_" AND
+        dp.PageId = p.PageId AND
+        d.DomainId = dp.DomainId AND
+        w.WebsiteId = d.WebsiteId AND
+        w.Deleted = "0" AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
       ORDER BY e.Evaluation_Date DESC`;
     const evaluations = await execute_query(query);
 

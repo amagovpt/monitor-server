@@ -454,9 +454,11 @@ module.exports.update_tag_admin = async (tag_id, newTagName) => {
       tag = await execute_query(query);
 
       for (const website of websites) {
-        await update_website_admin(website.WebsiteId, website.Name);
-        query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag.insertId}", "${website.WebsiteId}")`;
-        await execute_query(query);
+        const newWebsite = await update_website_admin(website.WebsiteId, website.Name);
+        if (newWebsite.success === 1) {
+          query = `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES ("${tag.insertId}", "${newWebsite.result || website.WebsiteId}")`;
+          await execute_query(query);
+        }
       }
     }
 

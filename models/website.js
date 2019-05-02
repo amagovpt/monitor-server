@@ -1056,6 +1056,7 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
     
     let domainUrl = webDomain[0].Url;
 
+    let returnWebsiteId = website_id;
     if (_.size(webDomain) > 0) {
       if (domainP) {
         for (let page of pages) {
@@ -1079,6 +1080,7 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
       } else {
         query = `INSERT INTO Website (Name, Creation_Date) VALUES ("${newWebsiteName}", "${webDate}")`;
         let website = await execute_query(query);
+        returnWebsiteId = website.insertId;
 
         query = `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES ( "${website.insertId}","${domainUrl}", "${domDate}", "1")`;
         let domain = await execute_query(query);
@@ -1092,7 +1094,7 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
         }
       }
     }
-    return success(website_id);
+    return success(returnWebsiteId);
   } catch (err) {
     console.log(err);
     return error(err);
