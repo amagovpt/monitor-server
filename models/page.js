@@ -24,30 +24,33 @@ const {
   save_page_evaluation
 } = require('./evaluation');
 
-module.exports.create_pages = async (domain_id, uris, observatory_uris, show_in) => {
+module.exports.create_pages = async (domain_id, uris, observatory_uris) => {
   try {
     const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     let pagesId = [];
     const errors = {};
 
+    let i = 0;
     for (let u of uris) {
+      i++;
       u = _.replace(u, 'https://', '');
       u = _.replace(u, 'http://', '');
       u = _.replace(u, 'www.', '');
       u = decodeURIComponent(u);
 
-      let query = `SELECT PageId, Show_In FROM Page WHERE LOWER(Uri) = "${_.toLower(u)}" LIMIT 1`;
+      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${u}" LIMIT 1`;
       let page = await execute_query(query);
 
       if (_.size(page) > 0) {
-        query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
+        /*query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
         let domain_page = await execute_query(query);
         if (_.size(domain_page) === 0) {
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${page[0].PageId}")`;
           await execute_query(query);
           pagesId.push(page[0].PageId);
-        }
+        }*/
+
         let new_show_in = '100';
 
         if (_.includes(observatory_uris, u)) {
@@ -64,6 +67,8 @@ module.exports.create_pages = async (domain_id, uris, observatory_uris, show_in)
 
         query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page[0].PageId}"`;
         await execute_query(query);
+        
+        pagesId.push(page[0].PageId);
       } else {
         let show = null;
 
@@ -86,14 +91,14 @@ module.exports.create_pages = async (domain_id, uris, observatory_uris, show_in)
           query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
           let newPage = await execute_query(query);
 
-          await save_page_evaluation(newPage.insertId, evaluation, "10");
+          await save_page_evaluation(newPage.insertId, evaluation, '10');
 
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
           await execute_query(query);
           pagesId.push(newPage.insertId);
-        } else {
+        } /*else {
           return success(pagesId);
-        }
+        }*/
       }
     }
 
@@ -1053,6 +1058,8 @@ module.exports.update_observatory_pages = async (pages, pages_id) => {
       let query = `UPDATE Page SET Show_In = "${show}" WHERE PageId = "${page.PageId}"`;
       await execute_query(query);
     }
+
+    return success(true);
   } catch (err) {
     console.log(err);
     return error(err);

@@ -41,6 +41,8 @@ module.exports.evaluate_url_and_save = async (page_id, url, show_to) => {
       const webpage = Buffer.from(evaluation.pagecode).toString('base64');
       const data = evaluation.data;
 
+      data.title = data.title.replace(/"/g, '');
+
       const conform = _.split(data.conform, '@');
       const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
       const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
@@ -309,7 +311,7 @@ module.exports.save_url_evaluation = async (url, evaluation, show_to) => {
       } else {
         const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${url}", "none", "${date}")`;
+        query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${url}", "000", "${date}")`;
         let newPage = await execute_query(query);
 
         query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${existing_domain.DomainId}", "${newPage.insertId}")`;
@@ -320,6 +322,8 @@ module.exports.save_url_evaluation = async (url, evaluation, show_to) => {
 
       const webpage = Buffer.from(evaluation.pagecode).toString('base64');
       const data = evaluation.data;
+      
+      data.title = data.title.replace(/"/g, '');
 
       const conform = _.split(data.conform, '@');
       const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
@@ -349,6 +353,9 @@ module.exports.save_page_evaluation = async (page_id, evaluation, show_to) => {
 
     const webpage = Buffer.from(evaluation.pagecode).toString('base64');
     const data = evaluation.data;
+
+    data.title = data.title.replace(/"/g, '');
+    console.log('1 ' + data.title);
 
     const conform = _.split(data.conform, '@');
     const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');

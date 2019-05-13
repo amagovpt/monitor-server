@@ -55,6 +55,7 @@ module.exports.create_website = async (name, domain, entity_id, user_id, tags) =
       LIMIT 1
       `;
     const website = await execute_query(query);
+
     let website_id = -1;
 
     if (_.size(website) > 0) {
@@ -213,6 +214,7 @@ module.exports.get_all_websites_without_entity = async () => {
         User as u 
       WHERE 
         w.EntityId IS NULL AND
+        w.Deleted = "0" AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`;
     const websites = await execute_query(query);
     return success(websites);
@@ -224,7 +226,7 @@ module.exports.get_all_websites_without_entity = async () => {
 
 module.exports.get_all_websites_without_user = async () => {
   try {
-    const query = `SELECT * FROM Website WHERE UserId IS NULL`;
+    const query = `SELECT * FROM Website WHERE UserId IS NULL AND Deleted = "0"`;
     const websites = await execute_query(query);
     return success(websites);
   } catch (err) {

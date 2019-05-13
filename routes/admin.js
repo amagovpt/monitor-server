@@ -86,6 +86,7 @@ const {
   domain_exists,
   domain_exists_in_admin,
   create_domain,
+  update_domain,
   delete_domain
 } = require('../models/domain');
 
@@ -101,7 +102,8 @@ const {
   delete_pages,
   get_urls,
   get_study_monitor_user_tag_website_pages,
-  get_my_monitor_user_website_pages
+  get_my_monitor_user_website_pages,
+  update_observatory_pages
 } = require('../models/page');
 
 const {
@@ -1500,6 +1502,32 @@ router.post('/websites/update', async function (req, res, next) {
   }
 });
 
+router.post('/domains/update', async function (req, res, next) {
+  try {
+    req.check('domainId', 'Invalid parameter DomainId').exists();
+    req.check('url', 'Invalid parameter Url').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const domain_id = req.body.domainId;
+        const url = decodeURIComponent(req.body.url);
+
+        update_domain(domain_id, url)
+          .then(success => res.send(success))
+          .catch(err => res.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
 router.post('/pages/update', async function (req, res, next) {
   try {
     req.check('pageId', 'Invalid parameter PageId').exists();
@@ -1681,16 +1709,16 @@ router.post('/pages/updateObservatorio', async function (req, res, next) {
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      // const user_id = await verify_user(res, req.body.cookie, true);
-      //if (user_id !== -1) {
-      const pages = JSON.parse(req.body.pages);
-      const pages_id = JSON.parse(req.body.pagesId);
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const pages = JSON.parse(req.body.pages);
+        const pages_id = JSON.parse(req.body.pagesId);
 
-      update_observatorio_pages(pages, pages_id)
-        .then(success => res.send(success))
-        .catch(err => res.send(res));
+        update_observatory_pages(pages, pages_id)
+          .then(success => res.send(success))
+          .catch(err => res.send(err));
+      }
     }
-    //}
   } catch (err) {
     console.log(err);
     res.send(error(new ServerError(err)));

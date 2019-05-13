@@ -122,7 +122,8 @@ module.exports.get_all_official_domains = async () => {
             u.UserId = w.UserId AND
             LOWER(u.Type) != 'studies'
           )
-        )
+        ) AND
+        w.Deleted = "0"
       GROUP BY d.DomainId`;
     const domains = await execute_query(query);
     return success(domains);
@@ -256,6 +257,18 @@ module.exports.domain_exists_in_admin = async (website_id) => {
 
     const websites = await execute_query(query);
     return websites;
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+}
+
+module.exports.update_domain = async (domain_id, url) => {
+  try {
+    const query = `UPDATE Domain SET Url = "${url}" WHERE DomainId = "${domain_id}"`;
+    await execute_query(query);
+
+    return success(domain_id);
   } catch (err) {
     console.log(err);
     return error(err);
