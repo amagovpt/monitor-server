@@ -355,7 +355,6 @@ module.exports.save_page_evaluation = async (page_id, evaluation, show_to) => {
     const data = evaluation.data;
 
     data.title = data.title.replace(/"/g, '');
-    console.log('1 ' + data.title);
 
     const conform = _.split(data.conform, '@');
     const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');

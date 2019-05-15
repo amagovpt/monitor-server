@@ -18,6 +18,9 @@ const {
   execute_query
 } = require('../lib/_database');
 const Crawler = require('simplecrawler');
+const {
+  get_io
+} = require('../lib/_util');
 
 const {
   evaluate_url,
@@ -26,94 +29,99 @@ const {
 
 module.exports.create_pages = async (domain_id, uris, observatory_uris) => {
   try {
-    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    const io = get_io();
 
-    let pagesId = [];
-    const errors = {};
+    io.sockets.on('connection', async socket => {
+      socket.on('message', message => {
+        if (message === 'cancel') {
+          cancel = true;
+        }
+      });
 
-    let i = 0;
-    for (let u of uris) {
-      i++;
-      u = _.replace(u, 'https://', '');
-      u = _.replace(u, 'http://', '');
-      u = _.replace(u, 'www.', '');
-      u = decodeURIComponent(u);
+      const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-      let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${u}" LIMIT 1`;
-      let page = await execute_query(query);
+      let pagesId = [];
+      const errors = {};
+      let cancel = false;
 
-      if (_.size(page) > 0) {
-        /*query = `SELECT * FROM DomainPage WHERE DomainId = "${domain_id}" AND PageId = "${page[0].PageId}" LIMIT 1`;
-        let domain_page = await execute_query(query);
-        if (_.size(domain_page) === 0) {
-          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${page[0].PageId}")`;
-          await execute_query(query);
-          pagesId.push(page[0].PageId);
-        }*/
+      for (let u of uris) {
+        u = _.replace(u, 'https://', '');
+        u = _.replace(u, 'http://', '');
+        u = _.replace(u, 'www.', '');
+        u = decodeURIComponent(u);
 
-        let new_show_in = '100';
+        let query = `SELECT PageId, Show_In FROM Page WHERE Uri = "${u}" LIMIT 1`;
+        let page = await execute_query(query);
 
-        if (_.includes(observatory_uris, u)) {
-          if (page[0].Show_In[1] === '1') {
-            new_show_in = '111';
+        if (_.size(page) > 0) {
+          let new_show_in = '100';
+
+          if (_.includes(observatory_uris, u)) {
+            if (page[0].Show_In[1] === '1') {
+              new_show_in = '111';
+            } else {
+              new_show_in = '101';
+            }
           } else {
-            new_show_in = '101';
+            if (page[0].Show_In[1] === '1') {
+              new_show_in = '110';
+            }
           }
-        } else {
-          if (page[0].Show_In[1] === '1') {
-            new_show_in = '110';
-          }
-        }
 
-        query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page[0].PageId}"`;
-        await execute_query(query);
-        
-        pagesId.push(page[0].PageId);
-      } else {
-        let show = null;
-
-        if (_.includes(observatory_uris, u)) {
-          show = '101'
-        } else {
-          show = '100';
-        }
-
-
-        let evaluation = null;
-        try {
-          evaluation = await evaluate_url(u, 'examinator');
-        } catch (e) {
-          errors[u] = -1;
-          evaluation = null;
-        }
-
-        if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
-          query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
-          let newPage = await execute_query(query);
-
-          await save_page_evaluation(newPage.insertId, evaluation, '10');
-
-          query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
+          query = `UPDATE Page SET Show_In = "${new_show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
-          pagesId.push(newPage.insertId);
-        } /*else {
-          return success(pagesId);
-        }*/
-      }
-    }
 
-    if (_.size(_.keys(errors)) > 0) {
-      return error({
-        code: 0,
-        message: 'SOME_PAGES_ERRORS',
-        err: errors
-      }, pagesId);
-    } else {
-      return success(pagesId);
-    }
+          pagesId.push(page[0].PageId);
+        } else {
+          let show = null;
+
+          if (_.includes(observatory_uris, u)) {
+            show = '101'
+          } else {
+            show = '100';
+          }
+
+          let evaluation = null;
+          try {
+            evaluation = await evaluate_url(u, 'examinator');
+          } catch (e) {
+            errors[u] = -1;
+            evaluation = null;
+          }
+
+          if (evaluation !== null && evaluation.success === 1 && evaluation.result !== null) {
+            query = `INSERT INTO Page (Uri, Show_In, Creation_Date) VALUES ("${u}", "${show}", "${date}")`;
+            let newPage = await execute_query(query);
+
+            await save_page_evaluation(newPage.insertId, evaluation, '10');
+
+            query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain_id}", "${newPage.insertId}")`;
+            await execute_query(query);
+            pagesId.push(newPage.insertId);
+          } else {
+            errors[u] = -1;
+          }
+        }
+
+        if (cancel) {
+          break;
+        }
+
+        if (errors[u] === -1) {
+          socket.emit('message', {
+            success: false,
+            uri: encodeURIComponent(u)
+          });
+        } else {
+          socket.emit('message', {
+            success: true,
+            uri: encodeURIComponent(u)
+          });
+        }
+      }
+    });
   } catch (err) {
     console.log(err);
-    return error(err);
   }
 }
 
@@ -963,7 +971,7 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
               u.UserId = t.UserId AND
               u.Username = "${username}"`;
     let tag = await execute_query(query);
-    
+
     let domDate = tag[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
     let webDate = tag[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
@@ -1016,7 +1024,7 @@ module.exports.update_page_study_admin = async (page_id, username, tagName, webs
 
     if (_.size(tag) > 0) {
       if (_.size(domainP) > 0) {
-        if(_.size(domainPageExists) <= 0) {
+        if (_.size(domainPageExists) <= 0) {
           query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP[0].DomainId}", "${page_id}")`;
           await execute_query(query);
         }

@@ -7,6 +7,7 @@
 const app = require('../app');
 const debug = require('debug')('monitor-server:server');
 const http = require('http');
+const { createSocketIoServer } = require('../lib/_util');
 
 /**
  * Get port from environment and store in Express.
@@ -19,7 +20,7 @@ app.set('port', PORT);
  * Create HTTP server.
  */
 const server = http.createServer(app);
-
+createSocketIoServer(server);
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -64,3 +65,4 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+

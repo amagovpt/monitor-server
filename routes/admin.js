@@ -1305,7 +1305,7 @@ router.post('/pages/create', async function (req, res, next) {
   try {
     req.check('domainId', 'Invalid DomainId').exists();
     req.check('uris', 'Invalid Uris').exists();
-    req.check('observatorio', 'Invalid Observatory Uris').exists();
+    req.check('observatory', 'Invalid Observatory Uris').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -1316,11 +1316,12 @@ router.post('/pages/create', async function (req, res, next) {
       if (user_id !== -1) {
         const domain_id = req.body.domainId;
         const uris = JSON.parse(req.body.uris);
-        const observatorio_uris = JSON.parse(req.body.observatorio);
+        const observatory_uris = JSON.parse(req.body.observatory);
 
-        create_pages(domain_id, uris, observatorio_uris, '100')
-          .then(success => res.send(success))
-          .catch(err => res.send(err));
+        create_pages(domain_id, uris, observatory_uris, '100');
+          //.then(success => res.send(success))
+          //.catch(err => res.send(err));
+        res.send(success(true));
       }
     }
   } catch (err) {
