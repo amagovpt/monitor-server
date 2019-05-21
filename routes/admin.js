@@ -110,7 +110,11 @@ const {
   evaluate_url_and_save,
   get_all_page_evaluations,
   get_evaluation,
-  delete_evaluation
+  get_user_evaluation,
+  delete_evaluation,
+  re_evaluate_website_pages,
+  re_evaluate_tag_website_pages,
+  re_evaluate_entity_website_pages
 } = require('../models/evaluation');
 
 /**
@@ -922,6 +926,32 @@ router.post('/page/evaluation', async function (req, res, next) {
         const evaluation_id = req.body.evaluation_id;
 
         get_evaluation(url, evaluation_id)
+          .then(evaluation => res.send(evaluation))
+          .catch(err => re.send(err));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/user/page/evaluation', async function (req, res, next) {
+  try {
+    req.check('url', 'Invalid url').exists();
+    req.check('userType', 'Invalid User type').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const url = decodeURIComponent(req.body.url);
+        const user_type = req.body.userType;
+
+        get_user_evaluation(url, user_type)
           .then(evaluation => res.send(evaluation))
           .catch(err => re.send(err));
       }
@@ -1953,6 +1983,81 @@ router.post('/page/odf', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err)
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/tag/reEvaluate', async function (req, res, next) {
+  try {
+    req.check('tagId', 'Invalid TagId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const tag_id = req.body.tagId;
+
+        re_evaluate_tag_website_pages(tag_id);
+          //.then(success => res.send(success))
+          //.catch(err => res.send(err));
+        res.send(success(true));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/entity/reEvaluate', async function (req, res, next) {
+  try {
+    req.check('entityId', 'Invalid EntityId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity_id = req.body.entityId;
+
+        re_evaluate_entity_website_pages(entity_id);
+          //.then(success => res.send(success))
+          //.catch(err => res.send(err));
+        res.send(success(true));
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/website/reEvaluate', async function (req, res, next) {
+  try {
+    req.check('domainId', 'Invalid DomainId').exists();
+    req.check('cookie', 'User not logged in').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const domain_id = req.body.domainId;
+
+        re_evaluate_website_pages(domain_id);
+          //.then(success => res.send(success))
+          //.catch(err => res.send(err));
+        res.send(success(true));
+      }
+    }
+  } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });

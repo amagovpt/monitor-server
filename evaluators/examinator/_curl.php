@@ -151,6 +151,11 @@ class myCurl {
 			curl_setopt($this->ch, CURLOPT_TIMECONDITION, CURLOPT_TIMECOND_IFMODIFIEDSINCE);
 		}
 
+    //$version = curl_version();
+    //$ssl_supported= ($version['features'] & CURL_VERSION_SSL);
+
+    //echo $ssl_supported;
+
 		curl_setopt($this->ch,CURLOPT_CONNECTTIMEOUT,30);
 		curl_setopt($this->ch,CURLOPT_COOKIEJAR, "cookie.txt");
 		curl_setopt($this->ch,CURLOPT_COOKIEFILE, "cookie.txt");
@@ -164,7 +169,9 @@ class myCurl {
 		curl_setopt($this->ch,CURLOPT_REFERER,'http://www.google.com');
 		curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,true);
 		curl_setopt($this->ch,CURLOPT_TIMEOUT,20);
-		curl_setopt($this->ch,CURLOPT_SSL_VERIFYPEER, false);
+		//curl_setopt($this->ch,CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
+    //curl_setopt($this->ch, CURLOPT_SSLVERSION, $ssl_supported);
 		curl_setopt($this->ch,CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'); //'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 	}
 

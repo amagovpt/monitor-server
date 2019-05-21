@@ -12,6 +12,7 @@
 
     if ($url !== "html") {
       $webpage = get_webpage($url);
+      
       if ($webpage) {
         $data = evaluate_url($url, $webpage[0], $webpage[1], $webpage[2]);
         if ($data) {

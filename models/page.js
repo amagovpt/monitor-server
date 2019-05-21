@@ -31,7 +31,7 @@ module.exports.create_pages = async (domain_id, uris, observatory_uris) => {
   try {
     const io = get_io();
 
-    io.sockets.on('connection', async socket => {
+    io.on('connection', async socket => {
       socket.on('message', message => {
         if (message === 'cancel') {
           cancel = true;
@@ -543,7 +543,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           await execute_query(query);
         }
 
-        query = `UPDATE Evaluation SET Show_To = "11" WHERE PageId = "${page[0].PageId}" AND Show_To = "1_"`;
+        query = `UPDATE Evaluation SET Show_To = "11" WHERE PageId = "${page[0].PageId}" AND Show_To LIKE "1_"`;
         await execute_query(query);
       } else {
         let evaluation = null;
