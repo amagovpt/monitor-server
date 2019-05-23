@@ -15,6 +15,7 @@ const adminTagRouter = require('./routes/admin/tag');
 const adminWebsiteRouter = require('./routes/admin/website');
 const adminEvaluationRouter = require('./routes/admin/evaluation');
 const adminUserRouter = require('./routes/admin/user');
+const adminCrawlerRouter = require('./routes/admin/crawler');
 
 const monitorDomainRouter = require('./routes/monitor/domain');
 const monitorPageRouter = require('./routes/monitor/page');
@@ -51,6 +52,7 @@ app.use('/admin', adminTagRouter);
 app.use('/admin', adminUserRouter);
 app.use('/admin', adminWebsiteRouter);
 app.use('/admin', adminEvaluationRouter);
+app.use('/admin', adminCrawlerRouter);
 
 app.use('/amp', ampRouter);
 
