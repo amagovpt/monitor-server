@@ -2,32 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="47961629-fefc-4ea3-b29e-485163b16d10" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/routes/Admin/domain.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/entities.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/evalutation.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/page.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/tag.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/user.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Admin/website.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Monitor/domain.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Monitor/evaluation.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Monitor/page.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Monitor/user.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Monitor/website.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/domain.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/evaluation.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/page.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/tag.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/user.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/routes/Study/website.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/_constants.js" beforeDir="false" afterPath="$PROJECT_DIR$/lib/_constants.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/admin.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/amp.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/AMP/evaluation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/monitor.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/observatory.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/Observatory/observatory.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/study.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/Admin/evalutation.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/Admin/evaluation.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -48,8 +25,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="810">
-              <caret line="66" column="39" selection-start-line="66" selection-start-column="39" selection-end-line="66" selection-end-column="39" />
+            <state relative-caret-position="315">
+              <caret line="21" column="64" selection-start-line="21" selection-start-column="64" selection-end-line="21" selection-end-column="64" />
             </state>
           </provider>
         </entry>
@@ -224,7 +201,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1558611466603" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1558613888048" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../admin-monitor-suite" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -285,12 +262,12 @@
       <workItem from="1556620430696" duration="9762000" />
       <workItem from="1556636357590" duration="4761000" />
       <workItem from="1558463172782" duration="1760000" />
-      <workItem from="1558607764451" duration="5005000" />
+      <workItem from="1558607764451" duration="5868000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="63057000" />
+    <option name="totallyTimeSpent" value="63920000" />
   </component>
   <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
@@ -303,7 +280,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1922" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.310032" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -606,7 +582,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/routes/Admin/evalutation.js">
+    <entry file="file://$PROJECT_DIR$/routes/Admin/evaluation.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="849">
           <caret line="57" column="24" selection-start-line="57" selection-start-column="24" selection-end-line="57" selection-end-column="24" />
@@ -618,8 +594,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="66" column="39" selection-start-line="66" selection-start-column="39" selection-end-line="66" selection-end-column="39" />
+        <state relative-caret-position="315">
+          <caret line="21" column="64" selection-start-line="21" selection-start-column="64" selection-end-line="21" selection-end-column="64" />
         </state>
       </provider>
     </entry>

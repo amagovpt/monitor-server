@@ -13,13 +13,13 @@ const adminDomainRouter = require('./routes/Admin/domain');
 const adminPageRouter = require('./routes/Admin/page');
 const adminTagRouter = require('./routes/Admin/tag');
 const adminWebsiteRouter = require('./routes/Admin/website');
-const adminEvalutationRouter = require('./routes/Admin/evalutation');
+const adminEvaluationRouter = require('./routes/Admin/evaluation');
 const adminUserRouter = require('./routes/Admin/user');
 
 const monitorDomainRouter = require('./routes/Monitor/domain');
 const monitorPageRouter = require('./routes/Monitor/page');
 const monitorWebsiteRouter = require('./routes/Monitor/website');
-const monitorEvalutationRouter = require('./routes/Monitor/evalutation');
+const monitorEvaluationRouter = require('./routes/Monitor/evaluation');
 const monitorUserRouter = require('./routes/Monitor/user');
 
 const studyUserRouter = require('./routes/Study/user');
@@ -27,7 +27,7 @@ const studyDomainRouter = require('./routes/Study/domain');
 const studyPageRouter = require('./routes/Study/page');
 const studyTagRouter = require('./routes/Study/tag');
 const studyWebsiteRouter = require('./routes/Study/website');
-const studyEvalutationRouter = require('./routes/Study/evalutation');
+const studyEvaluationRouter = require('./routes/Study/evaluation');
 
 const ampRouter = require('./routes/AMP/evaluation');
 const obsRouter = require('./routes/Observatory/observatory');
@@ -50,7 +50,7 @@ app.use('/admin', adminPageRouter);
 app.use('/admin', adminTagRouter);
 app.use('/admin', adminUserRouter);
 app.use('/admin', adminWebsiteRouter);
-app.use('/admin', adminEvalutationRouter);
+app.use('/admin', adminEvaluationRouter);
 
 app.use('/amp', ampRouter);
 
@@ -61,13 +61,13 @@ app.use('/study', studyDomainRouter);
 app.use('/study', studyPageRouter);
 app.use('/study', studyTagRouter);
 app.use('/study', studyWebsiteRouter);
-app.use('/study', studyEvalutationRouter);
+app.use('/study', studyEvaluationRouter);
 
 app.use('/monitor', monitorDomainRouter);
 app.use('/monitor', monitorPageRouter);
 app.use('/monitor', monitorUserRouter);
 app.use('/monitor', monitorWebsiteRouter);
-app.use('/monitor', monitorEvalutationRouter);
+app.use('/monitor', monitorEvaluationRouter);
 
 app.use('/digitalSeal', digitalSealRouter);
 
