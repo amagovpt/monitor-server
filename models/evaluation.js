@@ -273,6 +273,8 @@ module.exports.get_user_evaluation = async (url, user_type) => {
       query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE "${url}" AND e.PageId = p.PageId AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date DESC LIMIT 1`;
     } else if (user_type === 'studies') {
       query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE "${url}" AND e.PageId = p.PageId ORDER BY e.Evaluation_Date DESC LIMIT 1`;
+    } else {
+      throw error({success: -400, message: 'INVALID_USER_TYPE'});
     }
 
     let evaluation = await execute_query(query);
@@ -626,8 +628,17 @@ module.exports.re_evaluate_website_pages = async domainId => {
   try {
     const io = get_io();
 
+    let connectedSockets = [];
+    
     io.on('connection', async socket => {
-      console.log('connected');
+      console.log('connected ' + socket.id);
+      if (!_.includes(connectedSockets, socket.id)) {
+        connectedSockets.push(socket.id);
+      } else {
+        socket.close();
+        return;
+      }
+
       const errors = {};
       let cancel = false;
 
@@ -638,6 +649,7 @@ module.exports.re_evaluate_website_pages = async domainId => {
       });
 
       socket.on('disconnect', () => {
+        console.log('disconnected');
         cancel = true;
       });
 
@@ -653,10 +665,10 @@ module.exports.re_evaluate_website_pages = async domainId => {
           p.PageId = dp.PageId
         `;
       const pages = await execute_query(query);
-      await socket.emit('startup', _.size(pages));
+      await io.to(socket.id).emit('startup', _.size(pages));
 
       for (const page of pages) {
-        await socket.emit('current_uri', encodeURIComponent(page.Uri));
+        await io.to(socket.id).emit('current_uri', encodeURIComponent(page.Uri));
 
         try {
           await this.evaluate_url_and_save(page.PageId, page.Uri, '10');
@@ -667,14 +679,14 @@ module.exports.re_evaluate_website_pages = async domainId => {
         if (cancel) {
           break;
         }
-
+        console.log(page.Uri)
         if (errors[page.Uri] === -1) {
-          await socket.emit('message', {
+          await io.to(socket.id).emit('message', {
             success: false,
             uri: encodeURIComponent(page.Uri)
           });
         } else {
-          await socket.emit('message', {
+          await io.to(socket.id).emit('message', {
             success: true,
             uri: encodeURIComponent(page.Uri)
           });

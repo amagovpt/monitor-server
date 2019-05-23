@@ -4,12 +4,11 @@
 
 .www.cgd.pt	TRUE	/	TRUE	0	pre-ha-root	ep_SPC6001SPT26
 #HttpOnly_www.cm-faro.pt	FALSE	/	FALSE	0	ASP.NET_SessionId	jflsp4dhiztjednws2i0e3ct
-.google.pt	TRUE	/	FALSE	1560964014	1P_JAR	2019-05-20-17
+.google.pt	TRUE	/	FALSE	1561200393	1P_JAR	2019-05-23-10
 #HttpOnly_.google.pt	TRUE	/	FALSE	1573857433	NID	183=y1V4J13YXtLCotfgJQdVH-KY0a-au3uRBOh9M-Gs0lhDKRaUaNvLODYA_tSDpLtroC-FHvqAYyyDFN9eN9lDPZzLsis6Mynz0CWER9t4PBsTNuF4541D3i9QpcP3DAC3m6kPVYBUYte5xZvV6Ai4WwnNwcCvIjRTfaZCAm1AQpk
-.google.pt	TRUE	/	FALSE	2145916800	CONSENT	WP.279d96.279f87.27a1a3
+.google.pt	TRUE	/	FALSE	2145916800	CONSENT	PENDING.27a32f
 #HttpOnly_www.caixaimobiliario.pt	FALSE	/	TRUE	0	JSESSIONID	0B21AC917F98988C3CA831897B0A08EF.ctec-t22
 #HttpOnly_www.cm-albergaria.pt	FALSE	/	FALSE	0	ASP.NET_SessionId	enjykc45fg2m3055p2mti445
 www.cm-albergaria.pt	FALSE	/	FALSE	0	ProviderUser	
 #HttpOnly_www.imoveisparceiroscaixa.pt	FALSE	/	FALSE	0	JSESSIONID	8668366F599717213635C3CE17A07EEF.ctec-t21
 www.cm-portel.pt	FALSE	/pt	FALSE	0	SearchSession	7b8f57be%2D171f%2D45ff%2D8f41%2D7393df79c145
-www.cascais.pt	FALSE	/	FALSE	0	lastvisitedpage	area%2Fdesporto-para-todos

@@ -44,6 +44,10 @@ module.exports.create_pages = async (domain_id, uris, observatory_uris) => {
       const errors = {};
       let cancel = false;
 
+      socket.on('disconnect', () => {
+        cancel = true;
+      });
+
       for (let u of uris) {
         u = _.replace(u, 'https://', '');
         u = _.replace(u, 'http://', '');
