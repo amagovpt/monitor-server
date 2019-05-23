@@ -8,29 +8,29 @@ const compression = require('compression');
 
 const sessionRouter = require('./routes/session');
 
-const adminEntitiesRouter = require('./routes/Admin/entities');
-const adminDomainRouter = require('./routes/Admin/domain');
-const adminPageRouter = require('./routes/Admin/page');
-const adminTagRouter = require('./routes/Admin/tag');
-const adminWebsiteRouter = require('./routes/Admin/website');
-const adminEvaluationRouter = require('./routes/Admin/evaluation');
-const adminUserRouter = require('./routes/Admin/user');
+const adminEntitiesRouter = require('./routes/admin/entities');
+const adminDomainRouter = require('./routes/admin/domain');
+const adminPageRouter = require('./routes/admin/page');
+const adminTagRouter = require('./routes/admin/tag');
+const adminWebsiteRouter = require('./routes/admin/website');
+const adminEvaluationRouter = require('./routes/admin/evaluation');
+const adminUserRouter = require('./routes/admin/user');
 
-const monitorDomainRouter = require('./routes/Monitor/domain');
-const monitorPageRouter = require('./routes/Monitor/page');
-const monitorWebsiteRouter = require('./routes/Monitor/website');
-const monitorEvaluationRouter = require('./routes/Monitor/evaluation');
-const monitorUserRouter = require('./routes/Monitor/user');
+const monitorDomainRouter = require('./routes/monitor/domain');
+const monitorPageRouter = require('./routes/monitor/page');
+const monitorWebsiteRouter = require('./routes/monitor/website');
+const monitorEvaluationRouter = require('./routes/monitor/evaluation');
+const monitorUserRouter = require('./routes/monitor/user');
 
-const studyUserRouter = require('./routes/Study/user');
-const studyDomainRouter = require('./routes/Study/domain');
-const studyPageRouter = require('./routes/Study/page');
-const studyTagRouter = require('./routes/Study/tag');
-const studyWebsiteRouter = require('./routes/Study/website');
-const studyEvaluationRouter = require('./routes/Study/evaluation');
+const studyUserRouter = require('./routes/study/user');
+const studyDomainRouter = require('./routes/study/domain');
+const studyPageRouter = require('./routes/study/page');
+const studyTagRouter = require('./routes/study/tag');
+const studyWebsiteRouter = require('./routes/study/website');
+const studyEvaluationRouter = require('./routes/study/evaluation');
 
-const ampRouter = require('./routes/AMP/evaluation');
-const obsRouter = require('./routes/Observatory/observatory');
+const ampRouter = require('./routes/amp/evaluation');
+const obsRouter = require('./routes/observatory/observatory');
 const digitalSealRouter = require('./routes/digital-seal');
 
 const app = express();
