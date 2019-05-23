@@ -7,11 +7,30 @@ const cors = require('cors');
 const compression = require('compression');
 
 const sessionRouter = require('./routes/session');
-const adminRouter = require('./routes/admin');
-const ampRouter = require('./routes/amp');
-const obsRouter = require('./routes/observatory');
-const studyRouter = require('./routes/study');
-const monitorRouter = require('./routes/monitor');
+
+const adminEntitiesRouter = require('./routes/Admin/entities');
+const adminDomainRouter = require('./routes/Admin/domain');
+const adminPageRouter = require('./routes/Admin/page');
+const adminTagRouter = require('./routes/Admin/tag');
+const adminWebsiteRouter = require('./routes/Admin/website');
+const adminEvalutationRouter = require('./routes/Admin/evalutation');
+const adminUserRouter = require('./routes/Admin/user');
+
+const monitorDomainRouter = require('./routes/Monitor/domain');
+const monitorPageRouter = require('./routes/Monitor/page');
+const monitorWebsiteRouter = require('./routes/Monitor/website');
+const monitorEvalutationRouter = require('./routes/Monitor/evalutation');
+const monitorUserRouter = require('./routes/Monitor/user');
+
+const studyUserRouter = require('./routes/Study/user');
+const studyDomainRouter = require('./routes/Study/domain');
+const studyPageRouter = require('./routes/Study/page');
+const studyTagRouter = require('./routes/Study/tag');
+const studyWebsiteRouter = require('./routes/Study/website');
+const studyEvalutationRouter = require('./routes/Study/evalutation');
+
+const ampRouter = require('./routes/AMP/evaluation');
+const obsRouter = require('./routes/Observatory/observatory');
 const digitalSealRouter = require('./routes/digital-seal');
 
 const app = express();
@@ -24,11 +43,32 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '2mb' }));
 app.use(expressValidator());
 
 app.use('/session', sessionRouter);
-app.use('/admin', adminRouter);
+
+app.use('/admin', adminEntitiesRouter);
+app.use('/admin', adminDomainRouter);
+app.use('/admin', adminPageRouter);
+app.use('/admin', adminTagRouter);
+app.use('/admin', adminUserRouter);
+app.use('/admin', adminWebsiteRouter);
+app.use('/admin', adminEvalutationRouter);
+
 app.use('/amp', ampRouter);
+
 app.use('/observatory', obsRouter);
-app.use('/study', studyRouter);
-app.use('/monitor', monitorRouter);
+
+app.use('/study', studyUserRouter);
+app.use('/study', studyDomainRouter);
+app.use('/study', studyPageRouter);
+app.use('/study', studyTagRouter);
+app.use('/study', studyWebsiteRouter);
+app.use('/study', studyEvalutationRouter);
+
+app.use('/monitor', monitorDomainRouter);
+app.use('/monitor', monitorPageRouter);
+app.use('/monitor', monitorUserRouter);
+app.use('/monitor', monitorWebsiteRouter);
+app.use('/monitor', monitorEvalutationRouter);
+
 app.use('/digitalSeal', digitalSealRouter);
 
 // catch 404 and forward to error handler
