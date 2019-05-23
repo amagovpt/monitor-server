@@ -1,3 +1,39 @@
+'use strict';
+
+/**
+ * Admin Router and Controller
+ */
+const _ = require('lodash');
+const express = require('express');
+const router = express.Router();
+
+const {
+    ServerError,
+    ParamsError
+} = require('../../lib/_error');
+const {
+    error
+} = require('../../lib/_response');
+
+const {
+    verify_user
+} = require('../../models/user');
+
+const {
+    get_number_of_study_monitor_tags,
+    get_number_of_observatorio_tags,
+    get_all_tags,
+    get_all_official_tags,
+    tag_official_name_exists,
+    create_official_tag,
+    get_tag_info,
+    update_tag,
+    copy_tag,
+    delete_tag,
+    verify_update_tag_admin,
+    get_all_user_tags
+} = require('../../models/tag');
+
 router.get('/tags/exists/:name', async function (req, res, next) {
     try {
         req.check('name', 'Invalid Name').exists();

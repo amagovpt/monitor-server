@@ -7,8 +7,6 @@ const { ServerError, ParamsError } = require('../../lib/_error');
 const { error } = require('../../lib/_response');
 const { verify_user, change_user_password } = require('../../models/user');
 
-
-
 router.post('/user/changePassword', async function(req, res, next) {
     try {
         req.check('password', 'Invalid Password parameter').exists();
@@ -36,4 +34,3 @@ router.post('/user/changePassword', async function(req, res, next) {
 });
 
 module.exports = router;
-

@@ -21,9 +21,6 @@ const {
     get_user_type
 } = require('../../models/user');
 
-
-
-
 const {
     get_all_domains,
     get_all_official_domains,
@@ -34,9 +31,6 @@ const {
     update_domain,
     delete_domain
 } = require('../../models/domain');
-
-
-
 
 router.post('/domains/all', async function (req, res, next) {
     try {

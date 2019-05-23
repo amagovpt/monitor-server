@@ -6,12 +6,10 @@ const { ServerError, ParamsError } = require('../../lib/_error');
 const { error } = require('../../lib/_response');
 const { verify_user } = require('../../models/user');
 
-
 const {
     study_monitor_user_tag_website_domain_exists,
     get_study_monitor_user_tag_website_domain
 } = require('../../models/website');
-
 
 router.post('/user/tag/website/domainExists', async function(req, res, next) {
     try {
@@ -62,6 +60,5 @@ router.post('/user/tag/website/domain', async function(req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;

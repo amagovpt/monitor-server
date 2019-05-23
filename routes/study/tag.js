@@ -18,9 +18,6 @@ const {
     get_study_monitor_user_websites_from_other_tags
 } = require('../../models/website');
 
-
-
-
 router.post('/tags/allOfficial', async function (req, res, next) {
     try {
         req.check('cookie', 'User not logged in').exists();
@@ -113,9 +110,6 @@ router.post('/user/tag/nameExists', async function(req, res, next) {
     }
 });
 
-
-
-
 router.post('/user/removeTags', async function(req, res, next) {
     try {
         req.check('tagsId', 'Invalid tagsId parameter').exists();
@@ -140,8 +134,6 @@ router.post('/user/removeTags', async function(req, res, next) {
     }
 });
 
-
-
 router.post('/user/websites/otherTags', async function(req, res, next) {
     try {
         req.check('tag', 'Invalid tag parameter').exists();
@@ -165,6 +157,5 @@ router.post('/user/websites/otherTags', async function(req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;

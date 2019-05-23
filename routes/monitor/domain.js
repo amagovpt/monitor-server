@@ -8,7 +8,6 @@ const { verify_user} = require('../../models/user');
 const {  get_my_monitor_user_website_domain } = require('../../models/website');
 
 
-
 router.post('/user/website/domain', async function(req, res, next) {
     try {
         req.check('website', 'Invalid website parameter').exists();
@@ -31,6 +30,5 @@ router.post('/user/website/domain', async function(req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;

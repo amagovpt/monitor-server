@@ -8,8 +8,6 @@ const { verify_user } = require('../../models/user');
 const {  get_page_id } = require('../../models/page');
 const { get_my_monitor_newest_evaluation, evaluate_url_and_save } = require('../../models/evaluation');
 
-
-
 router.post('/evaluation', async function(req, res, next) {
   try {
     req.check('website', 'Invalid website parameter').exists();
@@ -59,7 +57,5 @@ router.post('/evaluate', async function(req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
-
 
 module.exports = router;

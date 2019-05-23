@@ -14,7 +14,6 @@ const {
     verify_user
 } = require('../../models/user');
 
-
 const {
     get_all_websites,
     get_number_of_study_monitor_websites,
@@ -42,9 +41,6 @@ const {
 const {
     get_website_pages
 } = require('../../models/page');
-
-
-
 
 router.post('/websites/allOfficial', async function (req, res, next) {
     try {

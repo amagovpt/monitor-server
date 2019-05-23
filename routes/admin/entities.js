@@ -19,8 +19,6 @@ const {
   verify_user
 } = require('../../models/user');
 
-
-
 const {
   get_all_entities,
   get_entity_info,
@@ -30,7 +28,6 @@ const {
   update_entity,
   delete_entity
 } = require('../../models/entity');
-
 
 
 /**
@@ -82,15 +79,6 @@ router.post('/entities/info', async function (req, res, next) {
   }
 });
 
-
-
-
-
-
-
-
-
-
 router.get('/entities/exists/shortName/:name', async function (req, res, next) {
   try {
     req.check('name', 'Invalid Name').exists();
@@ -135,8 +123,6 @@ router.get('/entities/exists/longName/:name', async function (req, res, next) {
  */
 
 
-
-
 router.post('/entities/create', async function (req, res, next) {
   try {
     req.check('shortName', 'Invalid ShortName').exists();
@@ -163,13 +149,6 @@ router.post('/entities/create', async function (req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
-
-
-
-
-
-
 
 router.post('/entities/update', async function (req, res, next) {
   try {
@@ -203,13 +182,9 @@ router.post('/entities/update', async function (req, res, next) {
   }
 });
 
-
 /**
  * DELETE
  */
-
-
-
 
 router.post('/entities/delete', async function (req, res, next) {
   try {

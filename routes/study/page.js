@@ -14,8 +14,6 @@ const {
     remove_study_monitor_user_tag_website_pages
 } = require('../../models/page');
 
-
-
 router.post('/user/tag/website/pages', async function(req, res, next) {
     try {
         req.check('tag', 'Invalid tag parameter').exists();
@@ -94,7 +92,6 @@ router.post('/user/tag/website/removePages', async function(req, res, next) {
     }
 });
 
-
 router.post('/user/tag/website/addPages', async function(req, res, next) {
     try {
         req.check('tag', 'Invalid tag parameter').exists();
@@ -123,6 +120,5 @@ router.post('/user/tag/website/addPages', async function(req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;

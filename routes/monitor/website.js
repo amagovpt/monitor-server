@@ -7,7 +7,6 @@ const { error } = require('../../lib/_response');
 const { verify_user } = require('../../models/user');
 const { get_my_monitor_user_websites} = require('../../models/website');
 
-
 router.post('/user/websites', async function(req, res, next) {
     try {
         req.check('cookie', 'User not logged in').exists();
@@ -28,6 +27,5 @@ router.post('/user/websites', async function(req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;

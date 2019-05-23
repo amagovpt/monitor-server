@@ -7,7 +7,6 @@ const { error } = require('../../lib/_response');
 const { verify_user} = require('../../models/user');
 const { get_my_monitor_user_website_pages, add_my_monitor_user_website_pages, remove_my_monitor_user_website_pages} = require('../../models/page');
 
-
 router.post('/user/website/pages', async function(req, res, next) {
     try {
         req.check('website', 'Invalid website').exists();

@@ -17,8 +17,6 @@ const {
 } = require('../../models/website');
 
 
-
-
 router.post('/user/tag/websites', async function(req, res, next) {
     try {
         req.check('tag', 'Invalid tag parameter').exists();

@@ -4,40 +4,9 @@ const express = require('express');
 const router = express.Router();
 const { ServerError, ParamsError } = require('../../lib/_error');
 const { error } = require('../../lib/_response');
-const { verify_user, change_user_password } = require('../../models/user');
+const { verify_user} = require('../../models/user');
 const { get_page_id } = require('../../models/page');
 const { evaluate_url_and_save, get_newest_evaluation } = require('../../models/evaluation');
-
-const {
-  get_all_official_tags,
-  create_user_tag, 
-  get_study_monitor_user_tags,
-  user_tag_name_exists,
-  user_remove_tags
-} = require('../../models/tag');
-
-const { 
-  get_study_monitor_user_tag_websites,
-  get_study_monitor_user_tag_websites_data,
-  add_study_monitor_user_tag_new_website,
-  add_study_monitor_user_tag_existing_website,
-  study_monitor_user_tag_website_name_exists,
-  study_monitor_user_tag_website_domain_exists,
-  get_study_monitor_user_tag_website_domain,
-  remove_study_monitor_user_tag_websites,
-  get_study_monitor_user_websites_from_other_tags
-} = require('../../models/website');
-
-const { 
-  get_study_monitor_user_tag_website_pages,
-  get_study_monitor_user_tag_website_pages_data,
-  add_study_monitor_user_tag_website_pages,
-  remove_study_monitor_user_tag_website_pages
-} = require('../../models/page');
-
-
-
-
 
 router.post('/evaluation', async function(req, res, next) {
   try {
@@ -89,6 +58,5 @@ router.post('/evaluate', async function(req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
 
 module.exports = router;

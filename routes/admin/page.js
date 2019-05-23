@@ -7,95 +7,34 @@ const {
     ParamsError
 } = require('../../lib/_error');
 const {
-    success,
     error
 } = require('../../lib/_response');
 
 const {
     verify_user,
-    get_number_of_study_monitor_users,
-    get_number_of_my_monitor_users,
-    get_all_users,
-    get_all_monitor_users,
-    create_user,
-    user_exists,
-    get_user_info,
-    update_user,
-    delete_user,
     get_user_type,
-    get_user_type_success,
     get_user_id
 } = require('../../models/user');
 
 const {
-    get_number_of_study_monitor_tags,
-    get_number_of_observatorio_tags,
-    get_all_tags,
-    get_all_official_tags,
-    tag_official_name_exists,
-    create_official_tag,
-    get_tag_info,
-    update_tag,
-    copy_tag,
-    delete_tag,
     update_tag_admin,
-    verify_update_tag_admin,
-    get_all_user_tags
+    verify_update_tag_admin
 } = require('../../models/tag');
 
 const {
-    get_all_entities,
-    get_entity_info,
-    entity_short_name_exists,
-    entity_long_name_exists,
-    create_entity,
-    update_entity,
-    delete_entity
-} = require('../../models/entity');
-
-const {
-    get_all_websites,
-    get_number_of_study_monitor_websites,
-    get_number_of_my_monitor_websites,
-    get_number_of_observatorio_websites,
-    get_all_official_websites,
-    get_all_websites_without_user,
-    get_all_websites_without_entity,
-    get_all_user_websites,
-    get_all_tag_websites,
-    get_all_entity_websites,
-    get_website_current_domain,
-    get_website_info,
-    website_name_exists,
-    create_website,
-    update_website,
-    delete_website,
     update_website_admin,
     verify_update_website_admin
 } = require('../../models/website');
 
 const {
-    get_all_domains,
-    get_all_official_domains,
-    get_all_website_domains,
-    domain_exists,
-    domain_exists_in_admin,
-    create_domain,
-    update_domain,
-    delete_domain
-} = require('../../models/domain');
-
-const {
     get_page_id,
     get_all_pages,
     get_all_domain_pages,
-    get_website_pages,
     create_pages,
     update_page,
     update_page_admin,
     update_page_study_admin,
     delete_pages,
-    get_urls,
     get_study_monitor_user_tag_website_pages,
     get_my_monitor_user_website_pages,
     update_observatory_pages
@@ -103,12 +42,8 @@ const {
 
 const {
     evaluate_url_and_save,
-    get_all_page_evaluations,
-    get_evaluation,
-    delete_evaluation
+    get_evaluation
 } = require('../../models/evaluation');
-
-
 
 router.post('/page/evaluation', async function (req, res, next) {
     try {
@@ -408,7 +343,6 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
     }
 });
 
-
 router.post('/pages/checkUpdateAdminTag', async function (req, res, next) {
     try {
         req.check('tagId', 'Invalid parameter PageId').exists();
@@ -508,6 +442,5 @@ router.post('/pages/delete', async function (req, res, next) {
         res.send(error(new ServerError(err)));
     }
 });
-
 
 module.exports = router;
