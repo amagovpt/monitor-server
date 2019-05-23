@@ -38,6 +38,7 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `Short_Name_UNIQUE` (`Short_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
   `EntityId` int(11) DEFAULT NULL,
@@ -71,6 +72,27 @@ CREATE TABLE `Page` (
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `CrawlDomain` (
+  `CrawlDomainId` int(11) NOT NULL AUTO_INCREMENT,
+  `DomainUri` varchar(255) NOT NULL,
+  `DomainId` int(11) NOT NULL,
+  `Creation_Date` datetime NOT NULL,
+  `Done` tinyint(1) NOT NULL DEFAULT '0',
+  `SubDomainUri` varchar(255) NOT NULL,
+  PRIMARY KEY (`CrawlDomainId`),
+  CONSTRAINT `CDDomainId_fk` FOREIGN KEY (`DomainId`) REFERENCES `Domain` (`DomainId`),
+  UNIQUE KEY `CrawlDomainId_UNIQUE` (`CrawlDomainId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `CrawlPage` (
+  `CrawlId` int(11) NOT NULL AUTO_INCREMENT,
+  `CrawlDomainId`  int(11) NOT NULL,
+  `Uri` varchar(255) NOT NULL,
+  PRIMARY KEY (`CrawlId`),
+  UNIQUE KEY `CrawlId_UNIQUE` (`CrawlId`),
+   CONSTRAINT `CrawlDomainId_fk` FOREIGN KEY (`CrawlDomainId`) REFERENCES `CrawlDomain` (`CrawlDomainId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Evaluation` (
