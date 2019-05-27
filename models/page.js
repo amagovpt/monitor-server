@@ -402,12 +402,8 @@ module.exports.get_observatory_data = async () => {
         t.Show_in_Observatorio,
         t.Creation_Date as Tag_Creation_Date
       FROM
-        Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-        ),
+        Evaluation as e,
+        Page as p,
         DomainPage as dp,
         Domain as d,
         Website as w
@@ -422,7 +418,13 @@ module.exports.get_observatory_data = async () => {
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        p.Show_In LIKE '%1'`;
+        p.Show_In LIKE '%1' AND
+        e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+        )
+      `;
 
     const data = await execute_query(query);
     return success(data);
