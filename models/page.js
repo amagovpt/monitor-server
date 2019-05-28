@@ -465,13 +465,13 @@ module.exports.get_my_monitor_user_website_pages = async (user_id, website) => {
         DomainPage as dp,
         Evaluation as e
       WHERE
-        LOWER(w.Name) = "${_.toLower(website)}" AND
+        w.Name = "${website}" AND
         w.UserId = "${user_id}" AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        LOWER(p.Show_In) LIKE '_1%' AND
+        p.Show_In LIKE '_1_' AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`;
 
     const pages = await execute_query(query);
@@ -504,7 +504,7 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
             dp.DomainId = d.DomainId AND
             dp.PageId = "${page[0].PageId}"`;
 
-        let domainPage = await execute_query(query);
+        /*let domainPage = await execute_query(query);
         if (_.size(domainPage) === 0) {
           query = `INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -520,9 +520,10 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               d.Url = "${domain}" AND
               d.Active = 1`;
           await execute_query(query);
-        }
+        }*/
+
         //AQUI
-        let none = new RegExp('[0-1][0][0]');
+        /*let none = new RegExp('[0-1][0][0]');
         let observatorio = new RegExp('[0-1][1][0-1]');
 
 
@@ -535,9 +536,13 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
           let show_in = page[0].Show_In[0] + '11';
           query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
           await execute_query(query);
-        }
+        }*/
 
-        query = `UPDATE Evaluation SET Show_To = "11" WHERE PageId = "${page[0].PageId}" AND Show_To = "1_"`;
+        const show_in = page[0].Show_In[0] + '1' + page[0].Show_In[2];
+        query = `UPDATE Page SET Show_In = "${show_in}" WHERE PageId = "${page[0].PageId}"`;
+        await execute_query(query);
+
+        query = `UPDATE Evaluation SET Show_To = "11" WHERE PageId = "${page[0].PageId}" AND Show_To LIKE "1_"`;
         await execute_query(query);
       } else {
         let evaluation = null;
@@ -564,10 +569,10 @@ module.exports.add_my_monitor_user_website_pages = async (user_id, website, doma
               Website as w,
               Domain as d
             WHERE 
-              LOWER(w.Name) = "${_.toLower(website)}" AND
+              w.Name = "${website}" AND
               w.UserId = "${user_id}" AND
               d.WebsiteId = w.WebsiteId AND
-              LOWER(d.Url) = "${_.toLower(domain)}" AND
+              d.Url = "${domain}" AND
               d.Active = 1`;
           await execute_query(query);
         } else {

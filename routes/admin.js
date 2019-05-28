@@ -819,14 +819,14 @@ router.post('/pages/website', async function (req, res, next) {
         const user = req.body.user;
         const website = req.body.website;
 
-        const user_id = await get_user_id(user);
-
+        const user_id2 = await get_user_id(user);
+        
         if (tag !== 'null') {
-          get_study_monitor_user_tag_website_pages(user_id, tag, website)
+          get_study_monitor_user_tag_website_pages(user_id2, tag, website)
             .then(pages => res.send(pages))
             .catch(err => re.send(err));
         } else {
-          get_my_monitor_user_website_pages(user_id, website)
+          get_my_monitor_user_website_pages(user_id2, website)
             .then(pages => res.send(pages))
             .catch(err => re.send(err));
         }
