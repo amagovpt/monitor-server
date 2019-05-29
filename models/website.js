@@ -173,14 +173,15 @@ module.exports.website_name_exists = async (name) => {
 
 module.exports.get_all_websites = async () => {
   try {
-    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, u.Type as Type
+    const query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, u.Type as Type, d.DomainId
       FROM Website as w
       LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
       LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+      LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
       WHERE 
         (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
         w.Deleted = "0"
-      GROUP BY w.WebsiteId`;
+      GROUP BY w.WebsiteId, d.DomainId`;
     const websites = await execute_query(query);
     return success(websites);
   } catch (err) {
