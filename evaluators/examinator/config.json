@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "language": "PHP",
   "main": "index.php",
-  "command": "C:/xampp/php/php.exe"
+  "command": "php"
 }

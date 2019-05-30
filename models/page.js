@@ -17,10 +17,11 @@ const {
 const {
   execute_query
 } = require('../lib/_database');
-const Crawler = require('simplecrawler');
+
 const {
   get_io
 } = require('../lib/_util');
+
 
 const {
   evaluate_url,
@@ -1131,82 +1132,6 @@ module.exports.delete_pages = async (pages) => {
     return error(err);
   }
 }
-
-const crawl = (domain, max_depth, max_pages) => {
-  return new Promise((resolve, reject) => {
-
-    const crawler = Crawler('http://' + domain);
-    let urlList = [];
-    let pageNumber = 0;
-
-    crawler.on('fetchcomplete', function (r, q) {
-      let contentType = r['stateData']['contentType'];
-      if ((contentType.includes('text/html') || contentType.includes('image/svg+xml')) && (pageNumber <= max_pages || max_pages === 0)) {
-        urlList.push(r['url']);
-        pageNumber++;
-      }
-
-      if (pageNumber >= max_pages && max_pages !== 0) {
-        this.emit('complete');
-      }
-    });
-
-    crawler.on('complete', function () {
-      crawler.stop();
-      resolve(urlList);
-    });
-
-    crawler.maxDepth = max_depth + 1;
-    crawler.start();
-  });
-}
-
-//perguntar se domino tar la eh relvante
-//acrescentar predefinicoes com -1 max pages e -1 para ir buscar a json
-//var Crawler = require("simplecrawler")
-//
-//  var crawler = Crawler('https://www.google.pt');
-//
-//         crawler.on("fetchcomplete", function (q, r,t) {
-//             console.log(r);
-//             console.log("separador")
-//             console.log(q);
-//
-//
-//         });
-//         crawler.maxDepth = 2;
-//         crawler.start();
-//
-//
-//
-module.exports.get_urls = async (domain, max_depth, max_pages) => {
-  let list = await crawl(domain, max_depth, max_pages);
-
-  return list;
-};
-
-//preciso de fazer isto?
-//como fazer standard
-//por ficheiro a mao
-module.exports.set_crawler_settings = async (max_depth, max_pages) => {
-  try {
-    const fs = require('fs');
-    let settings = {};
-
-    settings['max_depth'] = max_depth;
-    settings['max_pages'] = max_pages;
-
-    fs.writeFile(_dirname + '/lib/crawler.json', JSON.stringify(settings), function (err) {
-      if (err) {
-        throw (err);
-      }
-    });
-  } catch (err) {
-    console.log(err);
-    return error(err);
-  }
-};
-
 
 module.exports.add_evaluation = async odf => {
   try {
