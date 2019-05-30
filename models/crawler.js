@@ -19,7 +19,7 @@ const Crawler = require('simplecrawler');
 
 const fs = require('fs');
 
-const { write_file } = require('../lib/_util');
+const {write_file} = require('../lib/_util');
 
 const crawler = (domain, max_depth, max_pages, crawl_domain_id) => {
   return new Promise((resolve, reject) => {
@@ -123,79 +123,90 @@ module.exports.get_crawl_results_crawlDomainID = async (crawlDomainID) => {
 };
 
 module.exports.is_done_crawl_domain = async (subDomain) => {
-
-  const query = `SELECT cd.Done
-                    FROM 
-                    CrawlDomain as cd
-                    WHERE cd.SubDomainUri = "${subDomain}"`;
-
-  const page = await execute_query(query);
-  let result;
-
-  if (_.size(page) === 0)
-    result = 0;
-  else if (page[0].Done === 1)
-    result = 2;
-  else
-    result = 1;
-
-  return success(result);
+  try {
+    const query = `SELECT cd.Done FROM CrawlDomain as cd
+                    WHERE cd.SubDomainUri = "${subDomain}" LIMIT 1`;
+    const page = await execute_query(query);
+    let result;
+    if (_.size(page) === 0)
+      result = 0;
+    else if (page[0].Done === 1)
+      result = 2;
+    else
+      result = 1;
+    return success(result);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
 };
 
-module.exports.delete_crawl_results = async (crawlDomainId) => {
+module.exports.crawl_exists = async (subDomain) => {
+  try {
+    const query = `SELECT Done FROM CrawlDomain as cd
+                    WHERE LOWER(cd.SubDomainUri) = "${_.toLower(subDomain)}" LIMIT 1`;
+    const page = await execute_query(query);
+    return success(page);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};
+
+  module.exports.delete_crawl_results = async (crawlDomainId) => {
 
     const query = `DELETE FROM CrawlDomain
                     WHERE CrawlDomainId = "${crawlDomainId}"`;
     await execute_query(query);
 
-  return success(true);
-};
-
-
-module.exports.set_crawler_settings = async (max_depth, max_pages) => {
-  try {
-    let settings = {};
-
-    settings['maxDepth'] = max_depth;
-    settings['maxPages'] = max_pages;
-
-    await write_file(__dirname + '/../lib/crawler_config.json', JSON.stringify(settings, null, 2));
-
-    /*fs.writeFile('../lib/crawler_config.json', JSON.stringify(settings), function (err) {
-      if (err) {
-        throw (err);
-      }
-    });*/
-
     return success(true);
-  } catch (err) {
-    console.log(err);
-    return error(err);
-  }
-};
+  };
 
 
-module.exports.get_crawler_settings = async () => {
-  try {
-    const settings = require('./../lib/crawler_config.json');
-    return success(settings);
-  } catch (err) {
-    console.log(err);
-    return error(err);
-  }
-};
+  module.exports.set_crawler_settings = async (max_depth, max_pages) => {
+    try {
+      let settings = {};
 
-const readFile = () => {
-  return new Promise((resolve, reject) => {
-    let settings = {};
+      settings['maxDepth'] = max_depth;
+      settings['maxPages'] = max_pages;
 
-    fs.readFile('../lib/crawler_config.json', 'utf8', (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        settings = JSON.parse(data);
-        resolve(settings);
-      }
+      await write_file(__dirname + '/../lib/crawler_config.json', JSON.stringify(settings, null, 2));
+
+      /*fs.writeFile('../lib/crawler_config.json', JSON.stringify(settings), function (err) {
+        if (err) {
+          throw (err);
+        }
+      });*/
+
+      return success(true);
+    } catch (err) {
+      console.log(err);
+      return error(err);
+    }
+  };
+
+
+  module.exports.get_crawler_settings = async () => {
+    try {
+      const settings = require('./../lib/crawler_config.json');
+      return success(settings);
+    } catch (err) {
+      console.log(err);
+      return error(err);
+    }
+  };
+
+  const readFile = () => {
+    return new Promise((resolve, reject) => {
+      let settings = {};
+
+      fs.readFile('../lib/crawler_config.json', 'utf8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          settings = JSON.parse(data);
+          resolve(settings);
+        }
+      });
     });
-  });
-}
+  }

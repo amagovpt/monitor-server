@@ -20,7 +20,7 @@ const {
   get_crawl_results_domain,
   get_crawl_results_crawlDomainID,
   delete_crawl_results,
-  is_done_crawl_domain,
+  crawl_exists,
   get_all_crawl_results,
   get_crawler_settings,
   set_crawler_settings
@@ -103,7 +103,9 @@ router.post('/crawler/isSubdomainDone', async function (req, res, next) {
       res.send(error(new ParamsError(errors)));
     } else {
       const subDomain = req.body.subDomain;
-      is_done_crawl_domain(subDomain).then(result=> res.send(result));
+      crawl_exists(subDomain)
+        .then(exists => res.send(exists))
+        .catch(err => res.send(err));
     }
   } catch (err) {
     console.log(err);
