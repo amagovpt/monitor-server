@@ -1,9 +1,8 @@
 'use strict';
 
 /**
- * Admin Router and Controller
+ * Admin Entity Router and Controller
  */
-const _ = require('lodash');
 const express = require('express');
 const router = express.Router();
 
@@ -26,7 +25,8 @@ const {
   entity_long_name_exists,
   create_entity,
   update_entity,
-  delete_entity
+  delete_entity,
+  re_evaluate_entity_website_pages
 } = require('../../models/entity');
 
 
@@ -47,7 +47,7 @@ router.post('/entities/all', async function (req, res, next) {
       if (user_id !== -1) {
         get_all_entities()
           .then(entities => res.send(entities))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -70,7 +70,7 @@ router.post('/entities/info', async function (req, res, next) {
         const entity_id = req.body.entityId;
         get_entity_info(entity_id)
           .then(entity => res.send(entity))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -173,7 +173,7 @@ router.post('/entities/update', async function (req, res, next) {
 
         update_entity(entity_id, short_name, long_name, default_websites, websites)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -201,7 +201,7 @@ router.post('/entities/delete', async function (req, res, next) {
 
         delete_entity(entity_id)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -210,23 +210,24 @@ router.post('/entities/delete', async function (req, res, next) {
   }
 });
 
-/*
-
-router.post('/page/crawler', async function (req, res, next) {
+router.post('/entity/reEvaluate', async function (req, res, next) {
   try {
-    req.check('domain', 'Invalid domain parameter').exists();
-    req.check('max_depth', 'Invalid depth number').exists();
-    req.check('max_pages', 'Invalid max page number').exists();
+    req.check('entityId', 'Invalid EntityId').exists();
+    req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
     if (errors) {
       res.send(error(new ParamsError(errors)));
     } else {
-      const domain = req.body.domain;
-      const max_depth = parseInt(req.body.max_depth, 0);
-      const max_pages = parseInt(req.body.max_pages, 0);
-      const result = await get_urls(domain, max_depth, max_pages);
-      res.send(success(result));
+      const user_id = await verify_user(res, req.body.cookie, true);
+      if (user_id !== -1) {
+        const entity_id = req.body.entityId;
+
+        re_evaluate_entity_website_pages(entity_id);
+        //.then(success => res.send(success))
+        //.catch(err => res.send(err));
+        res.send(success(true));
+      }
     }
   } catch (err) {
     console.log(err);
@@ -234,39 +235,4 @@ router.post('/page/crawler', async function (req, res, next) {
   }
 });
 
-router.post('/page/crawlerSettings', async function (req, res, next) {
-  try {
-    req.check('max_depth', 'Invalid depth number').exists();
-    req.check('max_pages', 'Invalid max page number').exists();
-
-    const errors = req.validationErrors();
-    if (errors) {
-      res.send(error(new ParamsError(errors)));
-    } else {
-      await set_crawler_settings(req.body.max_depth, req.body.max_pages);
-      res.send(success());
-    }
-  } catch (err) {
-    console.log(err)
-    res.send(error(new ServerError(err)));
-  }
-});
-
-router.post('/page/odf', async function (req, res, next) {
-  try {
-    req.check('odf', 'Invalid depth number').exists();
-
-    const errors = req.validationErrors();
-    if (errors) {
-      res.send(error(new ParamsError(errors)));
-    } else {
-      await add_evaluation(req.body.odf);
-      res.send(success());
-    }
-  } catch (err) {
-    console.log(err)
-    res.send(error(new ServerError(err)));
-  }
-});
-*/
 module.exports = router;

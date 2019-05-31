@@ -1,12 +1,25 @@
 'use strict';
 
+/**
+ * Access Monitor Plus Evaluation Router and Controller
+ */
+
 const express = require('express');
 const router = express.Router();
-const { ServerError, ParamsError } = require('../../lib/_error');
-const { error } = require('../../lib/_response');
-const { evaluate_url, evaluate_html, save_url_evaluation } = require('../../models/evaluation');
+const {
+  ServerError,
+  ParamsError
+} = require('../../lib/_error');
+const {
+  error
+} = require('../../lib/_response');
+const {
+  evaluate_url,
+  evaluate_html,
+  save_url_evaluation
+} = require('../../models/evaluation');
 
-router.get('/eval/:url', function(req, res, next) {
+router.get('/eval/:url', function (req, res, next) {
   try {
     req.check('url', 'Invalid Url').exists();
 
@@ -25,11 +38,12 @@ router.get('/eval/:url', function(req, res, next) {
         .catch(err => res.send(err));
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });
 
-router.post('/eval/html', function(req, res, next) {
+router.post('/eval/html', function (req, res, next) {
   try {
     req.check('html', 'Invalid Html').exists();
 
@@ -44,6 +58,7 @@ router.post('/eval/html', function(req, res, next) {
         .catch(err => res.send(err));
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });

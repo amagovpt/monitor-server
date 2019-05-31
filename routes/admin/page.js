@@ -1,4 +1,9 @@
-const _ = require('lodash');
+'use strict';
+
+/**
+ * Admin Page Router and Controller
+ */
+
 const express = require('express');
 const router = express.Router();
 
@@ -38,7 +43,8 @@ const {
   delete_pages,
   get_study_monitor_user_tag_website_pages,
   get_my_monitor_user_website_pages,
-  update_observatory_pages
+  update_observatory_pages,
+  add_evaluation
 } = require('../../models/page');
 
 const {
@@ -135,14 +141,14 @@ router.post('/pages/website', async function (req, res, next) {
         const user = req.body.user;
         const website = req.body.website;
 
-        const user_id = await get_user_id(user);
+        const app_user_id = await get_user_id(user);
 
         if (tag !== 'null') {
-          get_study_monitor_user_tag_website_pages(user_id, tag, website)
+          get_study_monitor_user_tag_website_pages(app_user_id, tag, website)
             .then(pages => res.send(pages))
             .catch(err => re.send(err));
         } else {
-          get_my_monitor_user_website_pages(user_id, website)
+          get_my_monitor_user_website_pages(app_user_id, website)
             .then(pages => res.send(pages))
             .catch(err => re.send(err));
         }
@@ -213,8 +219,8 @@ router.post('/pages/create', async function (req, res, next) {
         const observatory_uris = JSON.parse(req.body.observatory);
 
         create_pages(domain_id, uris, observatory_uris, '100')
-          //.then(success => res.send(success))
-          //.catch(err => res.send(err));
+        //.then(success => res.send(success))
+        //.catch(err => res.send(err));
 
         res.send(success(true));
       }
@@ -224,7 +230,6 @@ router.post('/pages/create', async function (req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
 
 router.post('/pages/update', async function (req, res, next) {
   try {
@@ -243,7 +248,7 @@ router.post('/pages/update', async function (req, res, next) {
 
         update_page(page_id, checked)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -273,17 +278,15 @@ router.post('/pages/updateAdminPage', async function (req, res, next) {
 
         const type = await get_user_type(username);
 
-        const success = await update_page_admin(page_id, type)
-          .catch(err => res.send(err));
+        const success = await update_page_admin(page_id, type);
 
         if (type === 'studies') {
           //method to tag from selected page of studymonitor
           update_page_study_admin(page_id, username, tag, website)
-            .catch(err => res.send(res));
+            .catch(err => res.send(err));
         }
 
         res.send(success);
-
       }
     }
   } catch (err) {
@@ -304,13 +307,12 @@ router.post('/pages/updateAdminWebsite', async function (req, res, next) {
     } else {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
-        const websiteId = req.body.websiteId;
-        const websiteName = req.body.websiteName;
+        const website_id = req.body.websiteId;
+        const website_name = req.body.websiteName;
 
-        update_website_admin(websiteId, websiteName)
+        update_website_admin(website_id, website_name)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
-
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -332,12 +334,11 @@ router.post('/pages/updateAdminTag', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const tag_id = req.body.tagId;
-        const tagName = req.body.tagName;
+        const tag_name = req.body.tagName;
 
-        update_tag_admin(tag_id, tagName)
+        update_tag_admin(tag_id, tag_name)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
-
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -361,8 +362,7 @@ router.post('/pages/checkUpdateAdminTag', async function (req, res, next) {
 
         verify_update_tag_admin(tag_id)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
-
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -386,7 +386,7 @@ router.post('/pages/checkupdateAdminWebsite', async function (req, res, next) {
 
         verify_update_website_admin(websiteId)
           .then(success => res.send(success))
-          .catch(err => res.send(res));
+          .catch(err => res.send(err));
       }
     }
   } catch (err) {
@@ -394,7 +394,6 @@ router.post('/pages/checkupdateAdminWebsite', async function (req, res, next) {
     res.send(error(new ServerError(err)));
   }
 });
-
 
 router.post('/pages/updateObservatorio', async function (req, res, next) {
   try {
@@ -442,6 +441,26 @@ router.post('/pages/delete', async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
+    res.send(error(new ServerError(err)));
+  }
+});
+
+router.post('/page/odf', async function (req, res, next) {
+  try {
+    req.check('odf', 'Invalid ODF').exists();
+
+    const errors = req.validationErrors();
+    if (errors) {
+      res.send(error(new ParamsError(errors)));
+    } else {
+      const odf = req.body.odf;
+
+      add_evaluation(odf)
+        .then(success => res.send(success))
+        .catch(err => res.send(err));
+    }
+  } catch (err) {
+    console.log(err)
     res.send(error(new ServerError(err)));
   }
 });

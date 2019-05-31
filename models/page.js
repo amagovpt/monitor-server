@@ -1141,7 +1141,3 @@ module.exports.add_evaluation = async odf => {
     return error(err);
   }
 }
-
-function replaceAt(string, index, replace) {
-  return string.substring(0, index) + replace + string.substring(index + 1);
-}

@@ -8,7 +8,7 @@ const compression = require('compression');
 
 const sessionRouter = require('./routes/session');
 
-const adminEntitiesRouter = require('./routes/admin/entities');
+const adminEntitiesRouter = require('./routes/admin/entity');
 const adminDomainRouter = require('./routes/admin/domain');
 const adminPageRouter = require('./routes/admin/page');
 const adminTagRouter = require('./routes/admin/tag');

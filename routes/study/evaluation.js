@@ -1,14 +1,30 @@
 'use strict';
 
+/**
+ * Study Monitor Evaluation Router and Controller
+ */
+
 const express = require('express');
 const router = express.Router();
-const { ServerError, ParamsError } = require('../../lib/_error');
-const { error } = require('../../lib/_response');
-const { verify_user} = require('../../models/user');
-const { get_page_id } = require('../../models/page');
-const { evaluate_url_and_save, get_newest_evaluation } = require('../../models/evaluation');
+const {
+  ServerError,
+  ParamsError
+} = require('../../lib/_error');
+const {
+  error
+} = require('../../lib/_response');
+const {
+  verify_user
+} = require('../../models/user');
+const {
+  get_page_id
+} = require('../../models/page');
+const {
+  evaluate_url_and_save,
+  get_newest_evaluation
+} = require('../../models/evaluation');
 
-router.post('/evaluation', async function(req, res, next) {
+router.post('/evaluation', async function (req, res, next) {
   try {
     req.check('tag', 'Invalid tag parameter').exists();
     req.check('website', 'Invalid website parameter').exists();
@@ -31,11 +47,12 @@ router.post('/evaluation', async function(req, res, next) {
       }
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });
 
-router.post('/evaluate', async function(req, res, next) {
+router.post('/evaluate', async function (req, res, next) {
   try {
     req.check('url', 'Invalid url parameter').exists();
     req.check('cookie', 'User not logged in').exists();
@@ -55,6 +72,7 @@ router.post('/evaluate', async function(req, res, next) {
       }
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });

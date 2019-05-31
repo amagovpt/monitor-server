@@ -23,13 +23,12 @@ const { write_file } = require('../lib/_util');
 
 const crawler = (domain, max_depth, max_pages, crawl_domain_id) => {
   return new Promise((resolve, reject) => {
-
     const crawler = Crawler('http://' + domain);
     let urlList = [];
     let pageNumber = 0;
     let emit = false;
 
-    crawler.on('fetchcomplete', function (r, q) {
+    crawler.on('fetchcomplete', async (r, q) => {
       let contentType = r['stateData']['contentType'];
       if ((contentType.includes('text/html') || contentType.includes('image/svg+xml')) && (pageNumber <= max_pages || max_pages === 0)) {
         urlList.push(r['url']);
@@ -39,7 +38,7 @@ const crawler = (domain, max_depth, max_pages, crawl_domain_id) => {
 
       if (pageNumber >= max_pages && max_pages !== 0 && !emit) {
         emit = true;
-        this.emit('complete');
+        crawler.emit('complete');
       }
     });
 

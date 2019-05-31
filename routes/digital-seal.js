@@ -1,13 +1,24 @@
 'use strict';
 
+/**
+ * Digital Seal Router and Controller
+ */
+
 const express = require('express');
 const router = express.Router();
 
-const { ServerError, ParamsError } = require('../lib/_error');
-const { error } = require('../lib/_response');
-const { get_website_seal_information } = require('../models/website');
+const {
+  ServerError,
+  ParamsError
+} = require('../lib/_error');
+const {
+  error
+} = require('../lib/_response');
+const {
+  get_website_seal_information
+} = require('../models/website');
 
-router.post('/', function(req, res, next) {
+router.post('/', function (req, res, next) {
   try {
     req.check('domain', 'Invalid Domain').exists();
 
@@ -22,11 +33,12 @@ router.post('/', function(req, res, next) {
         .catch(err => res.send(err));
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });
 
-router.get('/:domain', function(req, res, next) {
+router.get('/:domain', function (req, res, next) {
   try {
     req.check('domain', 'Invalid Domain').exists();
 
@@ -41,6 +53,7 @@ router.get('/:domain', function(req, res, next) {
         .catch(err => res.send(err));
     }
   } catch (err) {
+    console.log(err);
     res.send(error(new ServerError(err)));
   }
 });

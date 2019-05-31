@@ -135,7 +135,7 @@ module.exports.get_number_of_study_monitor_tags = async () => {
   }
 }
 
-module.exports.get_number_of_observatorio_tags = async () => {
+module.exports.get_number_of_observatory_tags = async () => {
   try {
     const query = `SELECT COUNT(*) as Tags FROM Tag WHERE Show_in_Observatorio = "1"`;
     const tags = await execute_query(query);
