@@ -19,7 +19,9 @@ const Crawler = require('simplecrawler');
 
 const fs = require('fs');
 
-const { write_file } = require('../lib/_util');
+const {
+  write_file
+} = require('../lib/_util');
 
 const crawler = (domain, max_depth, max_pages, crawl_domain_id) => {
   return new Promise((resolve, reject) => {
@@ -89,9 +91,7 @@ module.exports.get_crawl_results_domain = async (domain) => {
 
 module.exports.get_all_crawl_results = async () => {
 
-  const query = `SELECT *
-                    FROM CrawlDomain`;
-
+  const query = `SELECT * FROM CrawlDomain`;
   const pages = await execute_query(query);
 
   return success(pages);
@@ -122,30 +122,41 @@ module.exports.get_crawl_results_crawlDomainID = async (crawlDomainID) => {
 };
 
 module.exports.is_done_crawl_domain = async (subDomain) => {
+  try {
+    const query = `SELECT cd.Done FROM CrawlDomain as cd
+                    WHERE cd.SubDomainUri = "${subDomain}" LIMIT 1`;
+    const page = await execute_query(query);
+    let result;
+    if (_.size(page) === 0)
+      result = 0;
+    else if (page[0].Done === 1)
+      result = 2;
+    else
+      result = 1;
+    return success(result);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
+};
 
-  const query = `SELECT cd.Done
-                    FROM 
-                    CrawlDomain as cd
-                    WHERE cd.SubDomainUri = "${subDomain}"`;
-
-  const page = await execute_query(query);
-  let result;
-
-  if (_.size(page) === 0)
-    result = 0;
-  else if (page[0].Done === 1)
-    result = 2;
-  else
-    result = 1;
-
-  return success(result);
+module.exports.crawl_exists = async (subDomain) => {
+  try {
+    const query = `SELECT Done FROM CrawlDomain as cd
+                    WHERE LOWER(cd.SubDomainUri) = "${_.toLower(subDomain)}" LIMIT 1`;
+    const page = await execute_query(query);
+    return success(_.size(page) > 0);
+  } catch (err) {
+    console.log(err);
+    return error(err);
+  }
 };
 
 module.exports.delete_crawl_results = async (crawlDomainId) => {
 
-    const query = `DELETE FROM CrawlDomain
+  const query = `DELETE FROM CrawlDomain
                     WHERE CrawlDomainId = "${crawlDomainId}"`;
-    await execute_query(query);
+  await execute_query(query);
 
   return success(true);
 };
