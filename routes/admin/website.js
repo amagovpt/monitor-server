@@ -13,6 +13,7 @@ const {
   ParamsError
 } = require('../../lib/_error');
 const {
+  success,
   error
 } = require('../../lib/_response');
 
@@ -37,8 +38,7 @@ const {
   create_website,
   update_website,
   delete_website,
-  verify_update_website_admin,
-  re_evaluate_website_pages
+  verify_update_website_admin
 } = require('../../models/website');
 
 const {
@@ -48,6 +48,10 @@ const {
 const {
   get_website_pages
 } = require('../../models/page');
+
+const { 
+  re_evaluate_website_pages
+} = require('../../models/evaluation');
 
 router.post('/websites/allOfficial', async function (req, res, next) {
   try {
@@ -499,6 +503,7 @@ router.post('/websites/update', async function (req, res, next) {
 router.post('/website/reEvaluate', async function (req, res, next) {
   try {
     req.check('domainId', 'Invalid DomainId').exists();
+    req.check('option', 'Invalid Option').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -508,8 +513,9 @@ router.post('/website/reEvaluate', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const domain_id = req.body.domainId;
+        const option = req.body.option;
 
-        re_evaluate_website_pages(domain_id);
+        re_evaluate_website_pages(domain_id, option);
         //.then(success => res.send(success))
         //.catch(err => res.send(err));
         res.send(success(true));

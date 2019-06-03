@@ -11,6 +11,7 @@ const {
   ParamsError
 } = require('../../lib/_error');
 const {
+  success,
   error
 } = require('../../lib/_response');
 
@@ -25,10 +26,12 @@ const {
   entity_long_name_exists,
   create_entity,
   update_entity,
-  delete_entity,
-  re_evaluate_entity_website_pages
+  delete_entity
 } = require('../../models/entity');
 
+const {
+  re_evaluate_entity_website_pages
+} = require('../../models/evaluation');
 
 /**
  * GET
@@ -213,6 +216,7 @@ router.post('/entities/delete', async function (req, res, next) {
 router.post('/entity/reEvaluate', async function (req, res, next) {
   try {
     req.check('entityId', 'Invalid EntityId').exists();
+    req.check('option', 'Invalid Option').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -222,8 +226,9 @@ router.post('/entity/reEvaluate', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const entity_id = req.body.entityId;
+        const option = req.body.option;
 
-        re_evaluate_entity_website_pages(entity_id);
+        re_evaluate_entity_website_pages(entity_id, option);
         //.then(success => res.send(success))
         //.catch(err => res.send(err));
         res.send(success(true));

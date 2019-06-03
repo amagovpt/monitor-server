@@ -11,6 +11,7 @@ const {
   ParamsError
 } = require('../../lib/_error');
 const {
+  success,
   error
 } = require('../../lib/_response');
 
@@ -32,6 +33,10 @@ const {
   verify_update_tag_admin,
   get_all_user_tags
 } = require('../../models/tag');
+
+const {
+  re_evaluate_tag_website_pages
+} = require('../../models/evaluation')
 
 router.get('/tags/exists/:name', async function (req, res, next) {
   try {
@@ -301,6 +306,7 @@ router.post('/tags/user', async function (req, res, next) {
 router.post('/tag/reEvaluate', async function (req, res, next) {
   try {
     req.check('tagId', 'Invalid TagId').exists();
+    req.check('option', 'Invalid Option').exists();
     req.check('cookie', 'User not logged in').exists();
 
     const errors = req.validationErrors();
@@ -310,8 +316,9 @@ router.post('/tag/reEvaluate', async function (req, res, next) {
       const user_id = await verify_user(res, req.body.cookie, true);
       if (user_id !== -1) {
         const tag_id = req.body.tagId;
+        const option = req.body.option;
 
-        re_evaluate_tag_website_pages(tag_id);
+        re_evaluate_tag_website_pages(tag_id, option);
         //.then(success => res.send(success))
         //.catch(err => res.send(err));
         res.send(success(true));

@@ -426,7 +426,7 @@ module.exports.save_page_evaluation = async (page_id, evaluation, show_to) => {
   }
 }
 
-module.exports.re_evaluate_tag_website_pages = async tag_id => {
+module.exports.re_evaluate_tag_website_pages = async (tag_id, option) => {
   try {
     const io = get_io();
 
@@ -478,7 +478,8 @@ module.exports.re_evaluate_tag_website_pages = async tag_id => {
             Page as p
           WHERE
             dp.DomainId = "${website.DomainId}" AND
-            p.PageId = dp.PageId
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "${option === 'all' ? '%' : '__1'}"
           `;
         const pages = await execute_query(query);
         
@@ -526,7 +527,7 @@ module.exports.re_evaluate_tag_website_pages = async tag_id => {
   }
 }
 
-module.exports.re_evaluate_entity_website_pages = async entity_id => {
+module.exports.re_evaluate_entity_website_pages = async (entity_id, option) => {
   try {
     const io = get_io();
 
@@ -576,7 +577,8 @@ module.exports.re_evaluate_entity_website_pages = async entity_id => {
             Page as p
           WHERE
             dp.DomainId = "${website.DomainId}" AND
-            p.PageId = dp.PageId
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "${option === 'all' ? '%' : '__1'}"
           `;
         const pages = await execute_query(query);
         
@@ -624,7 +626,7 @@ module.exports.re_evaluate_entity_website_pages = async entity_id => {
   }
 }
 
-module.exports.re_evaluate_website_pages = async domainId => {
+module.exports.re_evaluate_website_pages = async (domainId, option) => {
   try {
     const io = get_io();
 
@@ -662,7 +664,8 @@ module.exports.re_evaluate_website_pages = async domainId => {
           Page as p
         WHERE
           dp.DomainId = "${domainId}" AND
-          p.PageId = dp.PageId
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE "${option === 'all' ? '___' : '__1'}"
         `;
       const pages = await execute_query(query);
       await io.to(socket.id).emit('startup', _.size(pages));
