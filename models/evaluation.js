@@ -479,7 +479,7 @@ module.exports.re_evaluate_tag_website_pages = async (tag_id, option) => {
           WHERE
             dp.DomainId = "${website.DomainId}" AND
             p.PageId = dp.PageId AND
-            p.Show_In LIKE "${option === 'all' ? '%' : '__1'}"
+            p.Show_In LIKE "${option === 'all' ? '1__' : '1_1'}"
           `;
         const pages = await execute_query(query);
         
@@ -578,7 +578,7 @@ module.exports.re_evaluate_entity_website_pages = async (entity_id, option) => {
           WHERE
             dp.DomainId = "${website.DomainId}" AND
             p.PageId = dp.PageId AND
-            p.Show_In LIKE "${option === 'all' ? '%' : '__1'}"
+            p.Show_In LIKE "${option === 'all' ? '1__' : '1_1'}"
           `;
         const pages = await execute_query(query);
         
@@ -665,7 +665,7 @@ module.exports.re_evaluate_website_pages = async (domainId, option) => {
         WHERE
           dp.DomainId = "${domainId}" AND
           p.PageId = dp.PageId AND
-          p.Show_In LIKE "${option === 'all' ? '___' : '__1'}"
+          p.Show_In LIKE "${option === 'all' ? '1__' : '1_1'}"
         `;
       const pages = await execute_query(query);
       await io.to(socket.id).emit('startup', _.size(pages));

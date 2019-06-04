@@ -17,6 +17,11 @@ const {
 } = require('../lib/_database');
 
 const {
+  file_exists,
+  get_file_stats
+} = require('../lib/_util');
+
+const {
   evaluate_url,
   save_page_evaluation
 } = require('./evaluation');
@@ -275,7 +280,7 @@ module.exports.get_all_tag_websites = async (user, tag) => {
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId
       GROUP BY w.WebsiteId`;*/
-    
+
     let query = '';
     if (user === 'admin') {
       query = `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
@@ -937,73 +942,88 @@ var fs = require('fs'),
     imageMagick: true
   });
 
-module.exports.get_website_seal_information = async domain => {
+module.exports.get_website_stamp_information = async domain => {
   try {
-    const query = `SELECT
-      p.PageId,
-      e.A,
-      e.AA,
-      e.AAA,
-      e.Score
-    FROM
-      User as u,
-      Website as w,
-      Domain as d,
-      DomainPage as dp,
-      Page as p
-      LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-        SELECT Evaluation_Date FROM Evaluation 
-        WHERE PageId = p.PageId 
-        ORDER BY Evaluation_Date DESC LIMIT 1
-      )
-    WHERE
-      d.Url = "${domain}" AND
-      w.WebsiteId = d.WebsiteId AND
-      (
-        w.UserId IS NULL OR
-        (
-          u.UserId = w.UserId AND
-          LOWER(u.Type) != 'studies'
-        )
-      ) AND
-      dp.DomainId = d.DomainId AND
-      p.PageId = dp.PageId
-    GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score`;
-    const result = await execute_query(query);
+    const path = __dirname + '/../public/stamps/' + encodeURIComponent(domain) + '.jpg';
 
-    const n_pages = _.size(result);
+    const exists = await file_exists(path);
+    const stats = null;
+    const week = 604800000; //milliseconds
 
-    const hasLevelError = {
-      'A': 0,
-      'AA': 0,
-      'AAA': 0
-    };
-
-    let score = 0;
-
-    for (const page of result) {
-      if (page.A > 0) {
-        hasLevelError.A++;
-      }
-      if (page.AA > 0) {
-        hasLevelError.AA++;
-      }
-      if (page.AAA > 0) {
-        hasLevelError.AAA++;
-      }
-
-      score += page.Score;
+    if (exists) {
+      stats = await get_file_stats(path);
     }
 
-    score = (score / 3).toFixed(1);
+    if (!exists | (exists && new Date().getTime() > stats.mtimeMs + week)) {
+      const query = `SELECT
+        p.PageId,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Score
+      FROM
+        User as u,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId 
+          ORDER BY Evaluation_Date DESC LIMIT 1
+        )
+      WHERE
+        d.Url = "${domain}" AND
+        w.WebsiteId = d.WebsiteId AND
+        (
+          w.UserId IS NULL OR
+          (
+            u.UserId = w.UserId AND
+            LOWER(u.Type) != 'studies'
+          )
+        ) AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE "1_1"
+      GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score`;
+      const result = await execute_query(query);
 
-    gm(200, 400, "#ddff99f3")
-      .drawText(10, 50, "from scratch")
-      .write(__dirname + "../public/images/seal.jpg", function (err) {
-        if (err) console.log(err);
-      });
+      const n_pages = _.size(result);
 
-    return success(score);
+      const hasLevelError = {
+        'A': 0,
+        'AA': 0,
+        'AAA': 0
+      };
+
+      let score = 0;
+
+      for (const page of result) {
+        if (page.A > 0) {
+          hasLevelError.A++;
+        }
+        if (page.AA > 0) {
+          hasLevelError.AA++;
+        }
+        if (page.AAA > 0) {
+          hasLevelError.AAA++;
+        }
+
+        score += page.Score;
+      }
+
+      score = (score / n_pages).toFixed(1);
+
+      gm(200, 400, '#ddff99f3')
+        .drawText(10, 50, 'from scratch')
+        .write(path, function (err) {
+          if (err) console.log(err);
+        });
+    }
+
+    const uri = 'http://194.117.20.202/server/stamps/' + encodeURIComponent(domain) + '.jpg';
+
+    return success(uri);
   } catch (err) {
     console.log(err);
     return error(err);
@@ -1015,15 +1035,15 @@ module.exports.get_website_seal_information = async domain => {
 module.exports.update_website_admin = async (website_id, newWebsiteName) => {
   try {
     let query = `SELECT distinct w.*, d.*
-            FROM 
-            Page as p, 
-            Domain as d, 
-            Website as w,
-            DomainPage as dp 
-            WHERE 
-            w.WebsiteId = "${website_id}" AND
-            d.WebsiteId ="${website_id}" AND 
-            d.Active = "1"`;
+      FROM 
+      Page as p, 
+      Domain as d, 
+      Website as w,
+      DomainPage as dp 
+      WHERE 
+      w.WebsiteId = "${website_id}" AND
+      d.WebsiteId ="${website_id}" AND 
+      d.Active = "1"`;
 
     let webDomain = await execute_query(query);
 
@@ -1031,16 +1051,16 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
     let webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     query = `SELECT p.*
-            FROM 
-            Page as p, 
-            Domain as d, 
-            Website as w,
-            DomainPage as dp 
-            WHERE 
-            w.WebsiteId = "${website_id}" AND
-            d.WebsiteId ="${website_id}"AND 
-            dp.domainId = d.domainId AND
-            dp.PageId = p.PageId`;
+      FROM 
+      Page as p, 
+      Domain as d, 
+      Website as w,
+      DomainPage as dp 
+      WHERE 
+      w.WebsiteId = "${website_id}" AND
+      d.WebsiteId ="${website_id}"AND 
+      dp.domainId = d.domainId AND
+      dp.PageId = p.PageId`;
     let pages = await execute_query(query);
 
     query = `SELECT distinct d.DomainId, w.*
@@ -1056,7 +1076,7 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
             `;
     let domainP = await execute_query(query);
     domainP = domainP[0];
-    
+
     let domainUrl = webDomain[0].Url;
 
     let returnWebsiteId = website_id;
@@ -1068,8 +1088,8 @@ module.exports.update_website_admin = async (website_id, newWebsiteName) => {
             try {
               query = `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domainP.domainId}", "${page.PageId}")`;
               await execute_query(query);
-            } catch(err) {
-              
+            } catch (err) {
+
             }
           }
         }
@@ -1108,19 +1128,19 @@ module.exports.verify_update_website_admin = async (website_id) => {
   try {
 
     let query = `SELECT p.PageId
-            FROM  
-            Page as p, 
-            Domain as d,
-            DomainPage as dp,
-            Website as w
-            WHERE 
-            w.WebsiteId = "${website_id}" AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
-            dp.PageId = p.PageId AND
-            p.Show_In LIKE '0%' `;
+      FROM  
+      Page as p, 
+      Domain as d,
+      DomainPage as dp,
+      Website as w
+      WHERE 
+      w.WebsiteId = "${website_id}" AND
+      d.WebsiteId = w.WebsiteId AND
+      dp.DomainId = d.DomainId AND
+      dp.PageId = p.PageId AND
+      p.Show_In LIKE '0%' `;
     let studyP = await execute_query(query);
-    
+
     return _.size(studyP) === 0;
   } catch (err) {
     console.log(err);

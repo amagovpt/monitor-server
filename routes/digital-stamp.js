@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Digital Seal Router and Controller
+ * Digital Stam+ Router and Controller
  */
 
 const express = require('express');
@@ -15,7 +15,7 @@ const {
   error
 } = require('../lib/_response');
 const {
-  get_website_seal_information
+  get_website_stamp_information
 } = require('../models/website');
 
 router.post('/', function (req, res, next) {
@@ -28,7 +28,7 @@ router.post('/', function (req, res, next) {
     } else {
       const domain = req.body.domain;
 
-      get_website_seal_information(domain)
+      get_website_stamp_information(domain)
         .then(imageInformation => res.send(imageInformation))
         .catch(err => res.send(err));
     }
@@ -48,7 +48,7 @@ router.get('/:domain', function (req, res, next) {
     } else {
       const domain = req.params.domain;
 
-      get_website_seal_information(domain)
+      get_website_stamp_information(domain)
         .then(imageInformation => res.send(imageInformation))
         .catch(err => res.send(err));
     }

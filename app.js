@@ -5,6 +5,7 @@ const logger = require('morgan');
 const expressValidator = require('express-validator');
 const cors = require('cors');
 const compression = require('compression');
+const path = require('path');
 
 const sessionRouter = require('./routes/session');
 
@@ -32,7 +33,7 @@ const studyEvaluationRouter = require('./routes/study/evaluation');
 
 const ampRouter = require('./routes/amp/evaluation');
 const obsRouter = require('./routes/observatory/observatory');
-const digitalSealRouter = require('./routes/digital-seal');
+const digitalStampRouter = require('./routes/digital-stamp');
 
 const app = express();
 app.use(compression());
@@ -42,6 +43,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({ extended: false, limit: '2mb' }));
 app.use(expressValidator());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/session', sessionRouter);
 
@@ -71,7 +73,7 @@ app.use('/monitor', monitorUserRouter);
 app.use('/monitor', monitorWebsiteRouter);
 app.use('/monitor', monitorEvaluationRouter);
 
-app.use('/digitalSeal', digitalSealRouter);
+app.use('/digitalStamp', digitalStampRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
