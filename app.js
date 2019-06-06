@@ -35,6 +35,9 @@ const ampRouter = require('./routes/amp/evaluation');
 const obsRouter = require('./routes/observatory/observatory');
 const digitalStampRouter = require('./routes/digital-stamp');
 
+const evaluators = require('./lib/_evaluators');
+evaluators.init();
+
 const app = express();
 app.use(compression());
 app.use(cors());

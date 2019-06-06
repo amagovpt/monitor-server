@@ -1,4 +1,4 @@
 {
-  "evaluators": ["examinator"],
+  "evaluators": ["examinator", "qualweb"],
   "default": "examinator"
 }
