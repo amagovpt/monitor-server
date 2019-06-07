@@ -2,10 +2,10 @@
 
 const Qualweb = require('../../../../qualweb/qualweb-server/src/core');
 
-module.exports.init = url => {
+module.exports.init = params => {
   return Qualweb.run({
     '--act': '',
-    '-url': url,
+    '-url': params[0],
     '--save': 'json,earl'
   }, true);
 }
