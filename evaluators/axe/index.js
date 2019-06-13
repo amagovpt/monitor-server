@@ -4,7 +4,8 @@ const {
   AxePuppeteer
 } = require('axe-puppeteer');
 const puppeteer = require('puppeteer');
-const reporter = require('axe-reporter-earl');
+//const reporter = require('axe-reporter-earl');
+const reporter = require('../../../../deque/axe-reporter-earl/dist/axeReporterEarl');
 const fs = require('fs');
 
 module.exports.init = async params => {
@@ -22,12 +23,16 @@ module.exports.init = async params => {
   await page.goto(params[0]);
 
   const axe = new AxePuppeteer(page);
-  axe.configure({
-    reporter
-  });
+  /*axe.configure({
+    createEarlReport
+  });*/
   const results = await axe.analyze();
 
-  await write_file(__dirname + '/page.json', JSON.stringify(results, null, 2))
+  const earl = reporter.default(results, params[0]);
+
+  console.log(earl);
+
+  //await write_file(__dirname + '/page.json', JSON.stringify(earlReport, null, 2))
 
   await page.close();
   await browser.close();
