@@ -1,0 +1,28 @@
+{
+  "https://auto-wcag.github.io/auto-wcag/rules/SC2-4-2-page-has-title.html": {
+    "earl:passed": "title_06",
+    "earl:failed": "title_02"
+  },
+  "https://auto-wcag.github.io/auto-wcag/rules/SC2-2-1+SC2-2-4-meta-refresh.html": {
+    "earl:passed": "meta_01",
+    "earl:failed": "meta_02",
+    "earl:notApplicable": "meta_01"
+  },
+  "https://www.w3.org/TR/WCAG20-TECHS/H24.html": {
+    "earl:failed": "area_01b"
+  },
+  "https://www.w3.org/TR/WCAG20-TECHS/H35.html": {
+    "earl:failed": "applet_01"
+  },
+  "https://www.w3.org/TR/WCAG20-TECHS/H36.html": {
+    "earl:failed": "input_03"
+  },
+  "https://www.w3.org/TR/WCAG20-TECHS/H37.html": {
+    "earl:passed": "img_01a",
+    "earl:failed": "img_01b",
+    "earl:warning": "img_03"
+  },
+  "https://www.w3.org/TR/WCAG20-TECHS/H45.html": {
+    "earl:failed": "long_01"
+  }
+}
