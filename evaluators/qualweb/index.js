@@ -1,13 +1,18 @@
 'use strict';
 
-const Qualweb = require('../../../../qualweb/qualweb-server/src/core');
+const core = require('@qualweb/core');
 
-module.exports.init = params => {
-  return Qualweb.run({
-    '--act': '',
-    '--html': '',
-    '-htech': 'h37,h45,h24,h35,h36',
-    '-url': params[0],
-    '--save': 'json,earl'
-  }, true);
+module.exports.init = async params => {
+  const report = (await core.evaluate({
+    url: params[0],
+    execute: {
+      act: true,
+      html: true,
+      css: true,
+      bp: true
+    }
+  }))[0];
+  const earlReport = (await core.generateEarlReport())[0];
+  
+  return { report, earlReport };
 }

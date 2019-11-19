@@ -1,7 +1,0 @@
-{
-  "name": "Axe",
-  "version": "1.0.0",
-  "language": "js",
-  "main": "index.js",
-  "command": "node"
-}

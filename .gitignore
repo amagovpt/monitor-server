@@ -3,10 +3,10 @@
 
 # dependencies
 /node_modules
-node_modules
 package-lock.json
 
 /lib/_constants.js
-lib/_constants.js
 
-bin/
+/bin
+
+cookie.txt

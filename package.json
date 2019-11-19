@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@qualweb/core": "^0.1.2",
     "axe-puppeteer": "^1.0.0",
     "axe-reporter-earl": "0.1.0-canary.be38c0de",
     "body-parser": "^1.19.0",
@@ -16,12 +17,12 @@
     "express-validator": "^5.3.1",
     "gm": "^1.23.1",
     "htmlparser2": "^3.10.1",
-    "http-errors": "~1.7.2",
-    "lodash": "^4.17.11",
+    "http-errors": "^1.7.3",
+    "lodash": "^4.17.15",
     "morgan": "^1.9.1",
     "mysql": "^2.17.1",
-    "puppeteer": "^1.17.0",
-    "simplecrawler": "^1.1.7",
+    "puppeteer": "^1.19.0",
+    "simplecrawler": "^1.1.8",
     "socket.io": "^2.2.0",
     "stew-select": "0.0.5"
   },

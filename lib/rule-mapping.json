@@ -1,9 +1,9 @@
 {
-  "https://auto-wcag.github.io/auto-wcag/rules/SC2-4-2-page-has-title.html": {
+  "https://act-rules.github.io/rules/2779a5": {
     "earl:passed": "title_06",
     "earl:failed": "title_02"
   },
-  "https://auto-wcag.github.io/auto-wcag/rules/SC2-2-1+SC2-2-4-meta-refresh.html": {
+  "https://act-rules.github.io/rules/bc659a": {
     "earl:passed": "meta_01",
     "earl:failed": "meta_02",
     "earl:notApplicable": "meta_01"
