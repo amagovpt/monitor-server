@@ -33,7 +33,7 @@ router.get('/eval/:url', function (req, res, next) {
         .then(evaluation => {
           res.send(evaluation);
 
-          save_url_evaluation(url, evaluation, '00');
+          //save_url_evaluation(url, evaluation, '00');
         })
         .catch(err => res.send(err));
     }
