@@ -1,0 +1,4 @@
+{
+  "evaluators": ["examinator"],
+  "default": "examinator"
+}
