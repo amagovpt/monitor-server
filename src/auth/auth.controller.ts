@@ -1,6 +1,7 @@
 import { Controller, InternalServerErrorException, UnauthorizedException, Request, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { success } from '../response';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +13,7 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req: any): Promise<any> {
-    const token = this.authService.login(req.user);
+    const token = await this.authService.login(req.user);
     if (req.user.Type !== req.body.type) {
       throw new UnauthorizedException();
     } else {
@@ -22,7 +23,7 @@ export class AuthController {
         throw new InternalServerErrorException();
       }
 
-      return token;
+      return success(token);
     }
   }
 }

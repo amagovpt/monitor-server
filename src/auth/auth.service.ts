@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
+import { generatePasswordHash, comparePasswordHash } from '../lib/security';
 
 @Injectable()
 export class AuthService {
@@ -16,10 +16,6 @@ export class AuthService {
     private readonly connection: Connection,
     private readonly jwtService: JwtService
   ) { }
-
-  private async generatePasswordHash(password: string): Promise<string> {
-    return bcrypt.hash(password, this.saltRounds);
-  }
 
   async updateUserLastLogin(userId: number, date: any): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
@@ -44,8 +40,8 @@ export class AuthService {
 
   async verifyUserCredentials(username: string, password: string): Promise<any> {
     const user = await this.usersRepository.findOne({ where: { Username: username } });
-    //password = await this.generatePasswordHash(password);
-    if (user && user.Password === password) {
+    
+    if (user && await comparePasswordHash(password, user.Password)) {
       delete user.Password;
       delete user.Names;
       delete user.Emails;
@@ -64,8 +60,6 @@ export class AuthService {
 
   async login(user: any): Promise<any> {
     const payload = { username: user.Username, sub: user.UserId, type: user.Type, hash: user.Unique_Hash };
-    return {
-      access_token: this.jwtService.sign(payload)
-    };
+    return this.jwtService.sign(payload);
   }
 }

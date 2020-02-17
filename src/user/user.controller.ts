@@ -1,7 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, InternalServerErrorException, Post, Get, Request, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { generatePasswordHash, createRandomUniqueHash } from '../lib/security';
+import { success } from '../response';
 
 @Controller('user')
 export class UserController {
@@ -10,19 +12,24 @@ export class UserController {
     private readonly userService: UserService
   ) { }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('create')
-  async createUser(): Promise<string> {
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('create')
+  async createUser(@Request() req: any): Promise<string> {
     const user = new User();
-    user.Username = 'Carlos';
-    user.Password = 'ola';
-    user.Type = 'monitor';
+    user.Username = req.body.username;
+    user.Password = await generatePasswordHash(req.body.password);
+    user.Names = req.body.names;
+    user.Emails = req.body.emails;
+    user.Type = req.body.type;
     user.Register_Date = new Date();
-    user.Unique_Hash = 'nkjandjcwjca';
+    user.Unique_Hash = createRandomUniqueHash();
     
-    await this.userService.createOne(user);
+    const createSuccess = await this.userService.createOne(user);
+    if (!createSuccess) {
+      throw new InternalServerErrorException();
+    }
 
-    return 'inserted or not';
+    return success(true);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -31,9 +38,9 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
-  getAllUsers(): Promise<User[]> {
-    return this.userService.findAll();
+  async getAllNonAdminUsers(@Request() req: any): Promise<any> {
+    return success(await this.userService.findAllNonAdmin());
   }
 }
