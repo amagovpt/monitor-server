@@ -26,4 +26,11 @@ export class AuthController {
       return success(token);
     }
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('logout')
+  async logout(@Request() req: any): Promise<any> {
+    const token = req.headers.authorization.split(' ')[1];
+    return success(await this.authService.logout(token))
+  }
 }

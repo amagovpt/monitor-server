@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('Wesbite')
+@Entity('Website')
 export class Website {
 
   @PrimaryGeneratedColumn({

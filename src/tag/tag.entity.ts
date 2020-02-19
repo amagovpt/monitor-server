@@ -26,7 +26,7 @@ export class Tag {
     width: 1,
     nullable: false
   })
-  Show_In_Observatorio: number;
+  Show_in_Observatorio: number;
 
   @Column({
     type: 'datetime',

@@ -17,7 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any): Promise<any> {
     const valid = await this.authService.verifyUserPayload(payload);
     
-    if (!valid) {
+    delete payload.exp;
+    const token = this.authService.signToken(payload);
+
+    const isBlackListed = await this.authService.isTokenBlackListed(token);
+
+    if (!valid || isBlackListed) {
       throw new UnauthorizedException(); 
     }
     

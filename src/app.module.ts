@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StatusMonitorModule } from 'nest-status-monitor';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -65,6 +66,7 @@ const statusMonitorConfig = {
 @Module({
   imports: [
     StatusMonitorModule.setUp(statusMonitorConfig),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',

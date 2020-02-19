@@ -14,7 +14,7 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
-  async createUser(@Request() req: any): Promise<string> {
+  async createUser(@Request() req: any): Promise<any> {
     const user = new User();
     user.Username = req.body.username;
     user.Password = await generatePasswordHash(req.body.password);
@@ -32,15 +32,21 @@ export class UserController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('get/:id')
   getUser(@Param('id') id: string): Promise<User> {
     return this.userService.findById(id);
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get('exists/:username')
+  async checkIfUsernameExists(@Param('username') username: string): Promise<boolean> {
+    return success(!!await this.userService.findByUsername(username.toLowerCase()));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
-  async getAllNonAdminUsers(@Request() req: any): Promise<any> {
+  async getAllNonAdminUsers(): Promise<any> {
     return success(await this.userService.findAllNonAdmin());
   }
 }

@@ -16,8 +16,13 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
 
   async validate(payload: any): Promise<any> {
     const valid = await this.authService.verifyUserPayload(payload);
+
+    delete payload.exp;
+    const token = this.authService.signToken(payload);
+
+    const isBlackListed = await this.authService.isTokenBlackListed(token);
     
-    if (!valid || payload.type !== 'nimda') {
+    if (!valid || payload.type !== 'nimda' || isBlackListed) {
       throw new UnauthorizedException(); 
     }
     
