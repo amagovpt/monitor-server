@@ -1,4 +1,4 @@
-import { Controller, Request, Get, UseGuards } from '@nestjs/common';
+import { Controller, Param, Request, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DomainService } from './domain.service';
 import { success } from '../response';
@@ -12,5 +12,11 @@ export class DomainController {
   @Get('all')
   async getAllDomains(): Promise<any> {
     return success(await this.domainService.findAll());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('exists/:url')
+  async checkIfDomainExists(@Param('url') url: string): Promise<any> {
+    return success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
   }
 }

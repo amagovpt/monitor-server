@@ -37,4 +37,10 @@ export class TagController {
   async getAllTags(): Promise<any> {
     return success(await this.tagService.findAll());
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('allOfficial')
+  async getAllOfficialTags(): Promise<any> {
+    return success(await this.tagService.findAllOfficial());
+  }
 }

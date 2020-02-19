@@ -5,7 +5,7 @@ import { Connection, Repository, getManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { InvalidToken } from './invalid-token.entity';
-import { generatePasswordHash, comparePasswordHash } from '../lib/security';
+import { comparePasswordHash } from '../lib/security';
 
 @Injectable()
 export class AuthService {

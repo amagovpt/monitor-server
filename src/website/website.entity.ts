@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany } from 'typeorm';
+import { Tag } from '../tag/tag.entity';
 
 @Entity('Website')
 export class Website {
@@ -40,4 +41,8 @@ export class Website {
     default: 0
   })
   Deleted: number;
+
+  @ManyToMany(type => Tag)
+  @JoinTable()
+  Tags: Tag[];
 }

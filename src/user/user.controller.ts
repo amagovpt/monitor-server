@@ -49,4 +49,10 @@ export class UserController {
   async getAllNonAdminUsers(): Promise<any> {
     return success(await this.userService.findAllNonAdmin());
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('myMonitor')
+  async getAllMyMonitorUsers(): Promise<any> {
+    return success(await this.userService.findAllFromMyMonitor());
+  }
 }

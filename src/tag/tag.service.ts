@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
+import { Connection, Repository, getManager, IsNull } from 'typeorm';
 import { Tag } from './tag.entity';
 
 @Injectable()
@@ -29,6 +29,10 @@ export class TagService {
       GROUP BY t.TagId`);
     
     return tags;
+  }
+
+  async findAllOfficial(): Promise<any> {
+    return this.tagRepository.find({ where: { UserId: IsNull() } });
   }
 
   async createOne(tag: Tag): Promise<boolean> {

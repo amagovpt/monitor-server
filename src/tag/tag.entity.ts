@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany } from 'typeorm';
+import { Website } from '../website/website.entity';
 
 @Entity('Tag')
 export class Tag {
@@ -33,4 +34,8 @@ export class Tag {
     nullable: false
   })
   Creation_Date: any;
+
+  @ManyToMany(type => Website)
+  @JoinTable()
+  Websites: Website[];
 }

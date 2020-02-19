@@ -26,6 +26,13 @@ export class UserService {
     return users;
   }
 
+  async findAllFromMyMonitor(): Promise<User[]> {
+    return this.userRepository.find({ 
+      select: ['UserId', 'Username', 'Type', 'Register_Date', 'Last_Login'], 
+      where: { Type: 'monitor' } 
+    });
+  }
+
   findById(id: string): Promise<User> {
     return this.userRepository.findOne(id);
   }

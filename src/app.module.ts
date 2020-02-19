@@ -75,7 +75,7 @@ const statusMonitorConfig = {
       password: 'accessmonitor',
       database: 'accessmonitor',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     UserModule,

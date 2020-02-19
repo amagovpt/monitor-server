@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { getManager } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Connection, Repository, getManager } from 'typeorm';
+import { Domain } from './domain.entity';
 
 @Injectable()
 export class DomainService {
+
+  constructor(
+    @InjectRepository(Domain)
+    private readonly domainRepository: Repository<Domain>,
+    private readonly connection: Connection
+  ) {}
 
   async findAll(): Promise<any> {
     const manager = getManager();
@@ -18,5 +26,9 @@ export class DomainService {
         w.Deleted = "0"
       GROUP BY d.DomainId`);
     return domains;
+  }
+
+  async findByUrl(url: string): Promise<any> {
+    return this.domainRepository.findOne({ where: { Url: url }});
   }
 }
