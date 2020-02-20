@@ -27,7 +27,7 @@ AuthModule = __decorate([
                 publicKey: constants_1.jwtConstants.publicKey,
                 privateKey: constants_1.jwtConstants.privateKey,
                 signOptions: { expiresIn: '1d' },
-            }),
+            })
         ],
         exports: [auth_service_1.AuthService],
         providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy, jwt_admin_strategy_1.JwtAdminStrategy],

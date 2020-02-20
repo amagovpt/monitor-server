@@ -29,6 +29,7 @@
     "@nestjs/schedule": "^0.2.0",
     "@nestjs/typeorm": "^6.3.1",
     "@nestjs/websockets": "^6.11.7",
+    "@qualweb/core": "^0.3.13",
     "bcrypt": "^3.0.8",
     "compression": "^1.7.4",
     "csurf": "^1.11.0",

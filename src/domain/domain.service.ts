@@ -28,6 +28,31 @@ export class DomainService {
     return domains;
   }
 
+  async findAllOfficial(): Promise<any> {
+    const manager = getManager();
+    const domains = await manager.query(`SELECT
+        d.*,
+        COUNT(distinct dp.PageId) as Pages
+      FROM
+        Domain as d
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
+        Website as w,
+        User as u
+      WHERE
+        d.Active = '1' AND
+        w.WebsiteId = d.WebsiteId AND
+        (
+          w.UserId IS NULL OR
+          (
+            u.UserId = w.UserId AND
+            LOWER(u.Type) != 'studies'
+          )
+        ) AND
+        w.Deleted = "0"
+      GROUP BY d.DomainId`);
+    return domains;
+  }
+
   async findByUrl(url: string): Promise<any> {
     return this.domainRepository.findOne({ where: { Url: url }});
   }

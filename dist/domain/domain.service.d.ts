@@ -5,5 +5,6 @@ export declare class DomainService {
     private readonly connection;
     constructor(domainRepository: Repository<Domain>, connection: Connection);
     findAll(): Promise<any>;
+    findAllOfficial(): Promise<any>;
     findByUrl(url: string): Promise<any>;
 }

@@ -15,6 +15,12 @@ export class DomainController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get('allOfficial')
+  async getAllOfficialDomains(): Promise<any> {
+    return success(await this.domainService.findAllOfficial());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:url')
   async checkIfDomainExists(@Param('url') url: string): Promise<any> {
     return success(!!await this.domainService.findByUrl(decodeURIComponent(url)));

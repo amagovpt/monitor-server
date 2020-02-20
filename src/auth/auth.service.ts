@@ -6,11 +6,10 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { InvalidToken } from './invalid-token.entity';
 import { comparePasswordHash } from '../lib/security';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
-
-  private saltRounds: number = 10;
 
   constructor(
     @InjectRepository(User)
@@ -81,6 +80,15 @@ export class AuthService {
 
   signToken(payload: any): string {
     return this.jwtService.sign(payload);
+  }
+
+  verifyJWT(jwt: string): any {
+    try {
+      return this.jwtService.verify(jwt);
+    } catch(err) {
+      console.log(err);
+      return undefined;
+    }
   }
 
   async logout(token: string): Promise<any> {

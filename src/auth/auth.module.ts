@@ -17,7 +17,7 @@ import { jwtConstants } from './constants';
       publicKey: jwtConstants.publicKey,
       privateKey: jwtConstants.privateKey,
       signOptions: { expiresIn: '1d' },
-    }),
+    })
   ],
   exports: [AuthService],
   providers: [AuthService, LocalStrategy, JwtStrategy, JwtAdminStrategy],

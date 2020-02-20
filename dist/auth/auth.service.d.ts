@@ -7,7 +7,6 @@ export declare class AuthService {
     private readonly invalidTokenRepository;
     private readonly connection;
     private readonly jwtService;
-    private saltRounds;
     constructor(userRepository: Repository<User>, invalidTokenRepository: Repository<InvalidToken>, connection: Connection, jwtService: JwtService);
     cleanInvalidSessionTokens(): Promise<void>;
     isTokenBlackListed(token: string): Promise<any>;
@@ -16,5 +15,6 @@ export declare class AuthService {
     verifyUserPayload(payload: any): Promise<boolean>;
     login(user: any): string;
     signToken(payload: any): string;
+    verifyJWT(jwt: string): any;
     logout(token: string): Promise<any>;
 }

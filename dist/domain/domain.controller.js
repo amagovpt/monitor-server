@@ -23,6 +23,9 @@ let DomainController = class DomainController {
     async getAllDomains() {
         return response_1.success(await this.domainService.findAll());
     }
+    async getAllOfficialDomains() {
+        return response_1.success(await this.domainService.findAllOfficial());
+    }
     async checkIfDomainExists(url) {
         return response_1.success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
     }
@@ -34,6 +37,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DomainController.prototype, "getAllDomains", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('allOfficial'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DomainController.prototype, "getAllOfficialDomains", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:url'),

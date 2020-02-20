@@ -11,24 +11,29 @@ export class PageService {
     private readonly pageRepository: Repository<Page>
   ) {}
 
+  async createOne(): Promise<any> {
+    
+  }
+
   async findAll(): Promise<any> {
     const manager = getManager();
     const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date 
-        FROM 
-            Page as p
-            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-                SELECT Evaluation_Date FROM Evaluation 
-                WHERE PageId = p.PageId
-                ORDER BY Evaluation_Date DESC LIMIT 1
-            ) 
-        WHERE
-            LOWER(p.Show_In) LIKE '1%'
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date`);
+      FROM 
+        Page as p
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId
+          ORDER BY Evaluation_Date DESC LIMIT 1
+        ) 
+      WHERE
+        LOWER(p.Show_In) LIKE '1%'
+      GROUP BY p.PageId, e.Score, e.Evaluation_Date`);
     return pages;
   }
 
   getObservatoryData(): Promise<any> {
-    return getManager().query(`
+    const manager = getManager();
+    return manager.query(`
       SELECT
         e.EvaluationId,
         e.Title,
@@ -69,10 +74,10 @@ export class PageService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE '%1' AND
         e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
-            ORDER BY Evaluation_Date DESC LIMIT 1
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId AND Show_To LIKE "1_" 
+          ORDER BY Evaluation_Date DESC LIMIT 1
         )
-      `);
+    `);
   }
 }

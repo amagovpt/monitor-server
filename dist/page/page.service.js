@@ -20,23 +20,26 @@ let PageService = class PageService {
     constructor(pageRepository) {
         this.pageRepository = pageRepository;
     }
+    async createOne() {
+    }
     async findAll() {
         const manager = typeorm_2.getManager();
         const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date 
-        FROM 
-            Page as p
-            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-                SELECT Evaluation_Date FROM Evaluation 
-                WHERE PageId = p.PageId
-                ORDER BY Evaluation_Date DESC LIMIT 1
-            ) 
-        WHERE
-            LOWER(p.Show_In) LIKE '1%'
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date`);
+      FROM 
+        Page as p
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId
+          ORDER BY Evaluation_Date DESC LIMIT 1
+        ) 
+      WHERE
+        LOWER(p.Show_In) LIKE '1%'
+      GROUP BY p.PageId, e.Score, e.Evaluation_Date`);
         return pages;
     }
     getObservatoryData() {
-        return typeorm_2.getManager().query(`
+        const manager = typeorm_2.getManager();
+        return manager.query(`
       SELECT
         e.EvaluationId,
         e.Title,
@@ -77,11 +80,11 @@ let PageService = class PageService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE '%1' AND
         e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
-            ORDER BY Evaluation_Date DESC LIMIT 1
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId AND Show_To LIKE "1_" 
+          ORDER BY Evaluation_Date DESC LIMIT 1
         )
-      `);
+    `);
     }
 };
 PageService = __decorate([

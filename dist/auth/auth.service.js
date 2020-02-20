@@ -26,7 +26,6 @@ let AuthService = class AuthService {
         this.invalidTokenRepository = invalidTokenRepository;
         this.connection = connection;
         this.jwtService = jwtService;
-        this.saltRounds = 10;
     }
     async cleanInvalidSessionTokens() {
         const manager = typeorm_2.getManager();
@@ -78,6 +77,15 @@ let AuthService = class AuthService {
     }
     signToken(payload) {
         return this.jwtService.sign(payload);
+    }
+    verifyJWT(jwt) {
+        try {
+            return this.jwtService.verify(jwt);
+        }
+        catch (err) {
+            console.log(err);
+            return undefined;
+        }
     }
     async logout(token) {
         const tomorrow = new Date();

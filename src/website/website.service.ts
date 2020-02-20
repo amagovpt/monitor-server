@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
-import * as SqlString from 'sqlstring';
 import { Website } from './website.entity';
 import { Domain } from '../domain/domain.entity';
 
