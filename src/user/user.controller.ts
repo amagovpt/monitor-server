@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { generatePasswordHash, createRandomUniqueHash } from '../lib/security';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('user')
 export class UserController {

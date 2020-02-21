@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const page_service_1 = require("./page.service");
-const response_1 = require("../response");
+const response_1 = require("../lib/response");
 let PageController = class PageController {
     constructor(pageService) {
         this.pageService = pageService;

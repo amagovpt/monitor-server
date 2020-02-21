@@ -16,7 +16,7 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const tag_service_1 = require("./tag.service");
 const tag_entity_1 = require("./tag.entity");
-const response_1 = require("../response");
+const response_1 = require("../lib/response");
 let TagController = class TagController {
     constructor(tagService) {
         this.tagService = tagService;

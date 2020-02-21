@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 import * as SqlString from 'sqlstring';
 import { AuthService } from '../auth/auth.service';
+import { EvaluationService } from '../evaluation/evaluation.service';
 import { Page } from './page.entity';
 
 @WebSocketGateway()
@@ -14,6 +15,7 @@ export class PageGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly evaluationService: EvaluationService,
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     private readonly connection: Connection
@@ -67,7 +69,7 @@ export class PageGateway implements OnGatewayConnection, OnGatewayDisconnect {
             showIn = '100';
           }
 
-          //const evaluation = await evaluate_url(u, 'examinator');
+          const evaluation = await this.evaluationService.evaluateUrl(uri);
 
           const newPage = new Page();
           newPage.Uri = uri;
@@ -77,7 +79,7 @@ export class PageGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const insertPage = await queryRunner.manager.save(newPage);
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
           
-          //await save_page_evaluation(newPage.insertId, evaluation, '10');
+          //await this.evaluationService.createOne(newPage.insertId, evaluation, '10');
         }
 
         await queryRunner.commitTransaction();

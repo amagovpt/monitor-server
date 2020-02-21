@@ -12,6 +12,8 @@ const app_service_1 = require("./app.service");
 const typeorm_1 = require("@nestjs/typeorm");
 const nest_status_monitor_1 = require("nest-status-monitor");
 const schedule_1 = require("@nestjs/schedule");
+const serve_static_1 = require("@nestjs/serve-static");
+const path_1 = require("path");
 const auth_module_1 = require("./auth/auth.module");
 const user_module_1 = require("./user/user.module");
 const observatory_module_1 = require("./observatory/observatory.module");
@@ -25,9 +27,10 @@ const amp_module_1 = require("./amp/amp.module");
 const admin_module_1 = require("./admin/admin.module");
 const monitor_module_1 = require("./monitor/monitor.module");
 const studies_module_1 = require("./studies/studies.module");
+const stamp_module_1 = require("./stamp/stamp.module");
 const statusMonitorConfig = {
     pageTitle: 'Nest.js Monitoring Page',
-    port: 3001,
+    port: 3000,
     path: '/status',
     ignoreStartsWith: '/health/alive',
     spans: [
@@ -57,13 +60,13 @@ const statusMonitorConfig = {
             protocol: 'http',
             host: 'localhost',
             path: '/health/alive',
-            port: 3001,
+            port: 3000,
         },
         {
             protocol: 'http',
             host: 'localhost',
             path: '/health/dead',
-            port: 3001,
+            port: 3000,
         }
     ]
 };
@@ -84,6 +87,9 @@ AppModule = __decorate([
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 synchronize: false,
             }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: path_1.join(__dirname, '..', 'public'),
+            }),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
             observatory_module_1.ObservatoryModule,
@@ -96,7 +102,8 @@ AppModule = __decorate([
             amp_module_1.AmpModule,
             admin_module_1.AdminModule,
             monitor_module_1.MonitorModule,
-            studies_module_1.StudiesModule
+            studies_module_1.StudiesModule,
+            stamp_module_1.StampModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

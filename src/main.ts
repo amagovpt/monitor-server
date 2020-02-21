@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as helmet from 'helmet';
-import * as csurf from 'csurf';
-import * as compression from 'compression';
-import * as rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+//import csurf from 'csurf';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });

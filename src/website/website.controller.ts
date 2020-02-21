@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import * as SqlString from 'sqlstring';
 import { WebsiteService } from './website.service';
 import { Website } from './website.entity';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('website')
 export class WebsiteController {

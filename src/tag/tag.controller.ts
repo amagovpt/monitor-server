@@ -2,7 +2,7 @@ import { Controller, InternalServerErrorException, Post, Get, Request, Param, Us
 import { AuthGuard } from '@nestjs/passport';
 import { TagService } from './tag.service';
 import { Tag } from './tag.entity';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('tag')
 export class TagController {

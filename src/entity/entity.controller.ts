@@ -2,7 +2,7 @@ import { Controller, InternalServerErrorException, Get, Post, Request, Param, Us
 import { AuthGuard } from '@nestjs/passport';
 import { EntityService } from './entity.service';
 import { EntityTable } from './entity.entity';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('entity')
 export class EntityController {

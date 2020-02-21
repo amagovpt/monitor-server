@@ -16,7 +16,7 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const entity_service_1 = require("./entity.service");
 const entity_entity_1 = require("./entity.entity");
-const response_1 = require("../response");
+const response_1 = require("../lib/response");
 let EntityController = class EntityController {
     constructor(entityService) {
         this.entityService = entityService;

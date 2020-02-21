@@ -11,16 +11,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const websockets_1 = require("@nestjs/websockets");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const SqlString = require("sqlstring");
+const SqlString = __importStar(require("sqlstring"));
 const auth_service_1 = require("../auth/auth.service");
+const evaluation_service_1 = require("../evaluation/evaluation.service");
 const page_entity_1 = require("./page.entity");
 let PageGateway = class PageGateway {
-    constructor(authService, pageRepository, connection) {
+    constructor(authService, evaluationService, pageRepository, connection) {
         this.authService = authService;
+        this.evaluationService = evaluationService;
         this.pageRepository = pageRepository;
         this.connection = connection;
     }
@@ -66,6 +75,7 @@ let PageGateway = class PageGateway {
                     else {
                         showIn = '100';
                     }
+                    const evaluation = await this.evaluationService.evaluateUrl(uri);
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = uri;
                     newPage.Show_In = showIn;
@@ -103,8 +113,9 @@ __decorate([
 ], PageGateway.prototype, "handleMessage", null);
 PageGateway = __decorate([
     websockets_1.WebSocketGateway(),
-    __param(1, typeorm_1.InjectRepository(page_entity_1.Page)),
+    __param(2, typeorm_1.InjectRepository(page_entity_1.Page)),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
+        evaluation_service_1.EvaluationService,
         typeorm_2.Repository,
         typeorm_2.Connection])
 ], PageGateway);

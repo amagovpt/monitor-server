@@ -14,3 +14,7 @@ export function createRandomUniqueHash(): string {
   const random = Math.random().toString();
   return createHash('sha256').update(current_date + random).digest('hex');
 }
+
+export function generateMd5Hash(content: string): string {
+  return createHash('md5').update(content).digest('hex');
+}

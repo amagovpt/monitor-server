@@ -7,7 +7,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
+const middleware_1 = require("./middleware");
 let EvaluationService = class EvaluationService {
+    evaluateUrl(url) {
+        return middleware_1.executeUrlEvaluation(url);
+    }
+    createOne(evaluation) {
+        return null;
+    }
 };
 EvaluationService = __decorate([
     common_1.Injectable()

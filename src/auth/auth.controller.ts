@@ -1,7 +1,7 @@
 import { Controller, InternalServerErrorException, UnauthorizedException, Request, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('auth')
 export class AuthController {

@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PageService } from './page.service';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('page')
 export class PageController {

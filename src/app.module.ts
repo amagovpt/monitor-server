@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StatusMonitorModule } from 'nest-status-monitor';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -19,10 +21,11 @@ import { AmpModule } from './amp/amp.module';
 import { AdminModule } from './admin/admin.module';
 import { MonitorModule } from './monitor/monitor.module';
 import { StudiesModule } from './studies/studies.module';
+import { StampModule } from './stamp/stamp.module';
 
 const statusMonitorConfig = {
   pageTitle: 'Nest.js Monitoring Page',
-  port: 3001,
+  port: 3000,
   path: '/status',
   ignoreStartsWith: '/health/alive',
   spans: [
@@ -52,13 +55,13 @@ const statusMonitorConfig = {
       protocol: 'http',
       host: 'localhost',
       path: '/health/alive',
-      port: 3001,
+      port: 3000,
     },
     {
       protocol: 'http',
       host: 'localhost',
       path: '/health/dead',
-      port: 3001,
+      port: 3000,
     }
   ]
 };
@@ -77,6 +80,9 @@ const statusMonitorConfig = {
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     AuthModule,
     UserModule,
     ObservatoryModule,
@@ -89,7 +95,8 @@ const statusMonitorConfig = {
     AmpModule,
     AdminModule,
     MonitorModule,
-    StudiesModule
+    StudiesModule,
+    StampModule
   ],
   controllers: [AppController],
   providers: [AppService],

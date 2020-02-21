@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const auth_service_1 = require("./auth.service");
-const response_1 = require("../response");
+const response_1 = require("../lib/response");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;

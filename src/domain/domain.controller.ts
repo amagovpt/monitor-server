@@ -1,7 +1,7 @@
 import { Controller, Param, Request, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DomainService } from './domain.service';
-import { success } from '../response';
+import { success } from '../lib/response';
 
 @Controller('domain')
 export class DomainController {

@@ -7,7 +7,7 @@ export class ObservatoryController {
   constructor(private readonly pageService: PageService) { }
 
   @Get()
-  async getData(): Promise<any> {
+  getData(): Promise<any> {
     return this.pageService.getObservatoryData();
   }
 }

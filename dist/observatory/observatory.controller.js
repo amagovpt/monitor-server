@@ -15,7 +15,7 @@ let ObservatoryController = class ObservatoryController {
     constructor(pageService) {
         this.pageService = pageService;
     }
-    async getData() {
+    getData() {
         return this.pageService.getObservatoryData();
     }
 };

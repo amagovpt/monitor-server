@@ -12,12 +12,13 @@ const page_service_1 = require("./page.service");
 const page_entity_1 = require("./page.entity");
 const page_controller_1 = require("./page.controller");
 const auth_module_1 = require("../auth/auth.module");
+const evaluation_module_1 = require("../evaluation/evaluation.module");
 const page_gateway_1 = require("./page.gateway");
 let PageModule = class PageModule {
 };
 PageModule = __decorate([
     common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page]), auth_module_1.AuthModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page]), auth_module_1.AuthModule, evaluation_module_1.EvaluationModule],
         exports: [page_service_1.PageService],
         providers: [page_service_1.PageService, page_gateway_1.PageGateway],
         controllers: [page_controller_1.PageController]

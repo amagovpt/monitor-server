@@ -17,7 +17,7 @@ const passport_1 = require("@nestjs/passport");
 const user_service_1 = require("./user.service");
 const user_entity_1 = require("./user.entity");
 const security_1 = require("../lib/security");
-const response_1 = require("../response");
+const response_1 = require("../lib/response");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
