@@ -40,6 +40,13 @@ let TagService = class TagService {
     async findAllOfficial() {
         return this.tagRepository.find({ where: { UserId: typeorm_2.IsNull() } });
     }
+    async findNumberOfStudyMonitor() {
+        const manager = typeorm_2.getManager();
+        return (await manager.query(`SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE LOWER(u.Type) = "studies" AND t.UserId = u.UserId`))[0].Tags;
+    }
+    async findNumberOfObservatory() {
+        return this.tagRepository.count({ Show_in_Observatorio: 1 });
+    }
     async createOne(tag) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();

@@ -26,6 +26,7 @@ const SqlString = __importStar(require("sqlstring"));
 const auth_service_1 = require("../auth/auth.service");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
 const page_entity_1 = require("./page.entity");
+const evaluation_entity_1 = require("../evaluation/evaluation.entity");
 let PageGateway = class PageGateway {
     constructor(authService, evaluationService, pageRepository, connection) {
         this.authService = authService;
@@ -40,7 +41,7 @@ let PageGateway = class PageGateway {
         console.log('Disconnect');
     }
     async handleMessage(data, client) {
-        if (this.authService.verifyJWT(data['token'].trim())) {
+        if (this.authService.verifyJWT(data['token'])) {
             let hasError = false;
             const uri = decodeURIComponent(data['uri']);
             const domainId = SqlString.escape(data['domainId']);
@@ -82,6 +83,21 @@ let PageGateway = class PageGateway {
                     newPage.Creation_Date = new Date();
                     const insertPage = await queryRunner.manager.save(newPage);
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
+                    const newEvaluation = new evaluation_entity_1.Evaluation();
+                    newEvaluation.PageId = insertPage.PageId;
+                    newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+                    newEvaluation.Score = evaluation.data.score;
+                    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
+                    newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
+                    newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
+                    newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
+                    const conform = evaluation.data.conform.split('@');
+                    newEvaluation.A = conform[0];
+                    newEvaluation.AA = conform[1];
+                    newEvaluation.AAA = conform[2];
+                    newEvaluation.Evaluation_Date = evaluation.data.date;
+                    newEvaluation.Show_To = '10';
+                    await queryRunner.manager.save(newEvaluation);
                 }
                 await queryRunner.commitTransaction();
             }

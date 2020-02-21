@@ -7,5 +7,8 @@ export declare class WebsiteController {
     getAllOfficialWebsites(): Promise<any>;
     getWebsitesWithoutUser(): Promise<any>;
     getWebsitesWithoutEntity(): Promise<any>;
+    getNumberOfStudyMonitorUsers(): Promise<any>;
+    getNumberOfMyMonitorUsers(): Promise<any>;
+    getNumberOfObservatoryTags(): Promise<any>;
     checkIfWebsiteExists(name: string): Promise<any>;
 }

@@ -14,12 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
+const response_1 = require("../lib/response");
 let AmpController = class AmpController {
     constructor(evaluationService) {
         this.evaluationService = evaluationService;
     }
-    evaluateUrl(url) {
-        return this.evaluationService.evaluateUrl(decodeURIComponent(url));
+    async evaluateUrl(url) {
+        return response_1.success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
     }
 };
 __decorate([

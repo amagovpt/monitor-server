@@ -55,6 +55,15 @@ let WebsiteController = class WebsiteController {
     async getWebsitesWithoutEntity() {
         return response_1.success(await this.websiteService.findAllWithoutEntity());
     }
+    async getNumberOfStudyMonitorUsers() {
+        return response_1.success(await this.websiteService.findNumberOfStudyMonitor());
+    }
+    async getNumberOfMyMonitorUsers() {
+        return response_1.success(await this.websiteService.findNumberOfMyMonitor());
+    }
+    async getNumberOfObservatoryTags() {
+        return response_1.success(await this.websiteService.findNumberOfObservatory());
+    }
     async checkIfWebsiteExists(name) {
         return response_1.success(!!await this.websiteService.findByName(SqlString.escape(name)));
     }
@@ -95,6 +104,27 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsitesWithoutEntity", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('studyMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getNumberOfStudyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('myMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getNumberOfMyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('observatory/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getNumberOfObservatoryTags", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:name'),

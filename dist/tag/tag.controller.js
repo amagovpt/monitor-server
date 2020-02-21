@@ -41,6 +41,12 @@ let TagController = class TagController {
     async getAllOfficialTags() {
         return response_1.success(await this.tagService.findAllOfficial());
     }
+    async getNumberOfStudyMonitorUsers() {
+        return response_1.success(await this.tagService.findNumberOfStudyMonitor());
+    }
+    async getNumberOfObservatoryTags() {
+        return response_1.success(await this.tagService.findNumberOfObservatory());
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -72,6 +78,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "getAllOfficialTags", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('studyMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getNumberOfStudyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('observatory/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getNumberOfObservatoryTags", null);
 TagController = __decorate([
     common_1.Controller('tag'),
     __metadata("design:paramtypes", [tag_service_1.TagService])

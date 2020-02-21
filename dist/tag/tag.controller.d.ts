@@ -6,4 +6,6 @@ export declare class TagController {
     checkIfTagNameExists(tagName: string): Promise<boolean>;
     getAllTags(): Promise<any>;
     getAllOfficialTags(): Promise<any>;
+    getNumberOfStudyMonitorUsers(): Promise<any>;
+    getNumberOfObservatoryTags(): Promise<any>;
 }

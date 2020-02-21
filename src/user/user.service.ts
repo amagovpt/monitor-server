@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
+import { Connection, Repository, getManager, In } from 'typeorm';
 import { User } from './user.entity';
+import { Website } from '../website/website.entity';
 
 @Injectable()
 export class UserService {
@@ -41,7 +42,15 @@ export class UserService {
     return this.userRepository.findOne({ where: { Username: username } });
   }
 
-  async createOne(user: User): Promise<boolean> {
+  findNumberOfStudyMonitor(): Promise<number> {
+    return this.userRepository.count({ Type: 'studies' });
+  }
+
+  findNumberOfMyMonitor(): Promise<number> {
+    return this.userRepository.count({ Type: 'monitor' });
+  }
+
+  async createOne(user: User, websites: string[], transfer: boolean): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -49,7 +58,24 @@ export class UserService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.save(user);
+      const insertUser = await queryRunner.manager.save(user);
+
+      if (user.Type === 'monitor' && websites.length > 0) {
+        await queryRunner.manager.update(Website, { WebsiteId: In(websites) }, { UserId: insertUser.UserId });
+
+        if (transfer) {
+          await queryRunner.manager.query(`UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
+            SET 
+              p.Show_In = "111",
+              e.Show_To = "11" 
+            WHERE
+              d.WebsiteId IN (?) AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              p.Show_In LIKE "101" AND
+              e.PageId = p.PageId`, [websites]);
+        }
+      }
 
       await queryRunner.commitTransaction();
     } catch (err) {

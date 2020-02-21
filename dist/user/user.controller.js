@@ -31,7 +31,9 @@ let UserController = class UserController {
         user.Type = req.body.type;
         user.Register_Date = new Date();
         user.Unique_Hash = security_1.createRandomUniqueHash();
-        const createSuccess = await this.userService.createOne(user);
+        const websites = JSON.parse(req.body.websites);
+        const transfer = req.body.transfer === 'true';
+        const createSuccess = await this.userService.createOne(user, websites, transfer);
         if (!createSuccess) {
             throw new common_1.InternalServerErrorException();
         }
@@ -48,6 +50,12 @@ let UserController = class UserController {
     }
     async getAllMyMonitorUsers() {
         return response_1.success(await this.userService.findAllFromMyMonitor());
+    }
+    async getNumberOfStudyMonitorUsers() {
+        return response_1.success(await this.userService.findNumberOfStudyMonitor());
+    }
+    async getNumberOfMyMonitorUsers() {
+        return response_1.success(await this.userService.findNumberOfMyMonitor());
     }
 };
 __decorate([
@@ -88,6 +96,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAllMyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('studyMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getNumberOfStudyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('myMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getNumberOfMyMonitorUsers", null);
 UserController = __decorate([
     common_1.Controller('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

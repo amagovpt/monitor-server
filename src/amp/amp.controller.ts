@@ -1,5 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { EvaluationService } from '../evaluation/evaluation.service';
+import { success } from '../lib/response';
 
 @Controller('amp')
 export class AmpController {
@@ -7,7 +8,7 @@ export class AmpController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
   @Get('eval/:url')
-  evaluateUrl(@Param('url') url: string): Promise<any> {
-    return this.evaluationService.evaluateUrl(decodeURIComponent(url));
+  async evaluateUrl(@Param('url') url: string): Promise<any> {
+    return success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
   }
 }

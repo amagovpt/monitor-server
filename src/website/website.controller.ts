@@ -55,6 +55,24 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get('studyMonitor/total')
+  async getNumberOfStudyMonitorUsers(): Promise<any> {
+    return success(await this.websiteService.findNumberOfStudyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('myMonitor/total')
+  async getNumberOfMyMonitorUsers(): Promise<any> {
+    return success(await this.websiteService.findNumberOfMyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('observatory/total')
+  async getNumberOfObservatoryTags(): Promise<any> {
+    return success(await this.websiteService.findNumberOfObservatory());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:name')
   async checkIfWebsiteExists(@Param('name') name: string): Promise<any> {
     return success(!!await this.websiteService.findByName(SqlString.escape(name)));

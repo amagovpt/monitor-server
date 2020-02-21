@@ -35,6 +35,15 @@ export class TagService {
     return this.tagRepository.find({ where: { UserId: IsNull() } });
   }
 
+  async findNumberOfStudyMonitor(): Promise<number> {
+    const manager = getManager();
+    return (await manager.query(`SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE LOWER(u.Type) = "studies" AND t.UserId = u.UserId`))[0].Tags;
+  }
+
+  async findNumberOfObservatory(): Promise<number> {
+    return this.tagRepository.count({ Show_in_Observatorio: 1 });
+  }
+
   async createOne(tag: Tag): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 

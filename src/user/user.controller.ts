@@ -23,8 +23,11 @@ export class UserController {
     user.Type = req.body.type;
     user.Register_Date = new Date();
     user.Unique_Hash = createRandomUniqueHash();
+
+    const websites = JSON.parse(req.body.websites);
+    const transfer = req.body.transfer === 'true';
     
-    const createSuccess = await this.userService.createOne(user);
+    const createSuccess = await this.userService.createOne(user, websites, transfer);
     if (!createSuccess) {
       throw new InternalServerErrorException();
     }
@@ -54,5 +57,17 @@ export class UserController {
   @Get('myMonitor')
   async getAllMyMonitorUsers(): Promise<any> {
     return success(await this.userService.findAllFromMyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('studyMonitor/total')
+  async getNumberOfStudyMonitorUsers(): Promise<any> {
+    return success(await this.userService.findNumberOfStudyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('myMonitor/total')
+  async getNumberOfMyMonitorUsers(): Promise<any> {
+    return success(await this.userService.findNumberOfMyMonitor());
   }
 }

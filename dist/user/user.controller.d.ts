@@ -8,4 +8,6 @@ export declare class UserController {
     checkIfUsernameExists(username: string): Promise<boolean>;
     getAllNonAdminUsers(): Promise<any>;
     getAllMyMonitorUsers(): Promise<any>;
+    getNumberOfStudyMonitorUsers(): Promise<any>;
+    getNumberOfMyMonitorUsers(): Promise<any>;
 }

@@ -7,5 +7,7 @@ export declare class TagService {
     findByTagName(tagName: string): Promise<Tag | undefined>;
     findAll(): Promise<any>;
     findAllOfficial(): Promise<any>;
+    findNumberOfStudyMonitor(): Promise<number>;
+    findNumberOfObservatory(): Promise<number>;
     createOne(tag: Tag): Promise<boolean>;
 }

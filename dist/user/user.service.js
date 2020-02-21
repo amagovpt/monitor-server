@@ -16,6 +16,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
+const website_entity_1 = require("../website/website.entity");
 let UserService = class UserService {
     constructor(userRepository, connection) {
         this.userRepository = userRepository;
@@ -45,13 +46,34 @@ let UserService = class UserService {
     findByUsername(username) {
         return this.userRepository.findOne({ where: { Username: username } });
     }
-    async createOne(user) {
+    findNumberOfStudyMonitor() {
+        return this.userRepository.count({ Type: 'studies' });
+    }
+    findNumberOfMyMonitor() {
+        return this.userRepository.count({ Type: 'monitor' });
+    }
+    async createOne(user, websites, transfer) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            await queryRunner.manager.save(user);
+            const insertUser = await queryRunner.manager.save(user);
+            if (user.Type === 'monitor' && websites.length > 0) {
+                await queryRunner.manager.update(website_entity_1.Website, { WebsiteId: typeorm_2.In(websites) }, { UserId: insertUser.UserId });
+                if (transfer) {
+                    await queryRunner.manager.query(`UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
+            SET 
+              p.Show_In = "111",
+              e.Show_To = "11" 
+            WHERE
+              d.WebsiteId IN (?) AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              p.Show_In LIKE "101" AND
+              e.PageId = p.PageId`, [websites]);
+                }
+            }
             await queryRunner.commitTransaction();
         }
         catch (err) {

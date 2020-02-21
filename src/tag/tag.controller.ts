@@ -43,4 +43,16 @@ export class TagController {
   async getAllOfficialTags(): Promise<any> {
     return success(await this.tagService.findAllOfficial());
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('studyMonitor/total')
+  async getNumberOfStudyMonitorUsers(): Promise<any> {
+    return success(await this.tagService.findNumberOfStudyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('observatory/total')
+  async getNumberOfObservatoryTags(): Promise<any> {
+    return success(await this.tagService.findNumberOfObservatory());
+  }
 }
