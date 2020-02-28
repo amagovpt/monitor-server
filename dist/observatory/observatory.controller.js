@@ -11,12 +11,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const page_service_1 = require("../page/page.service");
+const response_1 = require("../lib/response");
 let ObservatoryController = class ObservatoryController {
     constructor(pageService) {
         this.pageService = pageService;
     }
-    getData() {
-        return this.pageService.getObservatoryData();
+    async getData() {
+        return response_1.success(await this.pageService.getObservatoryData());
     }
 };
 __decorate([

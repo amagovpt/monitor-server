@@ -2570,7 +2570,7 @@
         "signature": "8c91213bbf0b87bbade7f5998d846b0759cd054ba8f3e5044ee7ec7453dde7c2"
       },
       "../src/observatory/observatory.controller.ts": {
-        "version": "e5f17ca539ba56a563d3487317003210e7bed186f0d1dd770a59b271e6c577a3",
+        "version": "615d847ae4007f1939a4659a4e5c5c7354b5fd8a5311d1d4193609c3a16fe825",
         "signature": "843e8eddde7931dc40d63d4aa83a0f68ee75c93557766b90735823f91f91f6a0"
       },
       "../src/page/page.controller.ts": {
@@ -8464,6 +8464,7 @@
       "../src/observatory/observatory.controller.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../src/page/page.service.ts",
+        "../src/lib/response.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.5/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -16049,7 +16050,6 @@
       "../src/user/user.module.ts",
       "../src/page/page.entity.ts",
       "../src/page/page.service.ts",
-      "../src/observatory/observatory.controller.ts",
       "../src/page/page.controller.ts",
       "../src/evaluation/evaluation.entity.ts",
       "../node_modules/htmlparser2/lib/tokenizer.d.ts",
@@ -16127,6 +16127,7 @@
       "../src/admin/admin.module.ts",
       "../src/monitor/monitor.module.ts",
       "../src/studies/studies.module.ts",
+      "../src/stamp/stamp.service.ts",
       "../src/stamp/stamp.controller.ts",
       "../src/stamp/stamp.module.ts",
       "../src/app.module.ts",
@@ -16173,7 +16174,7 @@
       "../node_modules/@types/webpack/index.d.ts",
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
-      "../src/stamp/stamp.service.ts"
+      "../src/observatory/observatory.controller.ts"
     ]
   },
   "version": "3.8.2"
