@@ -43,6 +43,46 @@ let EvaluationService = class EvaluationService {
         }
         return !hasError;
     }
+    async findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url) {
+        const manager = typeorm_2.getManager();
+        const evaluation = (await manager.query(`SELECT e.* 
+      FROM
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Uri = ? AND 
+        e.PageId = p.PageId AND 
+        e.Show_To LIKE '_1'
+      ORDER BY e.Evaluation_Date DESC 
+      LIMIT 1`, [website, userId, url]))[0];
+        if (evaluation) {
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            return {
+                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                data: {
+                    title: evaluation.Title,
+                    score: evaluation.Score,
+                    rawUrl: url,
+                    tot: tot,
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+                    elems: tot.elems,
+                    date: evaluation.Evaluation_Date
+                }
+            };
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
 };
 EvaluationService = __decorate([
     common_1.Injectable(),

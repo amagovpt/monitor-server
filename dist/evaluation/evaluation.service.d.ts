@@ -6,4 +6,5 @@ export declare class EvaluationService {
     constructor(evaluationRepository: Repository<Evaluation>, connection: Connection);
     evaluateUrl(url: string): Promise<any>;
     createOne(evaluation: Evaluation): Promise<any>;
+    findMyMonitorUserWebsitePageNewestEvaluation(userId: number, website: string, url: string): Promise<any>;
 }

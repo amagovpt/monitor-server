@@ -13,26 +13,30 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const evaluation_service_1 = require("../evaluation/evaluation.service");
+const passport_1 = require("@nestjs/passport");
+const evaluation_service_1 = require("./evaluation.service");
 const response_1 = require("../lib/response");
-let AmpController = class AmpController {
+let EvaluationController = class EvaluationController {
     constructor(evaluationService) {
         this.evaluationService = evaluationService;
     }
-    async evaluateUrl(url) {
-        return response_1.success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
+    async removeMyMonitorUserWebsitePages(req, website, url) {
+        const userId = req.user.userId;
+        url = decodeURIComponent(url);
+        return response_1.success(await this.evaluationService.findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url));
     }
 };
 __decorate([
-    common_1.Get('eval/:url'),
-    __param(0, common_1.Param('url')),
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Get('myMonitor/:website/:url'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('website')), __param(2, common_1.Param('url')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
-], AmpController.prototype, "evaluateUrl", null);
-AmpController = __decorate([
-    common_1.Controller('amp'),
+], EvaluationController.prototype, "removeMyMonitorUserWebsitePages", null);
+EvaluationController = __decorate([
+    common_1.Controller('evaluation'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
-], AmpController);
-exports.AmpController = AmpController;
-//# sourceMappingURL=amp.controller.js.map
+], EvaluationController);
+exports.EvaluationController = EvaluationController;
+//# sourceMappingURL=evaluation.controller.js.map

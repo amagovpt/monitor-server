@@ -10,13 +10,15 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const evaluation_service_1 = require("./evaluation.service");
 const evaluation_entity_1 = require("./evaluation.entity");
+const evaluation_controller_1 = require("./evaluation.controller");
 let EvaluationModule = class EvaluationModule {
 };
 EvaluationModule = __decorate([
     common_1.Module({
         imports: [typeorm_1.TypeOrmModule.forFeature([evaluation_entity_1.Evaluation])],
         exports: [evaluation_service_1.EvaluationService],
-        providers: [evaluation_service_1.EvaluationService]
+        providers: [evaluation_service_1.EvaluationService],
+        controllers: [evaluation_controller_1.EvaluationController]
     })
 ], EvaluationModule);
 exports.EvaluationModule = EvaluationModule;

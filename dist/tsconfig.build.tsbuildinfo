@@ -2674,8 +2674,8 @@
         "signature": "711d7a64f99019a5ef66ffd25ab4ef09896f2fa1293884cf1936dd295001a199"
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "4d9eb446159eaaf4c0ce82034c3beb84a690f4f6ebe28881e5367a23eb8b38b1",
-        "signature": "cf3814381b07694e7047441173d752587309fb5c86421776a68242361c023d83"
+        "version": "3c9951abb78a41893935a96bc4149d2b71c0e21d64bb8410f7fc9786b72edd26",
+        "signature": "b9d36fb1bd161caf2f46c3d3553cb39637d104ee68d7b23778ed87321768ab7b"
       },
       "../src/page/page.service.ts": {
         "version": "f354d5a6dbec9f85cfb30a7e8bede6b755b72ec72c8b92108503451d1dd53c3a",
@@ -2689,8 +2689,12 @@
         "version": "6ec02ee20c85837bbc1959f1d042394fb33890a0397b9fe46f7a53d515b0970a",
         "signature": "89d620ff6d00b9b31c83c3f3e2c0f04bc6b687079d9aadb0f2cfd186f0f98a3c"
       },
+      "../src/evaluation/evaluation.controller.ts": {
+        "version": "3d951483974da57d39020c678fe4678317db3e9e34238685a5bae633d998af35",
+        "signature": "077f27b88927ac9373eb04eacf941a0c0ba7c1b62bea7a01b44137ab31ed8f4c"
+      },
       "../src/evaluation/evaluation.module.ts": {
-        "version": "02037311241678c58f2e24782e53457770e58af08965f31a7887b43d0f296dd8",
+        "version": "24ed7a7e84a7987324da55b1e94870aa8e8f2dbd8731c8b191e85a9a1206661e",
         "signature": "5e28f4580a40ee88558125d89d8aef6c3e30621809b85c9e3e5a05947e61886c"
       },
       "../node_modules/@nestjs/websockets/adapters/ws-adapter.d.ts": {
@@ -8713,11 +8717,22 @@
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.5/util.d.ts"
       ],
+      "../src/evaluation/evaluation.controller.ts": [
+        "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/passport/index.d.ts",
+        "../src/evaluation/evaluation.service.ts",
+        "../src/lib/response.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.5/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.5/util.d.ts"
+      ],
       "../src/evaluation/evaluation.module.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@nestjs/typeorm/index.d.ts",
         "../src/evaluation/evaluation.service.ts",
         "../src/evaluation/evaluation.entity.ts",
+        "../src/evaluation/evaluation.controller.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.5/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -14904,6 +14919,9 @@
       "../src/page/page.controller.ts": [
         "../src/page/page.service.ts"
       ],
+      "../src/evaluation/evaluation.controller.ts": [
+        "../src/evaluation/evaluation.service.ts"
+      ],
       "../node_modules/@nestjs/websockets/adapters/ws-adapter.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@nestjs/common/interfaces/index.d.ts",
@@ -16074,6 +16092,7 @@
       "../src/auth/auth.module.ts",
       "../src/tag/tag.entity.ts",
       "../src/website/website.entity.ts",
+      "../src/user/user.service.ts",
       "../src/user/user.controller.ts",
       "../src/user/user.module.ts",
       "../src/page/page.entity.ts",
@@ -16103,10 +16122,10 @@
       "../src/evaluation/testsColors.ts",
       "../src/evaluation/mapping.ts",
       "../src/evaluation/middleware.ts",
-      "../src/evaluation/evaluation.service.ts",
       "../src/page/page.service.ts",
       "../src/observatory/observatory.controller.ts",
       "../src/page/page.controller.ts",
+      "../src/evaluation/evaluation.controller.ts",
       "../src/evaluation/evaluation.module.ts",
       "../node_modules/@nestjs/websockets/adapters/ws-adapter.d.ts",
       "../node_modules/@nestjs/websockets/adapters/index.d.ts",
@@ -16203,7 +16222,7 @@
       "../node_modules/@types/webpack/index.d.ts",
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
-      "../src/user/user.service.ts"
+      "../src/evaluation/evaluation.service.ts"
     ]
   },
   "version": "3.8.2"
