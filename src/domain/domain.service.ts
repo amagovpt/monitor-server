@@ -56,4 +56,19 @@ export class DomainService {
   async findByUrl(url: string): Promise<any> {
     return this.domainRepository.findOne({ where: { Url: url }});
   }
+
+  async findMyMonitorUserWebsiteDomain(userId: number, website: string): Promise<any> {
+    const manager = getManager();
+    const domain = await manager.query(`SELECT d.Url FROM 
+        Website as w,
+        Domain as d
+      WHERE
+        w.UserId = ? AND
+        LOWER(w.Name) = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+      LIMIT 1`, [userId, website]);
+
+    return domain ? domain[0].Url : null;
+  }
 }

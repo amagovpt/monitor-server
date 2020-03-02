@@ -15,8 +15,8 @@ export class WebsiteController {
   async createUser(@Request() req: any): Promise<any> {
     const website = new Website();
     website.Name = req.body.name;
-    website.UserId = parseInt(SqlString.escape(req.body.userId || null));
-    website.EntityId = parseInt(SqlString.escape(req.body.entityId || null));
+    website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
+    website.EntityId = parseInt(SqlString.escape(req.body.entityId)) || null;
     website.Creation_Date = new Date();
 
     const domain = decodeURIComponent(req.body.domain);
@@ -76,5 +76,11 @@ export class WebsiteController {
   @Get('exists/:name')
   async checkIfWebsiteExists(@Param('name') name: string): Promise<any> {
     return success(!!await this.websiteService.findByName(SqlString.escape(name)));
+  }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Get('myMonitor')
+  async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
+    return success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
   }
 }

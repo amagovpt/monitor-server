@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager, In } from 'typeorm';
 import { User } from './user.entity';
 import { Website } from '../website/website.entity';
+import { comparePasswordHash, generatePasswordHash } from '../lib/security';
 
 @Injectable()
 export class UserService {
@@ -12,6 +13,40 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly connection: Connection
   ) {}
+
+  async changePassword(userId: number, password: string, newPassword: string): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const user = await this.userRepository.findOne({ where: { UserId: userId } });
+      if (user && await comparePasswordHash(password, user.Password)) {
+        const newPasswordHash = await generatePasswordHash(newPassword);
+        await queryRunner.manager.update(User, { UserId: userId }, { Password: newPasswordHash });
+      } else {
+        hasError = true;
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    if (hasError) {
+      throw new UnauthorizedException();
+    }
+
+    return true;
+  }
 
   async findAllNonAdmin(): Promise<User[]> {
     const manager = getManager();

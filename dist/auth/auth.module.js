@@ -16,6 +16,7 @@ const invalid_token_entity_1 = require("./invalid-token.entity");
 const local_strategy_1 = require("./local.strategy");
 const jwt_strategy_1 = require("./jwt.strategy");
 const jwt_admin_strategy_1 = require("./jwt-admin.strategy");
+const jwt_monitor_strategy_1 = require("./jwt-monitor.strategy");
 const constants_1 = require("./constants");
 let AuthModule = class AuthModule {
 };
@@ -30,7 +31,13 @@ AuthModule = __decorate([
             })
         ],
         exports: [auth_service_1.AuthService],
-        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy, jwt_admin_strategy_1.JwtAdminStrategy],
+        providers: [
+            auth_service_1.AuthService,
+            local_strategy_1.LocalStrategy,
+            jwt_strategy_1.JwtStrategy,
+            jwt_admin_strategy_1.JwtAdminStrategy,
+            jwt_monitor_strategy_1.JwtMonitorStrategy
+        ],
         controllers: [auth_controller_1.AuthController]
     })
 ], AuthModule);

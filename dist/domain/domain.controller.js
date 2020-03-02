@@ -29,6 +29,9 @@ let DomainController = class DomainController {
     async checkIfDomainExists(url) {
         return response_1.success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
     }
+    async getMyMonitorUserWebsiteDomain(req, website) {
+        return response_1.success(await this.domainService.findMyMonitorUserWebsiteDomain(req.user.userId, website));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -52,6 +55,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DomainController.prototype, "checkIfDomainExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Get('myMonitor/website/:website'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DomainController.prototype, "getMyMonitorUserWebsiteDomain", null);
 DomainController = __decorate([
     common_1.Controller('domain'),
     __metadata("design:paramtypes", [domain_service_1.DomainService])

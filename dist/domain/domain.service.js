@@ -63,6 +63,19 @@ let DomainService = class DomainService {
     async findByUrl(url) {
         return this.domainRepository.findOne({ where: { Url: url } });
     }
+    async findMyMonitorUserWebsiteDomain(userId, website) {
+        const manager = typeorm_2.getManager();
+        const domain = await manager.query(`SELECT d.Url FROM 
+        Website as w,
+        Domain as d
+      WHERE
+        w.UserId = ? AND
+        LOWER(w.Name) = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+      LIMIT 1`, [userId, website]);
+        return domain ? domain[0].Url : null;
+    }
 };
 DomainService = __decorate([
     common_1.Injectable(),

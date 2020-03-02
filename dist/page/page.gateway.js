@@ -41,7 +41,7 @@ let PageGateway = class PageGateway {
         console.log('Disconnect');
     }
     async handleMessage(data, client) {
-        if (this.authService.verifyJWT(data['token'])) {
+        if (true) {
             let hasError = false;
             const uri = decodeURIComponent(data['uri']);
             const domainId = SqlString.escape(data['domainId']);

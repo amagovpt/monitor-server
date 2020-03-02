@@ -89,6 +89,7 @@ let AuthService = class AuthService {
     }
     async logout(token) {
         const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
         const invalidToken = new invalid_token_entity_1.InvalidToken();
         invalidToken.Token = token;
         invalidToken.Expiration_Date = tomorrow;

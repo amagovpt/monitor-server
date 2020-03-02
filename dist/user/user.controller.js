@@ -22,6 +22,15 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
+    async changeUserPassword(req) {
+        const password = req.body.password;
+        const newPassword = req.body.newPassword;
+        const confirmNewPassword = req.body.confirmPassword;
+        if (newPassword !== confirmNewPassword) {
+            throw new common_1.UnauthorizedException();
+        }
+        return response_1.success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
+    }
     async createUser(req) {
         const user = new user_entity_1.User();
         user.Username = req.body.username;
@@ -58,6 +67,14 @@ let UserController = class UserController {
         return response_1.success(await this.userService.findNumberOfMyMonitor());
     }
 };
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('changePassword'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changeUserPassword", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Post('create'),

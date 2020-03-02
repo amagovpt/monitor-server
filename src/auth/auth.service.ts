@@ -93,7 +93,7 @@ export class AuthService {
 
   async logout(token: string): Promise<any> {
     const tomorrow = new Date();
-    //tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const invalidToken = new InvalidToken();
     invalidToken.Token = token;

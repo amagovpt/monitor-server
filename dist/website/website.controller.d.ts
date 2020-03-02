@@ -11,4 +11,5 @@ export declare class WebsiteController {
     getNumberOfMyMonitorUsers(): Promise<any>;
     getNumberOfObservatoryTags(): Promise<any>;
     checkIfWebsiteExists(name: string): Promise<any>;
+    getMyMonitorUserWebsites(req: any): Promise<any>;
 }

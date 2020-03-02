@@ -4,6 +4,7 @@ export declare class UserService {
     private readonly userRepository;
     private readonly connection;
     constructor(userRepository: Repository<User>, connection: Connection);
+    changePassword(userId: number, password: string, newPassword: string): Promise<any>;
     findAllNonAdmin(): Promise<User[]>;
     findAllFromMyMonitor(): Promise<User[]>;
     findById(id: string): Promise<User>;

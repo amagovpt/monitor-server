@@ -17,10 +17,40 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const website_entity_1 = require("../website/website.entity");
+const security_1 = require("../lib/security");
 let UserService = class UserService {
     constructor(userRepository, connection) {
         this.userRepository = userRepository;
         this.connection = connection;
+    }
+    async changePassword(userId, password, newPassword) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            const user = await this.userRepository.findOne({ where: { UserId: userId } });
+            if (user && await security_1.comparePasswordHash(password, user.Password)) {
+                const newPasswordHash = await security_1.generatePasswordHash(newPassword);
+                await queryRunner.manager.update(user_entity_1.User, { UserId: userId }, { Password: newPasswordHash });
+            }
+            else {
+                hasError = true;
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+            console.log(err);
+        }
+        finally {
+            await queryRunner.release();
+        }
+        if (hasError) {
+            throw new common_1.UnauthorizedException();
+        }
+        return true;
     }
     async findAllNonAdmin() {
         const manager = typeorm_2.getManager();

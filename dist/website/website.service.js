@@ -68,6 +68,19 @@ let WebsiteService = class WebsiteService {
         (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`);
         return websites;
     }
+    async findAllFromMyMonitorUser(userId) {
+        const manager = typeorm_2.getManager();
+        const websites = await manager.query(`SELECT w.*, d.Url as Domain, COUNT(distinct p.PageId) as Pages
+      FROM
+        Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND LOWER(p.Show_In) LIKE '_1%'
+      WHERE
+        w.UserId = ?
+      GROUP BY w.WebsiteId, d.Url`, [userId]);
+        return websites;
+    }
     async findNumberOfStudyMonitor() {
         const manager = typeorm_2.getManager();
         return (await manager.query(`SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE LOWER(u.Type) = "studies" AND w.UserId = u.UserId`))[0].Websites;

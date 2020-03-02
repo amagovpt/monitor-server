@@ -25,4 +25,10 @@ export class DomainController {
   async checkIfDomainExists(@Param('url') url: string): Promise<any> {
     return success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
   }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Get('myMonitor/website/:website')
+  async getMyMonitorUserWebsiteDomain(@Request() req: any, @Param('website') website: string): Promise<any> {
+    return success(await this.domainService.findMyMonitorUserWebsiteDomain(req.user.userId, website));
+  }
 }

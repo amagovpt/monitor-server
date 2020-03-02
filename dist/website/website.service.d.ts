@@ -9,6 +9,7 @@ export declare class WebsiteService {
     findByName(name: string): Promise<any>;
     findAllWithoutUser(): Promise<any>;
     findAllWithoutEntity(): Promise<any>;
+    findAllFromMyMonitorUser(userId: number): Promise<any>;
     findNumberOfStudyMonitor(): Promise<number>;
     findNumberOfMyMonitor(): Promise<number>;
     findNumberOfObservatory(): Promise<number>;

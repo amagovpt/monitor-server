@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
@@ -20,6 +23,20 @@ let PageController = class PageController {
     async getAllPages() {
         return response_1.success(await this.pageService.findAll());
     }
+    async getAllMyMonitorUserWebsitePages(req, website) {
+        return response_1.success(await this.pageService.findAllFromMyMonitorUserWebsite(req.user.userId, website));
+    }
+    async createMyMonitorUserWebsitePages(req) {
+        const website = req.body.website;
+        const domain = req.body.domain;
+        const uris = JSON.parse(req.body.pages);
+        return response_1.success(await this.pageService.createMyMonitorUserWebsitePages(req.user.userId, website, domain, uris));
+    }
+    async removeMyMonitorUserWebsitePages(req) {
+        const website = req.body.website;
+        const ids = JSON.parse(req.body.pagesId);
+        return response_1.success(await this.pageService.removeMyMonitorUserWebsitePages(req.user.userId, website, ids));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -28,6 +45,30 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "getAllPages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Get('myMonitor/website/:website'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "getAllMyMonitorUserWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('myMonitor/create'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "createMyMonitorUserWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('myMonitor/remove'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "removeMyMonitorUserWebsitePages", null);
 PageController = __decorate([
     common_1.Controller('page'),
     __metadata("design:paramtypes", [page_service_1.PageService])

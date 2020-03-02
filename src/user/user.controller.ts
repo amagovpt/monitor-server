@@ -1,4 +1,4 @@
-import { Controller, InternalServerErrorException, Post, Get, Request, Param, UseGuards } from '@nestjs/common';
+import { Controller, InternalServerErrorException, Post, Get, Request, Param, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from './user.entity';
@@ -11,6 +11,20 @@ export class UserController {
   constructor(
     private readonly userService: UserService
   ) { }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Post('changePassword')
+  async changeUserPassword(@Request() req: any): Promise<any> {
+    const password = req.body.password;
+    const newPassword = req.body.newPassword;
+    const confirmNewPassword = req.body.confirmPassword;
+
+    if (newPassword !== confirmNewPassword) {
+      throw new UnauthorizedException();
+    }
+
+    return success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
+  }
 
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')

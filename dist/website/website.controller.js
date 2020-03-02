@@ -32,8 +32,8 @@ let WebsiteController = class WebsiteController {
     async createUser(req) {
         const website = new website_entity_1.Website();
         website.Name = req.body.name;
-        website.UserId = parseInt(SqlString.escape(req.body.userId || null));
-        website.EntityId = parseInt(SqlString.escape(req.body.entityId || null));
+        website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
+        website.EntityId = parseInt(SqlString.escape(req.body.entityId)) || null;
         website.Creation_Date = new Date();
         const domain = decodeURIComponent(req.body.domain);
         const tags = JSON.parse(req.body.tags).map((tag) => SqlString.escape(tag));
@@ -66,6 +66,9 @@ let WebsiteController = class WebsiteController {
     }
     async checkIfWebsiteExists(name) {
         return response_1.success(!!await this.websiteService.findByName(SqlString.escape(name)));
+    }
+    async getMyMonitorUserWebsites(req) {
+        return response_1.success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
     }
 };
 __decorate([
@@ -133,6 +136,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "checkIfWebsiteExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Get('myMonitor'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getMyMonitorUserWebsites", null);
 WebsiteController = __decorate([
     common_1.Controller('website'),
     __metadata("design:paramtypes", [website_service_1.WebsiteService])

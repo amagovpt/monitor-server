@@ -8,6 +8,7 @@ import { InvalidToken } from './invalid-token.entity';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAdminStrategy } from './jwt-admin.strategy';
+import { JwtMonitorStrategy } from './jwt-monitor.strategy';
 import { jwtConstants } from './constants';
 
 @Module({
@@ -20,7 +21,13 @@ import { jwtConstants } from './constants';
     })
   ],
   exports: [AuthService],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtAdminStrategy],
+  providers: [
+    AuthService, 
+    LocalStrategy, 
+    JwtStrategy, 
+    JwtAdminStrategy, 
+    JwtMonitorStrategy
+  ],
   controllers: [AuthController]
 })
 export class AuthModule {}
