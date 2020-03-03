@@ -20,10 +20,22 @@ let EvaluationController = class EvaluationController {
     constructor(evaluationService) {
         this.evaluationService = evaluationService;
     }
-    async removeMyMonitorUserWebsitePages(req, website, url) {
+    async getMyMonitorWebsitePageEvaluation(req, website, url) {
         const userId = req.user.userId;
         url = decodeURIComponent(url);
         return response_1.success(await this.evaluationService.findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url));
+    }
+    async evaluateMyMonitorWebsitePage(req) {
+        const userId = req.user.userId;
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.evaluationService.findPageFromUrl(url);
+        const isUserPage = await this.evaluationService.isPageFromUser(userId, page.PageId);
+        if (isUserPage) {
+            return response_1.success(await this.evaluationService.evaluatePageAndSave(page.PageId, url, '01'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
     }
 };
 __decorate([
@@ -33,7 +45,15 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
-], EvaluationController.prototype, "removeMyMonitorUserWebsitePages", null);
+], EvaluationController.prototype, "getMyMonitorWebsitePageEvaluation", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('myMonitor/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "evaluateMyMonitorWebsitePage", null);
 EvaluationController = __decorate([
     common_1.Controller('evaluation'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
