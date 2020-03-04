@@ -16,11 +16,13 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
+const tag_entity_1 = require("../tag/tag.entity");
 const website_entity_1 = require("../website/website.entity");
 const security_1 = require("../lib/security");
 let UserService = class UserService {
-    constructor(userRepository, connection) {
+    constructor(userRepository, tagRepository, connection) {
         this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
         this.connection = connection;
     }
     async changePassword(userId, password, newPassword) {
@@ -82,6 +84,9 @@ let UserService = class UserService {
     findNumberOfMyMonitor() {
         return this.userRepository.count({ Type: 'monitor' });
     }
+    async findStudyMonitorUserTagByName(userId, name) {
+        return await this.tagRepository.findOne({ where: { Name: name, UserId: userId } });
+    }
     async createOne(user, websites, transfer) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -115,14 +120,13 @@ let UserService = class UserService {
         }
         return !hasError;
     }
-    async remove(id) {
-        await this.userRepository.delete(id);
-    }
 };
 UserService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(user_entity_1.User)),
+    __param(1, typeorm_1.InjectRepository(tag_entity_1.Tag)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Connection])
 ], UserService);
 exports.UserService = UserService;

@@ -12,7 +12,7 @@ export class UserController {
     private readonly userService: UserService
   ) { }
 
-  @UseGuards(AuthGuard('jwt-monitor'))
+  @UseGuards(AuthGuard('jwt'))
   @Post('changePassword')
   async changeUserPassword(@Request() req: any): Promise<any> {
     const password = req.body.password;
@@ -83,5 +83,15 @@ export class UserController {
   @Get('myMonitor/total')
   async getNumberOfMyMonitorUsers(): Promise<any> {
     return success(await this.userService.findNumberOfMyMonitor());
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('tag/nameExists/:name')
+  async checkIfUserTagNameExists(@Request() req: any, @Param('name') name: string): Promise<any> {
+    if (name) {
+      return success(!!await this.userService.findStudyMonitorUserTagByName(req.user.userId, name));
+    } else {
+      return success(false);
+    }
   }
 }

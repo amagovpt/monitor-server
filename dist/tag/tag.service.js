@@ -16,6 +16,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const tag_entity_1 = require("./tag.entity");
+const website_entity_1 = require("../website/website.entity");
+const domain_entity_1 = require("../domain/domain.entity");
 let TagService = class TagService {
     constructor(tagRepository, connection) {
         this.tagRepository = tagRepository;
@@ -47,14 +49,101 @@ let TagService = class TagService {
     async findNumberOfObservatory() {
         return this.tagRepository.count({ Show_in_Observatorio: 1 });
     }
-    async createOne(tag) {
+    async findAllFromStudyMonitorUser(userId) {
+        const manager = typeorm_2.getManager();
+        const tags = await manager.query(`SELECT 
+        distinct t.*, 
+        COUNT(distinct tw.WebsiteId) as Websites,
+        COUNT(distinct dp.PageId) as Pages 
+      FROM 
+        Tag as t
+        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = tw.WebsiteId
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+      WHERE 
+        t.UserId = ?
+      GROUP BY t.TagId`, [userId]);
+        return tags;
+    }
+    async createOne(tag, websites) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            await queryRunner.manager.save(tag);
+            const insertTag = await queryRunner.manager.save(tag);
+            for (const websiteId of websites || []) {
+                await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.TagId, websiteId]);
+            }
             await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async createUserTag(tag, type, tagsId) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            if (type === 'official' || type === 'user') {
+                const insertTag = await queryRunner.manager.save(tag);
+                if (type === 'official') {
+                    let websites = null;
+                    if (tagsId.length > 1) {
+                        websites = await queryRunner.manager.query(`SELECT w.Name, d.DomainId, d.Url, d.Start_Date
+              FROM 
+                TagWebsite as tw
+                LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
+                LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+              WHERE 
+                tw.TagId IN (?)
+              GROUP BY
+                w.Name, d.DomainId, d.Url, d.Start_Date
+              HAVING
+                COUNT(tw.WebsiteId) = ?`, [tagsId, tagsId.length]);
+                    }
+                    else {
+                        websites = await queryRunner.manager.query(`SELECT w.Name, d.DomainId, d.Url, d.Start_Date
+              FROM 
+                TagWebsite as tw
+                LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
+                LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+              WHERE 
+                tw.TagId = ?
+              GROUP BY
+                w.Name, d.DomainId, d.Url, d.Start_Date`, [tagsId[0]]);
+                    }
+                    for (const website of websites || []) {
+                        const newWebsite = new website_entity_1.Website();
+                        newWebsite.Name = website.Name;
+                        newWebsite.UserId = tag.UserId;
+                        newWebsite.Creation_Date = tag.Creation_Date;
+                        const insertWebsite = await queryRunner.manager.save(newWebsite);
+                        const newDomain = new domain_entity_1.Domain();
+                        newDomain.WebsiteId = insertWebsite.WebsiteId;
+                        newDomain.Url = website.Url;
+                        newDomain.Start_Date = website.Start_Date;
+                        newDomain.Active = 1;
+                        const insertDomain = await queryRunner.manager.save(newDomain);
+                        const pages = await queryRunner.manager.query(`SELECT dp.* FROM DomainPage as dp, Page as p WHERE dp.DomainId = ? AND p.PageId = dp.PageId AND p.Show_In LIKE "1_1"`, [website.DomainId]);
+                        for (const page of pages || []) {
+                            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
+                        }
+                        await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.TagId, insertWebsite.WebsiteId]);
+                    }
+                }
+                await queryRunner.commitTransaction();
+            }
+            else {
+                hasError = true;
+            }
         }
         catch (err) {
             await queryRunner.rollbackTransaction();

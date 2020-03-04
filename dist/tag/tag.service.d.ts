@@ -9,5 +9,7 @@ export declare class TagService {
     findAllOfficial(): Promise<any>;
     findNumberOfStudyMonitor(): Promise<number>;
     findNumberOfObservatory(): Promise<number>;
-    createOne(tag: Tag): Promise<boolean>;
+    findAllFromStudyMonitorUser(userId: number): Promise<any>;
+    createOne(tag: Tag, websites: number[]): Promise<boolean>;
+    createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
 }

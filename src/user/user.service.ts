@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager, In } from 'typeorm';
 import { User } from './user.entity';
+import { Tag } from '../tag/tag.entity';
 import { Website } from '../website/website.entity';
 import { comparePasswordHash, generatePasswordHash } from '../lib/security';
 
@@ -11,6 +12,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
   ) {}
 
@@ -85,6 +88,10 @@ export class UserService {
     return this.userRepository.count({ Type: 'monitor' });
   }
 
+  async findStudyMonitorUserTagByName(userId: number, name: string): Promise<any> {
+    return await this.tagRepository.findOne({ where: { Name: name, UserId: userId }});
+  }
+
   async createOne(user: User, websites: string[], transfer: boolean): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
@@ -123,9 +130,5 @@ export class UserService {
     }
 
     return !hasError;
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.userRepository.delete(id);
   }
 }

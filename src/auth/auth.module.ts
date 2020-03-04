@@ -9,6 +9,7 @@ import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { JwtMonitorStrategy } from './jwt-monitor.strategy';
+import { JwtStudyStrategy } from './jwt-study.strategy';
 import { jwtConstants } from './constants';
 
 @Module({
@@ -26,7 +27,8 @@ import { jwtConstants } from './constants';
     LocalStrategy, 
     JwtStrategy, 
     JwtAdminStrategy, 
-    JwtMonitorStrategy
+    JwtMonitorStrategy,
+    JwtStudyStrategy
   ],
   controllers: [AuthController]
 })

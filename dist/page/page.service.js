@@ -49,6 +49,7 @@ let PageService = class PageService {
         e.Title,
         e.Score,
         e.Errors,
+        e.Tot,
         e.A,
         e.AA,
         e.AAA,

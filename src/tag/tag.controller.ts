@@ -11,13 +11,36 @@ export class TagController {
 
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
-  async createTag(@Request() req: any): Promise<any> {
+  async createOfficialTag(@Request() req: any): Promise<any> {
     const tag = new Tag();
     tag.Name = req.body.name;
     tag.Show_in_Observatorio = req.body.observatory;
     tag.Creation_Date = new Date();
+
+    const websites = JSON.parse(req.body.websites);
     
-    const createSuccess = await this.tagService.createOne(tag);
+    const createSuccess = await this.tagService.createOne(tag, websites);
+
+    if (!createSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('user/create')
+  async createStudyMonitorUserTag(@Request() req: any): Promise<any> {
+    const tag = new Tag();
+    tag.Name = req.body.user_tag_name;
+    tag.UserId = req.user.userId;
+    tag.Show_in_Observatorio = 0;
+    tag.Creation_Date = new Date();
+
+    const type = req.body.type;
+    const tagsId = JSON.parse(req.body.tagsId);
+
+    const createSuccess = this.tagService.createUserTag(tag, type, tagsId);
 
     if (!createSuccess) {
       throw new InternalServerErrorException();
@@ -38,7 +61,7 @@ export class TagController {
     return success(await this.tagService.findAll());
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
+  @UseGuards(AuthGuard('jwt'), AuthGuard('jwt-study'))
   @Get('allOfficial')
   async getAllOfficialTags(): Promise<any> {
     return success(await this.tagService.findAllOfficial());
@@ -54,5 +77,11 @@ export class TagController {
   @Get('observatory/total')
   async getNumberOfObservatoryTags(): Promise<any> {
     return success(await this.tagService.findNumberOfObservatory());
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor')
+  async getStudyMonitorUserTags(@Request() req: any): Promise<any> {
+    return success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
   }
 }

@@ -66,9 +66,17 @@ let UserController = class UserController {
     async getNumberOfMyMonitorUsers() {
         return response_1.success(await this.userService.findNumberOfMyMonitor());
     }
+    async checkIfUserTagNameExists(req, name) {
+        if (name) {
+            return response_1.success(!!await this.userService.findStudyMonitorUserTagByName(req.user.userId, name));
+        }
+        else {
+            return response_1.success(false);
+        }
+    }
 };
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.UseGuards(passport_1.AuthGuard('jwt')),
     common_1.Post('changePassword'),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
@@ -127,6 +135,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getNumberOfMyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('tag/nameExists/:name'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('name')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "checkIfUserTagNameExists", null);
 UserController = __decorate([
     common_1.Controller('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

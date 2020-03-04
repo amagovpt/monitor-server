@@ -11,4 +11,5 @@ export declare class UserController {
     getAllMyMonitorUsers(): Promise<any>;
     getNumberOfStudyMonitorUsers(): Promise<any>;
     getNumberOfMyMonitorUsers(): Promise<any>;
+    checkIfUserTagNameExists(req: any, name: string): Promise<any>;
 }
