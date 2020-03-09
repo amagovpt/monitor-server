@@ -76,6 +76,24 @@ let DomainService = class DomainService {
       LIMIT 1`, [userId, website]);
         return domain ? domain[0].Url : null;
     }
+    async findStudyMonitorUserTagWebsiteDomain(userId, tag, website) {
+        const manager = typeorm_2.getManager();
+        const domain = await manager.query(`SELECT d.Url FROM 
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.UserId = ? AND
+        LOWER(w.Name) = ? AND
+        d.WebsiteId = w.WebsiteId
+      LIMIT 1`, [tag.toLowerCase(), userId, userId, website.toLowerCase()]);
+        return domain ? domain[0].Url : null;
+    }
 };
 DomainService = __decorate([
     common_1.Injectable(),

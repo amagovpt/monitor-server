@@ -10,6 +10,9 @@ export declare class TagService {
     findNumberOfStudyMonitor(): Promise<number>;
     findNumberOfObservatory(): Promise<number>;
     findAllFromStudyMonitorUser(userId: number): Promise<any>;
+    findStudyMonitorUserTagData(userId: number, tag: string): Promise<any>;
+    findStudyMonitorUserTagWebsitesPagesData(userId: number, tag: string, website: string): Promise<any>;
     createOne(tag: Tag, websites: number[]): Promise<boolean>;
     createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
+    removeUserTag(userId: number, tagsId: number[]): Promise<any>;
 }

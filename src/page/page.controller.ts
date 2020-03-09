@@ -36,4 +36,29 @@ export class PageController {
     const ids = JSON.parse(req.body.pagesId);
     return success(await this.pageService.removeMyMonitorUserWebsitePages(req.user.userId, website, ids));
   }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag/website/:website')
+  async getStudyMonitorUserTagWebsitePages(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
+    return success(await this.pageService.findStudyMonitorUserTagWebsitePages(req.user.userId, tag, website));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/create')
+  async createStudyMonitorUserTagWebsitePages(@Request() req: any): Promise<any> {
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const domain = req.body.domain;
+    const uris = JSON.parse(req.body.pages).map(page => decodeURIComponent(page));
+    return success(await this.pageService.createStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, domain, uris));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/remove')
+  async removeStudyMonitorUserTagWebsitePages(@Request() req: any): Promise<any> {
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const pagesId = JSON.parse(req.body.pagesId);
+    return success(await this.pageService.removeStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, pagesId));
+  }
 }

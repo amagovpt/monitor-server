@@ -32,6 +32,9 @@ let DomainController = class DomainController {
     async getMyMonitorUserWebsiteDomain(req, website) {
         return response_1.success(await this.domainService.findMyMonitorUserWebsiteDomain(req.user.userId, website));
     }
+    async getStudyMonitorUserTagWebsiteDomain(req, tag, website) {
+        return response_1.success(await this.domainService.findStudyMonitorUserTagWebsiteDomain(req.user.userId, tag, website));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -63,6 +66,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DomainController.prototype, "getMyMonitorUserWebsiteDomain", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/tag/:tag/website/:website'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], DomainController.prototype, "getStudyMonitorUserTagWebsiteDomain", null);
 DomainController = __decorate([
     common_1.Controller('domain'),
     __metadata("design:paramtypes", [domain_service_1.DomainService])

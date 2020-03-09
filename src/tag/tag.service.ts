@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager, IsNull } from 'typeorm';
+import { Connection, Repository, getManager, IsNull, In } from 'typeorm';
 import { Tag } from './tag.entity';
 import { Website } from '../website/website.entity';
 import { Domain } from '../domain/domain.entity';
@@ -62,6 +62,76 @@ export class TagService {
       GROUP BY t.TagId`, [userId]);
 
     return tags;
+  }
+
+  async findStudyMonitorUserTagData(userId: number, tag: string): Promise<any> {
+    const manager = getManager();
+    const pages = await manager.query(`SELECT
+        w.WebsiteId,
+        w.Name,
+        d.Url,
+        p.Uri,
+        e.Score,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, userId]);
+
+    return pages;
+  }
+
+  async findStudyMonitorUserTagWebsitesPagesData(userId: number, tag: string, website: string): Promise<any> {
+    const manager = getManager();
+    const pages = await manager.query(`SELECT 
+        distinct p.*,
+        e.Score,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+
+    return pages;
   }
 
   async createOne(tag: Tag, websites: number[]): Promise<boolean> {
@@ -156,6 +226,36 @@ export class TagService {
       } else {
         hasError = true;
       }
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async removeUserTag(userId: number, tagsId: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const id of tagsId || []) {
+        const relations = await queryRunner.manager.query(`SELECT * FROM TagWebsite WHERE TagId = ? AND WebsiteId <> -1`, [id]);
+        if (relations.length > 0) {
+          const websitesId = relations.map(tw => tw.WebsiteId);
+          await queryRunner.manager.delete(Website, { WebsiteId: In(websitesId) });
+        }
+      }
+      await queryRunner.manager.delete(Tag, { TagId: In(tagsId) });
+
+      await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();

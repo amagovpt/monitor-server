@@ -95,6 +95,27 @@ export class EvaluationService {
     }
   }
 
+  async savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string): Promise<any> {
+    const newEvaluation = new Evaluation();
+    newEvaluation.PageId = pageId;
+    newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+    newEvaluation.Score = evaluation.data.score;
+    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
+    newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
+    newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
+    newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
+    
+    const conform = evaluation.data.conform.split('@');
+    
+    newEvaluation.A = conform[0];
+    newEvaluation.AA = conform[1];
+    newEvaluation.AAA = conform[2];
+    newEvaluation.Evaluation_Date = evaluation.data.date;
+    newEvaluation.Show_To = showTo;
+
+    await queryRunner.manager.save(newEvaluation);
+  }
+
   async findMyMonitorUserWebsitePageNewestEvaluation(userId: number, website: string, url: string): Promise<any> {
     
     const manager = getManager();

@@ -29,7 +29,7 @@ let WebsiteController = class WebsiteController {
     constructor(websiteService) {
         this.websiteService = websiteService;
     }
-    async createUser(req) {
+    async createWebsite(req) {
         const website = new website_entity_1.Website();
         website.Name = req.body.name;
         website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
@@ -70,6 +70,54 @@ let WebsiteController = class WebsiteController {
     async getMyMonitorUserWebsites(req) {
         return response_1.success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
     }
+    async getStudyMonitorUserTagWebsites(req, tag) {
+        const userId = req.user.userId;
+        return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+    }
+    async getStudyMonitorUserOtherTagsWebsites(req, tag) {
+        const userId = req.user.userId;
+        return response_1.success(await this.websiteService.findAllFromStudyMonitorUserOtherTagsWebsites(userId, tag));
+    }
+    async checkIfStudyMonitorUserTagWebsiteNameExists(req, tag, website) {
+        const userId = req.user.userId;
+        return response_1.success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByName(userId, tag, website));
+    }
+    async checkIfStudyMonitorUserTagWebsiteDomainExists(req, tag, domain) {
+        const userId = req.user.userId;
+        return response_1.success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByDomain(userId, tag, domain));
+    }
+    async linkStudyMonitorUserTagWebsite(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const websitesId = JSON.parse(req.body.websitesId);
+        const linkSuccess = await this.websiteService.linkStudyMonitorUserTagWebsite(userId, tag, websitesId);
+        if (!linkSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+    }
+    async createStudyMonitorUserTagWebsite(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const websiteName = req.body.name;
+        const domain = decodeURIComponent(req.body.domain);
+        const pages = JSON.parse(req.body.pages).map((page) => decodeURIComponent(page));
+        const createSuccess = await this.websiteService.createStudyMonitorUserTagWebsite(userId, tag, websiteName, domain, pages);
+        if (!createSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+    }
+    async removeStudyMonitorUserTagWebsite(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const websitesId = JSON.parse(req.body.websitesId);
+        const removeSuccess = await this.websiteService.removeStudyMonitorUserTagWebsite(userId, tag, websitesId);
+        if (!removeSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -78,7 +126,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], WebsiteController.prototype, "createUser", null);
+], WebsiteController.prototype, "createWebsite", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),
@@ -144,6 +192,62 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getMyMonitorUserWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/tag/:tag'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getStudyMonitorUserTagWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/otherTags/:tag'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getStudyMonitorUserOtherTagsWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/tag/:tag/website/nameExists/:website'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "checkIfStudyMonitorUserTagWebsiteNameExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/tag/:tag/website/domainExists/:domain'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('domain')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "checkIfStudyMonitorUserTagWebsiteDomainExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/link'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "linkStudyMonitorUserTagWebsite", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/create'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "createStudyMonitorUserTagWebsite", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/remove'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "removeStudyMonitorUserTagWebsite", null);
 WebsiteController = __decorate([
     common_1.Controller('website'),
     __metadata("design:paramtypes", [website_service_1.WebsiteService])

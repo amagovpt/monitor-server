@@ -71,4 +71,25 @@ export class DomainService {
 
     return domain ? domain[0].Url : null;
   }
+
+  async findStudyMonitorUserTagWebsiteDomain(userId: number, tag: string, website: string): Promise<any> {
+    const manager = getManager();
+
+    const domain = await manager.query(`SELECT d.Url FROM 
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.UserId = ? AND
+        LOWER(w.Name) = ? AND
+        d.WebsiteId = w.WebsiteId
+      LIMIT 1`, [tag.toLowerCase(), userId, userId, website.toLowerCase()]);
+
+    return domain ? domain[0].Url : null;
+  }
 }

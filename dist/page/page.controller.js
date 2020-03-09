@@ -37,6 +37,22 @@ let PageController = class PageController {
         const ids = JSON.parse(req.body.pagesId);
         return response_1.success(await this.pageService.removeMyMonitorUserWebsitePages(req.user.userId, website, ids));
     }
+    async getStudyMonitorUserTagWebsitePages(req, tag, website) {
+        return response_1.success(await this.pageService.findStudyMonitorUserTagWebsitePages(req.user.userId, tag, website));
+    }
+    async createStudyMonitorUserTagWebsitePages(req) {
+        const tag = req.body.tag;
+        const website = req.body.website;
+        const domain = req.body.domain;
+        const uris = JSON.parse(req.body.pages).map(page => decodeURIComponent(page));
+        return response_1.success(await this.pageService.createStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, domain, uris));
+    }
+    async removeStudyMonitorUserTagWebsitePages(req) {
+        const tag = req.body.tag;
+        const website = req.body.website;
+        const pagesId = JSON.parse(req.body.pagesId);
+        return response_1.success(await this.pageService.removeStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, pagesId));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -69,6 +85,30 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "removeMyMonitorUserWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/tag/:tag/website/:website'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "getStudyMonitorUserTagWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/create'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "createStudyMonitorUserTagWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/remove'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "removeStudyMonitorUserTagWebsitePages", null);
 PageController = __decorate([
     common_1.Controller('page'),
     __metadata("design:paramtypes", [page_service_1.PageService])

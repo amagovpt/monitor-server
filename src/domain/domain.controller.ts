@@ -31,4 +31,10 @@ export class DomainController {
   async getMyMonitorUserWebsiteDomain(@Request() req: any, @Param('website') website: string): Promise<any> {
     return success(await this.domainService.findMyMonitorUserWebsiteDomain(req.user.userId, website));
   }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag/website/:website')
+  async getStudyMonitorUserTagWebsiteDomain(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
+    return success(await this.domainService.findStudyMonitorUserTagWebsiteDomain(req.user.userId, tag, website));
+  }
 }

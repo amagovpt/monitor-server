@@ -40,13 +40,27 @@ export class TagController {
     const type = req.body.type;
     const tagsId = JSON.parse(req.body.tagsId);
 
-    const createSuccess = this.tagService.createUserTag(tag, type, tagsId);
+    const createSuccess = await this.tagService.createUserTag(tag, type, tagsId);
 
     if (!createSuccess) {
       throw new InternalServerErrorException();
     }
 
     return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('user/remove')
+  async removeStudyMonitorUserTag(@Request() req: any): Promise<any> {
+    const tagsId = JSON.parse(req.body.tagsId);
+
+    const removeSuccess = await this.tagService.removeUserTag(req.user.userId, tagsId);
+
+    if (!removeSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
@@ -83,5 +97,17 @@ export class TagController {
   @Get('studyMonitor')
   async getStudyMonitorUserTags(@Request() req: any): Promise<any> {
     return success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/:tag/data')
+  async getStudyMonitorUserTagData(@Request() req: any, @Param('tag') tag: string): Promise<any> {
+    return success(await this.tagService.findStudyMonitorUserTagData(req.user.userId, tag));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/:tag/website/:website/data')
+  async getStudyMonitorUserTagWebsitesPagesData(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
+    return success(await this.tagService.findStudyMonitorUserTagWebsitesPagesData(req.user.userId, tag, website));
   }
 }

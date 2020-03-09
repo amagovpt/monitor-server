@@ -11,5 +11,6 @@ export declare class EvaluationService {
     evaluateUrl(url: string): Promise<any>;
     createOne(evaluation: Evaluation): Promise<any>;
     evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any>;
+    savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string): Promise<any>;
     findMyMonitorUserWebsitePageNewestEvaluation(userId: number, website: string, url: string): Promise<any>;
 }

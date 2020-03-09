@@ -10,12 +10,15 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const website_service_1 = require("./website.service");
 const website_entity_1 = require("./website.entity");
+const tag_entity_1 = require("../tag/tag.entity");
+const page_entity_1 = require("../page/page.entity");
 const website_controller_1 = require("./website.controller");
+const evaluation_module_1 = require("../evaluation/evaluation.module");
 let WebsiteModule = class WebsiteModule {
 };
 WebsiteModule = __decorate([
     common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([website_entity_1.Website])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([tag_entity_1.Tag, website_entity_1.Website, page_entity_1.Page]), evaluation_module_1.EvaluationModule],
         exports: [website_service_1.WebsiteService],
         providers: [website_service_1.WebsiteService],
         controllers: [website_controller_1.WebsiteController]

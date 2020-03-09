@@ -12,7 +12,7 @@ export class WebsiteController {
 
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
-  async createUser(@Request() req: any): Promise<any> {
+  async createWebsite(@Request() req: any): Promise<any> {
     const website = new Website();
     website.Name = req.body.name;
     website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
@@ -82,5 +82,80 @@ export class WebsiteController {
   @Get('myMonitor')
   async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
     return success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag')
+  async getStudyMonitorUserTagWebsites(@Request() req: any, @Param('tag') tag: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/otherTags/:tag')
+  async getStudyMonitorUserOtherTagsWebsites(@Request() req: any, @Param('tag') tag: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(await this.websiteService.findAllFromStudyMonitorUserOtherTagsWebsites(userId, tag));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag/website/nameExists/:website')
+  async checkIfStudyMonitorUserTagWebsiteNameExists(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByName(userId, tag, website));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag/website/domainExists/:domain')
+  async checkIfStudyMonitorUserTagWebsiteDomainExists(@Request() req: any, @Param('tag') tag: string, @Param('domain') domain: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByDomain(userId, tag, domain));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/link')
+  async linkStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const tag = req.body.tag;
+    const websitesId = JSON.parse(req.body.websitesId);
+    
+    const linkSuccess = await this.websiteService.linkStudyMonitorUserTagWebsite(userId, tag, websitesId);
+    if (!linkSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/create')
+  async createStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const tag = req.body.tag;
+    const websiteName = req.body.name;
+    const domain = decodeURIComponent(req.body.domain);
+    const pages = JSON.parse(req.body.pages).map((page: string) => decodeURIComponent(page));
+    
+    const createSuccess = await this.websiteService.createStudyMonitorUserTagWebsite(userId, tag, websiteName, domain, pages);
+    if (!createSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/remove')
+  async removeStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const tag = req.body.tag;
+    const websitesId = JSON.parse(req.body.websitesId);
+    
+    const removeSuccess = await this.websiteService.removeStudyMonitorUserTagWebsite(userId, tag, websitesId);
+    if (!removeSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
   }
 }

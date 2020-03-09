@@ -1,7 +1,7 @@
 import { Connection, Repository } from 'typeorm';
 import { Website } from '../website/website.entity';
 import { Page } from './page.entity';
-import { EvaluationService } from 'src/evaluation/evaluation.service';
+import { EvaluationService } from '../evaluation/evaluation.service';
 export declare class PageService {
     private readonly websiteRepository;
     private readonly pageRepository;
@@ -11,6 +11,9 @@ export declare class PageService {
     findAll(): Promise<any>;
     getObservatoryData(): Promise<any>;
     findAllFromMyMonitorUserWebsite(userId: number, websiteName: string): Promise<any>;
+    findStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string): Promise<any>;
     createMyMonitorUserWebsitePages(userId: number, website: string, domain: string, uris: string[]): Promise<any>;
     removeMyMonitorUserWebsitePages(userId: number, website: string, pagesIds: number[]): Promise<any>;
+    createStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, domain: string, uris: string[]): Promise<any>;
+    removeStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, pagesId: number[]): Promise<any>;
 }

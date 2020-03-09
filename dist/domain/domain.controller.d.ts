@@ -6,4 +6,5 @@ export declare class DomainController {
     getAllOfficialDomains(): Promise<any>;
     checkIfDomainExists(url: string): Promise<any>;
     getMyMonitorUserWebsiteDomain(req: any, website: string): Promise<any>;
+    getStudyMonitorUserTagWebsiteDomain(req: any, tag: string, website: string): Promise<any>;
 }

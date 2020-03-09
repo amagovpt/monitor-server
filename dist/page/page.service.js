@@ -122,6 +122,41 @@ let PageService = class PageService {
       e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`, [website.Name, website.UserId]);
         return pages;
     }
+    async findStudyMonitorUserTagWebsitePages(userId, tag, website) {
+        const manager = typeorm_2.getManager();
+        const websiteExists = await manager.query(`SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`, [userId, website.toLowerCase()]);
+        if (!websiteExists) {
+            throw new common_1.InternalServerErrorException();
+        }
+        const pages = await manager.query(`SELECT 
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+        return pages;
+    }
     async createMyMonitorUserWebsitePages(userId, website, domain, uris) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -214,7 +249,145 @@ let PageService = class PageService {
         finally {
             await queryRunner.release();
         }
-        return await this.findAllFromMyMonitorUserWebsite(userId, website);
+        return this.findAllFromMyMonitorUserWebsite(userId, website);
+    }
+    async createStudyMonitorUserTagWebsitePages(userId, tag, website, domain, uris) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            for (const uri of uris || []) {
+                const pageExists = await queryRunner.manager.findOne(page_entity_1.Page, { Uri: uri }, { select: ['PageId'] });
+                if (pageExists) {
+                    const domainPage = await queryRunner.manager.query(`SELECT 
+              dp.* 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d,
+              DomainPage as dp
+            WHERE 
+              LOWER(t.Name) = ? AND
+              t.UserId = ? AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              LOWER(w.Name) = ? AND
+              w.UserId = ? AND
+              d.WebsiteId = w.WebsiteId AND
+              dp.DomainId = d.DomainId AND
+              dp.PageId = ?`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, pageExists.PageId]);
+                    if (domainPage) {
+                        await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
+              SELECT 
+                d.DomainId, 
+                ? 
+              FROM
+                Tag as t,
+                TagWebsite as tw,
+                Website as w,
+                Domain as d
+              WHERE 
+                LOWER(t.Name) = ? AND
+                t.UserId = ? AND 
+                tw.TagId = t.TagId AND
+                w.WebsiteId = tw.WebsiteId AND
+                LOWER(w.Name) = ? AND
+                w.UserId = ? AND
+                d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+                    }
+                }
+                else {
+                    const evaluation = await this.evaluationService.evaluateUrl(uri);
+                    const newPage = new page_entity_1.Page();
+                    newPage.Uri = uri;
+                    newPage.Show_In = '000';
+                    newPage.Creation_Date = new Date();
+                    const insertPage = await queryRunner.manager.save(newPage);
+                    await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
+                    await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              ? 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d
+            WHERE 
+              LOWER(t.Name) = ? AND
+              t.UserId = ? AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              LOWER(w.Name) = ? AND
+              w.UserId = ? AND
+              d.WebsiteId = w.WebsiteId`, [insertPage.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+                    const existingDomain = await queryRunner.manager.query(`SELECT distinct d.DomainId, d.Url 
+            FROM
+              User as u,
+              Website as w,
+              Domain as d
+            WHERE
+              LOWER(d.Url) = ? AND
+              d.WebsiteId = w.WebsiteId AND
+              (
+                w.UserId IS NULL OR
+                (
+                  u.UserId = w.UserId AND
+                  LOWER(u.Type) = 'monitor'
+                )
+              )
+            LIMIT 1`, [domain.toLowerCase()]);
+                    if (existingDomain.length > 0) {
+                        await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
+                    }
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+            console.log(err);
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
+    }
+    async removeStudyMonitorUserTagWebsitePages(userId, tag, website, pagesId) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.query(`
+        DELETE 
+          dp.* 
+        FROM
+          Tag as t,
+          TagWebsite as tw,
+          Domain as d,
+          DomainPage as dp
+        WHERE 
+          LOWER(t.Name) = ? AND
+          t.UserId = ? AND
+          tw.TagId = t.TagId AND
+          d.WebsiteId = tw.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          dp.PageId IN (?)`, [tag.toLowerCase(), userId, pagesId]);
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+            console.log(err);
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
     }
 };
 PageService = __decorate([

@@ -41,11 +41,19 @@ let TagController = class TagController {
         tag.Creation_Date = new Date();
         const type = req.body.type;
         const tagsId = JSON.parse(req.body.tagsId);
-        const createSuccess = this.tagService.createUserTag(tag, type, tagsId);
+        const createSuccess = await this.tagService.createUserTag(tag, type, tagsId);
         if (!createSuccess) {
             throw new common_1.InternalServerErrorException();
         }
         return response_1.success(true);
+    }
+    async removeStudyMonitorUserTag(req) {
+        const tagsId = JSON.parse(req.body.tagsId);
+        const removeSuccess = await this.tagService.removeUserTag(req.user.userId, tagsId);
+        if (!removeSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
     }
     async checkIfTagNameExists(tagName) {
         return response_1.success(!!await this.tagService.findByTagName(tagName.toLowerCase()));
@@ -65,6 +73,12 @@ let TagController = class TagController {
     async getStudyMonitorUserTags(req) {
         return response_1.success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
     }
+    async getStudyMonitorUserTagData(req, tag) {
+        return response_1.success(await this.tagService.findStudyMonitorUserTagData(req.user.userId, tag));
+    }
+    async getStudyMonitorUserTagWebsitesPagesData(req, tag, website) {
+        return response_1.success(await this.tagService.findStudyMonitorUserTagWebsitesPagesData(req.user.userId, tag, website));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -82,6 +96,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "createStudyMonitorUserTag", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('user/remove'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "removeStudyMonitorUserTag", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:tagName'),
@@ -126,6 +148,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "getStudyMonitorUserTags", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/:tag/data'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getStudyMonitorUserTagData", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/:tag/website/:website/data'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getStudyMonitorUserTagWebsitesPagesData", null);
 TagController = __decorate([
     common_1.Controller('tag'),
     __metadata("design:paramtypes", [tag_service_1.TagService])

@@ -4,7 +4,7 @@ import { Connection, Repository, getManager, Like } from 'typeorm';
 import { Website } from '../website/website.entity';
 import { Page } from './page.entity';
 import { Evaluation } from '../evaluation/evaluation.entity';
-import { EvaluationService } from 'src/evaluation/evaluation.service';
+import { EvaluationService } from '../evaluation/evaluation.service';
 
 @Injectable()
 export class PageService {
@@ -120,6 +120,45 @@ export class PageService {
     return pages;
   }
 
+  async findStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string): Promise<any> {
+    const manager = getManager();
+    const websiteExists = await manager.query(`SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`, [userId, website.toLowerCase()]);
+    
+    if (!websiteExists) {
+      throw new InternalServerErrorException();
+    }
+
+    const pages = await manager.query(`SELECT 
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+  
+    return pages;
+  }
+
   async createMyMonitorUserWebsitePages(userId: number, website: string, domain: string, uris: string[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
@@ -231,6 +270,161 @@ export class PageService {
     }
 
     //return !hasError;
-    return await this.findAllFromMyMonitorUserWebsite(userId, website);
+    return this.findAllFromMyMonitorUserWebsite(userId, website);
+  }
+
+  async createStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, domain: string, uris: string[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const uri of uris || []) {
+        const pageExists = await queryRunner.manager.findOne(Page, { Uri: uri }, { select: ['PageId'] });
+        if (pageExists) {
+          const domainPage = await queryRunner.manager.query(`SELECT 
+              dp.* 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d,
+              DomainPage as dp
+            WHERE 
+              LOWER(t.Name) = ? AND
+              t.UserId = ? AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              LOWER(w.Name) = ? AND
+              w.UserId = ? AND
+              d.WebsiteId = w.WebsiteId AND
+              dp.DomainId = d.DomainId AND
+              dp.PageId = ?`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, pageExists.PageId]);
+
+          if (domainPage) {
+            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
+              SELECT 
+                d.DomainId, 
+                ? 
+              FROM
+                Tag as t,
+                TagWebsite as tw,
+                Website as w,
+                Domain as d
+              WHERE 
+                LOWER(t.Name) = ? AND
+                t.UserId = ? AND 
+                tw.TagId = t.TagId AND
+                w.WebsiteId = tw.WebsiteId AND
+                LOWER(w.Name) = ? AND
+                w.UserId = ? AND
+                d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+          }
+        } else {
+          const evaluation = await this.evaluationService.evaluateUrl(uri);
+          const newPage = new Page();
+          newPage.Uri = uri;
+          newPage.Show_In = '000';
+          newPage.Creation_Date = new Date();
+
+          const insertPage = await queryRunner.manager.save(newPage);
+
+          await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
+
+          await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
+            SELECT 
+              d.DomainId, 
+              ? 
+            FROM
+              Tag as t,
+              TagWebsite as tw,
+              Website as w,
+              Domain as d
+            WHERE 
+              LOWER(t.Name) = ? AND
+              t.UserId = ? AND 
+              tw.TagId = t.TagId AND
+              w.WebsiteId = tw.WebsiteId AND
+              LOWER(w.Name) = ? AND
+              w.UserId = ? AND
+              d.WebsiteId = w.WebsiteId`, [insertPage.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+
+          const existingDomain = await queryRunner.manager.query(`SELECT distinct d.DomainId, d.Url 
+            FROM
+              User as u,
+              Website as w,
+              Domain as d
+            WHERE
+              LOWER(d.Url) = ? AND
+              d.WebsiteId = w.WebsiteId AND
+              (
+                w.UserId IS NULL OR
+                (
+                  u.UserId = w.UserId AND
+                  LOWER(u.Type) = 'monitor'
+                )
+              )
+            LIMIT 1`, [domain.toLowerCase()]);
+
+          if (existingDomain.length > 0) {
+            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
+          }
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    //return !hasError;
+    return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
+  }
+
+  async removeStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, pagesId: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.query(`
+        DELETE 
+          dp.* 
+        FROM
+          Tag as t,
+          TagWebsite as tw,
+          Domain as d,
+          DomainPage as dp
+        WHERE 
+          LOWER(t.Name) = ? AND
+          t.UserId = ? AND
+          tw.TagId = t.TagId AND
+          d.WebsiteId = tw.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          dp.PageId IN (?)`, [tag.toLowerCase(), userId, pagesId]);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    //return !hasError;
+    return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
   }
 }
