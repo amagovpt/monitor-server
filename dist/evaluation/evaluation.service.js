@@ -27,7 +27,7 @@ let EvaluationService = class EvaluationService {
     async findPageFromUrl(url) {
         return this.pageRepository.findOne({ where: { Uri: url } });
     }
-    async isPageFromUser(userId, pageId) {
+    async isPageFromMyMonitorUser(userId, pageId) {
         const manager = typeorm_2.getManager();
         const pages = await manager.query(`SELECT p.* FROM
         Website as w,
@@ -41,7 +41,29 @@ let EvaluationService = class EvaluationService {
         dp.PageId = p.PageId AND
         p.PageId = ?
       `, [userId, pageId]);
-        console.log(pages);
+        return pages.length > 0;
+    }
+    async isPageFromStudyMonitorUser(userId, tag, website, pageId) {
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`SELECT p.* FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        t.Name = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.PageId = ?
+      `, [tag, userId, website, userId, pageId]);
         return pages.length > 0;
     }
     evaluateUrl(url) {
@@ -126,6 +148,51 @@ let EvaluationService = class EvaluationService {
         e.Show_To LIKE '_1'
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`, [website, userId, url]))[0];
+        if (evaluation) {
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            return {
+                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                data: {
+                    title: evaluation.Title,
+                    score: evaluation.Score,
+                    rawUrl: url,
+                    tot: tot,
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+                    elems: tot.elems,
+                    date: evaluation.Evaluation_Date
+                }
+            };
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findStudyMonitorUserTagWebsitePageNewestEvaluation(userId, tag, website, url) {
+        const manager = typeorm_2.getManager();
+        const evaluation = (await manager.query(`SELECT e.* 
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        LOWER(p.Uri) = ? AND 
+        e.PageId = p.PageId
+      ORDER BY e.Evaluation_Date DESC 
+      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase()]))[0];
         if (evaluation) {
             const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
             return {

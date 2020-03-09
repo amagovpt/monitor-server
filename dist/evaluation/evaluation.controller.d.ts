@@ -4,4 +4,6 @@ export declare class EvaluationController {
     constructor(evaluationService: EvaluationService);
     getMyMonitorWebsitePageEvaluation(req: any, website: string, url: string): Promise<any>;
     evaluateMyMonitorWebsitePage(req: any): Promise<any>;
+    getStudyMonitorTagWebsitePageEvaluation(req: any, tag: string, website: string, url: string): Promise<any>;
+    evaluateStudyMonitorTagWebsitePage(req: any): Promise<any>;
 }

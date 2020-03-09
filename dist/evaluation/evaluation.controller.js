@@ -29,9 +29,28 @@ let EvaluationController = class EvaluationController {
         const userId = req.user.userId;
         const url = decodeURIComponent(req.body.url);
         const page = await this.evaluationService.findPageFromUrl(url);
-        const isUserPage = await this.evaluationService.isPageFromUser(userId, page.PageId);
+        const isUserPage = await this.evaluationService.isPageFromMyMonitorUser(userId, page.PageId);
         if (isUserPage) {
             return response_1.success(await this.evaluationService.evaluatePageAndSave(page.PageId, url, '01'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
+    }
+    async getStudyMonitorTagWebsitePageEvaluation(req, tag, website, url) {
+        const userId = req.user.userId;
+        url = decodeURIComponent(url);
+        return response_1.success(await this.evaluationService.findStudyMonitorUserTagWebsitePageNewestEvaluation(userId, tag, website, url));
+    }
+    async evaluateStudyMonitorTagWebsitePage(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const website = req.body.website;
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.evaluationService.findPageFromUrl(url);
+        const isUserPage = await this.evaluationService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
+        if (isUserPage) {
+            return response_1.success(await this.evaluationService.evaluatePageAndSave(page.PageId, url, '00'));
         }
         else {
             throw new common_1.UnauthorizedException();
@@ -54,6 +73,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EvaluationController.prototype, "evaluateMyMonitorWebsitePage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('studyMonitor/:tag/:website/:url'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')), __param(3, common_1.Param('url')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "getStudyMonitorTagWebsitePageEvaluation", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "evaluateStudyMonitorTagWebsitePage", null);
 EvaluationController = __decorate([
     common_1.Controller('evaluation'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])

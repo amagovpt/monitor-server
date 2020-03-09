@@ -2678,8 +2678,8 @@
         "signature": "711d7a64f99019a5ef66ffd25ab4ef09896f2fa1293884cf1936dd295001a199"
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "48771e94d2831b8272270cc7f3665c78e7559baade6e7a7da24df21edcde467d",
-        "signature": "08b88ed9304d34dcf008f91bcb299ebf999a264691fe5064808ad29cdd47ba90"
+        "version": "b491aadca069afe3bbc6df790c27626bc4e04e58a1503f748b2a3e5d0fe7a456",
+        "signature": "10012f3deee3082bd1348302cdc5b205c03a1c250e818cc28f114ba0be4c71e7"
       },
       "../src/page/page.service.ts": {
         "version": "1448544311846bf6955a230e0e80f5eb62b93765223c27a7ba454add97066bc6",
@@ -2694,8 +2694,8 @@
         "signature": "2ba1f3caab9d6867d672e6f09f1d09378224e38f15f5a9cbfd6814fd821561f4"
       },
       "../src/evaluation/evaluation.controller.ts": {
-        "version": "6a00caa9e0dcf2a13cd0b048c308ad6c4d388cdfa82269c7bfd5dcfc8a9e8d4d",
-        "signature": "2f94b4ddd807784f69bcf7011b79caf17b1efcd72f3fdff3dbd0729b247f49af"
+        "version": "8dbdb4c5093d6aaadd2087579a4363f76ae62bb149b869bea159d5664e31a0ab",
+        "signature": "5bede99e409aa4c676c2e76eec86f0427704e72b92949aaf07df78281c72a88d"
       },
       "../src/evaluation/evaluation.module.ts": {
         "version": "9a58994499547b8e503490850017751e0d60f280713485d0657af9f20dcf609f",
@@ -16159,9 +16159,6 @@
       "../src/evaluation/testsColors.ts",
       "../src/evaluation/mapping.ts",
       "../src/evaluation/middleware.ts",
-      "../src/evaluation/evaluation.service.ts",
-      "../src/evaluation/evaluation.controller.ts",
-      "../src/evaluation/evaluation.module.ts",
       "../node_modules/@nestjs/websockets/adapters/ws-adapter.d.ts",
       "../node_modules/@nestjs/websockets/adapters/index.d.ts",
       "../node_modules/@nestjs/websockets/decorators/connected-socket.decorator.d.ts",
@@ -16188,14 +16185,10 @@
       "../node_modules/@nestjs/websockets/index.d.ts",
       "../node_modules/@types/socket.io/index.d.ts",
       "../node_modules/@types/sqlstring/index.d.ts",
-      "../src/page/page.gateway.ts",
       "../src/domain/domain.entity.ts",
       "../src/tag/tag.service.ts",
       "../src/tag/tag.controller.ts",
       "../src/tag/tag.module.ts",
-      "../src/website/website.service.ts",
-      "../src/website/website.controller.ts",
-      "../src/website/website.module.ts",
       "../src/domain/domain.service.ts",
       "../src/domain/domain.controller.ts",
       "../src/domain/domain.module.ts",
@@ -16203,8 +16196,6 @@
       "../src/entity/entity.service.ts",
       "../src/entity/entity.controller.ts",
       "../src/entity/entity.module.ts",
-      "../src/amp/amp.controller.ts",
-      "../src/amp/amp.module.ts",
       "../src/admin/admin.module.ts",
       "../src/monitor/monitor.module.ts",
       "../src/studies/studies.module.ts",
@@ -16254,11 +16245,20 @@
       "../node_modules/@types/webpack/index.d.ts",
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
+      "../src/evaluation/evaluation.controller.ts",
+      "../src/evaluation/evaluation.service.ts",
       "../src/page/page.service.ts",
-      "../src/page/page.module.ts",
-      "../src/page/page.controller.ts",
       "../src/observatory/observatory.controller.ts",
+      "../src/page/page.controller.ts",
+      "../src/evaluation/evaluation.module.ts",
+      "../src/page/page.gateway.ts",
+      "../src/page/page.module.ts",
       "../src/observatory/observatory.module.ts",
+      "../src/website/website.service.ts",
+      "../src/website/website.controller.ts",
+      "../src/website/website.module.ts",
+      "../src/amp/amp.controller.ts",
+      "../src/amp/amp.module.ts",
       "../src/app.module.ts"
     ]
   },
