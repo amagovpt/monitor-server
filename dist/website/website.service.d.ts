@@ -9,6 +9,9 @@ export declare class WebsiteService {
     private readonly evaluationService;
     constructor(websiteRepository: Repository<Website>, tagRepository: Repository<Tag>, connection: Connection, evaluationService: EvaluationService);
     findAll(): Promise<any>;
+    findUserType(username: string): Promise<any>;
+    findAllDomains(user: string, type: string, website: string, flags: string): Promise<void>;
+    findAllPages(websiteId: number): Promise<any>;
     findAllOfficial(): Promise<any>;
     findByName(name: string): Promise<any>;
     findAllWithoutUser(): Promise<any>;

@@ -4,6 +4,8 @@ export declare class WebsiteController {
     constructor(websiteService: WebsiteService);
     createWebsite(req: any): Promise<any>;
     getAllWebsites(): Promise<any>;
+    getAllWebsiteDomains(website: string, user: string): Promise<any>;
+    getAllWebsitePages(websiteId: number): Promise<any>;
     getAllOfficialWebsites(): Promise<any>;
     getWebsitesWithoutUser(): Promise<any>;
     getWebsitesWithoutEntity(): Promise<any>;

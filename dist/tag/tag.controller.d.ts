@@ -7,6 +7,9 @@ export declare class TagController {
     removeStudyMonitorUserTag(req: any): Promise<any>;
     checkIfTagNameExists(tagName: string): Promise<boolean>;
     getAllTags(): Promise<any>;
+    getUserTagWebsites(tag: string, user: string): Promise<any>;
+    getTagWebsites(tag: string, user: string): Promise<any>;
+    getUserWebsitePages(tag: string, website: string, user: string): Promise<any>;
     getAllOfficialTags(): Promise<any>;
     getNumberOfStudyMonitorUsers(): Promise<any>;
     getNumberOfObservatoryTags(): Promise<any>;

@@ -26,6 +26,23 @@ let DomainController = class DomainController {
     async getAllOfficialDomains() {
         return response_1.success(await this.domainService.findAllOfficial());
     }
+    async getAllDomainPages(domain, user) {
+        domain = decodeURIComponent(domain);
+        const type = await this.domainService.findUserType(user);
+        let flags;
+        switch (type) {
+            case 'nimda':
+                flags = '1__';
+                break;
+            case 'monitor':
+                flags = '_1_';
+                break;
+            default:
+                flags = '%';
+                break;
+        }
+        return response_1.success(await this.domainService.findAllDomainPages(user, type, domain, flags));
+    }
     async checkIfDomainExists(url) {
         return response_1.success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
     }
@@ -50,6 +67,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DomainController.prototype, "getAllOfficialDomains", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get(':domain/user/:user/pages'),
+    __param(0, common_1.Param('domain')), __param(1, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], DomainController.prototype, "getAllDomainPages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:url'),

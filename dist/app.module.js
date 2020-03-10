@@ -28,6 +28,7 @@ const admin_module_1 = require("./admin/admin.module");
 const monitor_module_1 = require("./monitor/monitor.module");
 const studies_module_1 = require("./studies/studies.module");
 const stamp_module_1 = require("./stamp/stamp.module");
+const crawler_module_1 = require("./crawler/crawler.module");
 const statusMonitorConfig = {
     pageTitle: 'Nest.js Monitoring Page',
     port: 3000,
@@ -103,7 +104,8 @@ AppModule = __decorate([
             admin_module_1.AdminModule,
             monitor_module_1.MonitorModule,
             studies_module_1.StudiesModule,
-            stamp_module_1.StampModule
+            stamp_module_1.StampModule,
+            crawler_module_1.CrawlerModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

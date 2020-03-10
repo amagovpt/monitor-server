@@ -15,4 +15,7 @@ export declare class UserService {
     findNumberOfMyMonitor(): Promise<number>;
     findStudyMonitorUserTagByName(userId: number, name: string): Promise<any>;
     createOne(user: User, websites: string[], transfer: boolean): Promise<boolean>;
+    findType(username: string): Promise<any>;
+    findAllWebsites(user: string): Promise<any>;
+    findAllTags(user: string): Promise<any>;
 }

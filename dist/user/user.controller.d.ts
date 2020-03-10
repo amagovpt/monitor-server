@@ -12,4 +12,7 @@ export declare class UserController {
     getNumberOfStudyMonitorUsers(): Promise<any>;
     getNumberOfMyMonitorUsers(): Promise<any>;
     checkIfUserTagNameExists(req: any, name: string): Promise<any>;
+    getUserType(user: string): Promise<any>;
+    getListOfUserWebsites(user: string): Promise<any>;
+    getListOfUserTags(user: string): Promise<any>;
 }

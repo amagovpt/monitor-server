@@ -44,4 +44,10 @@ export class EntityController {
   async checkIfLongNameExists(@Param('longName') longName: string): Promise<any> {
     return success(!!await this.entityService.findByLongName(longName));
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('websites/:entity')
+  async getListOfEntityWebsites(@Param('entity') entity: string): Promise<any> {
+    return success(await this.entityService.findAllWebsites(entity));
+  }
 }

@@ -131,4 +131,55 @@ export class UserService {
 
     return !hasError;
   }
+
+  async findType(username: string): Promise<any> {
+    if (username === 'admin') {
+      return 'nimda';
+    }
+
+    const user = await this.userRepository.findOne({ where: { Username: username }});
+
+    if (user) {
+      return user.Type;
+    } else {
+      return null;
+    }
+  }
+
+  async findAllWebsites(user: string): Promise<any> {
+    const manager = getManager();
+
+    const websites = await manager.query(
+      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
+          User as u,
+          Domain as d
+        WHERE
+          LOWER(u.Username) = ? AND
+          w.UserId = u.UserId AND 
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = "1"
+        GROUP BY w.WebsiteId, d.Url`, [user.toLowerCase()]);
+
+    return websites;
+  }
+
+  async findAllTags(user: string): Promise<any> {
+    const manager = getManager();
+
+    const tags = await manager.query(
+      `SELECT t.*, COUNT(distinct tw.WebsiteId) as Websites, u.Username as User 
+      FROM 
+        User as u,
+        Tag as t
+        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+      WHERE
+        LOWER(u.Username) = ? AND
+        t.UserId = u.UserId
+      GROUP BY t.TagId`, [user.toLowerCase()]);
+
+    return tags;
+  }
 }

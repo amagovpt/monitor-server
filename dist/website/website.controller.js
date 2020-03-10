@@ -46,6 +46,25 @@ let WebsiteController = class WebsiteController {
     async getAllWebsites() {
         return response_1.success(await this.websiteService.findAll());
     }
+    async getAllWebsiteDomains(website, user) {
+        const type = await this.websiteService.findUserType(user);
+        let flags;
+        switch (type) {
+            case 'nimda':
+                flags = '1__';
+                break;
+            case 'monitor':
+                flags = '_1_';
+                break;
+            default:
+                flags = '%';
+                break;
+        }
+        return response_1.success(await this.websiteService.findAllDomains(user, type, website, flags));
+    }
+    async getAllWebsitePages(websiteId) {
+        return response_1.success(await this.websiteService.findAllPages(websiteId));
+    }
     async getAllOfficialWebsites() {
         return response_1.success(await this.websiteService.findAllOfficial());
     }
@@ -134,6 +153,22 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get(':website/user/:user/domains'),
+    __param(0, common_1.Param('website')), __param(1, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getAllWebsiteDomains", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('pages'),
+    __param(0, common_1.Param('websiteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getAllWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('official'),

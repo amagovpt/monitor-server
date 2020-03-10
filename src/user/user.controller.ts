@@ -94,4 +94,34 @@ export class UserController {
       return success(false);
     }
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('type/:user')
+  async getUserType(@Param('user') user: string): Promise<any> {
+    if (user) {
+      return success(await this.userService.findType(user));
+    } else {
+      return success(null);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('websites/:user')
+  async getListOfUserWebsites(@Param('user') user: string): Promise<any> {
+    if (user) {
+      return success(await this.userService.findAllWebsites(user));
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('tags/:user')
+  async getListOfUserTags(@Param('user') user: string): Promise<any> {
+    if (user) {
+      return success(await this.userService.findAllTags(user));
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
 }

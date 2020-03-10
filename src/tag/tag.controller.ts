@@ -75,6 +75,38 @@ export class TagController {
     return success(await this.tagService.findAll());
   }
 
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':tag/user/:user/websites/study')
+  async getUserTagWebsites(@Param('tag') tag: string, @Param('user') user: string): Promise<any> {
+    const websites = await this.tagService.findAllUserTagWebsites(tag, user);
+
+    for (const website of websites || []) {
+      website['imported'] = await this.tagService.verifyUpdateWebsiteAdmin(website.WebsiteId);
+
+      const websiteAdmin = await this.tagService.domainExistsInAdmin(website.WebsiteId);
+      website['hasDomain'] = websiteAdmin.length === 1;
+      website['webName'] = undefined;
+
+      if (websiteAdmin.length === 1) {
+        website['webName'] = websiteAdmin[0].Name;
+      }
+    }
+
+    return success(websites);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':tag/user/:user/websites')
+  async getTagWebsites(@Param('tag') tag: string, @Param('user') user: string): Promise<any> {
+    return success(await this.tagService.findAllUserTagWebsites(tag, user));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':tag/website/:website/user/:user/pages')
+  async getUserWebsitePages(@Param('tag') tag: string, @Param('website') website: string, @Param('user') user: string): Promise<any> {
+    return success(await this.tagService.findAllUserWebsitePages(tag, website, user));
+  }
+
   @UseGuards(AuthGuard('jwt'), AuthGuard('jwt-study'))
   @Get('allOfficial')
   async getAllOfficialTags(): Promise<any> {

@@ -92,4 +92,97 @@ export class DomainService {
 
     return domain ? domain[0].Url : null;
   }
+
+  async findUserType(username: string): Promise<any> {
+    if (username === 'admin') {
+      return 'nimda';
+    }
+
+    const user = await getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
+
+    if (user) {
+      return user[0].Type;
+    } else {
+      return null;
+    }
+  }
+
+  async findAllDomainPages(user: string, type: string, domain: string, flags: string): Promise<any> {
+    const manager = getManager();
+    
+    if (type === 'nimda') {
+      const pages = await manager.query(`SELECT 
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Score,
+          e.Errors,
+          e.Evaluation_Date 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          ),
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp
+        WHERE
+          (
+            LOWER(u.Type) = "monitor" AND
+            w.UserId = u.UserId AND
+            d.WebsiteId = w.WebsiteId AND
+            LOWER(d.Url) = ? AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE ?
+          )
+          OR
+          (
+            w.UserId IS NULL AND
+            d.WebsiteId = w.WebsiteId AND
+            LOWER(d.Url) = ? AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE ?
+          )
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
+      
+      return pages;
+    } else {
+      const pages = await manager.query(`SELECT 
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Score,
+          e.Errors,
+          e.Evaluation_Date 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          ),
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp
+        WHERE
+          LOWER(u.Username) = ? AND
+          w.UserId = u.UserId AND
+          d.WebsiteId = w.WebsiteId AND
+          LOWER(d.Url) = ? AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`, [user.toLowerCase(), domain.toLowerCase(), flags]);
+
+      return pages;
+    }
+  }
 }

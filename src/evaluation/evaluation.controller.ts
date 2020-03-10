@@ -55,4 +55,37 @@ export class EvaluationController {
       throw new UnauthorizedException();
     }
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':type/page/:page')
+  async getListOfPageEvaluations(@Request() req: any, @Param('type') type: string, @Param('page') page: string): Promise<any> {
+    page = decodeURIComponent(page);
+    return success(await this.evaluationService.findAllEvaluationsFromPage(type, page));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':url/:evaluationId')
+  async getPageEvaluation(@Param('url') url: string, @Param('evaluationId') evaluationId: number): Promise<any> {
+    url = decodeURIComponent(url);
+    return success(await this.evaluationService.findEvaluationById(url, evaluationId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('user/:type/:url')
+  async getUserPageEvaluation(@Param('type') type: string, @Param('url') url: string): Promise<any> {
+    url = decodeURIComponent(url);
+    return success(await this.evaluationService.findUserPageEvaluation(url, type));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('page/evaluate')
+  async evaluatePage(@Request() req: any): Promise<any> {
+    const url = decodeURIComponent(req.body.url);
+    const page = await this.evaluationService.findPageFromUrl(url);
+    if (page) {
+      return success(await this.evaluationService.evaluatePageAndSave(page.PageId, url, '10'));
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
 }

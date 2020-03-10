@@ -31,6 +31,22 @@ export class EntityService {
     return this.entityRepository.findOne({ where: { Long_Name: longName } });
   }
 
+  async findAllWebsites(entity: string): Promise<any> {
+    const manager = getManager();
+
+    const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+      FROM 
+        Website as w
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+        Entity as e
+      WHERE
+        e.EntityId = w.EntityId AND
+        LOWER(e.Long_Name) = ?
+      GROUP BY w.WebsiteId`, [entity.toLowerCase()]);
+
+    return websites;
+  }
+
   async createOne(entity: EntityTable, websites: string[]): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 

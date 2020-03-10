@@ -37,6 +37,31 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':website/user/:user/domains')
+  async getAllWebsiteDomains(@Param('website') website: string, @Param('user') user: string): Promise<any> {
+    const type = await this.websiteService.findUserType(user);
+    let flags: string;
+    switch (type) {
+      case 'nimda':
+        flags = '1__';
+        break;
+      case 'monitor':
+        flags = '_1_';
+        break;
+      default:
+        flags = '%';
+        break;
+    }
+    return success(await this.websiteService.findAllDomains(user, type, website, flags));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('pages')
+  async getAllWebsitePages(@Param('websiteId') websiteId: number): Promise<any> {
+    return success(await this.websiteService.findAllPages(websiteId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('official')
   async getAllOfficialWebsites(): Promise<any> {
     return success(await this.websiteService.findAllOfficial());

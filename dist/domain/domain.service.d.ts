@@ -9,4 +9,6 @@ export declare class DomainService {
     findByUrl(url: string): Promise<any>;
     findMyMonitorUserWebsiteDomain(userId: number, website: string): Promise<any>;
     findStudyMonitorUserTagWebsiteDomain(userId: number, tag: string, website: string): Promise<any>;
+    findUserType(username: string): Promise<any>;
+    findAllDomainPages(user: string, type: string, domain: string, flags: string): Promise<any>;
 }

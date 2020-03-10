@@ -12,7 +12,12 @@ export declare class TagService {
     findAllFromStudyMonitorUser(userId: number): Promise<any>;
     findStudyMonitorUserTagData(userId: number, tag: string): Promise<any>;
     findStudyMonitorUserTagWebsitesPagesData(userId: number, tag: string, website: string): Promise<any>;
+    getUserId(username: string): Promise<any>;
+    findAllUserWebsitePages(tag: string, website: string, user: string): Promise<any>;
     createOne(tag: Tag, websites: number[]): Promise<boolean>;
     createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
     removeUserTag(userId: number, tagsId: number[]): Promise<any>;
+    findAllUserTagWebsites(tag: string, user: string): Promise<any>;
+    verifyUpdateWebsiteAdmin(websiteId: number): Promise<any>;
+    domainExistsInAdmin(websiteId: number): Promise<any>;
 }

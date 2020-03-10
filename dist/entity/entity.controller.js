@@ -42,6 +42,9 @@ let EntityController = class EntityController {
     async checkIfLongNameExists(longName) {
         return response_1.success(!!await this.entityService.findByLongName(longName));
     }
+    async getListOfEntityWebsites(entity) {
+        return response_1.success(await this.entityService.findAllWebsites(entity));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -74,6 +77,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EntityController.prototype, "checkIfLongNameExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('websites/:entity'),
+    __param(0, common_1.Param('entity')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "getListOfEntityWebsites", null);
 EntityController = __decorate([
     common_1.Controller('entity'),
     __metadata("design:paramtypes", [entity_service_1.EntityService])

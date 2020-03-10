@@ -131,6 +131,74 @@ let TagService = class TagService {
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
         return pages;
     }
+    async getUserId(username) {
+        return (await typeorm_2.getManager().query('SELECT * FROM User WHERE Username = ? LIMIT 1', [username]))[0].UserId;
+    }
+    async findAllUserWebsitePages(tag, website, user) {
+        const userId = await this.getUserId(user);
+        const manager = typeorm_2.getManager();
+        const websiteExists = await manager.query(`SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`, [userId, website.toLowerCase()]);
+        if (tag !== 'null') {
+            if (websiteExists) {
+                const pages = await manager.query(`SELECT 
+            distinct p.*,
+            e.Score,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date
+          FROM 
+            Page as p,
+            Tag as t,
+            TagWebsite as tw,
+            Website as w,
+            Domain as d,
+            DomainPage as dp,
+            Evaluation as e
+          WHERE
+            LOWER(t.Name) = ? AND
+            t.UserId = ? AND
+            tw.TagId = t.TagId AND
+            w.WebsiteId = tw.WebsiteId AND
+            LOWER(w.Name) = ? AND
+            w.UserId = ? AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            e.PageId = p.PageId AND
+            e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+                return pages;
+            }
+        }
+        else {
+            if (websiteExists) {
+                const pages = await manager.query(`SELECT 
+            distinct p.*,
+            e.Score,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Errors,
+            e.Evaluation_Date
+          FROM 
+            Page as p,
+            Website as w,
+            Domain as d,
+            DomainPage as dp,
+            Evaluation as e
+          WHERE
+            w.Name = ? AND
+            w.UserId = ? AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            e.PageId = p.PageId AND
+            p.Show_In LIKE '_1_' AND
+            e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`, [website, userId]);
+                return pages;
+            }
+        }
+    }
     async createOne(tag, websites) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -244,6 +312,77 @@ let TagService = class TagService {
             await queryRunner.release();
         }
         return !hasError;
+    }
+    async findAllUserTagWebsites(tag, user) {
+        const manager = typeorm_2.getManager();
+        if (user === 'admin') {
+            const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        FROM 
+          Website as w
+          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+          Tag as t,
+          TagWebsite as tw
+        WHERE
+          LOWER(t.Name) = ? AND
+          t.UserId IS NULL AND
+          tw.TagId = t.TagId AND
+          w.WebsiteId = tw.WebsiteId
+        GROUP BY w.WebsiteId`, [tag.toLowerCase()]);
+            return websites;
+        }
+        else {
+            const websites = await manager.query(`SELECT w.*, d.Url, e.Long_Name as Entity, u.Username as User 
+      FROM 
+        Website as w
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
+        User as u,
+        Tag as t,
+        TagWebsite as tw,
+        Domain as d
+      WHERE
+        LOWER(t.Name) = ? AND
+        u.Username = ? AND
+        t.UserId = u.UserId AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND 
+        d.WebsiteId = w.WebsiteId
+      GROUP BY w.WebsiteId, d.Url`, [tag.toLowerCase(), user]);
+            return websites;
+        }
+    }
+    async verifyUpdateWebsiteAdmin(websiteId) {
+        const manager = typeorm_2.getManager();
+        const studyP = await manager.query(`SELECT p.PageId
+      FROM  
+        Page as p, 
+        Domain as d,
+        DomainPage as dp,
+        Website as w
+      WHERE 
+        w.WebsiteId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.Show_In LIKE '0%'`, [websiteId]);
+        return studyP.length === 0;
+    }
+    async domainExistsInAdmin(websiteId) {
+        const manager = typeorm_2.getManager();
+        const websites = await manager.query(`SELECT
+        w2.*
+      FROM
+        Domain as d,
+        Domain as d2,
+        Website as w,
+        Website as w2
+      WHERE
+        w.WebsiteId = ? AND
+        d.WebsiteId = w.WebsiteId AND 
+        d2.WebsiteId = w2.WebsiteId AND 
+        d2.Url = d.Url AND
+        d2.DomainId != d.DomainId`, [websiteId]);
+        return websites;
     }
 };
 TagService = __decorate([

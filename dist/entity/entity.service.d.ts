@@ -7,5 +7,6 @@ export declare class EntityService {
     findAll(): Promise<any>;
     findByShortName(shortName: string): Promise<any>;
     findByLongName(longName: string): Promise<any>;
+    findAllWebsites(entity: string): Promise<any>;
     createOne(entity: EntityTable, websites: string[]): Promise<boolean>;
 }

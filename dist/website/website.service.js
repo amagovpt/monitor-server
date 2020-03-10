@@ -42,6 +42,78 @@ let WebsiteService = class WebsiteService {
       GROUP BY w.WebsiteId, d.DomainId`);
         return websites;
     }
+    async findUserType(username) {
+        if (username === 'admin') {
+            return 'nimda';
+        }
+        const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
+        if (user) {
+            return user[0].Type;
+        }
+        else {
+            return null;
+        }
+    }
+    async findAllDomains(user, type, website, flags) {
+        const manager = typeorm_2.getManager();
+        if (type === 'nimda') {
+            const domains = await manager.query(`SELECT
+          d.*,
+          COUNT(distinct p.PageId) as Pages,
+          u2.Username as User
+        FROM
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
+          LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__",
+          Website as w,
+          User as u
+        WHERE
+          w.WebsiteId = d.WebsiteId AND
+          LOWER(w.Name) = ? AND
+          (
+            w.UserId IS NULL OR
+            (
+              u.UserId = w.UserId AND
+              LOWER(u.Type) != 'studies'
+            )
+          )
+        GROUP BY d.DomainId`, [website.toLowerCase()]);
+            return domains;
+        }
+        else {
+            const domains = await manager.query(`SELECT d.*, SUM(CASE WHEN(p.Show_In LIKE ?) THEN 1 ELSE 0 END) as Pages, u.Username as User
+        FROM
+          Domain as d
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId,
+          User as u,
+          Website as w
+        WHERE
+          LOWER(u.Username) = ? AND
+          w.UserId = u.UserId AND
+          LOWER(w.Name) = ? AND
+          d.WebsiteId = w.WebsiteId
+        GROUP BY d.DomainId`, [flags, user.toLowerCase(), website.toLowerCase()]);
+            return domains;
+        }
+    }
+    async findAllPages(websiteId) {
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`SELECT p.PageId, p.Uri, p.Show_In
+      FROM
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        d.WebsiteId = ? AND
+        d.Active = "1" AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE "1__"`, [websiteId]);
+        return pages;
+    }
     async findAllOfficial() {
         const manager = typeorm_2.getManager();
         const websites = await manager.query(`SELECT distinct w.* 

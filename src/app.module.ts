@@ -22,6 +22,7 @@ import { AdminModule } from './admin/admin.module';
 import { MonitorModule } from './monitor/monitor.module';
 import { StudiesModule } from './studies/studies.module';
 import { StampModule } from './stamp/stamp.module';
+import { CrawlerModule } from './crawler/crawler.module';
 
 const statusMonitorConfig = {
   pageTitle: 'Nest.js Monitoring Page',
@@ -96,7 +97,8 @@ const statusMonitorConfig = {
     AdminModule,
     MonitorModule,
     StudiesModule,
-    StampModule
+    StampModule,
+    CrawlerModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,4 +6,5 @@ export declare class EntityController {
     createEntity(req: any): Promise<any>;
     checkIfShortNameExists(shortName: string): Promise<any>;
     checkIfLongNameExists(longName: string): Promise<any>;
+    getListOfEntityWebsites(entity: string): Promise<any>;
 }

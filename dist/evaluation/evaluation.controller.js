@@ -56,6 +56,28 @@ let EvaluationController = class EvaluationController {
             throw new common_1.UnauthorizedException();
         }
     }
+    async getListOfPageEvaluations(req, type, page) {
+        page = decodeURIComponent(page);
+        return response_1.success(await this.evaluationService.findAllEvaluationsFromPage(type, page));
+    }
+    async getPageEvaluation(url, evaluationId) {
+        url = decodeURIComponent(url);
+        return response_1.success(await this.evaluationService.findEvaluationById(url, evaluationId));
+    }
+    async getUserPageEvaluation(type, url) {
+        url = decodeURIComponent(url);
+        return response_1.success(await this.evaluationService.findUserPageEvaluation(url, type));
+    }
+    async evaluatePage(req) {
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.evaluationService.findPageFromUrl(url);
+        if (page) {
+            return response_1.success(await this.evaluationService.evaluatePageAndSave(page.PageId, url, '10'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
@@ -89,6 +111,38 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EvaluationController.prototype, "evaluateStudyMonitorTagWebsitePage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get(':type/page/:page'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('type')), __param(2, common_1.Param('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "getListOfPageEvaluations", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get(':url/:evaluationId'),
+    __param(0, common_1.Param('url')), __param(1, common_1.Param('evaluationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "getPageEvaluation", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('user/:type/:url'),
+    __param(0, common_1.Param('type')), __param(1, common_1.Param('url')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "getUserPageEvaluation", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('page/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "evaluatePage", null);
 EvaluationController = __decorate([
     common_1.Controller('evaluation'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])

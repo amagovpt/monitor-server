@@ -21,6 +21,26 @@ export class DomainController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':domain/user/:user/pages')
+  async getAllDomainPages(@Param('domain') domain: string, @Param('user') user: string): Promise<any> {
+    domain = decodeURIComponent(domain);
+    const type = await this.domainService.findUserType(user);
+    let flags: string;
+    switch (type) {
+      case 'nimda':
+        flags = '1__';
+        break;
+      case 'monitor':
+        flags = '_1_';
+        break;
+      default:
+        flags = '%';
+        break;
+    }
+    return success(await this.domainService.findAllDomainPages(user, type, domain, flags));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:url')
   async checkIfDomainExists(@Param('url') url: string): Promise<any> {
     return success(!!await this.domainService.findByUrl(decodeURIComponent(url)));

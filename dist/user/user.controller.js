@@ -74,6 +74,30 @@ let UserController = class UserController {
             return response_1.success(false);
         }
     }
+    async getUserType(user) {
+        if (user) {
+            return response_1.success(await this.userService.findType(user));
+        }
+        else {
+            return response_1.success(null);
+        }
+    }
+    async getListOfUserWebsites(user) {
+        if (user) {
+            return response_1.success(await this.userService.findAllWebsites(user));
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async getListOfUserTags(user) {
+        if (user) {
+            return response_1.success(await this.userService.findAllTags(user));
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt')),
@@ -143,6 +167,30 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "checkIfUserTagNameExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('type/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUserType", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('websites/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getListOfUserWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('tags/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getListOfUserTags", null);
 UserController = __decorate([
     common_1.Controller('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

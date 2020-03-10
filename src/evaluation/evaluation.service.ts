@@ -229,4 +229,119 @@ export class EvaluationService {
       throw new InternalServerErrorException();
     }
   }
+
+  async findAllEvaluationsFromPage(type: string, page: string): Promise<any> {
+    const manager = getManager();
+    let query = '';
+
+    if (type === 'admin') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = ? AND
+          p.Show_In LIKE "1%%" AND
+          e.PageId = p.PageId AND
+          e.Show_To LIKE "1_" AND
+          dp.PageId = p.PageId AND
+          d.DomainId = dp.DomainId AND
+          w.WebsiteId = d.WebsiteId AND
+          w.Deleted = "0" AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
+        ORDER BY e.Evaluation_Date DESC`;
+    } else if (type === 'monitor') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          User as u,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = ? AND
+          p.Show_In LIKE "11%" AND
+          e.PageId = p.PageId AND
+          e.Show_To LIKE "_1" AND
+          dp.PageId = p.PageId AND
+          d.DomainId = dp.DomainId AND
+          w.WebsiteId = d.WebsiteId AND
+          u.UserId = w.UserId AND 
+          LOWER(u.Type) = "monitor"
+        ORDER BY e.Evaluation_Date DESC`;
+    } else if (type === 'studies') {
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+        FROM
+          Page as p,
+          Evaluation as e
+        WHERE
+          LOWER(p.Uri) = ? AND
+          e.PageId = p.PageId
+        ORDER BY e.Evaluation_Date DESC
+        LIMIT 1`;
+    } else {
+      throw new InternalServerErrorException();
+    }
+
+    const evaluations = await manager.query(query, [page.toLowerCase()]);
+    return evaluations;
+  }
+
+  async findEvaluationById(url: string, id: number): Promise<any> {
+    const manager = getManager();
+
+    const evaluation = await manager.findOne(Evaluation, { where: { EvaluationId: id } });
+
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+
+    return {
+      pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+      data: {
+        title: evaluation.Title,
+        score: evaluation.Score,
+        rawUrl: url,
+        tot: tot,
+        nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+        conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+        elems: tot.elems,
+        date: evaluation.Evaluation_Date
+      }
+    };
+  }
+
+  async findUserPageEvaluation(url: string, type: string): Promise<any> {
+    let query = null;
+    if (type === 'monitor') {
+      query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date DESC LIMIT 1`;
+    } else if (type === 'studies') {
+      query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId ORDER BY e.Evaluation_Date DESC LIMIT 1`;
+    } else {
+      throw new InternalServerErrorException();
+    }
+
+    const manager = getManager();
+
+    const evaluation = (await manager.query(query, [url]))[0]
+
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+
+    return {
+      pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+      data: {
+        title: evaluation.Title,
+        score: evaluation.Score,
+        rawUrl: url,
+        tot: tot,
+        nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+        conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+        elems: tot.elems,
+        date: evaluation.Evaluation_Date
+      }
+    };
+  }
 }

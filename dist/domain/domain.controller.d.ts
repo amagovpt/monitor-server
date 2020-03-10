@@ -4,6 +4,7 @@ export declare class DomainController {
     constructor(domainService: DomainService);
     getAllDomains(): Promise<any>;
     getAllOfficialDomains(): Promise<any>;
+    getAllDomainPages(domain: string, user: string): Promise<any>;
     checkIfDomainExists(url: string): Promise<any>;
     getMyMonitorUserWebsiteDomain(req: any, website: string): Promise<any>;
     getStudyMonitorUserTagWebsiteDomain(req: any, tag: string, website: string): Promise<any>;
