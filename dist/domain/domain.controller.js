@@ -44,7 +44,7 @@ let DomainController = class DomainController {
         return response_1.success(await this.domainService.findAllDomainPages(user, type, domain, flags));
     }
     async checkIfDomainExists(url) {
-        return response_1.success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
+        return response_1.success(!!await this.domainService.exists(decodeURIComponent(url)));
     }
     async getMyMonitorUserWebsiteDomain(req, website) {
         return response_1.success(await this.domainService.findMyMonitorUserWebsiteDomain(req.user.userId, website));

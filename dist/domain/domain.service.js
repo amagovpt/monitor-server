@@ -63,6 +63,22 @@ let DomainService = class DomainService {
     async findByUrl(url) {
         return this.domainRepository.findOne({ where: { Url: url } });
     }
+    async exists(url) {
+        url = url.replace('https://', '');
+        url = url.replace('http://', '');
+        url = url.replace('www.', '');
+        return (await this.domainRepository.query(`SELECT d.*
+      FROM
+        Domain as d,
+        Website as w,
+        User as u
+      WHERE
+        LOWER(d.Url) = "${url.toLowerCase()}" AND
+        w.WebsiteId = d.WebsiteId AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+        w.Deleted = "0"
+      LIMIT 1`)).length > 0;
+    }
     async findMyMonitorUserWebsiteDomain(userId, website) {
         const manager = typeorm_2.getManager();
         const domain = await manager.query(`SELECT d.Url FROM 

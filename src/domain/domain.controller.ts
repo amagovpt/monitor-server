@@ -43,7 +43,7 @@ export class DomainController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:url')
   async checkIfDomainExists(@Param('url') url: string): Promise<any> {
-    return success(!!await this.domainService.findByUrl(decodeURIComponent(url)));
+    return success(!!await this.domainService.exists(decodeURIComponent(url)));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))

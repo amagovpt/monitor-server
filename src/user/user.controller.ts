@@ -50,9 +50,56 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async updateUser(@Request() req: any): Promise<any> {
+    const userId = req.body.userId;
+    const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+
+    if (password !== confirmPassword) {
+      return success(false);
+    }
+
+    const names = req.body.names;
+    const emails = req.body.emails;
+    const app = req.body.app;
+
+    const websites = JSON.parse(req.body.websites);
+    const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+    const transfer = req.body.transfer === 'true';
+    
+    const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
+    if (!updateSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('delete')
+  async deleteUser(@Request() req: any): Promise<any> {
+    const userId = req.body.userId;
+    const app = req.body.app;
+    
+    const deleteSuccess = await this.userService.delete(userId, app);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('get/:id')
   getUser(@Param('id') id: string): Promise<User> {
     return this.userService.findById(id);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('info/:userId')
+  async getUserInfo(@Param('userId') userId: number): Promise<User> {
+    return success(await this.userService.findInfo(userId));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))

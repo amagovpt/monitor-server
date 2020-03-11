@@ -16,6 +16,12 @@ export class EntityController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get('info/:entityId')
+  async getEntityInfo(@Param('entityId') entityId: number): Promise<any> {
+    return success(await this.entityService.findInfo(entityId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
   async createEntity(@Request() req: any): Promise<any> {
     const entity = new EntityTable();
@@ -27,6 +33,37 @@ export class EntityController {
 
     const createSuccess = await this.entityService.createOne(entity, websites);
     if (!createSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async updateEntity(@Request() req: any): Promise<any> {
+    const entityId = req.body.entityId;
+    const shortName = req.body.shortName;
+    const longName = req.body.longName;
+
+    const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+    const websites = JSON.parse(req.body.websites);
+
+    const updateSuccess = await this.entityService.update(entityId, shortName, longName, websites, defaultWebsites);
+    if (!updateSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('delete')
+  async deleteEntity(@Request() req: any): Promise<any> {
+    const entityId = req.body.entityId;
+
+    const deleteSuccess = await this.entityService.delete(entityId);
+    if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
 

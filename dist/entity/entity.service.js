@@ -31,6 +31,16 @@ let EntityService = class EntityService {
       GROUP BY e.EntityId`);
         return entities;
     }
+    async findInfo(entityId) {
+        const entity = await this.entityRepository.findOne({ where: { EntityId: entityId } });
+        if (entity) {
+            entity['websites'] = await this.entityRepository.query(`SELECT * FROM Website WHERE EntityId = ?`, [entityId]);
+            return entity;
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
     async findByShortName(shortName) {
         return this.entityRepository.findOne({ where: { Short_Name: shortName } });
     }
@@ -60,6 +70,53 @@ let EntityService = class EntityService {
             for (const websiteId of websites || []) {
                 await queryRunner.manager.update(website_entity_1.Website, { WebsiteId: websiteId }, { EntityId: insertEntity.EntityId });
             }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async update(entityId, shortName, longName, websites, defaultWebsites) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(entity_entity_1.EntityTable, { EntityId: entityId }, { Short_Name: shortName, Long_Name: longName });
+            for (const id of defaultWebsites || []) {
+                if (!websites.includes(id)) {
+                    await queryRunner.manager.query(`UPDATE Website SET EntityId = NULL WHERE WebsiteId = ?`, [id]);
+                }
+            }
+            for (const id of websites || []) {
+                if (!defaultWebsites.includes(id)) {
+                    await queryRunner.manager.query(`UPDATE Website SET EntityId = ? WHERE WebsiteId = ?`, [entityId, id]);
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async delete(entityId) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(website_entity_1.Website, { EntityId: entityId }, { EntityId: null });
+            await queryRunner.manager.delete(entity_entity_1.EntityTable, { where: { EntityId: entityId } });
             await queryRunner.commitTransaction();
         }
         catch (err) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
 import { EntityTable } from './entity.entity';
@@ -21,6 +21,17 @@ export class EntityService {
         LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
       GROUP BY e.EntityId`);
     return entities;
+  }
+
+  async findInfo(entityId: number): Promise<any> {
+    const entity = await this.entityRepository.findOne({ where: { EntityId: entityId } });
+
+    if (entity) {
+      entity['websites'] = await this.entityRepository.query(`SELECT * FROM Website WHERE EntityId = ?`, [entityId]);
+      return entity;
+    } else {
+      throw new InternalServerErrorException();
+    }
   }
 
   async findByShortName(shortName: string): Promise<any> {
@@ -60,6 +71,66 @@ export class EntityService {
       for (const websiteId of websites || []) {
         await queryRunner.manager.update(Website, { WebsiteId: websiteId }, { EntityId: insertEntity.EntityId });
       }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async update(entityId: number, shortName: string, longName: string, websites: number[], defaultWebsites: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.update(EntityTable, { EntityId: entityId }, { Short_Name: shortName, Long_Name: longName });
+
+      for (const id of defaultWebsites || []) {
+        if (!websites.includes(id)) {
+          await queryRunner.manager.query(`UPDATE Website SET EntityId = NULL WHERE WebsiteId = ?`, [id]);
+        }
+      }
+  
+      for (const id of websites || []) {
+        if (!defaultWebsites.includes(id)) {
+          await queryRunner.manager.query(`UPDATE Website SET EntityId = ? WHERE WebsiteId = ?`, [entityId, id]);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async delete(entityId: number): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.update(Website, { EntityId: entityId }, { EntityId: null });
+
+      await queryRunner.manager.delete(EntityTable, { where: { EntityId: entityId } });
 
       await queryRunner.commitTransaction();
     } catch (err) {

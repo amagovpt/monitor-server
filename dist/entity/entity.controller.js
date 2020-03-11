@@ -24,6 +24,9 @@ let EntityController = class EntityController {
     async getAllEntities() {
         return response_1.success(await this.entityService.findAll());
     }
+    async getEntityInfo(entityId) {
+        return response_1.success(await this.entityService.findInfo(entityId));
+    }
     async createEntity(req) {
         const entity = new entity_entity_1.EntityTable();
         entity.Short_Name = req.body.shortName;
@@ -32,6 +35,26 @@ let EntityController = class EntityController {
         const websites = JSON.parse(req.body.websites);
         const createSuccess = await this.entityService.createOne(entity, websites);
         if (!createSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
+    async updateEntity(req) {
+        const entityId = req.body.entityId;
+        const shortName = req.body.shortName;
+        const longName = req.body.longName;
+        const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+        const websites = JSON.parse(req.body.websites);
+        const updateSuccess = await this.entityService.update(entityId, shortName, longName, websites, defaultWebsites);
+        if (!updateSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
+    async deleteEntity(req) {
+        const entityId = req.body.entityId;
+        const deleteSuccess = await this.entityService.delete(entityId);
+        if (!deleteSuccess) {
             throw new common_1.InternalServerErrorException();
         }
         return response_1.success(true);
@@ -55,12 +78,36 @@ __decorate([
 ], EntityController.prototype, "getAllEntities", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('info/:entityId'),
+    __param(0, common_1.Param('entityId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "getEntityInfo", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Post('create'),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EntityController.prototype, "createEntity", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "updateEntity", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "deleteEntity", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/shortName/:shortName'),

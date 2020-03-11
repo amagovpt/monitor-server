@@ -34,6 +34,27 @@ export class WebsiteService {
       GROUP BY w.WebsiteId, d.DomainId`);
     return websites;
   }
+  async findInfo(websiteId: number): Promise<any> {
+    const websites = await this.websiteRepository.query(`SELECT w.*, u.Username as User, e.Long_Name as Entity, d.Url as Domain
+      FROM 
+        Website as w
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = ? AND d.Active = 1
+      WHERE 
+        w.WebsiteId = ?
+      GROUP BY w.WebsiteId, d.Url 
+      LIMIT 1`, [websiteId, websiteId]);
+
+    if (websites) {
+      const website = websites[0];
+
+      website.tags = await this.websiteRepository.query(`SELECT t.* FROM Tag as t, TagWebsite as tw WHERE tw.WebsiteId = ? AND t.TagId = tw.TagId`, [websiteId]);
+      return website;
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
 
   async findUserType(username: string): Promise<any> {
     if (username === 'admin') {
@@ -111,7 +132,7 @@ export class WebsiteService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE "1__"`, [websiteId]);
-
+    
     return pages;
   }
 
@@ -528,5 +549,184 @@ export class WebsiteService {
     }
 
     return !hasError;
+  }
+
+  async update(websiteId: number, name: string, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.update(Website, { WebsiteId: websiteId }, { Name: name, EntityId: entityId, UserId: userId });
+
+      if (oldUserId === null && userId !== null) {
+        if (transfer) {
+          await queryRunner.manager.query(`
+            UPDATE
+              Domain as d, 
+              DomainPage as dp, 
+              Page as p,
+              Evaluation as e
+            SET 
+              p.Show_In = "111",
+              e.Show_To = "11" 
+            WHERE
+              d.WebsiteId = ? AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              p.Show_In LIKE "101" AND
+              e.PageId = p.PageId`, [websiteId]);
+        }
+      } else if ((oldUserId !== null && userId !== null && oldUserId !== userId) || oldUserId !== null && userId === null) {
+        if (!transfer || (oldUserId && !userId)) {
+          await queryRunner.manager.query(`
+            UPDATE
+              Domain as d, 
+              DomainPage as dp, 
+              Page as p,
+              Evaluation as e
+            SET 
+              p.Show_In = "101",
+              e.Show_To = "10" 
+            WHERE
+              d.WebsiteId = ? AND
+              dp.DomainId = d.DomainId AND
+              p.PageId = dp.PageId AND
+              p.Show_In = "111" AND
+              e.PageId = p.PageId`, [websiteId]);
+        }
+
+        await queryRunner.manager.query(`
+          UPDATE 
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p,
+            Evaluation as e
+          SET 
+            p.Show_In = "100",
+            e.Show_To = "10"
+          WHERE
+            d.WebsiteId = ? AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In = "110" AND
+            e.PageId = p.PageId`, [websiteId]);
+
+        await queryRunner.manager.query(`
+          UPDATE 
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p,
+            Evaluation as e
+          SET 
+            p.Show_In = "000",
+            e.Show_To = "10"
+          WHERE
+            d.WebsiteId = ? AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In = "010" AND
+            e.PageId = p.PageId`, [websiteId]);
+      }
+
+      for (const id of defaultTags || []) {
+        if (!tags.includes(id)) {
+          await queryRunner.manager.query(`DELETE FROM TagWebsite WHERE TagId = ? AND WebsiteId = ?`, [id, websiteId]);
+        }
+      }
+  
+      for (const id of tags || []) {
+        if (!defaultTags.includes(id)) {
+          await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [id, websiteId]);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const page of pages || []) {
+        let show = null;
+
+        if (!pagesId.includes(page.PageId)) {
+          show = page.Show_In[0] + page.Show_In[2] + '0';
+        } else {
+          show = page.Show_In[0] + page.Show_In[2] + '1';
+        }
+
+        await queryRunner.manager.update(Page, { PageId: page.PageId }, { Show_In: show });
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async delete(websiteId: number): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.query(`DELETE FROM TagWebsite WHERE WebsiteId = ? AND TagId <> 0`, [websiteId]);
+
+      await queryRunner.manager.query(`
+        UPDATE 
+          Domain as d, 
+          DomainPage as dp, 
+          Page as p
+        SET 
+          p.Show_In = "000"
+        WHERE
+          d.WebsiteId = ? AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId
+      `, [websiteId]);
+
+      await queryRunner.manager.query(`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`, [websiteId]);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return websiteId;
   }
 }

@@ -9,6 +9,7 @@ export declare class WebsiteService {
     private readonly evaluationService;
     constructor(websiteRepository: Repository<Website>, tagRepository: Repository<Tag>, connection: Connection, evaluationService: EvaluationService);
     findAll(): Promise<any>;
+    findInfo(websiteId: number): Promise<any>;
     findUserType(username: string): Promise<any>;
     findAllDomains(user: string, type: string, website: string, flags: string): Promise<void>;
     findAllPages(websiteId: number): Promise<any>;
@@ -28,4 +29,7 @@ export declare class WebsiteService {
     findNumberOfMyMonitor(): Promise<number>;
     findNumberOfObservatory(): Promise<number>;
     createOne(website: Website, domain: string, tags: string[]): Promise<boolean>;
+    update(websiteId: number, name: string, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any>;
+    updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any>;
+    delete(websiteId: number): Promise<any>;
 }

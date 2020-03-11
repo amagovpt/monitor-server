@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager, In } from 'typeorm';
 import { User } from './user.entity';
@@ -51,6 +51,182 @@ export class UserService {
     return true;
   }
 
+  async update(userId: number, password: string, names: string, emails: string, app: string, defaultWebsites: number[], websites: number[], transfer: boolean): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.update(User, { UserId: userId }, { Names: names, Emails: emails });
+
+      if (password && password !== 'null') {
+        await queryRunner.manager.update(User, { UserId: userId }, { Password: await generatePasswordHash(password) });
+      }
+
+      if (app === 'monitor') {
+        for (const id of defaultWebsites || []) {
+          if (!websites.includes(id)) {
+            await queryRunner.manager.query(`
+              UPDATE
+                Domain as d, 
+                DomainPage as dp, 
+                Page as p,
+                Evaluation as e
+              SET 
+                p.Show_In = "101",
+                e.Show_To = "10" 
+              WHERE
+                d.WebsiteId = ? AND
+                dp.DomainId = d.DomainId AND
+                p.PageId = dp.PageId AND
+                p.Show_In = "111" AND
+                e.PageId = p.PageId`, [id]);
+  
+            await queryRunner.manager.query(`
+              UPDATE 
+                Domain as d, 
+                DomainPage as dp, 
+                Page as p,
+                Evaluation as e
+              SET 
+                p.Show_In = "100",
+                e.Show_To = "10"
+              WHERE
+                d.WebsiteId = ? AND
+                dp.DomainId = d.DomainId AND
+                p.PageId = dp.PageId AND
+                p.Show_In = "110" AND
+                e.PageId = p.PageId`, [id]);
+  
+            await queryRunner.manager.query(`
+              UPDATE 
+                Domain as d, 
+                DomainPage as dp, 
+                Page as p,
+                Evaluation as e
+              SET 
+                p.Show_In = "000",
+                e.Show_To = "10" 
+              WHERE
+                d.WebsiteId = ? AND
+                dp.DomainId = d.DomainId AND
+                p.PageId = dp.PageId AND
+                p.Show_In = "010" AND
+                e.PageId = p.PageId`, [id]);
+
+            await queryRunner.manager.update(Website, { WebsiteId: id }, { UserId: null });
+          }
+        }
+  
+        for (const id of websites || []) {
+          if (!defaultWebsites.includes(id)) {
+            await queryRunner.manager.update(Website, { WebsiteId: id }, { UserId: userId });
+  
+            if (transfer) {
+              await queryRunner.manager.query(`UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
+                WHERE
+                  d.WebsiteId = ? AND
+                  dp.DomainId = d.DomainId AND
+                  p.PageId = dp.PageId AND
+                  p.Show_In = "101" AND
+                  e.PageId = e.PageId`, [id]);
+            }
+          }
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async delete(userId: number, app: string): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      if (app === 'monitor') {
+        await queryRunner.manager.query(`
+          UPDATE 
+            Website as w,
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p 
+          SET 
+            p.Show_In = "101" 
+          WHERE
+            w.UserId = ? AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "111"`, [userId]);
+  
+        await queryRunner.manager.query(`
+          UPDATE 
+            Website as w,
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p 
+          SET 
+            p.Show_In = "100" 
+          WHERE
+            w.UserId = ? AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            LOWER(p.Show_In) = "110"`, [userId]);
+  
+        await queryRunner.manager.query(`
+          UPDATE 
+            Website as w,
+            Domain as d, 
+            DomainPage as dp, 
+            Page as p 
+          SET 
+            p.Show_In = "000" 
+          WHERE
+            w.UserId = ? AND
+            d.WebsiteId = w.WebsiteId AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            LOWER(p.Show_In) = "100"`, [userId]);
+  
+        await queryRunner.manager.query(`UPDATE Website SET UserId = NULL WHERE UserId = ?`, [userId]);
+      } else {
+        await queryRunner.manager.query(`DELETE FROM Tag WHERE UserId = ? AND TagId <> 0`, [userId]);
+        await queryRunner.manager.query(`DELETE FROM Website WHERE UserId = ? AND WebsiteId <> 0`, [userId]);
+      }
+  
+      await queryRunner.manager.query(`DELETE FROM User WHERE UserId = ?`, [userId]);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async findAllNonAdmin(): Promise<User[]> {
     const manager = getManager();
     const users = await manager.query(`
@@ -70,6 +246,24 @@ export class UserService {
       select: ['UserId', 'Username', 'Type', 'Register_Date', 'Last_Login'], 
       where: { Type: 'monitor' } 
     });
+  }
+
+  async findInfo(userId: number): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { UserId: userId }});
+
+    if (user) {
+
+      if (user.Type === 'monitor') {
+        user['websites'] = await this.userRepository.query(`SELECT * FROM Website WHERE UserId = ?`, [userId]);
+      }
+
+      delete user.Password;
+      delete user.Unique_Hash;
+
+      return user;
+    } else {
+      throw new InternalServerErrorException();
+    }
   }
 
   findById(id: string): Promise<User> {

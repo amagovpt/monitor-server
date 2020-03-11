@@ -48,8 +48,39 @@ let UserController = class UserController {
         }
         return response_1.success(true);
     }
+    async updateUser(req) {
+        const userId = req.body.userId;
+        const password = req.body.password;
+        const confirmPassword = req.body.confirmPassword;
+        if (password !== confirmPassword) {
+            return response_1.success(false);
+        }
+        const names = req.body.names;
+        const emails = req.body.emails;
+        const app = req.body.app;
+        const websites = JSON.parse(req.body.websites);
+        const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+        const transfer = req.body.transfer === 'true';
+        const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
+        if (!updateSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
+    async deleteUser(req) {
+        const userId = req.body.userId;
+        const app = req.body.app;
+        const deleteSuccess = await this.userService.delete(userId, app);
+        if (!deleteSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
     getUser(id) {
         return this.userService.findById(id);
+    }
+    async getUserInfo(userId) {
+        return response_1.success(await this.userService.findInfo(userId));
     }
     async checkIfUsernameExists(username) {
         return response_1.success(!!await this.userService.findByUsername(username.toLowerCase()));
@@ -117,12 +148,36 @@ __decorate([
 ], UserController.prototype, "createUser", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('get/:id'),
     __param(0, common_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('info/:userId'),
+    __param(0, common_1.Param('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUserInfo", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:username'),

@@ -3,7 +3,11 @@ export declare class WebsiteController {
     private readonly websiteService;
     constructor(websiteService: WebsiteService);
     createWebsite(req: any): Promise<any>;
+    updateWebsite(req: any): Promise<any>;
+    updateWebsitePagesObservatory(req: any): Promise<any>;
+    deleteWebsite(req: any): Promise<any>;
     getAllWebsites(): Promise<any>;
+    getWebsiteInfo(websiteId: number): Promise<any>;
     getAllWebsiteDomains(website: string, user: string): Promise<any>;
     getAllWebsitePages(websiteId: number): Promise<any>;
     getAllOfficialWebsites(): Promise<any>;

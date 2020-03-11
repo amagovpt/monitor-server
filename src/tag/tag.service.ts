@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager, IsNull, In } from 'typeorm';
 import { Tag } from './tag.entity';
@@ -16,6 +16,30 @@ export class TagService {
 
   findByTagName(tagName: string): Promise<Tag | undefined> {
     return this.tagRepository.findOne({ where: { Name: tagName } });
+  }
+
+  async findByOfficialTagName(tagName: string): Promise<Tag | undefined> {
+    return (await this.tagRepository.query(`SELECT * FROM Tag WHERE LOWER(Name) = ? AND UserId IS NULL LIMIT 1`, [tagName.toLowerCase()]))[0];
+  }
+
+  async findInfo(tagId: number): Promise<any> {
+    const tags = await this.tagRepository.query(`SELECT t.*, u.Username FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = ? LIMIT 1`, [tagId]);
+  
+    if (tags) {
+      const tag = tags[0];
+
+      tag.websites = await this.tagRepository.query(`SELECT w.* 
+        FROM
+          TagWebsite as tw,
+          Website as w 
+        WHERE
+          tw.TagId = ? AND 
+          w.WebsiteId = tw.WebsiteId`, [tagId]);
+
+      return tag;
+    } else {
+      throw new InternalServerErrorException();
+    }
   }
 
   async findAll(): Promise<any> {
@@ -299,6 +323,63 @@ export class TagService {
       } else {
         hasError = true;
       }
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async update(tagId: number, name: string, observatory: number, defaultWebsites: number[], websites: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.update(Tag, { TagId: tagId }, { Name: name, Show_in_Observatorio: observatory});
+
+      for (const id of defaultWebsites || []) {
+        if (!websites.includes(id)) {
+          await queryRunner.manager.query(`DELETE FROM TagWebsite WHERE TagId = ? AND WebsiteId = ?`, [tagId, id]);
+        }
+      }
+  
+      for (const id of websites || []) {
+        if (!defaultWebsites.includes(id)) {
+          await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [tagId, id]);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async delete(tagId: number): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.delete(Tag, { where: { TagId: tagId } });
+      await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();

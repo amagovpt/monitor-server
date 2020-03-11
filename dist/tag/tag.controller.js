@@ -33,6 +33,26 @@ let TagController = class TagController {
         }
         return response_1.success(true);
     }
+    async updateOfficialTag(req) {
+        const tagId = req.body.tagId;
+        const name = req.body.name;
+        const observatory = req.body.observatory;
+        const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+        const websites = JSON.parse(req.body.websites);
+        const updateSuccess = await this.tagService.update(tagId, name, observatory, defaultWebsites, websites);
+        if (!updateSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
+    async deleteOfficialTag(req) {
+        const tagId = req.body.tagId;
+        const deleteSuccess = await this.tagService.delete(tagId);
+        if (!deleteSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
     async createStudyMonitorUserTag(req) {
         const tag = new tag_entity_1.Tag();
         tag.Name = req.body.user_tag_name;
@@ -56,7 +76,7 @@ let TagController = class TagController {
         return response_1.success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
     }
     async checkIfTagNameExists(tagName) {
-        return response_1.success(!!await this.tagService.findByTagName(tagName.toLowerCase()));
+        return response_1.success(!!await this.tagService.findByOfficialTagName(tagName.toLowerCase()));
     }
     async getAllTags() {
         return response_1.success(await this.tagService.findAll());
@@ -79,6 +99,9 @@ let TagController = class TagController {
     }
     async getUserWebsitePages(tag, website, user) {
         return response_1.success(await this.tagService.findAllUserWebsitePages(tag, website, user));
+    }
+    async getTagInfo(tagId) {
+        return response_1.success(await this.tagService.findInfo(tagId));
     }
     async getAllOfficialTags() {
         return response_1.success(await this.tagService.findAllOfficial());
@@ -107,6 +130,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "createOfficialTag", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "updateOfficialTag", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "deleteOfficialTag", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
     common_1.Post('user/create'),
@@ -163,7 +202,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "getUserWebsitePages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt'), passport_1.AuthGuard('jwt-study')),
+    common_1.UseGuards(passport_1.AuthGuard('jwt')),
+    common_1.Get('info/:tagId'),
+    __param(0, common_1.Param('tagId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getTagInfo", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt')),
     common_1.Get('allOfficial'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

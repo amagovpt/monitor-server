@@ -5,7 +5,10 @@ export declare class UserController {
     constructor(userService: UserService);
     changeUserPassword(req: any): Promise<any>;
     createUser(req: any): Promise<any>;
+    updateUser(req: any): Promise<any>;
+    deleteUser(req: any): Promise<any>;
     getUser(id: string): Promise<User>;
+    getUserInfo(userId: number): Promise<User>;
     checkIfUsernameExists(username: string): Promise<boolean>;
     getAllNonAdminUsers(): Promise<any>;
     getAllMyMonitorUsers(): Promise<any>;

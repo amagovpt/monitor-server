@@ -61,4 +61,19 @@ export class PageController {
     const pagesId = JSON.parse(req.body.pagesId);
     return success(await this.pageService.removeStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, pagesId));
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async update(@Request() req: any): Promise<any> {
+    const pageId = req.body.pageId;
+    const checked = req.body.checked;
+    return success(await this.pageService.update(pageId, checked));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('delete')
+  async delete(@Request() req: any): Promise<any> {
+    const pages = req.body.pages
+    return success(await this.pageService.delete(pages));
+  }
 }

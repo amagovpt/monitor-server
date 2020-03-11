@@ -427,4 +427,84 @@ export class PageService {
     //return !hasError;
     return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
   }
+
+  async update(pageId: number, checked: boolean): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const page = await queryRunner.manager.findOne(Page, { where: { PageId: pageId } });
+
+      if (page) {
+        const both = new RegExp('[0-1][1][1]');
+        const none = new RegExp('[0-1][0][0]');
+        let show = null;
+
+        if (both.test(page.Show_In)) {
+          show = page.Show_In[0] + "10";
+        } else if (page.Show_In[1] === '1' && checked) {
+          show = page.Show_In[0] + "11";
+        } else if (page.Show_In[1] === '1' && !checked) {
+          show = page.Show_In[0] + "00";
+        } else if (page.Show_In[2] === '1' && checked) {
+          show = page.Show_In[0] + "11";
+        } else if (page.Show_In[2] === '1' && !checked) {
+          show = page.Show_In[0] + "00";
+        } else if (none.test(page.Show_In)) {
+          show = page.Show_In[0] + "01";
+        }
+
+        await queryRunner.manager.update(Page, { PageId: pageId }, { Show_In: show });
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return pageId;
+  }
+
+  async delete(pages: number[]): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const id of pages || []) {
+        const page = await queryRunner.manager.findOne(Page, { where: { PageId: id } });
+
+        if (page) {
+          const show_in = page.Show_In;
+          let new_show_in = '000';
+          if (show_in[1] === '1') {
+            new_show_in = '010';
+          }
+          await queryRunner.manager.update(Page, { PageId: id }, { Show_In: new_show_in });
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
 }

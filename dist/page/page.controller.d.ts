@@ -9,4 +9,6 @@ export declare class PageController {
     getStudyMonitorUserTagWebsitePages(req: any, tag: string, website: string): Promise<any>;
     createStudyMonitorUserTagWebsitePages(req: any): Promise<any>;
     removeStudyMonitorUserTagWebsitePages(req: any): Promise<any>;
+    update(req: any): Promise<any>;
+    delete(req: any): Promise<any>;
 }

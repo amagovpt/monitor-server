@@ -43,8 +43,39 @@ let WebsiteController = class WebsiteController {
         }
         return response_1.success(true);
     }
+    async updateWebsite(req) {
+        const websiteId = req.body.websiteId;
+        const name = req.body.name;
+        const entityId = req.body.entityId;
+        const userId = req.body.userId;
+        const oldUserId = req.body.olderUserId;
+        const transfer = req.body.transfer === 'true';
+        const defaultTags = JSON.parse(req.body.defaultTags);
+        const tags = JSON.parse(req.body.tags);
+        const updateSuccess = await this.websiteService.update(websiteId, name, entityId, userId, oldUserId, transfer, defaultTags, tags);
+        if (!updateSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
+    async updateWebsitePagesObservatory(req) {
+        const pages = JSON.parse(req.body.pages);
+        const pagesId = JSON.parse(req.body.pagesId);
+        return response_1.success(await this.websiteService.updatePagesObservatory(pages, pagesId));
+    }
+    async deleteWebsite(req) {
+        const websiteId = req.body.websiteId;
+        const deleteSuccess = await this.websiteService.delete(websiteId);
+        if (!deleteSuccess) {
+            throw new common_1.InternalServerErrorException();
+        }
+        return response_1.success(true);
+    }
     async getAllWebsites() {
         return response_1.success(await this.websiteService.findAll());
+    }
+    async getWebsiteInfo(websiteId) {
+        return response_1.success(await this.websiteService.findInfo(websiteId));
     }
     async getAllWebsiteDomains(website, user) {
         const type = await this.websiteService.findUserType(user);
@@ -148,11 +179,43 @@ __decorate([
 ], WebsiteController.prototype, "createWebsite", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "updateWebsite", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('pages/updateObservatory'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "updateWebsitePagesObservatory", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "deleteWebsite", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('info/:websiteId'),
+    __param(0, common_1.Param('websiteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getWebsiteInfo", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get(':website/user/:user/domains'),
@@ -163,7 +226,7 @@ __decorate([
 ], WebsiteController.prototype, "getAllWebsiteDomains", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('pages'),
+    common_1.Get('pages/:websiteId'),
     __param(0, common_1.Param('websiteId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),

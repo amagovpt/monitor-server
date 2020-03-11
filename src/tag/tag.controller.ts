@@ -28,6 +28,37 @@ export class TagController {
     return success(true);
   }
 
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async updateOfficialTag(@Request() req: any): Promise<any> {
+    const tagId = req.body.tagId;
+    const name = req.body.name;
+    const observatory = req.body.observatory;
+    const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+    const websites = JSON.parse(req.body.websites);
+    
+    const updateSuccess = await this.tagService.update(tagId, name, observatory, defaultWebsites, websites);
+
+    if (!updateSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('delete')
+  async deleteOfficialTag(@Request() req: any): Promise<any> {
+    const tagId = req.body.tagId;
+    
+    const deleteSuccess = await this.tagService.delete(tagId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
   @UseGuards(AuthGuard('jwt-study'))
   @Post('user/create')
   async createStudyMonitorUserTag(@Request() req: any): Promise<any> {
@@ -66,7 +97,7 @@ export class TagController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:tagName')
   async checkIfTagNameExists(@Param('tagName') tagName: string): Promise<boolean> {
-    return success(!!await this.tagService.findByTagName(tagName.toLowerCase()));
+    return success(!!await this.tagService.findByOfficialTagName(tagName.toLowerCase()));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
@@ -107,7 +138,13 @@ export class TagController {
     return success(await this.tagService.findAllUserWebsitePages(tag, website, user));
   }
 
-  @UseGuards(AuthGuard('jwt'), AuthGuard('jwt-study'))
+  @UseGuards(AuthGuard('jwt'))
+  @Get('info/:tagId')
+  async getTagInfo(@Param('tagId') tagId: number): Promise<any> {
+    return success(await this.tagService.findInfo(tagId));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get('allOfficial')
   async getAllOfficialTags(): Promise<any> {
     return success(await this.tagService.findAllOfficial());

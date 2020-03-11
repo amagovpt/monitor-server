@@ -53,6 +53,15 @@ let PageController = class PageController {
         const pagesId = JSON.parse(req.body.pagesId);
         return response_1.success(await this.pageService.removeStudyMonitorUserTagWebsitePages(req.user.userId, tag, website, pagesId));
     }
+    async update(req) {
+        const pageId = req.body.pageId;
+        const checked = req.body.checked;
+        return response_1.success(await this.pageService.update(pageId, checked));
+    }
+    async delete(req) {
+        const pages = req.body.pages;
+        return response_1.success(await this.pageService.delete(pages));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -109,6 +118,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "removeStudyMonitorUserTagWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "update", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "delete", null);
 PageController = __decorate([
     common_1.Controller('page'),
     __metadata("design:paramtypes", [page_service_1.PageService])

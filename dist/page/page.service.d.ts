@@ -16,4 +16,6 @@ export declare class PageService {
     removeMyMonitorUserWebsitePages(userId: number, website: string, pagesIds: number[]): Promise<any>;
     createStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, domain: string, uris: string[]): Promise<any>;
     removeStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, pagesId: number[]): Promise<any>;
+    update(pageId: number, checked: boolean): Promise<any>;
+    delete(pages: number[]): Promise<any>;
 }

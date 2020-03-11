@@ -31,9 +31,56 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async updateWebsite(@Request() req: any): Promise<any> {
+    const websiteId = req.body.websiteId;
+    const name = req.body.name;
+    const entityId = req.body.entityId;
+    const userId = req.body.userId;
+    const oldUserId = req.body.olderUserId;
+    const transfer = req.body.transfer === 'true';
+    const defaultTags = JSON.parse(req.body.defaultTags);
+    const tags = JSON.parse(req.body.tags);
+    
+    const updateSuccess = await this.websiteService.update(websiteId, name, entityId, userId, oldUserId, transfer, defaultTags, tags);
+    if (!updateSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('pages/updateObservatory')
+  async updateWebsitePagesObservatory(@Request() req: any): Promise<any> {
+    const pages = JSON.parse(req.body.pages);
+    const pagesId = JSON.parse(req.body.pagesId);
+    return success(await this.websiteService.updatePagesObservatory(pages, pagesId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('delete')
+  async deleteWebsite(@Request() req: any): Promise<any> {
+    const websiteId = req.body.websiteId;
+  
+    const deleteSuccess = await this.websiteService.delete(websiteId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
   async getAllWebsites(): Promise<any> {
     return success(await this.websiteService.findAll());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('info/:websiteId')
+  async getWebsiteInfo(@Param('websiteId') websiteId: number): Promise<any> {
+    return success(await this.websiteService.findInfo(websiteId));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
@@ -56,7 +103,7 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
-  @Get('pages')
+  @Get('pages/:websiteId')
   async getAllWebsitePages(@Param('websiteId') websiteId: number): Promise<any> {
     return success(await this.websiteService.findAllPages(websiteId));
   }

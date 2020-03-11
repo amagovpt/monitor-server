@@ -7,8 +7,11 @@ export declare class UserService {
     private readonly connection;
     constructor(userRepository: Repository<User>, tagRepository: Repository<Tag>, connection: Connection);
     changePassword(userId: number, password: string, newPassword: string): Promise<any>;
+    update(userId: number, password: string, names: string, emails: string, app: string, defaultWebsites: number[], websites: number[], transfer: boolean): Promise<any>;
+    delete(userId: number, app: string): Promise<any>;
     findAllNonAdmin(): Promise<User[]>;
     findAllFromMyMonitor(): Promise<User[]>;
+    findInfo(userId: number): Promise<any>;
     findById(id: string): Promise<User>;
     findByUsername(username: string): Promise<User | undefined>;
     findNumberOfStudyMonitor(): Promise<number>;
