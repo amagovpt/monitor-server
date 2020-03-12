@@ -77,6 +77,9 @@ let WebsiteController = class WebsiteController {
     async getWebsiteInfo(websiteId) {
         return response_1.success(await this.websiteService.findInfo(websiteId));
     }
+    async getWebsiteCurrentDomain(websiteId) {
+        return response_1.success(await this.websiteService.findCurrentDomain(websiteId));
+    }
     async getAllWebsiteDomains(website, user) {
         const type = await this.websiteService.findUserType(user);
         let flags;
@@ -216,6 +219,14 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsiteInfo", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('currentDomain/:websiteId'),
+    __param(0, common_1.Param('websiteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "getWebsiteCurrentDomain", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get(':website/user/:user/domains'),

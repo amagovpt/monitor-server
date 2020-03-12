@@ -1,13 +1,15 @@
 import { Connection, Repository } from 'typeorm';
 import { Website } from './website.entity';
+import { Domain } from '../domain/domain.entity';
 import { Tag } from '../tag/tag.entity';
 import { EvaluationService } from '../evaluation/evaluation.service';
 export declare class WebsiteService {
     private readonly websiteRepository;
     private readonly tagRepository;
+    private readonly domainRepository;
     private readonly connection;
     private readonly evaluationService;
-    constructor(websiteRepository: Repository<Website>, tagRepository: Repository<Tag>, connection: Connection, evaluationService: EvaluationService);
+    constructor(websiteRepository: Repository<Website>, tagRepository: Repository<Tag>, domainRepository: Repository<Domain>, connection: Connection, evaluationService: EvaluationService);
     findAll(): Promise<any>;
     findInfo(websiteId: number): Promise<any>;
     findUserType(username: string): Promise<any>;
@@ -28,6 +30,7 @@ export declare class WebsiteService {
     findNumberOfStudyMonitor(): Promise<number>;
     findNumberOfMyMonitor(): Promise<number>;
     findNumberOfObservatory(): Promise<number>;
+    findCurrentDomain(websiteId: number): Promise<any>;
     createOne(website: Website, domain: string, tags: string[]): Promise<boolean>;
     update(websiteId: number, name: string, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any>;
     updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any>;

@@ -24,15 +24,15 @@ export class PageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(){
-    console.log('Connect');
+    
   }
 
   async handleDisconnect(){
-    console.log('Disconnect');
+    
   }
 
   @SubscribeMessage('pages')
-  async handleMessage(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+  async addPages(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
     const uris = JSON.parse(data.uris).map(uri => decodeURIComponent(uri));
     const observatory = JSON.parse(data.observatory).map(uri => decodeURIComponent(uri));;
     
@@ -124,6 +124,209 @@ export class PageGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return true;
     } else {
       throw new UnauthorizedException();
+    }
+  }
+
+  @SubscribeMessage('website')
+  async reEvaluateWebsite(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    let cancel = false;
+
+    client.on('cancel', data => {
+      cancel = true;
+    });
+
+    const pages = await this.pageRepository.query(`
+      SELECT 
+        p.PageId, 
+        p.Uri 
+      FROM 
+        DomainPage as dp, 
+        Page as p
+      WHERE
+        dp.DomainId = ? AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE ?`, [data.domainId, data.option === 'all' ? '1__' : '1_1']);
+
+    client.emit('startup', pages.length);
+
+    for (const page of pages || []) {
+
+      if (cancel) {
+        break;
+      }
+
+      client.emit('currentUri', encodeURIComponent(page.Uri));
+
+      let hasError = false;
+
+      try {
+        await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+      } catch (err) {
+        hasError = true;
+        console.log(err);
+      }
+      const resultData = {
+        success: !hasError,
+        uri: encodeURIComponent(page.Uri)
+      };
+
+      client.emit('evaluated', resultData);
+    }
+  }
+
+  @SubscribeMessage('entity')
+  async reEvaluateEntity(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    let cancel = false;
+    let skip = false;
+
+    client.on('cancel', data => {
+      cancel = true;
+    });
+
+    client.on('skip', data => {
+      skip = true;
+    });
+
+    const websites = await this.pageRepository.query(`
+      SELECT
+        w.Name,
+        d.DomainId
+      FROM
+        Website as w,
+        Domain as d
+      WHERE
+        w.EntityId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+    `, [data.entityId]);
+
+    client.emit('startupEntity', websites.length);
+
+    for (const website of websites || []) {
+
+      if (cancel) {
+        break;
+      }
+
+      const pages = await this.pageRepository.query(`
+        SELECT 
+          p.PageId, 
+          p.Uri 
+        FROM 
+          DomainPage as dp, 
+          Page as p
+        WHERE
+          dp.DomainId = ? AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?`, [website.DomainId, data.option === 'all' ? '1__' : '1_1']);
+
+      client.emit('startupWebsite', { n_uris: pages.length, current_website: website.Name });
+
+      for (const page of pages || []) {
+
+        if (cancel || skip) {
+          skip = false;
+          break;
+        }
+  
+        client.emit('currentUri', encodeURIComponent(page.Uri));
+  
+        let hasError = false;
+  
+        try {
+          await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+        } catch (err) {
+          hasError = true;
+          console.log(err);
+        }
+        const resultData = {
+          success: !hasError,
+          uri: encodeURIComponent(page.Uri)
+        };
+  
+        client.emit('evaluated', resultData);
+      }
+
+      client.emit('websiteFinished', website.Name);
+    }
+  }
+
+  @SubscribeMessage('tag')
+  async reEvaluateTag(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    let cancel = false;
+    let skip = false;
+
+    client.on('cancel', data => {
+      cancel = true;
+    });
+
+    client.on('skip', data => {
+      skip = true;
+    });
+
+    const websites = await this.pageRepository.query(`
+      SELECT
+        w.Name,
+        d.DomainId
+      FROM
+        TagWebsite as tw,
+        Website as w,
+        Domain as d
+      WHERE
+        tw.TagId = ? AND
+        w.WebsiteId = tw.WebsiteId AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+    `, [data.tagId]);
+
+    client.emit('startupTag', websites.length);
+
+    for (const website of websites || []) {
+
+      if (cancel) {
+        break;
+      }
+
+      const pages = await this.pageRepository.query(`
+        SELECT 
+          p.PageId, 
+          p.Uri 
+        FROM 
+          DomainPage as dp, 
+          Page as p
+        WHERE
+          dp.DomainId = ? AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?`, [website.DomainId, data.option === 'all' ? '1__' : '1_1']);
+
+      client.emit('startupWebsite', { n_uris: pages.length, current_website: website.Name });
+
+      for (const page of pages || []) {
+
+        if (cancel || skip) {
+          skip = false;
+          break;
+        }
+  
+        client.emit('currentUri', encodeURIComponent(page.Uri));
+  
+        let hasError = false;
+  
+        try {
+          await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+        } catch (err) {
+          hasError = true;
+          console.log(err);
+        }
+        const resultData = {
+          success: !hasError,
+          uri: encodeURIComponent(page.Uri)
+        };
+  
+        client.emit('evaluated', resultData);
+      }
+
+      client.emit('websiteFinished', website.Name);
     }
   }
 }

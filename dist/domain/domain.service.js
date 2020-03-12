@@ -21,6 +21,43 @@ let DomainService = class DomainService {
         this.domainRepository = domainRepository;
         this.connection = connection;
     }
+    async create(domain) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(domain_entity_1.Domain, { WebsiteId: domain.WebsiteId, Active: 1 }, { End_Date: domain.Start_Date, Active: 0 });
+            await queryRunner.manager.save(domain);
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async update(domainId, url) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(domain_entity_1.Domain, { DomainId: domainId }, { Url: url });
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
     async findAll() {
         const manager = typeorm_2.getManager();
         const domains = await manager.query(`SELECT d.*, COUNT(distinct p.PageId) as Pages, u.Username as User

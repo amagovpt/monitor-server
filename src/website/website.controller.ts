@@ -84,6 +84,12 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Get('currentDomain/:websiteId')
+  async getWebsiteCurrentDomain(@Param('websiteId') websiteId: number): Promise<any> {
+    return success(await this.websiteService.findCurrentDomain(websiteId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get(':website/user/:user/domains')
   async getAllWebsiteDomains(@Param('website') website: string, @Param('user') user: string): Promise<any> {
     const type = await this.websiteService.findUserType(user);

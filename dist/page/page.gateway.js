@@ -36,12 +36,10 @@ let PageGateway = class PageGateway {
         this.connection = connection;
     }
     async handleConnection() {
-        console.log('Connect');
     }
     async handleDisconnect() {
-        console.log('Disconnect');
     }
-    async handleMessage(data, client) {
+    async addPages(data, client) {
         const uris = JSON.parse(data.uris).map(uri => decodeURIComponent(uri));
         const observatory = JSON.parse(data.observatory).map(uri => decodeURIComponent(uri));
         ;
@@ -124,6 +122,167 @@ let PageGateway = class PageGateway {
             throw new common_1.UnauthorizedException();
         }
     }
+    async reEvaluateWebsite(data, client) {
+        let cancel = false;
+        client.on('cancel', data => {
+            cancel = true;
+        });
+        const pages = await this.pageRepository.query(`
+      SELECT 
+        p.PageId, 
+        p.Uri 
+      FROM 
+        DomainPage as dp, 
+        Page as p
+      WHERE
+        dp.DomainId = ? AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE ?`, [data.domainId, data.option === 'all' ? '1__' : '1_1']);
+        client.emit('startup', pages.length);
+        for (const page of pages || []) {
+            if (cancel) {
+                break;
+            }
+            client.emit('currentUri', encodeURIComponent(page.Uri));
+            let hasError = false;
+            try {
+                await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+            }
+            catch (err) {
+                hasError = true;
+                console.log(err);
+            }
+            const resultData = {
+                success: !hasError,
+                uri: encodeURIComponent(page.Uri)
+            };
+            client.emit('evaluated', resultData);
+        }
+    }
+    async reEvaluateEntity(data, client) {
+        let cancel = false;
+        let skip = false;
+        client.on('cancel', data => {
+            cancel = true;
+        });
+        client.on('skip', data => {
+            skip = true;
+        });
+        const websites = await this.pageRepository.query(`
+      SELECT
+        w.Name,
+        d.DomainId
+      FROM
+        Website as w,
+        Domain as d
+      WHERE
+        w.EntityId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+    `, [data.entityId]);
+        client.emit('startupEntity', websites.length);
+        for (const website of websites || []) {
+            if (cancel) {
+                break;
+            }
+            const pages = await this.pageRepository.query(`
+        SELECT 
+          p.PageId, 
+          p.Uri 
+        FROM 
+          DomainPage as dp, 
+          Page as p
+        WHERE
+          dp.DomainId = ? AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?`, [website.DomainId, data.option === 'all' ? '1__' : '1_1']);
+            client.emit('startupWebsite', { n_uris: pages.length, current_website: website.Name });
+            for (const page of pages || []) {
+                if (cancel || skip) {
+                    skip = false;
+                    break;
+                }
+                client.emit('currentUri', encodeURIComponent(page.Uri));
+                let hasError = false;
+                try {
+                    await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+                }
+                catch (err) {
+                    hasError = true;
+                    console.log(err);
+                }
+                const resultData = {
+                    success: !hasError,
+                    uri: encodeURIComponent(page.Uri)
+                };
+                client.emit('evaluated', resultData);
+            }
+            client.emit('websiteFinished', website.Name);
+        }
+    }
+    async reEvaluateTag(data, client) {
+        let cancel = false;
+        let skip = false;
+        client.on('cancel', data => {
+            cancel = true;
+        });
+        client.on('skip', data => {
+            skip = true;
+        });
+        const websites = await this.pageRepository.query(`
+      SELECT
+        w.Name,
+        d.DomainId
+      FROM
+        TagWebsite as tw,
+        Website as w,
+        Domain as d
+      WHERE
+        tw.TagId = ? AND
+        w.WebsiteId = tw.WebsiteId AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1
+    `, [data.tagId]);
+        client.emit('startupTag', websites.length);
+        for (const website of websites || []) {
+            if (cancel) {
+                break;
+            }
+            const pages = await this.pageRepository.query(`
+        SELECT 
+          p.PageId, 
+          p.Uri 
+        FROM 
+          DomainPage as dp, 
+          Page as p
+        WHERE
+          dp.DomainId = ? AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?`, [website.DomainId, data.option === 'all' ? '1__' : '1_1']);
+            client.emit('startupWebsite', { n_uris: pages.length, current_website: website.Name });
+            for (const page of pages || []) {
+                if (cancel || skip) {
+                    skip = false;
+                    break;
+                }
+                client.emit('currentUri', encodeURIComponent(page.Uri));
+                let hasError = false;
+                try {
+                    await this.evaluationService.evaluatePageAndSave(page.PageId, page.Uri, '10');
+                }
+                catch (err) {
+                    hasError = true;
+                    console.log(err);
+                }
+                const resultData = {
+                    success: !hasError,
+                    uri: encodeURIComponent(page.Uri)
+                };
+                client.emit('evaluated', resultData);
+            }
+            client.emit('websiteFinished', website.Name);
+        }
+    }
 };
 __decorate([
     websockets_1.WebSocketServer(),
@@ -135,7 +294,28 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], PageGateway.prototype, "handleMessage", null);
+], PageGateway.prototype, "addPages", null);
+__decorate([
+    websockets_1.SubscribeMessage('website'),
+    __param(0, websockets_1.MessageBody()), __param(1, websockets_1.ConnectedSocket()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PageGateway.prototype, "reEvaluateWebsite", null);
+__decorate([
+    websockets_1.SubscribeMessage('entity'),
+    __param(0, websockets_1.MessageBody()), __param(1, websockets_1.ConnectedSocket()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PageGateway.prototype, "reEvaluateEntity", null);
+__decorate([
+    websockets_1.SubscribeMessage('tag'),
+    __param(0, websockets_1.MessageBody()), __param(1, websockets_1.ConnectedSocket()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PageGateway.prototype, "reEvaluateTag", null);
 PageGateway = __decorate([
     websockets_1.WebSocketGateway(),
     __param(2, typeorm_1.InjectRepository(page_entity_1.Page)),

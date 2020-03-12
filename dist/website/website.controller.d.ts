@@ -8,6 +8,7 @@ export declare class WebsiteController {
     deleteWebsite(req: any): Promise<any>;
     getAllWebsites(): Promise<any>;
     getWebsiteInfo(websiteId: number): Promise<any>;
+    getWebsiteCurrentDomain(websiteId: number): Promise<any>;
     getAllWebsiteDomains(website: string, user: string): Promise<any>;
     getAllWebsitePages(websiteId: number): Promise<any>;
     getAllOfficialWebsites(): Promise<any>;

@@ -21,9 +21,10 @@ const tag_entity_1 = require("../tag/tag.entity");
 const page_entity_1 = require("../page/page.entity");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
 let WebsiteService = class WebsiteService {
-    constructor(websiteRepository, tagRepository, connection, evaluationService) {
+    constructor(websiteRepository, tagRepository, domainRepository, connection, evaluationService) {
         this.websiteRepository = websiteRepository;
         this.tagRepository = tagRepository;
+        this.domainRepository = domainRepository;
         this.connection = connection;
         this.evaluationService = evaluationService;
     }
@@ -431,6 +432,15 @@ let WebsiteService = class WebsiteService {
         return (await manager.query(`SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
       WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`))[0].Websites;
     }
+    async findCurrentDomain(websiteId) {
+        const domain = await this.domainRepository.findOne({ where: { WebsiteId: websiteId } });
+        if (domain) {
+            return domain.Url;
+        }
+        else {
+            return null;
+        }
+    }
     async createOne(website, domain, tags) {
         domain = domain.replace('https://', '').replace('http://', '').replace('www.', '');
         if (domain.endsWith('/')) {
@@ -656,7 +666,9 @@ WebsiteService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(website_entity_1.Website)),
     __param(1, typeorm_1.InjectRepository(tag_entity_1.Tag)),
+    __param(2, typeorm_1.InjectRepository(domain_entity_1.Domain)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Connection,
         evaluation_service_1.EvaluationService])

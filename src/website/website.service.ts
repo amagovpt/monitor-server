@@ -15,6 +15,8 @@ export class WebsiteService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
+    @InjectRepository(Domain)
+    private readonly domainRepository: Repository<Domain>,
     private readonly connection: Connection,
     private readonly evaluationService: EvaluationService
   ) {}
@@ -470,6 +472,16 @@ export class WebsiteService {
     const manager = getManager();
     return (await manager.query(`SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
       WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`))[0].Websites;
+  }
+
+  async findCurrentDomain(websiteId: number): Promise<any> {
+    const domain = await this.domainRepository.findOne({ where: { WebsiteId: websiteId }});
+
+    if (domain) {
+      return domain.Url;
+    } else {
+      return null;
+    }
   }
 
   async createOne(website: Website, domain: string, tags: string[]): Promise<boolean> {

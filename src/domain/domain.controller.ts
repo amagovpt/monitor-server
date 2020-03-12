@@ -1,12 +1,36 @@
-import { Controller, Param, Request, Get, UseGuards } from '@nestjs/common';
+import { Controller, Param, Request, Get, Post, UseGuards, InternalServerErrorException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DomainService } from './domain.service';
 import { success } from '../lib/response';
+import { Domain } from './domain.entity';
 
 @Controller('domain')
 export class DomainController {
 
   constructor(private readonly domainService: DomainService) { }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('create')
+  async createDomain(@Request() req: any): Promise<any> {
+    const newDomain = new Domain();
+    newDomain.WebsiteId = req.body.websiteId;
+    newDomain.Url = decodeURIComponent(req.body.url);
+    newDomain.Start_Date = new Date();
+    newDomain.Active = 1;
+
+    const createSuccess = await this.domainService.create(newDomain);
+    if (!createSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('update')
+  async updateDomain(@Request() req: any): Promise<any> {
+    return success(await this.domainService.update(req.body.domainId, req.body.url));
+  }
 
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')

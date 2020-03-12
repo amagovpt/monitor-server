@@ -13,5 +13,8 @@ export declare class PageGateway implements OnGatewayConnection, OnGatewayDiscon
     constructor(authService: AuthService, evaluationService: EvaluationService, pageRepository: Repository<Page>, connection: Connection);
     handleConnection(): Promise<void>;
     handleDisconnect(): Promise<void>;
-    handleMessage(data: any, client: Socket): Promise<any>;
+    addPages(data: any, client: Socket): Promise<any>;
+    reEvaluateWebsite(data: any, client: Socket): Promise<any>;
+    reEvaluateEntity(data: any, client: Socket): Promise<any>;
+    reEvaluateTag(data: any, client: Socket): Promise<any>;
 }

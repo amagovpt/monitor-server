@@ -4,6 +4,8 @@ export declare class DomainService {
     private readonly domainRepository;
     private readonly connection;
     constructor(domainRepository: Repository<Domain>, connection: Connection);
+    create(domain: Domain): Promise<any>;
+    update(domainId: number, url: string): Promise<any>;
     findAll(): Promise<any>;
     findAllOfficial(): Promise<any>;
     findByUrl(url: string): Promise<any>;
