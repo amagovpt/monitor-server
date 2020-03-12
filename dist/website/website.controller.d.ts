@@ -6,6 +6,7 @@ export declare class WebsiteController {
     updateWebsite(req: any): Promise<any>;
     updateWebsitePagesObservatory(req: any): Promise<any>;
     deleteWebsite(req: any): Promise<any>;
+    importWebsiteFromMyMonitor(req: any): Promise<any>;
     getAllWebsites(): Promise<any>;
     getWebsiteInfo(websiteId: number): Promise<any>;
     getWebsiteCurrentDomain(websiteId: number): Promise<any>;

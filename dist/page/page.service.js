@@ -26,6 +26,18 @@ let PageService = class PageService {
         this.connection = connection;
         this.evaluationService = evaluationService;
     }
+    async findUserType(username) {
+        if (username === 'admin') {
+            return 'nimda';
+        }
+        const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
+        if (user) {
+            return user[0].Type;
+        }
+        else {
+            return null;
+        }
+    }
     async findAll() {
         const manager = typeorm_2.getManager();
         const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date 
@@ -455,6 +467,124 @@ let PageService = class PageService {
             await queryRunner.rollbackTransaction();
             hasError = true;
             console.log(err);
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async import(pageId, type) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            const page = await queryRunner.manager.query(`SELECT Show_In FROM Page WHERE PageId = ? LIMIT 1`, [pageId]);
+            if (page.length > 0) {
+                const show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
+                await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [show, pageId]);
+                let query;
+                if (type === 'studies') {
+                    query = `SELECT  e.EvaluationId, e.Show_To FROM Evaluation as e WHERE e.PageId = ? ORDER BY e.Evaluation_Date  DESC LIMIT 1`;
+                }
+                else {
+                    query = `SELECT e.EvaluationId, e.Show_To FROM Evaluation as e WHERE e.PageId = ? AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date  DESC LIMIT 1`;
+                }
+                const evaluation = await queryRunner.manager.query(query, [pageId]);
+                const evalId = evaluation[0].EvaluationId;
+                const showTo = evaluation[0].Show_To;
+                if (evaluation.length > 0) {
+                    const newShowTo = "1" + showTo[1];
+                    await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [newShowTo, evalId]);
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            console.log(err);
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async importStudy(pageId, username, tagName, website) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            const tag = await queryRunner.manager.query(`SELECT w.*, d.*
+        FROM
+          User as u,
+          Tag as t, 
+          Page as p, 
+          Domain as d, 
+          Website as w,
+          TagWebsite as tw,
+          DomainPage as dp 
+        WHERE
+          p.PageId = ?  AND 
+          dp.PageId = p.PageId AND
+          dp.DomainId = d.DomainId AND
+          d.WebsiteId = w.WebsiteId AND
+          w.Name = ? AND
+          tw.WebsiteId = w.WebsiteId AND 
+          t.TagId = tw.TagId AND
+          t.Name = ? AND
+          u.UserId = t.UserId AND
+          u.Username = ?`, [pageId, website, tagName, username]);
+            const domDate = tag[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const webDate = tag[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const websiteName = tag[0].Name;
+            const domainUrl = tag[0].Url;
+            const domainP = await queryRunner.manager.query(`
+        SELECT d.DomainId, w.Deleted, w.WebsiteId
+        FROM
+          User as u,
+          Website as w,
+          Domain as d
+        WHERE
+          d.Url = ? AND
+          w.WebsiteId = d.WebsiteId AND
+          (
+            w.UserId IS NULL OR
+            (
+              u.UserId = w.UserId AND
+              LOWER(u.Type) = 'monitor'
+            )
+          )
+        LIMIT 1
+      `, [domainUrl]);
+            const domainPageExists = await queryRunner.manager.query(`SELECT dp.*
+        FROM 
+          DomainPage as dp
+        WHERE
+          dp.DomainId = ? AND
+          dp.PageId = ?`, [domainP[0].DomainId, pageId]);
+            if (tag.length > 0) {
+                if (domainP.length > 0) {
+                    if (domainPageExists.length <= 0) {
+                        await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainP[0].DomainId, pageId]);
+                    }
+                    if (domainP[0].Deleted === 1) {
+                        await queryRunner.manager.query(`UPDATE Website SET Name = ?, Deleted = 0 WHERE WebsiteId = ?`, [website, domainP[0].WebsiteId]);
+                    }
+                }
+                else {
+                    const insertWebsite = await queryRunner.manager.query(`INSERT INTO Website (Name, Creation_Date) VALUES (?, ?)`, [websiteName, webDate]);
+                    const insertDomain = await queryRunner.manager.query(`INSERT INTO Domain ( WebsiteId, Url, Start_Date, Active) VALUES (?, ?, ?, "1")`, [insertWebsite.WebsiteId, domainUrl, domDate]);
+                    await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, pageId]);
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            console.log(err);
+            await queryRunner.rollbackTransaction();
+            hasError = true;
         }
         finally {
             await queryRunner.release();

@@ -11,4 +11,5 @@ export declare class PageController {
     removeStudyMonitorUserTagWebsitePages(req: any): Promise<any>;
     update(req: any): Promise<any>;
     delete(req: any): Promise<any>;
+    importPage(req: any): Promise<any>;
 }

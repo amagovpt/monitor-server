@@ -49,7 +49,7 @@ let WebsiteController = class WebsiteController {
         const entityId = req.body.entityId;
         const userId = req.body.userId;
         const oldUserId = req.body.olderUserId;
-        const transfer = req.body.transfer === 'true';
+        const transfer = !!req.body.transfer;
         const defaultTags = JSON.parse(req.body.defaultTags);
         const tags = JSON.parse(req.body.tags);
         const updateSuccess = await this.websiteService.update(websiteId, name, entityId, userId, oldUserId, transfer, defaultTags, tags);
@@ -70,6 +70,11 @@ let WebsiteController = class WebsiteController {
             throw new common_1.InternalServerErrorException();
         }
         return response_1.success(true);
+    }
+    async importWebsiteFromMyMonitor(req) {
+        const websiteId = req.body.websiteId;
+        const websiteName = req.body.websiteName;
+        return response_1.success(await this.websiteService.import(websiteId, websiteName));
     }
     async getAllWebsites() {
         return response_1.success(await this.websiteService.findAll());
@@ -118,7 +123,7 @@ let WebsiteController = class WebsiteController {
         return response_1.success(await this.websiteService.findNumberOfObservatory());
     }
     async checkIfWebsiteExists(name) {
-        return response_1.success(!!await this.websiteService.findByName(SqlString.escape(name)));
+        return response_1.success(!!await this.websiteService.findByName(name));
     }
     async getMyMonitorUserWebsites(req) {
         return response_1.success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
@@ -204,6 +209,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "deleteWebsite", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('import'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "importWebsiteFromMyMonitor", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),

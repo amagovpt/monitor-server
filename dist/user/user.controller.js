@@ -41,7 +41,7 @@ let UserController = class UserController {
         user.Register_Date = new Date();
         user.Unique_Hash = security_1.createRandomUniqueHash();
         const websites = JSON.parse(req.body.websites);
-        const transfer = req.body.transfer === 'true';
+        const transfer = !!req.body.transfer;
         const createSuccess = await this.userService.createOne(user, websites, transfer);
         if (!createSuccess) {
             throw new common_1.InternalServerErrorException();
@@ -60,7 +60,7 @@ let UserController = class UserController {
         const app = req.body.app;
         const websites = JSON.parse(req.body.websites);
         const defaultWebsites = JSON.parse(req.body.defaultWebsites);
-        const transfer = req.body.transfer === 'true';
+        const transfer = !!req.body.transfer;
         const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
         if (!updateSuccess) {
             throw new common_1.InternalServerErrorException();

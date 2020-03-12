@@ -8,6 +8,7 @@ export declare class PageService {
     private readonly connection;
     private readonly evaluationService;
     constructor(websiteRepository: Repository<Website>, pageRepository: Repository<Page>, connection: Connection, evaluationService: EvaluationService);
+    findUserType(username: string): Promise<any>;
     findAll(): Promise<any>;
     getObservatoryData(): Promise<any>;
     findAllFromMyMonitorUserWebsite(userId: number, websiteName: string): Promise<any>;
@@ -18,4 +19,6 @@ export declare class PageService {
     removeStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, pagesId: number[]): Promise<any>;
     update(pageId: number, checked: boolean): Promise<any>;
     delete(pages: number[]): Promise<any>;
+    import(pageId: number, type: string): Promise<any>;
+    importStudy(pageId: number, username: string, tagName: string, website: string): Promise<any>;
 }

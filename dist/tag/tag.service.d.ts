@@ -24,4 +24,7 @@ export declare class TagService {
     findAllUserTagWebsites(tag: string, user: string): Promise<any>;
     verifyUpdateWebsiteAdmin(websiteId: number): Promise<any>;
     domainExistsInAdmin(websiteId: number): Promise<any>;
+    import(tagId: number, tagName: string): Promise<any>;
+    private importWebsite;
+    private importPage;
 }

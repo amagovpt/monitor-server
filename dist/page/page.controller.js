@@ -62,6 +62,18 @@ let PageController = class PageController {
         const pages = req.body.pages;
         return response_1.success(await this.pageService.delete(pages));
     }
+    async importPage(req) {
+        const pageId = req.body.pageId;
+        const username = req.body.user;
+        const tag = req.body.tag;
+        const website = req.body.website;
+        const type = await this.pageService.findUserType(username);
+        let successImport = await this.pageService.import(pageId, type);
+        if (type === 'studies') {
+            successImport = await this.pageService.importStudy(pageId, username, tag, website);
+        }
+        return response_1.success(successImport);
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -134,6 +146,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "delete", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('import'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "importPage", null);
 PageController = __decorate([
     common_1.Controller('page'),
     __metadata("design:paramtypes", [page_service_1.PageService])

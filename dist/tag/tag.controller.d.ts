@@ -7,6 +7,7 @@ export declare class TagController {
     deleteOfficialTag(req: any): Promise<any>;
     createStudyMonitorUserTag(req: any): Promise<any>;
     removeStudyMonitorUserTag(req: any): Promise<any>;
+    importTag(req: any): Promise<any>;
     checkIfTagNameExists(tagName: string): Promise<boolean>;
     getAllTags(): Promise<any>;
     getUserTagWebsites(tag: string, user: string): Promise<any>;

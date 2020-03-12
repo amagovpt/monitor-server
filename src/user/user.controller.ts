@@ -39,7 +39,7 @@ export class UserController {
     user.Unique_Hash = createRandomUniqueHash();
 
     const websites = JSON.parse(req.body.websites);
-    const transfer = req.body.transfer === 'true';
+    const transfer = !!req.body.transfer;
     
     const createSuccess = await this.userService.createOne(user, websites, transfer);
     if (!createSuccess) {
@@ -66,7 +66,7 @@ export class UserController {
 
     const websites = JSON.parse(req.body.websites);
     const defaultWebsites = JSON.parse(req.body.defaultWebsites);
-    const transfer = req.body.transfer === 'true';
+    const transfer = !!req.body.transfer;
     
     const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
     if (!updateSuccess) {

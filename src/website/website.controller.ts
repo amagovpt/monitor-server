@@ -38,7 +38,7 @@ export class WebsiteController {
     const entityId = req.body.entityId;
     const userId = req.body.userId;
     const oldUserId = req.body.olderUserId;
-    const transfer = req.body.transfer === 'true';
+    const transfer = !!req.body.transfer;
     const defaultTags = JSON.parse(req.body.defaultTags);
     const tags = JSON.parse(req.body.tags);
     
@@ -69,6 +69,15 @@ export class WebsiteController {
     }
 
     return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('import')
+  async importWebsiteFromMyMonitor(@Request() req: any): Promise<any> {
+    const websiteId = req.body.websiteId;
+    const websiteName = req.body.websiteName;
+    
+    return success(await this.websiteService.import(websiteId, websiteName));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
@@ -153,7 +162,7 @@ export class WebsiteController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:name')
   async checkIfWebsiteExists(@Param('name') name: string): Promise<any> {
-    return success(!!await this.websiteService.findByName(SqlString.escape(name)));
+    return success(!!await this.websiteService.findByName(name));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))

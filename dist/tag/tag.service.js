@@ -26,8 +26,8 @@ let TagService = class TagService {
     findByTagName(tagName) {
         return this.tagRepository.findOne({ where: { Name: tagName } });
     }
-    async findByOfficialTagName(tagName) {
-        return (await this.tagRepository.query(`SELECT * FROM Tag WHERE LOWER(Name) = ? AND UserId IS NULL LIMIT 1`, [tagName.toLowerCase()]))[0];
+    findByOfficialTagName(tagName) {
+        return this.tagRepository.findOne({ where: { Name: tagName.toLowerCase(), UserId: typeorm_2.IsNull() } });
     }
     async findInfo(tagId) {
         const tags = await this.tagRepository.query(`SELECT t.*, u.Username FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = ? LIMIT 1`, [tagId]);
@@ -449,6 +449,118 @@ let TagService = class TagService {
         d2.Url = d.Url AND
         d2.DomainId != d.DomainId`, [websiteId]);
         return websites;
+    }
+    async import(tagId, tagName) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            const websites = await queryRunner.manager.query(`SELECT tw.*, w.Name FROM TagWebsite as tw, Website as w WHERE tw.TagId = ? AND w.WebsiteId = tw.WebsiteId`, [tagId]);
+            if (websites.length > 0) {
+                const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                const insertTag = await queryRunner.manager.query(`INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
+                    VALUES (?, "0", ?)`, [tagName, date]);
+                for (const website of websites || []) {
+                    const websiteId = await this.importWebsite(queryRunner, website.WebsiteId, website.Name);
+                    await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.insertId, websiteId]);
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+            console.error(err);
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async importWebsite(queryRunner, websiteId, websiteName) {
+        let returnWebsiteId = websiteId;
+        const webDomain = await queryRunner.manager.query(`SELECT distinct w.*, d.*
+      FROM 
+        Page as p, 
+        Domain as d, 
+        Website as w,
+        DomainPage as dp 
+      WHERE 
+        w.WebsiteId = ? AND
+        d.WebsiteId = w.WebsiteId AND 
+        d.Active = "1"`, [websiteId]);
+        const domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        const webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        const pages = await queryRunner.manager.query(`SELECT p.*
+      FROM 
+        Page as p, 
+        Domain as d, 
+        Website as w,
+        DomainPage as dp 
+      WHERE 
+        w.WebsiteId = ? AND
+        d.WebsiteId = w.WebsiteId AND 
+        dp.domainId = d.DomainId AND
+        dp.PageId = p.PageId`, [websiteId]);
+        const domainP = (await queryRunner.manager.query(`SELECT distinct d.DomainId, w.*
+      FROM  
+        Domain as d,
+        Website as w,
+        User as u
+      WHERE 
+        d.Url = ? AND
+        w.WebsiteId = d.WebsiteId AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
+      LIMIT 1
+      `, [webDomain[0].Url]))[0];
+        const domainUrl = webDomain[0].Url;
+        if (webDomain.length > 0) {
+            if (domainP) {
+                for (const page of pages || []) {
+                    if (page.Show_In[0] === '0') {
+                        await this.importPage(queryRunner, page.PageId);
+                        try {
+                            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainP.DomainId, page.PageId]);
+                        }
+                        catch (err) {
+                        }
+                    }
+                }
+                if (domainP.Deleted === 1) {
+                    await queryRunner.manager.query(`UPDATE Website SET Name = ?, Creation_Date = ?, Deleted = "0" WHERE WebsiteId = ?`, [websiteName || domainP.Name, webDate, domainP.WebsiteId]);
+                }
+                else {
+                    await queryRunner.manager.query(`UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`, [webDate, domainP.DomainId]);
+                }
+            }
+            else {
+                const insertWebsite = await queryRunner.manager.query(`INSERT INTO Website (Name, Creation_Date) VALUES (?, ?)`, [websiteName, webDate]);
+                returnWebsiteId = insertWebsite.insertId;
+                const domain = await queryRunner.manager.query(`INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`, [insertWebsite.websiteId, domainUrl, domDate]);
+                for (const page of pages || []) {
+                    if (page.Show_In[0] === '0') {
+                        await this.importPage(queryRunner, page.PageId);
+                        await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`, [domain.DomainId, page.PageId]);
+                    }
+                }
+            }
+        }
+        return returnWebsiteId;
+    }
+    async importPage(queryRunner, pageId) {
+        const page = await queryRunner.manager.query(`SELECT Show_In FROM Page WHERE PageId = ? LIMIT 1`, [pageId]);
+        if (page.length > 0) {
+            const show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
+            await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [show, pageId]);
+            const evaluation = await queryRunner.manager.query(`SELECT  e.EvaluationId, e.Show_To FROM Evaluation as e WHERE e.PageId = ? AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date  DESC LIMIT 1`, [pageId]);
+            const evalId = evaluation[0].EvaluationId;
+            const showTo = evaluation[0].Show_To;
+            if (evaluation.length > 0) {
+                const newShowTo = "1" + showTo[1];
+                await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [newShowTo, evalId]);
+            }
+        }
     }
 };
 TagService = __decorate([

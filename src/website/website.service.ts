@@ -360,7 +360,7 @@ export class WebsiteService {
       newDomain.Active = 1;
 
       const insertDomain = await queryRunner.manager.save(newDomain);
-
+      console.log(insertDomain)
       for (const url of pages || []) {
         const page = await queryRunner.manager.findOne(Page, { where: { Uri: url } });
         if (page) {
@@ -376,7 +376,7 @@ export class WebsiteService {
           const insertPage = await queryRunner.manager.save(newPage);
 
           await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '01');
-
+          
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, insertPage.PageId]);
           
           const existingDomain = await queryRunner.manager.query(`SELECT distinct d.DomainId, d.Url 
@@ -394,10 +394,10 @@ export class WebsiteService {
                   u.Type = 'monitor'
                 )
               )
-            LIMIT 1`, [domain]);
+            LIMIT 1`, [domain.toLowerCase()]);
 
           if (existingDomain.length > 0) {
-            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain.DomainId, newPage.PageId]);
+            await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, newPage.PageId]);
           }
         }
       }
@@ -572,7 +572,6 @@ export class WebsiteService {
     let hasError = false;
     try {
       await queryRunner.manager.update(Website, { WebsiteId: websiteId }, { Name: name, EntityId: entityId, UserId: userId });
-
       if (oldUserId === null && userId !== null) {
         if (transfer) {
           await queryRunner.manager.query(`
@@ -740,5 +739,119 @@ export class WebsiteService {
     }
 
     return websiteId;
+  }
+
+  async import(websiteId: number, websiteName: string): Promise<any> {
+    let returnWebsiteId = websiteId;
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const webDomain = await queryRunner.manager.query(`SELECT distinct w.*, d.*
+        FROM 
+          Page as p, 
+          Domain as d, 
+          Website as w,
+          DomainPage as dp 
+        WHERE 
+          w.WebsiteId = ? AND
+          d.WebsiteId = w.WebsiteId AND 
+          d.Active = "1"`, [websiteId]);
+
+      const domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      const webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+      const pages = await queryRunner.manager.query(`SELECT p.*
+        FROM 
+          Page as p, 
+          Domain as d, 
+          Website as w,
+          DomainPage as dp 
+        WHERE 
+          w.WebsiteId = ? AND
+          d.WebsiteId = w.WebsiteId AND 
+          dp.domainId = d.DomainId AND
+          dp.PageId = p.PageId`, [websiteId]);
+
+      const domainP = (await queryRunner.manager.query(`SELECT distinct d.DomainId, w.*
+        FROM  
+          Domain as d,
+          Website as w,
+          User as u
+        WHERE 
+          d.Url = ? AND
+          w.WebsiteId = d.WebsiteId AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
+        LIMIT 1
+        `, [webDomain[0].Url]))[0]; 
+
+      const domainUrl = webDomain[0].Url;
+
+      if (webDomain.length > 0) {
+        if (domainP) {
+          for (const page of pages || []) {
+            if (page.Show_In[0] === '0') {
+              await this.importPage(queryRunner, page.PageId);
+              try {
+                await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainP.DomainId, page.PageId]);
+              } catch(err) {
+                // ignore - don't know why
+              }
+            }
+          }
+          if (domainP.Deleted === 1) {
+            await queryRunner.manager.query(`UPDATE Website SET Name = ?, Creation_Date = ?, Deleted = "0" WHERE WebsiteId = ?`, [websiteName || domainP.Name, webDate, domainP.WebsiteId]);
+          } else {
+            await queryRunner.manager.query(`UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`, [webDate, domainP.DomainId]);
+          }
+        } else {
+          const insertWebsite = await queryRunner.manager.query(`INSERT INTO Website (Name, Creation_Date) VALUES (?, ?)`, [websiteName, webDate]);
+          returnWebsiteId = insertWebsite.WebsiteId;
+  
+          const domain = await queryRunner.manager.query(`INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`, [insertWebsite.websiteId, domainUrl, domDate]);
+  
+          for (const page of pages || []) {
+            if (page.Show_In[0] === '0') {
+              await this.importPage(queryRunner, page.PageId);
+              await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`, [domain.DomainId, page.PageId]);
+            }
+          }
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+    
+    return returnWebsiteId;
+  }
+
+  private async importPage(queryRunner: any, pageId: number): Promise<any> {
+    const page = await queryRunner.manager.query(`SELECT Show_In FROM Page WHERE PageId = ? LIMIT 1`, [pageId]);
+
+    if (page.length > 0) {
+      const show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
+      await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [show, pageId]);
+
+      const evaluation = await queryRunner.manager.query(`SELECT  e.EvaluationId, e.Show_To FROM Evaluation as e WHERE e.PageId = ? AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date  DESC LIMIT 1`, [pageId]);
+
+      const evalId = evaluation[0].EvaluationId;
+      const showTo = evaluation[0].Show_To;
+
+      if (evaluation.length > 0) {
+        const newShowTo = "1" + showTo[1];
+        await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [newShowTo, evalId]);
+      }
+    }
   }
 }

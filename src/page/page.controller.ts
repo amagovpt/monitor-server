@@ -73,7 +73,27 @@ export class PageController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('delete')
   async delete(@Request() req: any): Promise<any> {
-    const pages = req.body.pages
+    const pages = req.body.pages;
     return success(await this.pageService.delete(pages));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('import')
+  async importPage(@Request() req: any): Promise<any> {
+    const pageId = req.body.pageId;
+    const username = req.body.user;
+    const tag = req.body.tag;
+    const website = req.body.website;
+
+    const type = await this.pageService.findUserType(username);
+
+    let successImport = await this.pageService.import(pageId, type);
+
+    if (type === 'studies') {
+      //method to tag from selected page of studymonitor
+      successImport = await this.pageService.importStudy(pageId, username, tag, website);
+    }
+
+    return success(successImport);
   }
 }

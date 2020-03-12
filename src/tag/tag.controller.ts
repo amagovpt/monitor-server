@@ -95,9 +95,18 @@ export class TagController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('import')
+  async importTag(@Request() req: any): Promise<any> {
+    const tagId = req.body.tagId;
+    const tagName = req.body.tagName;
+
+    return success(await this.tagService.import(tagId, tagName));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:tagName')
   async checkIfTagNameExists(@Param('tagName') tagName: string): Promise<boolean> {
-    return success(!!await this.tagService.findByOfficialTagName(tagName.toLowerCase()));
+    return success(!!await this.tagService.findByOfficialTagName(tagName));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))

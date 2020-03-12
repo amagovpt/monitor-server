@@ -35,4 +35,6 @@ export declare class WebsiteService {
     update(websiteId: number, name: string, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any>;
     updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any>;
     delete(websiteId: number): Promise<any>;
+    import(websiteId: number, websiteName: string): Promise<any>;
+    private importPage;
 }

@@ -75,8 +75,13 @@ let TagController = class TagController {
         }
         return response_1.success(await this.tagService.findAllFromStudyMonitorUser(req.user.userId));
     }
+    async importTag(req) {
+        const tagId = req.body.tagId;
+        const tagName = req.body.tagName;
+        return response_1.success(await this.tagService.import(tagId, tagName));
+    }
     async checkIfTagNameExists(tagName) {
-        return response_1.success(!!await this.tagService.findByOfficialTagName(tagName.toLowerCase()));
+        return response_1.success(!!await this.tagService.findByOfficialTagName(tagName));
     }
     async getAllTags() {
         return response_1.success(await this.tagService.findAll());
@@ -162,6 +167,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "removeStudyMonitorUserTag", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('import'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "importTag", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('exists/:tagName'),
