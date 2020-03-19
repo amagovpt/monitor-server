@@ -29,6 +29,8 @@ const monitor_module_1 = require("./monitor/monitor.module");
 const studies_module_1 = require("./studies/studies.module");
 const stamp_module_1 = require("./stamp/stamp.module");
 const crawler_module_1 = require("./crawler/crawler.module");
+const fs_1 = require("fs");
+const databaseConfig = JSON.parse(fs_1.readFileSync('/home/javicente/Projects/accessmonitor/monitor_db.json').toString());
 const statusMonitorConfig = {
     pageTitle: 'Nest.js Monitoring Page',
     port: 3000,
@@ -80,11 +82,11 @@ AppModule = __decorate([
             schedule_1.ScheduleModule.forRoot(),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'mysql',
-                host: 'localhost',
+                host: databaseConfig.host,
                 port: 3306,
-                username: 'accessmonitor',
-                password: 'accessmonitor',
-                database: 'accessmonitor',
+                username: databaseConfig.user,
+                password: databaseConfig.password,
+                database: databaseConfig.database,
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 synchronize: false,
             }),

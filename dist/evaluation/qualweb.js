@@ -81,8 +81,8 @@ async function init(params) {
                 'QW-BP13',
             ]
         }
-    }))[0];
-    const earlReport = (await core.generateEarlReport())[0];
+    }))[params.url];
+    const earlReport = (await core.generateEarlReport())[params.url];
     return { report, earlReport };
 }
 exports.init = init;

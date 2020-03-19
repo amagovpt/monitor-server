@@ -1,3 +1,5 @@
+import xpath from './xpath';
+
 const act_mapping = {
   'QW-ACT-R1': QW_ACT_R1,
   'QW-ACT-R2': QW_ACT_R2,
@@ -631,7 +633,6 @@ function addToResults(results: any, key: string): void {
 }
 
 function addToNodes(nodes: any, key: string, selectors: string[]): void {
-  const { xpath } = require('./xpath');
   for (const selector of selectors || []) {
     if (selector !== undefined && !nodes[key]) {
       nodes[key] = convert_css_selector_to_xpath(selector);

@@ -1,5 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const xpath_1 = __importDefault(require("./xpath"));
 const act_mapping = {
     'QW-ACT-R1': QW_ACT_R1,
     'QW-ACT-R2': QW_ACT_R2,
@@ -576,7 +580,6 @@ function addToResults(results, key) {
     results[key] = 'something';
 }
 function addToNodes(nodes, key, selectors) {
-    const { xpath } = require('./xpath');
     for (const selector of selectors || []) {
         if (selector !== undefined && !nodes[key]) {
             nodes[key] = convert_css_selector_to_xpath(selector);
@@ -584,8 +587,8 @@ function addToNodes(nodes, key, selectors) {
         else if (selector !== undefined) {
             nodes[key] += '|' + convert_css_selector_to_xpath(selector);
         }
-        else if (xpath[key]) {
-            nodes[key] = xpath[key];
+        else if (xpath_1.default[key]) {
+            nodes[key] = xpath_1.default[key];
         }
     }
 }
