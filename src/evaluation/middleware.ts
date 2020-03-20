@@ -48,8 +48,8 @@ function generateScore(report: any): string {
     finalScore += R;
   }
 
-  console.log(scores);
-  console.log(finalScore / scores.length);
+  //console.log(scores);
+  //console.log(finalScore / scores.length);
 
   return (Math.round((finalScore / scores.length) * 10) / 10).toString();
 }

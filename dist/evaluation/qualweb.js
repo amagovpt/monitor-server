@@ -19,7 +19,6 @@ async function init(params) {
                 'QW-ACT-R4',
                 'QW-ACT-R5',
                 'QW-ACT-R6',
-                'QW-ACT-R9',
                 'QW-ACT-R16',
                 'QW-ACT-R17',
                 'QW-ACT-R18',
