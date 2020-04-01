@@ -20,6 +20,9 @@ let CrawlerController = class CrawlerController {
     constructor(crawlerService) {
         this.crawlerService = crawlerService;
     }
+    async test() {
+        return response_1.success(this.crawlerService.crawl('https://ciencias.ulisboa.pt'));
+    }
     async getAll() {
         return response_1.success(await this.crawlerService.findAll());
     }
@@ -51,6 +54,12 @@ let CrawlerController = class CrawlerController {
         return response_1.success(await this.crawlerService.getCrawlResultsCrawlDomainID(parseInt(crawlDomainId)));
     }
 };
+__decorate([
+    common_1.Get('test'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "test", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),

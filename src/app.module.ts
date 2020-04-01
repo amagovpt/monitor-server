@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { StatusMonitorModule } from 'nest-status-monitor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { NestCrawlerModule } from 'nest-crawler';
 import { join } from 'path';
 
 import { AuthModule } from './auth/auth.module';
@@ -102,7 +103,8 @@ const statusMonitorConfig = {
     MonitorModule,
     StudiesModule,
     StampModule,
-    CrawlerModule
+    CrawlerModule,
+    NestCrawlerModule
   ],
   controllers: [AppController],
   providers: [AppService],

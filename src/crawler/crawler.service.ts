@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
+import { NestCrawlerService } from 'nest-crawler';
 import { CrawlDomain, CrawlPage } from './crawler.entity';
 import { readFileSync, writeFileSync } from 'fs';
 import Crawler from 'simplecrawler';
@@ -13,8 +14,44 @@ export class CrawlerService {
     private readonly crawlDomainRepository: Repository<CrawlDomain>,
     @InjectRepository(CrawlPage)
     private readonly crawlPageRepository: Repository<CrawlPage>,
+    private readonly newCrawler: NestCrawlerService,
     private readonly connection: Connection
   ) {}
+
+  public crawl(url: string): void{
+    const urls = new Array<string>();
+
+    this.newCrawler.fetch({
+      target: {
+        url,
+        iterator: {
+          selector: 'a',
+          convert: (x: string) => {
+            x = decodeURIComponent(x);
+            if (!x.startsWith('#')) {
+              if (x !== url && url.startsWith(x) && !urls.includes(x)) {
+                console.log(x);
+                urls.push(x);
+                return `${x}`;
+              } else if (x.startsWith('/') && !urls.includes(`${url}${x}`)) {
+                console.log(x);
+                urls.push(`${url}${x}`);
+                return `${url}${x}`;
+              }
+            }
+
+            return x;
+          },
+        },
+      },
+      fetch: (data: any, index: number, url: string) => ({
+        title: '.title > a',
+      })
+    }).then(pages => {
+      console.log(pages);
+      console.log(urls);
+    });
+  }
 
   private crawler(domain: string, max_depth: number, max_pages: number, crawl_domain_id: number): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();

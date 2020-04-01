@@ -61,18 +61,6 @@ export default {
     'dis': '54153',
     'result': 'warning'
   },
-  'long_01': {
-    'type': 'prop',
-    'elem': 'longDImg',
-    'test': 'longDNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'H45',
-    'scs': '1.1.1',
-    'dis': '54153',
-    'result': 'failed'
-  },
   'area_01a': {
     'type': 'fals',
     'elem': 'area',
@@ -119,18 +107,6 @@ export default {
     'ref': 'F65',
     'scs': '1.1.1',
     'dis': '53322',
-    'result': 'failed'
-  },
-  'applet_01': {
-    'type': 'prop',
-    'elem': 'applet',
-    'test': 'appletAltNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'H35',
-    'scs': '1.1.1',
-    'dis': '53142',
     'result': 'failed'
   },
   'a_04': {
@@ -197,18 +173,6 @@ export default {
     'ref': 'H2',
     'scs': '1.1.1,2.4.4,2.4.9',
     'dis': '54353',
-    'result': 'failed'
-  },
-  'akey_01': {
-    'type': 'true',
-    'elem': 'all',
-    'test': 'acckeyRep',
-    'score': 4,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'F17',
-    'scs': '1.3.1,4.1.1',
-    'dis': '44151',
     'result': 'failed'
   },
   'a_01a': {
@@ -319,20 +283,6 @@ export default {
     'dis': '54253',
     'result': 'failed'
   },
-  'a_07': {
-    'type': 'decr',
-    'elem': 'a',
-    'test': 'aGroupNo',
-    'score': 5,
-    'level': 'A',
-    'trust': '1',
-    'top': 1,
-    'steps': 1,
-    'ref': 'H50',
-    'scs': '2.4.1',
-    'dis': '54253',
-    'result': ''
-  },
   'list_01': {
     'type': 'decr',
     'elem': 'all',
@@ -385,30 +335,6 @@ export default {
     'ref': 'H71',
     'scs': '1.3.1,3.3.2',
     'dis': '54152',
-    'result': 'failed'
-  },
-  'label_03': {
-    'type': 'prop',
-    'elem': 'label',
-    'test': 'labelTextNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'F68',
-    'scs': '1.3.1,4.1.2',
-    'dis': '52523',
-    'result': 'failed'
-  },
-  'label_01': {
-    'type': 'prop',
-    'elem': 'label',
-    'test': 'labelForNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'F68',
-    'scs': '1.3.1,4.1.2',
-    'dis': '52523',
     'result': 'failed'
   },
   'label_02': {
@@ -599,18 +525,6 @@ export default {
     'dis': '53311',
     'result': 'failed'
   },
-  'frame_02': {
-    'type': 'true',
-    'elem': 'frameset',
-    'test': 'frameDtdNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'H88',
-    'scs': '4.1.1,4.1.2',
-    'dis': '22232',
-    'result': 'failed'
-  },
   'iframe_01': {
     'type': 'prop',
     'elem': 'iframe',
@@ -646,30 +560,6 @@ export default {
     'scs': '3.2.1',
     'dis': '53454',
     'result': 'warning'
-  },
-  'embed_01': {
-    'type': 'prop',
-    'elem': 'embed',
-    'test': 'embedAltNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '0.9',
-    'ref': 'H46',
-    'scs': '1.1.1,1.2.8',
-    'dis': '54353',
-    'result': 'failed'
-  },
-  'object_01': {
-    'type': 'prop',
-    'elem': 'object',
-    'test': 'objectAltNo',
-    'score': 3,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'H27',
-    'scs': '1.1.1',
-    'dis': '54152',
-    'result': 'failed'
   },
   'abbr_01': {
     'type': 'true',
@@ -829,32 +719,6 @@ export default {
     'dis': '13113',
     'result': 'warning'
   },
-  'marquee_01': {
-    'type': 'true',
-    'elem': 'all',
-    'test': 'marquee',
-    'score': 1,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'F16',
-    'scs': '2.2.2',
-    'dis': '45153',
-    'result': 'warning'
-  },
-  'blink_01': {
-    'type': 'decr',
-    'elem': 'all',
-    'test': 'blink',
-    'score': 2,
-    'level': 'A',
-    'trust': '1',
-    'top': 1,
-    'steps': 1,
-    'ref': 'F47',
-    'scs': '2.2.2',
-    'dis': '15154',
-    'result': 'failed'
-  },
   'blink_02': {
     'type': 'true',
     'elem': 'all',
@@ -915,18 +779,6 @@ export default {
     'dis': '43411',
     'result': 'failed'
   },
-  'dtd_01': {
-    'type': 'fals',
-    'elem': 'all',
-    'test': 'dtd',
-    'score': 3,
-    'level': 'a',
-    'trust': '1',
-    'ref': 'H88',
-    'scs': '4.1.1,4.1.2',
-    'dis': '22232',
-    'result': 'failed'
-  },
   'w3c_validator_01a': {
     'type': 'fals',
     'elem': 'w3cValidator',
@@ -952,34 +804,6 @@ export default {
     'scs': '4.1.1',
     'dis': '22232',
     'result': 'failed'
-  },
-  'css_validator_01': {
-    'type': 'fals',
-    'elem': 'all',
-    'test': 'cssValidatorErrors',
-    'score': 10,
-    'level': 'A',
-    'trust': '1',
-    'top': 1,
-    'steps': 1,
-    'ref': 'G134',
-    'scs': '4.1.1',
-    'dis': '54253',
-    'result': ''
-  },
-  'css_validator_02': {
-    'type': 'decr',
-    'elem': 'all',
-    'test': 'cssValidatorErrors',
-    'score': 5,
-    'level': 'A',
-    'trust': '1',
-    'top': 3,
-    'steps': 3,
-    'ref': 'G134',
-    'scs': '4.1.1',
-    'dis': '54253',
-    'result': ''
   },
   'id_01': {
     'type': 'true',
@@ -1033,32 +857,6 @@ export default {
     'dis': '34212',
     'result': 'failed'
   },
-  'layout_02a': {
-    'type': 'fals',
-    'elem': 'all',
-    'test': 'layoutAttr',
-    'score': 10,
-    'level': 'a',
-    'trust': '1',
-    'ref': 'G140',
-    'scs': '1.3.1,1.4.5,1.4.9',
-    'dis': '25243',
-    'result': 'passed'
-  },
-  'layout_02b': {
-    'type': 'decr',
-    'elem': 'all',
-    'test': 'layoutAttr',
-    'score': 5,
-    'level': 'A',
-    'trust': '0.9',
-    'top': 3,
-    'steps': 3,
-    'ref': 'G140',
-    'scs': '1.3.1,1.4.5,1.4.9',
-    'dis': '25243',
-    'result': 'failed'
-  },
   'lang_01': {
     'type': 'true',
     'elem': 'all',
@@ -1100,18 +898,6 @@ export default {
     'elem': 'all',
     'test': 'langMatchNo',
     'score': 4,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'H57',
-    'scs': '3.1.1',
-    'dis': '53112',
-    'result': 'failed'
-  },
-  'lang_05': {
-    'type': 'true',
-    'elem': 'all',
-    'test': 'langExtra',
-    'score': 5,
     'level': 'A',
     'trust': '1',
     'ref': 'H57',
@@ -1192,18 +978,6 @@ export default {
     'scs': '2.4.2',
     'dis': '52112',
     'result': 'failed'
-  },
-  'title_07': {
-    'type': 'true',
-    'elem': 'all',
-    'test': 'titleSame',
-    'score': 4,
-    'level': 'A',
-    'trust': '1',
-    'ref': 'F25',
-    'scs': '2.4.2',
-    'dis': '33151',
-    'result': 'warning'
   },
   'link_01': {
     'type': 'true',

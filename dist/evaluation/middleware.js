@@ -19,35 +19,70 @@ const testsColors_1 = __importDefault(require("./testsColors"));
 const security_1 = require("../lib/security");
 const mapping_1 = require("./mapping");
 function generateScore(report) {
-    const scores = new Array();
-    let finalScore = 0;
-    for (const test in report['data'].tot.results || {}) {
-        const level = tests_1.default[test]['level'].toLowerCase();
-        const nSCs = tests_1.default[test]['scs'].includes(',');
-        const V = (level === 'a' ? 0.9 : level === 'aa' ? 0.5 : 0.1);
-        const VFinal = nSCs ? V + 0.1 : V - 0.1;
-        const C = Number.parseFloat(tests_1.default[test]['trust']);
-        const P = VFinal * C;
-        const E = report['data'].elems[tests_1.default[test]['elem']];
-        const S = report['data'].elems[tests_1.default[test]['test']];
-        const N = tests_1.default[test]['score'];
-        let R = 0;
-        if (tests_1.default[test]['type'] === 'prop' && E && S) {
-            R = N * (1 - (S / E)) * P;
+    let SS = 0;
+    let PP = 0;
+    for (const test in tests_1.default || {}) {
+        const value = tests_1.default[test];
+        if (report.data.elems.frame) {
+            if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
+                continue;
+            }
         }
-        else if (tests_1.default[test]['type'] === 'decr') {
-            const T = tests_1.default[test]['top'];
-            const F = tests_1.default[test]['steps'];
-            const errors = S - T > 0 ? Math.round(((S - T) / F)) : 0;
-            R = (N - errors) * P;
+        let calc = false;
+        switch (value['type']) {
+            case 'true':
+            case 'decr':
+                if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
+                    if (report.data['elems'][value['test']] !== undefined) {
+                        calc = true;
+                    }
+                }
+                break;
+            case 'fals':
+                if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
+                    if (report.data['elems'][value['test']] === undefined) {
+                        calc = true;
+                    }
+                }
+                break;
+            case 'prop':
+                if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
+                    calc = true;
+                }
+                break;
         }
-        else {
-            R = N * P;
+        if (calc) {
+            const C = parseFloat(tests_1.default[test]['trust']);
+            const E = report['data'].elems[tests_1.default[test]['elem']];
+            const S = report['data'].elems[tests_1.default[test]['test']];
+            let R = 0;
+            let N = 0;
+            for (const w of value['dis']) {
+                if (w > 1) {
+                    if (tests_1.default[test]['type'] === 'prop') {
+                        R += +(w * C).toFixed(2);
+                        const op = tests_1.default[test]['score'] * (1 - (S / E));
+                        N = op < 1 ? 1 : op;
+                    }
+                    else if (tests_1.default[test]['type'] === 'decr') {
+                        const T = tests_1.default[test]['top'];
+                        const F = tests_1.default[test]['steps'];
+                        const errors = S > T ? (S - T) / F : 0;
+                        R += +(w * C).toFixed(2);
+                        const op = (tests_1.default[test]['score'] - errors);
+                        N = op < 1 ? 1 : op;
+                    }
+                    else if (tests_1.default[test]['type'] === 'true' || tests_1.default[test]['type'] === 'fals') {
+                        R += +(w * C).toFixed(2);
+                        N = tests_1.default[test]['score'];
+                    }
+                }
+            }
+            PP += +(R / 5).toFixed(2);
+            SS += +(N * +(R / 5).toFixed(2)).toFixed(1);
         }
-        scores.push(R);
-        finalScore += R;
     }
-    return (Math.round((finalScore / scores.length) * 10) / 10).toString();
+    return (SS / PP).toFixed(1);
 }
 function calculateCssRules(evaluation) {
     const cssReport = evaluation.modules['css-techniques'];

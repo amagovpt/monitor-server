@@ -61,18 +61,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    long_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     area_01a: {
         type: string;
         elem: string;
@@ -110,18 +98,6 @@ declare const _default: {
         result: string;
     };
     inp_img_01b: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    applet_01: {
         type: string;
         elem: string;
         test: string;
@@ -194,18 +170,6 @@ declare const _default: {
         trust: string;
         top: number;
         steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    akey_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
         ref: string;
         scs: string;
         dis: string;
@@ -319,20 +283,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    a_07: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        top: number;
-        steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     list_01: {
         type: string;
         elem: string;
@@ -376,30 +326,6 @@ declare const _default: {
         result: string;
     };
     field_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    label_03: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    label_01: {
         type: string;
         elem: string;
         test: string;
@@ -599,18 +525,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    frame_02: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     iframe_01: {
         type: string;
         elem: string;
@@ -636,30 +550,6 @@ declare const _default: {
         result: string;
     };
     win_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    embed_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    object_01: {
         type: string;
         elem: string;
         test: string;
@@ -829,32 +719,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    marquee_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    blink_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        top: number;
-        steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     blink_02: {
         type: string;
         elem: string;
@@ -915,18 +779,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    dtd_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     w3c_validator_01a: {
         type: string;
         elem: string;
@@ -940,34 +792,6 @@ declare const _default: {
         result: string;
     };
     w3c_validator_01b: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        top: number;
-        steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    css_validator_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        top: number;
-        steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    css_validator_02: {
         type: string;
         elem: string;
         test: string;
@@ -1033,32 +857,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    layout_02a: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    layout_02b: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        top: number;
-        steps: number;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     lang_01: {
         type: string;
         elem: string;
@@ -1096,18 +894,6 @@ declare const _default: {
         result: string;
     };
     lang_04: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    lang_05: {
         type: string;
         elem: string;
         test: string;
@@ -1182,18 +968,6 @@ declare const _default: {
         result: string;
     };
     title_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
-    title_07: {
         type: string;
         elem: string;
         test: string;

@@ -13,6 +13,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const nest_status_monitor_1 = require("nest-status-monitor");
 const schedule_1 = require("@nestjs/schedule");
 const serve_static_1 = require("@nestjs/serve-static");
+const nest_crawler_1 = require("nest-crawler");
 const path_1 = require("path");
 const auth_module_1 = require("./auth/auth.module");
 const user_module_1 = require("./user/user.module");
@@ -107,7 +108,8 @@ AppModule = __decorate([
             monitor_module_1.MonitorModule,
             studies_module_1.StudiesModule,
             stamp_module_1.StampModule,
-            crawler_module_1.CrawlerModule
+            crawler_module_1.CrawlerModule,
+            nest_crawler_1.NestCrawlerModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -10,48 +10,79 @@ import { generateMd5Hash } from '../lib/security';
 import { getElementsMapping } from './mapping';
 
 function generateScore(report: any): string {
-  //const tests = require('./tests.json');
 
-  const scores = new Array();
+  let SS = 0;
+  let PP = 0;
 
-  let finalScore = 0;
+  for (const test in tests || {}) {
+    const value = tests[test];
 
-  for (const test in report['data'].tot.results || {}) {
-    const level = tests[test]['level'].toLowerCase();
-    const nSCs = tests[test]['scs'].includes(',');
-    const V = (level === 'a' ? 0.9 : level === 'aa' ? 0.5 : 0.1);
-    const VFinal = nSCs ? V + 0.1 : V - 0.1;
-    const C = Number.parseFloat(tests[test]['trust']);
-
-    const P = VFinal * C;
-
-    const E = report['data'].elems[tests[test]['elem']];
-    const S = report['data'].elems[tests[test]['test']];
-    const N = tests[test]['score'];
-
-    let R = 0;
-
-    if (tests[test]['type'] === 'prop' && E && S) {
-      R = N * (1 - (S / E)) * P;
-    } else if (tests[test]['type'] === 'decr') {
-      const T = tests[test]['top'];
-      const F = tests[test]['steps'];
-
-      const errors = S - T > 0 ? Math.round(((S - T) / F)) : 0;
-
-      R = (N - errors) * P;
-    } else {
-      R = N * P;
+    if (report.data.elems.frame) {
+      if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
+        continue;
+      }
     }
 
-    scores.push(R);
-    finalScore += R;
+    let calc = false;
+    switch (value['type']) {
+      case 'true':
+      case 'decr':
+        if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
+          if (report.data['elems'][value['test']] !== undefined) {
+            calc = true;
+          }
+        }
+        break;
+      case 'fals':
+        if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
+          if (report.data['elems'][value['test']] === undefined) {
+            calc = true;
+          }
+        }
+        break;
+      case 'prop':
+        if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
+          calc = true;
+        }
+        break;
+    }
+
+    if (calc) {
+      const C = parseFloat(tests[test]['trust']);
+
+      const E = report['data'].elems[tests[test]['elem']];
+      const S = report['data'].elems[tests[test]['test']];
+
+      let R = 0;
+      let N = 0;
+      for (const w of value['dis']) {
+        if (w > 1) {
+          if (tests[test]['type'] === 'prop') {
+            R += +(w * C).toFixed(2);
+            const op = tests[test]['score'] * (1 - (S / E));
+            N = op < 1 ? 1 : op;
+          } else if (tests[test]['type'] === 'decr') {
+            const T = tests[test]['top'];
+            const F = tests[test]['steps'];
+    
+            const errors = S > T ? (S - T) / F : 0;
+            
+            R += +(w * C).toFixed(2);
+            const op = (tests[test]['score'] - errors);
+            N = op < 1 ? 1 : op;
+          } else if (tests[test]['type'] === 'true' || tests[test]['type'] === 'fals') {
+            R += +(w * C).toFixed(2);
+            N = tests[test]['score'];
+          }
+        }
+      }
+
+      PP += +(R / 5).toFixed(2);
+      SS += +(N * +(R / 5).toFixed(2)).toFixed(1);
+    }
   }
 
-  //console.log(scores);
-  //console.log(finalScore / scores.length);
-
-  return (Math.round((finalScore / scores.length) * 10) / 10).toString();
+  return (SS / PP).toFixed(1);
 }
 
 function calculateCssRules(evaluation: any): number {

@@ -2238,8 +2238,8 @@
         "signature": "5ffa4219ee64e130980a4231392cbc628544df137ccf650ae8d76e0a1744fd2b"
       },
       "../node_modules/@types/node/fs.d.ts": {
-        "version": "40da414698c06b261ab809208b2c1d52a11499768392b438dbd3bf292f506042",
-        "signature": "40da414698c06b261ab809208b2c1d52a11499768392b438dbd3bf292f506042"
+        "version": "17cd9bc7eb9d10d02514b704191fa6bbc714f7093994033f1b5cd861eec03d26",
+        "signature": "17cd9bc7eb9d10d02514b704191fa6bbc714f7093994033f1b5cd861eec03d26"
       },
       "../node_modules/@types/node/http.d.ts": {
         "version": "9fe481fd52f878a1904411455b09f8eeb87bc4237c10d230454144c1f46ea7ad",
@@ -2350,8 +2350,8 @@
         "signature": "6622f76993bdfeaacb947ba7c4cf26f2e5c5194194d02d792c3cba4174cd8fce"
       },
       "../node_modules/@types/node/ts3.2/fs.d.ts": {
-        "version": "1ed55651f38540dba21f4a864bd89834ddb552446dce8c8a5f9dc0b44ce0b024",
-        "signature": "1ed55651f38540dba21f4a864bd89834ddb552446dce8c8a5f9dc0b44ce0b024"
+        "version": "12b2608d6074167c331c9c3c6994a57819f6ff934c7fd4527e23aabf56d4c8d1",
+        "signature": "12b2608d6074167c331c9c3c6994a57819f6ff934c7fd4527e23aabf56d4c8d1"
       },
       "../node_modules/@types/node/ts3.2/util.d.ts": {
         "version": "ffc1cd688606ad1ddb59a40e8f3defbde907af2a3402d1d9ddf69accb2903f07",
@@ -2364,6 +2364,62 @@
       "../node_modules/@types/node/ts3.2/index.d.ts": {
         "version": "6e19418b881b57998d218487d41d85534c7fa5ab329bbc72afe571e7683d774a",
         "signature": "6e19418b881b57998d218487d41d85534c7fa5ab329bbc72afe571e7683d774a"
+      },
+      "../node_modules/@types/cheerio/index.d.ts": {
+        "version": "a2a3c3d318efd9fc0b751af00fa5c4e3b25921cc7d707a7f900d7e621085e192",
+        "signature": "a2a3c3d318efd9fc0b751af00fa5c4e3b25921cc7d707a7f900d7e621085e192"
+      },
+      "../node_modules/scrape-it/lib/index.d.ts": {
+        "version": "195ef5dfbf86b3d716b2389e9012afb23ae72c5dfe8149ff0b83da94bf832aa5",
+        "signature": "195ef5dfbf86b3d716b2389e9012afb23ae72c5dfe8149ff0b83da94bf832aa5"
+      },
+      "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts": {
+        "version": "36ca34e43758347282fb47829a812e60b9c8de64f23dcdfc9645b7a69e6cb4df",
+        "signature": "36ca34e43758347282fb47829a812e60b9c8de64f23dcdfc9645b7a69e6cb4df"
+      },
+      "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts": {
+        "version": "033227670889a29b90de606e09e60271828a9c87b4e1ee722406c7bba9b0c308",
+        "signature": "033227670889a29b90de606e09e60271828a9c87b4e1ee722406c7bba9b0c308"
+      },
+      "../node_modules/@web-master/node-web-scraper/index.d.ts": {
+        "version": "af2be71e455f3dde6eaf7c5b9d4fd6d7f435c19b2153d14a102743c594ae22c4",
+        "signature": "af2be71e455f3dde6eaf7c5b9d4fd6d7f435c19b2153d14a102743c594ae22c4"
+      },
+      "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts": {
+        "version": "515c985a689961b4dc22f527baf210da76634504488a102745db63f9cb27fb84",
+        "signature": "515c985a689961b4dc22f527baf210da76634504488a102745db63f9cb27fb84"
+      },
+      "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts": {
+        "version": "25de2063ffef58de175230224f5f0cc1459f9fd003a0771fd0d5bc4cd5149cae",
+        "signature": "25de2063ffef58de175230224f5f0cc1459f9fd003a0771fd0d5bc4cd5149cae"
+      },
+      "../node_modules/@web-master/node-web-crawler/index.d.ts": {
+        "version": "5286bebb77bf2d9225bae0b174334eabb7765872bba9a87c431ebe5ab30b1cf1",
+        "signature": "5286bebb77bf2d9225bae0b174334eabb7765872bba9a87c431ebe5ab30b1cf1"
+      },
+      "../node_modules/@web-master/node-web-fetch/dist/index.d.ts": {
+        "version": "348f3d4b422889d7aae8dcc42a9a759c951f639700501eb1be0179eec624d0e1",
+        "signature": "348f3d4b422889d7aae8dcc42a9a759c951f639700501eb1be0179eec624d0e1"
+      },
+      "../node_modules/@web-master/node-web-fetch/index.d.ts": {
+        "version": "9c26ee36a5d54376044fbcd075d7a459a70a363f7698b2631a705961984f55c6",
+        "signature": "9c26ee36a5d54376044fbcd075d7a459a70a363f7698b2631a705961984f55c6"
+      },
+      "../node_modules/nest-crawler/dist/crawler.module.d.ts": {
+        "version": "463ed6a354189d84cc0758b37fa050c3cc31293557942f39ad11de40d9d61e7a",
+        "signature": "463ed6a354189d84cc0758b37fa050c3cc31293557942f39ad11de40d9d61e7a"
+      },
+      "../node_modules/nest-crawler/dist/crawler.service.d.ts": {
+        "version": "d6ecaa19798e4c8e8c300819ee8718b65e0109929ab9352ddd82e79b93de9154",
+        "signature": "d6ecaa19798e4c8e8c300819ee8718b65e0109929ab9352ddd82e79b93de9154"
+      },
+      "../node_modules/nest-crawler/dist/utils/index.d.ts": {
+        "version": "9cd1617a07a7ea8cfbf84b3e4189d9d735382961365ff1dc24ba1ea95262f8da",
+        "signature": "9cd1617a07a7ea8cfbf84b3e4189d9d735382961365ff1dc24ba1ea95262f8da"
+      },
+      "../node_modules/nest-crawler/dist/index.d.ts": {
+        "version": "5bb941c51374ba7d9aed3d1e0a0dbf7f035251c593d57ec08a5ba621183a3ba4",
+        "signature": "5bb941c51374ba7d9aed3d1e0a0dbf7f035251c593d57ec08a5ba621183a3ba4"
       },
       "../node_modules/@types/jsonwebtoken/index.d.ts": {
         "version": "ed2e832899b97594aebebb6f4e29124156d85edad0c4764d3b8a3e5ad1db7eb5",
@@ -2638,12 +2694,12 @@
         "signature": "80a65fb9accc71da572f36d828bde067c79e314179b7b433c5b2ca1a916774ce"
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "757187a746cf683d221fd188b0dd190fc152776b55537d9497f0076176e5cf98",
+        "version": "b2c2cc83318d1bf6ca5f02420349a7f9f16dd0187181f5801139a8fc57df140e",
         "signature": "0fecb41adf5f85398a872eab691d45f96e40b063e42bfd4815c3307908fcb09f"
       },
       "../src/evaluation/tests.ts": {
-        "version": "128690af484b4464f54dedf7371ad899afb725f595a8e311cee25a21b379cbb8",
-        "signature": "abf7d03a3b4029f6cfa8b755d86b397d63285651be29d46ce1b86ae046838550"
+        "version": "c764004532ed7de83dee52ca87d2c35cba3c5e5ca45357c7b98475015eb74314",
+        "signature": "952bc38760be7b74772d48f25fbe4cebda735bc89f3680755f7e4e2a2be04d41"
       },
       "../src/evaluation/testsColors.ts": {
         "version": "5ecc5a3f774bbfe00268193f5c1aaee4b82ba745b80d77364b8baf50ff787277",
@@ -2654,11 +2710,11 @@
         "signature": "f97a5effdc362ddf2677767fc2c5da561f830ddc1899cda866ae9b0fd70093e4"
       },
       "../src/evaluation/mapping.ts": {
-        "version": "e49eb495b0a287366f1f6aa1ae152c5bb2683795c54a5a1b11375f0dd8c6a433",
+        "version": "9fa536e21f630a567b1a472ae9ed30829982a258869a20419dcc104bef3f9f13",
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b"
       },
       "../src/evaluation/middleware.ts": {
-        "version": "c528cbfec92a53f6549e92f0ce2efd42d7caaed403ec357fef58b0ae8f9873b1",
+        "version": "6f2b4b5ddedeb1340ca052a951ab9f2685973154b389d6c0c44da0b0f91501ab",
         "signature": "711d7a64f99019a5ef66ffd25ab4ef09896f2fa1293884cf1936dd295001a199"
       },
       "../src/evaluation/evaluation.service.ts": {
@@ -2894,19 +2950,19 @@
         "signature": "1c91f86efb2a480dc37d163391b724688f0c5ba3d3347ccbcb356ff68d495741"
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "3174ffa6a5aa771ec06cb9ec3aaf2db19a46311bdc74a48da4cd5762a7a1d88a",
-        "signature": "75eac964e9457f951b8dbc53fc104631c9812c2a8a31a49f7466b27e4406b685"
+        "version": "06b72131fcbff5c424e21c5f4463eb58751f8207581d75c38d91a3aa471a6d09",
+        "signature": "1a91c85bab579a792787b655948c30b5e5afc37212b9a512f43ca23d136959d0"
       },
       "../src/crawler/crawler.controller.ts": {
-        "version": "1834a412688649cf0be5f4f595fc47575f7bb1c5b9bb128ff67b7fe25668a6e4",
-        "signature": "a3d1f6d6fb72bafc1947a204489b65ec4aa73032515509f548f30f85868b49af"
+        "version": "d4967c67e0467254217986512d60efe852ae0f7cc74f403b841ef2fadf8ad3db",
+        "signature": "7fae95beb77077bc3d50ee05028e640b50376e335985818e69b64ca8e92609cb"
       },
       "../src/crawler/crawler.module.ts": {
-        "version": "04f97b148363d9629765fb3975ebae9acc9cd0d15c532af34d595a0f8fa1dd82",
+        "version": "69b2c40c6279dd677b89a4cfcd880b437a10efa5c63a182f9dbeab626beafc56",
         "signature": "14b151fe9d19e258f1aaba4d08014a26a157efb58625057803534813c70be584"
       },
       "../src/app.module.ts": {
-        "version": "32fcaac1ce2c666800b3126b08220b339e928bc4e010a8a1fca7f40dc7cd928a",
+        "version": "2699117024426e12b76476be9c379f91e7ee2d6ddcd6ec4937741d422c65714d",
         "signature": "b82491e2990291580288c5602d4c017238977749d52b17391f0e45d9a29be644"
       },
       "../src/main.ts": {
@@ -3017,6 +3073,10 @@
         "version": "f17dd220e27f33e3f1c5bb6f00999420520a6dd1e7f71ee66c11cfc1c2990f20",
         "signature": "f17dd220e27f33e3f1c5bb6f00999420520a6dd1e7f71ee66c11cfc1c2990f20"
       },
+      "../node_modules/@types/prettier/index.d.ts": {
+        "version": "29651525db5579157e617c77e869af8bfdc1130f5d811c1f759ad35b7bafc8ef",
+        "signature": "29651525db5579157e617c77e869af8bfdc1130f5d811c1f759ad35b7bafc8ef"
+      },
       "../node_modules/@types/puppeteer/Errors.d.ts": {
         "version": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
         "signature": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b"
@@ -3062,12 +3122,12 @@
         "signature": "4fb0b7d532aa6fb850b6cd2f1ee4f00802d877b5c66a51903bc1fb0624126349"
       },
       "../node_modules/@types/webpack-sources/index.d.ts": {
-        "version": "ab95c4625e16499b8181731576984bcdfd0438a9a87b5f7de8299de5c912a241",
-        "signature": "ab95c4625e16499b8181731576984bcdfd0438a9a87b5f7de8299de5c912a241"
+        "version": "d55cc13acdfa6c943725250fe4ee3b269e2b0f4098aef46713bc2fbec38d197f",
+        "signature": "d55cc13acdfa6c943725250fe4ee3b269e2b0f4098aef46713bc2fbec38d197f"
       },
       "../node_modules/@types/webpack/index.d.ts": {
-        "version": "7be0afa3b166ab3da2292f998187ae4e4675bad23734a4b47f201d8e4e7f6602",
-        "signature": "7be0afa3b166ab3da2292f998187ae4e4675bad23734a4b47f201d8e4e7f6602"
+        "version": "a21801cab2baacd62648114594f1b6952247db92f48c44f71e0e391da1fd1f76",
+        "signature": "a21801cab2baacd62648114594f1b6952247db92f48c44f71e0e391da1fd1f76"
       },
       "../node_modules/@types/yargs-parser/index.d.ts": {
         "version": "fdfbe321c556c39a2ecf791d537b999591d0849e971dd938d88f460fea0186f6",
@@ -8054,6 +8114,111 @@
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
+      "../node_modules/@types/cheerio/index.d.ts": [
+        "../node_modules/@types/node/ts3.2/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/scrape-it/lib/index.d.ts": [
+        "../node_modules/@types/cheerio/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts": [
+        "../node_modules/scrape-it/lib/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts",
+        "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+        "../node_modules/scrape-it/lib/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts": [
+        "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/index.d.ts": [
+        "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-fetch/dist/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-fetch/index.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/dist/index.d.ts",
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/crawler.module.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/crawler.service.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/utils/index.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/index.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/index.d.ts",
+        "../node_modules/nest-crawler/dist/crawler.module.d.ts",
+        "../node_modules/nest-crawler/dist/crawler.service.d.ts",
+        "../node_modules/nest-crawler/dist/utils/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
       "../node_modules/@types/jsonwebtoken/index.d.ts": [
         "../node_modules/@types/node/ts3.2/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -9206,6 +9371,7 @@
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@nestjs/typeorm/index.d.ts",
         "../node_modules/typeorm/index.d.ts",
+        "../node_modules/nest-crawler/dist/index.d.ts",
         "../src/crawler/crawler.entity.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -9225,6 +9391,7 @@
       "../src/crawler/crawler.module.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@nestjs/typeorm/index.d.ts",
+        "../node_modules/nest-crawler/dist/index.d.ts",
         "../src/crawler/crawler.controller.ts",
         "../src/crawler/crawler.service.ts",
         "../src/crawler/crawler.entity.ts",
@@ -9241,6 +9408,7 @@
         "../node_modules/nest-status-monitor/dist/index.d.ts",
         "../node_modules/@nestjs/schedule/index.d.ts",
         "../node_modules/@nestjs/serve-static/index.d.ts",
+        "../node_modules/nest-crawler/dist/index.d.ts",
         "../node_modules/@types/node/path.d.ts",
         "../src/auth/auth.module.ts",
         "../src/user/user.module.ts",
@@ -9445,6 +9613,12 @@
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
       "../node_modules/@types/mime-types/index.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@types/prettier/index.d.ts": [
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -14512,6 +14686,111 @@
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
+      "../node_modules/@types/cheerio/index.d.ts": [
+        "../node_modules/@types/node/ts3.2/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/scrape-it/lib/index.d.ts": [
+        "../node_modules/@types/cheerio/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts": [
+        "../node_modules/scrape-it/lib/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-scraper/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts",
+        "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+        "../node_modules/scrape-it/lib/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts": [
+        "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-crawler/index.d.ts": [
+        "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-fetch/dist/index.d.ts": [
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@web-master/node-web-fetch/index.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/dist/index.d.ts",
+        "../node_modules/@web-master/node-web-scraper/index.d.ts",
+        "../node_modules/@web-master/node-web-crawler/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/crawler.module.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/crawler.service.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/utils/index.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/nest-crawler/dist/index.d.ts": [
+        "../node_modules/@web-master/node-web-fetch/index.d.ts",
+        "../node_modules/nest-crawler/dist/crawler.module.d.ts",
+        "../node_modules/nest-crawler/dist/crawler.service.d.ts",
+        "../node_modules/nest-crawler/dist/utils/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
       "../node_modules/@types/jsonwebtoken/index.d.ts": [
         "../node_modules/@types/node/ts3.2/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -14521,7 +14800,7 @@
       ],
       "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts": [
         "../node_modules/@nestjs/common/interfaces/index.d.ts",
-        "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts",
+        "../node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@types/node/ts3.2/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -14544,7 +14823,7 @@
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
       "../node_modules/@nestjs/jwt/dist/jwt.service.d.ts": [
-        "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts",
+        "../node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts",
         "../node_modules/@types/node/ts3.2/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -15193,7 +15472,8 @@
       ],
       "../src/crawler/crawler.service.ts": [
         "../node_modules/typeorm/index.d.ts",
-        "../src/crawler/crawler.entity.ts"
+        "../src/crawler/crawler.entity.ts",
+        "../node_modules/nest-crawler/dist/index.d.ts"
       ],
       "../src/crawler/crawler.controller.ts": [
         "../src/crawler/crawler.service.ts"
@@ -15378,6 +15658,12 @@
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
+      "../node_modules/@types/prettier/index.d.ts": [
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
       "../node_modules/@types/puppeteer/Errors.d.ts": [
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -15443,7 +15729,7 @@
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
       "../node_modules/@types/uglify-js/index.d.ts": [
-        "../node_modules/@types/uglify-js/node_modules/source-map/source-map.d.ts",
+        "../node_modules/source-map/source-map.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -15457,7 +15743,7 @@
       ],
       "../node_modules/@types/webpack-sources/index.d.ts": [
         "../node_modules/@types/node/crypto.d.ts",
-        "../node_modules/@types/uglify-js/node_modules/source-map/source-map.d.ts",
+        "../node_modules/source-map/source-map.d.ts",
         "../node_modules/@types/source-list-map/index.d.ts",
         "../node_modules/@types/node/ts3.2/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -16083,6 +16369,20 @@
       "../node_modules/@types/node/ts3.2/util.d.ts",
       "../node_modules/@types/node/ts3.2/globals.d.ts",
       "../node_modules/@types/node/ts3.2/index.d.ts",
+      "../node_modules/@types/cheerio/index.d.ts",
+      "../node_modules/scrape-it/lib/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/index.d.ts",
+      "../node_modules/@web-master/node-web-fetch/dist/index.d.ts",
+      "../node_modules/@web-master/node-web-fetch/index.d.ts",
+      "../node_modules/nest-crawler/dist/crawler.module.d.ts",
+      "../node_modules/nest-crawler/dist/crawler.service.d.ts",
+      "../node_modules/nest-crawler/dist/utils/index.d.ts",
+      "../node_modules/nest-crawler/dist/index.d.ts",
       "../node_modules/@types/jsonwebtoken/index.d.ts",
       "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts",
       "../node_modules/@nestjs/jwt/dist/interfaces/index.d.ts",
@@ -16152,7 +16452,6 @@
       "../node_modules/htmlparser2/lib/index.d.ts",
       "../node_modules/css-select/index.d.ts",
       "../src/evaluation/qualweb.ts",
-      "../src/evaluation/tests.ts",
       "../src/evaluation/testsColors.ts",
       "../src/evaluation/xpath.ts",
       "../src/evaluation/mapping.ts",
@@ -16210,7 +16509,6 @@
       "../src/admin/admin.module.ts",
       "../src/monitor/monitor.module.ts",
       "../src/studies/studies.module.ts",
-      "../src/stamp/stamp.service.ts",
       "../src/stamp/stamp.controller.ts",
       "../src/stamp/stamp.module.ts",
       "../src/crawler/crawler.entity.ts",
@@ -16245,6 +16543,7 @@
       "../node_modules/@types/json-schema/index.d.ts",
       "../node_modules/@types/json5/index.d.ts",
       "../node_modules/@types/mime-types/index.d.ts",
+      "../node_modules/@types/prettier/index.d.ts",
       "../node_modules/@types/puppeteer/Errors.d.ts",
       "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts",
       "../node_modules/@types/puppeteer/index.d.ts",
@@ -16260,6 +16559,8 @@
       "../node_modules/@types/webpack/index.d.ts",
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
+      "../src/evaluation/tests.ts",
+      "../src/stamp/stamp.service.ts",
       "../src/evaluation/middleware.ts"
     ]
   },

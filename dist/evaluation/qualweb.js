@@ -81,8 +81,7 @@ async function init(params) {
             ]
         }
     }))[params.url];
-    const earlReport = (await core.generateEarlReport())[params.url];
-    return { report, earlReport };
+    return { report };
 }
 exports.init = init;
 //# sourceMappingURL=qualweb.js.map

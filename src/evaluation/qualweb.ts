@@ -75,7 +75,7 @@ export async function init(params: any): Promise<any> {
     }
   }))[params.url];
 
-  const earlReport = (await core.generateEarlReport())[params.url];
+  //const earlReport = (await core.generateEarlReport())[params.url];
   
-  return { report, earlReport };
+  return { report /*, earlReport */ };
 }

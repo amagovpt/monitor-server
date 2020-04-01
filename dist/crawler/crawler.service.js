@@ -18,14 +18,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const nest_crawler_1 = require("nest-crawler");
 const crawler_entity_1 = require("./crawler.entity");
 const fs_1 = require("fs");
 const simplecrawler_1 = __importDefault(require("simplecrawler"));
 let CrawlerService = class CrawlerService {
-    constructor(crawlDomainRepository, crawlPageRepository, connection) {
+    constructor(crawlDomainRepository, crawlPageRepository, newCrawler, connection) {
         this.crawlDomainRepository = crawlDomainRepository;
         this.crawlPageRepository = crawlPageRepository;
+        this.newCrawler = newCrawler;
         this.connection = connection;
+    }
+    crawl(url) {
+        const urls = new Array();
+        this.newCrawler.fetch({
+            target: {
+                url,
+                iterator: {
+                    selector: 'a',
+                    convert: (x) => {
+                        x = decodeURIComponent(x);
+                        if (!x.startsWith('#')) {
+                            if (x !== url && url.startsWith(x) && !urls.includes(x)) {
+                                console.log(x);
+                                urls.push(x);
+                                return `${x}`;
+                            }
+                            else if (x.startsWith('/') && !urls.includes(`${url}${x}`)) {
+                                console.log(x);
+                                urls.push(`${url}${x}`);
+                                return `${url}${x}`;
+                            }
+                        }
+                        return x;
+                    },
+                },
+            },
+            fetch: (data, index, url) => ({
+                title: '.title > a',
+            })
+        }).then(pages => {
+            console.log(pages);
+            console.log(urls);
+        });
     }
     crawler(domain, max_depth, max_pages, crawl_domain_id) {
         const queryRunner = this.connection.createQueryRunner();
@@ -143,6 +178,7 @@ CrawlerService = __decorate([
     __param(1, typeorm_1.InjectRepository(crawler_entity_1.CrawlPage)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
+        nest_crawler_1.NestCrawlerService,
         typeorm_2.Connection])
 ], CrawlerService);
 exports.CrawlerService = CrawlerService;
