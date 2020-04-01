@@ -10,7 +10,6 @@ const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const typeorm_1 = require("@nestjs/typeorm");
-const nest_status_monitor_1 = require("nest-status-monitor");
 const schedule_1 = require("@nestjs/schedule");
 const serve_static_1 = require("@nestjs/serve-static");
 const nest_crawler_1 = require("nest-crawler");
@@ -31,55 +30,12 @@ const studies_module_1 = require("./studies/studies.module");
 const stamp_module_1 = require("./stamp/stamp.module");
 const crawler_module_1 = require("./crawler/crawler.module");
 const fs_1 = require("fs");
-const databaseConfig = JSON.parse(fs_1.readFileSync('/home/javicente/Projects/accessmonitor/monitor_db.json').toString());
-const statusMonitorConfig = {
-    pageTitle: 'Nest.js Monitoring Page',
-    port: 3000,
-    path: '/status',
-    ignoreStartsWith: '/health/alive',
-    spans: [
-        {
-            interval: 1,
-            retention: 60,
-        },
-        {
-            interval: 5,
-            retention: 60,
-        },
-        {
-            interval: 15,
-            retention: 60,
-        }
-    ],
-    chartVisibility: {
-        cpu: true,
-        mem: true,
-        load: true,
-        responseTime: true,
-        rps: true,
-        statusCodes: true,
-    },
-    healthChecks: [
-        {
-            protocol: 'http',
-            host: 'localhost',
-            path: '/health/alive',
-            port: 3000,
-        },
-        {
-            protocol: 'http',
-            host: 'localhost',
-            path: '/health/dead',
-            port: 3000,
-        }
-    ]
-};
+const databaseConfig = JSON.parse(fs_1.readFileSync('../monitor_db.json').toString());
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     common_1.Module({
         imports: [
-            nest_status_monitor_1.StatusMonitorModule.setUp(statusMonitorConfig),
             schedule_1.ScheduleModule.forRoot(),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'mysql',

@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StatusMonitorModule } from 'nest-status-monitor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { NestCrawlerModule } from 'nest-crawler';
@@ -27,54 +26,10 @@ import { CrawlerModule } from './crawler/crawler.module';
 
 import { readFileSync } from 'fs';
 
-const databaseConfig = JSON.parse(readFileSync('/home/javicente/Projects/accessmonitor/monitor_db.json').toString());
-
-const statusMonitorConfig = {
-  pageTitle: 'Nest.js Monitoring Page',
-  port: 3000,
-  path: '/status',
-  ignoreStartsWith: '/health/alive',
-  spans: [
-    {
-      interval: 1, // Every second
-      retention: 60, // Keep 60 datapoints in memory
-    },
-    {
-      interval: 5, // Every 5 seconds
-      retention: 60,
-    },
-    {
-      interval: 15, // Every 15 seconds
-      retention: 60,
-    }
-  ],
-  chartVisibility: {
-    cpu: true,
-    mem: true,
-    load: true,
-    responseTime: true,
-    rps: true,
-    statusCodes: true,
-  },
-  healthChecks: [
-    {
-      protocol: 'http',
-      host: 'localhost',
-      path: '/health/alive',
-      port: 3000,
-    },
-    {
-      protocol: 'http',
-      host: 'localhost',
-      path: '/health/dead',
-      port: 3000,
-    }
-  ]
-};
+const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString());
 
 @Module({
   imports: [
-    StatusMonitorModule.setUp(statusMonitorConfig),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
