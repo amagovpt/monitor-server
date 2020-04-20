@@ -10,6 +10,15 @@ export class TagController {
   constructor(private readonly tagService: TagService) { }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('reEvaluate')
+  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
+    const tagId = req.body.tagId;
+    const option = req.body.option;
+
+    return success(await this.tagService.addPagesToEvaluate(tagId, option));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
   async createOfficialTag(@Request() req: any): Promise<any> {
     const tag = new Tag();

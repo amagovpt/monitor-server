@@ -66,7 +66,7 @@ export async function init(params: any): Promise<any> {
         'QW-BP5',
         'QW-BP6',
         'QW-BP7',
-        'QW-BP8',
+        //'QW-BP8',
         'QW-BP9',
         'QW-BP10',
         'QW-BP11',
@@ -74,8 +74,6 @@ export async function init(params: any): Promise<any> {
       ]
     }
   }))[params.url];
-
-  //const earlReport = (await core.generateEarlReport())[params.url];
   
-  return { report /*, earlReport */ };
+  return report;
 }

@@ -24,9 +24,6 @@ const domain_module_1 = require("./domain/domain.module");
 const entity_module_1 = require("./entity/entity.module");
 const evaluation_module_1 = require("./evaluation/evaluation.module");
 const amp_module_1 = require("./amp/amp.module");
-const admin_module_1 = require("./admin/admin.module");
-const monitor_module_1 = require("./monitor/monitor.module");
-const studies_module_1 = require("./studies/studies.module");
 const stamp_module_1 = require("./stamp/stamp.module");
 const crawler_module_1 = require("./crawler/crawler.module");
 const fs_1 = require("fs");
@@ -60,9 +57,6 @@ AppModule = __decorate([
             entity_module_1.EntityModule,
             evaluation_module_1.EvaluationModule,
             amp_module_1.AmpModule,
-            admin_module_1.AdminModule,
-            monitor_module_1.MonitorModule,
-            studies_module_1.StudiesModule,
             stamp_module_1.StampModule,
             crawler_module_1.CrawlerModule,
             nest_crawler_1.NestCrawlerModule

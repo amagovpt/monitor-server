@@ -28,6 +28,38 @@ let WebsiteService = class WebsiteService {
         this.connection = connection;
         this.evaluationService = evaluationService;
     }
+    async addPagesToEvaluate(domainId, option) {
+        const pages = await this.websiteRepository.query(`
+      SELECT 
+        p.PageId, 
+        p.Uri 
+      FROM 
+        DomainPage as dp, 
+        Page as p
+      WHERE
+        dp.DomainId = ? AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE ?`, [domainId, option === 'all' ? '1__' : '1_1']);
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let error = false;
+        try {
+            for (const page of pages || []) {
+                await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            console.log(err);
+            error = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !error;
+    }
     async findAll() {
         const manager = typeorm_2.getManager();
         const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, u.Type as Type, d.DomainId, d.Url as Domain, COUNT(t.TagId) as Observatory

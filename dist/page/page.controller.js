@@ -20,6 +20,13 @@ let PageController = class PageController {
     constructor(pageService) {
         this.pageService = pageService;
     }
+    async reEvaluatePage(req) {
+        const page = decodeURIComponent(req.body.page);
+        return response_1.success(await this.pageService.addPageToEvaluate(page));
+    }
+    async getNumberOfPagesWaitingForEvaluation() {
+        return response_1.success(await this.pageService.findAllInEvaluationList());
+    }
     async getAllPages() {
         return response_1.success(await this.pageService.findAll());
     }
@@ -39,6 +46,12 @@ let PageController = class PageController {
     }
     async getStudyMonitorUserTagWebsitePages(req, tag, website) {
         return response_1.success(await this.pageService.findStudyMonitorUserTagWebsitePages(req.user.userId, tag, website));
+    }
+    async addPages(req) {
+        const domainId = req.body.domainId;
+        const uris = JSON.parse(req.body.uris).map((uri) => decodeURIComponent(uri));
+        const observatory = JSON.parse(req.body.observatory).map((uri) => decodeURIComponent(uri));
+        return response_1.success(await this.pageService.addPages(domainId, uris, observatory));
     }
     async createStudyMonitorUserTagWebsitePages(req) {
         const tag = req.body.tag;
@@ -75,6 +88,21 @@ let PageController = class PageController {
         return response_1.success(successImport);
     }
 };
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "reEvaluatePage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('evaluationList'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "getNumberOfPagesWaitingForEvaluation", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),
@@ -114,6 +142,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "getStudyMonitorUserTagWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('add'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "addPages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
     common_1.Post('studyMonitor/create'),

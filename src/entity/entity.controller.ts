@@ -10,6 +10,15 @@ export class EntityController {
   constructor(private readonly entityService: EntityService) { }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('reEvaluate')
+  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
+    const entityId = req.body.entityId;
+    const option = req.body.option;
+
+    return success(await this.entityService.addPagesToEvaluate(entityId, option));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
   async getAllEntities(): Promise<any> {
     return success(await this.entityService.findAll());

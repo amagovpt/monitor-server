@@ -21,6 +21,11 @@ let EntityController = class EntityController {
     constructor(entityService) {
         this.entityService = entityService;
     }
+    async reEvaluateWebsitePages(req) {
+        const entityId = req.body.entityId;
+        const option = req.body.option;
+        return response_1.success(await this.entityService.addPagesToEvaluate(entityId, option));
+    }
     async getAllEntities() {
         return response_1.success(await this.entityService.findAll());
     }
@@ -69,6 +74,14 @@ let EntityController = class EntityController {
         return response_1.success(await this.entityService.findAllWebsites(entity));
     }
 };
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "reEvaluateWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Get('all'),

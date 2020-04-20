@@ -32,6 +32,12 @@ export class PageService {
     }
   }
 
+  async findAllInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List');
+    return result[0].Total;
+  }
+
   async findAll(): Promise<any> {
     const manager = getManager();
     const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date 
@@ -173,6 +179,90 @@ export class PageService {
     return pages;
   }
 
+  async addPageToEvaluate(url: string): Promise<boolean> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const page = await queryRunner.manager.findOne(Page, { where: { Uri: url }});
+
+      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async addPages(domainId: number, uris: string[], observatory: string[]): Promise<boolean> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const uri of uris || []) {
+        const page = await this.pageRepository.findOne({ select: ['PageId', 'Show_In'], where: { Uri: uri }});
+
+        if (page) {
+          let newShowIn = '100';
+          if (observatory.indexOf(uri) > -1) {
+            if (page.Show_In[1] === '1') {
+              newShowIn = '111';
+            } else {
+              newShowIn = '101';
+            }
+          } else {
+            if (page.Show_In[1] === '1') {
+              newShowIn = '110';
+            }
+          }
+
+          await queryRunner.manager.update(Page, { PageId: page.PageId }, { Show_In: newShowIn });
+        } else {
+          let showIn = null;
+
+          if (observatory.indexOf(uri) > -1) {
+            showIn = '101'
+          } else {
+            showIn = '100';
+          }
+
+          const newPage = new Page();
+          newPage.Uri = uri;
+          newPage.Show_In = showIn;
+          newPage.Creation_Date = new Date();
+
+          const insertPage = await queryRunner.manager.save(newPage);
+          await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
+
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, uri, '10', newPage.Creation_Date]);
+        }
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async createMyMonitorUserWebsitePages(userId: number, website: string, domain: string, uris: string[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
@@ -189,7 +279,7 @@ export class PageService {
           await queryRunner.manager.update(Page, { PageId: page.PageId }, { Show_In: showIn });
           await queryRunner.manager.update(Evaluation, { PageId: page.PageId, Show_To: Like('1_') }, { Show_To: '11' });
         } else {
-          const evaluation = <any> await this.evaluationService.evaluateUrl(uri);
+          //const evaluation = <any> await this.evaluationService.evaluateUrl(uri);
           
           const newPage = new Page();
           newPage.Uri = uri;
@@ -198,7 +288,7 @@ export class PageService {
 
           const insertPage = await queryRunner.manager.save(newPage);
 
-          const webpage = Buffer.from(evaluation.pagecode).toString('base64');
+          /*const webpage = Buffer.from(evaluation.pagecode).toString('base64');
           const data = evaluation.data;
 
           data.title = data.title.replace(/"/g, '');
@@ -222,7 +312,7 @@ export class PageService {
           newEvaluation.Evaluation_Date = data.date;
           newEvaluation.Show_To = '01';
 
-          await queryRunner.manager.save(newEvaluation);
+          await queryRunner.manager.save(newEvaluation);*/
 
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -237,6 +327,8 @@ export class PageService {
               d.WebsiteId = w.WebsiteId AND
               d.Url = ? AND
               d.Active = 1`, [insertPage.PageId, website, userId, domain]);
+
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '01', insertPage.Creation_Date]);
         }
       }
 
@@ -251,8 +343,8 @@ export class PageService {
       await queryRunner.release();
     }
 
-    //return !hasError;
-    return await this.findAllFromMyMonitorUserWebsite(userId, website);
+    return !hasError;
+    //return await this.findAllFromMyMonitorUserWebsite(userId, website);
   }
 
   async removeMyMonitorUserWebsitePages(userId: number, website: string, pagesIds: number[]): Promise<any> {

@@ -9,10 +9,13 @@ export declare class PageService {
     private readonly evaluationService;
     constructor(websiteRepository: Repository<Website>, pageRepository: Repository<Page>, connection: Connection, evaluationService: EvaluationService);
     findUserType(username: string): Promise<any>;
+    findAllInEvaluationList(): Promise<number>;
     findAll(): Promise<any>;
     getObservatoryData(): Promise<any>;
     findAllFromMyMonitorUserWebsite(userId: number, websiteName: string): Promise<any>;
     findStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string): Promise<any>;
+    addPageToEvaluate(url: string): Promise<boolean>;
+    addPages(domainId: number, uris: string[], observatory: string[]): Promise<boolean>;
     createMyMonitorUserWebsitePages(userId: number, website: string, domain: string, uris: string[]): Promise<any>;
     removeMyMonitorUserWebsitePages(userId: number, website: string, pagesIds: number[]): Promise<any>;
     createStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, domain: string, uris: string[]): Promise<any>;

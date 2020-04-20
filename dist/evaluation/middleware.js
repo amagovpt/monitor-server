@@ -125,12 +125,12 @@ function calculateConform(results) {
     return `${errors.A}@${errors.AA}@${errors.AAA}`;
 }
 function parseEvaluation(evaluation) {
+    const { elements, results, nodes } = mapping_1.getElementsMapping(evaluation);
     const report = {};
-    report.pagecode = evaluation.report.system.page.dom.processed.html.plain;
+    report.pagecode = evaluation.system.page.dom.processed.html.plain;
     report['data'] = {};
-    report['data'].title = evaluation.report.system.page.dom.processed.title;
-    report['data'].rawUrl = evaluation.report.system.url.completeUrl;
-    const { elements, results, nodes } = mapping_1.getElementsMapping(evaluation.report);
+    report['data'].title = evaluation.system.page.dom.processed.title;
+    report['data'].rawUrl = evaluation.system.url.completeUrl;
     report['data'].elems = lodash_clone_1.default(elements);
     report['data'].nodes = lodash_clone_1.default(nodes);
     report['data'].date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
@@ -139,11 +139,11 @@ function parseEvaluation(evaluation) {
     report['data'].tot.info.url = lodash_clone_1.default(report['data'].rawUrl);
     report['data'].tot.info.title = lodash_clone_1.default(report['data'].title);
     report['data'].tot.info.date = lodash_clone_1.default(report['data'].date);
-    report['data'].tot.info.htmlTags = evaluation.report.system.page.dom.processed.elementCount;
+    report['data'].tot.info.htmlTags = evaluation.system.page.dom.processed.elementCount;
     report['data'].tot.info.size = encodeURI(report.pagecode).split(/%..|./).length - 1;
-    report['data'].tot.info.cssRules = calculateCssRules(evaluation.report);
+    report['data'].tot.info.cssRules = calculateCssRules(evaluation);
     report['data'].tot.info.encoding = 'utf-8';
-    report['data'].tot.info.lang = getHtmlLang(evaluation.report.system.page.dom.processed.html.plain);
+    report['data'].tot.info.lang = getHtmlLang(evaluation.system.page.dom.processed.html.plain);
     report['data'].tot.info.content = 'text/html';
     report['data'].tot.info.hash = security_1.generateMd5Hash(report['data'].date);
     report['data'].tot.info.tests = Object.keys(results).length;

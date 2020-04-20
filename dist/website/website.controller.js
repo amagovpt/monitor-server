@@ -29,6 +29,11 @@ let WebsiteController = class WebsiteController {
     constructor(websiteService) {
         this.websiteService = websiteService;
     }
+    async reEvaluateWebsitePages(req) {
+        const domainId = req.body.domainId;
+        const option = req.body.option;
+        return response_1.success(await this.websiteService.addPagesToEvaluate(domainId, option));
+    }
     async createWebsite(req) {
         const website = new website_entity_1.Website();
         website.Name = req.body.name;
@@ -177,6 +182,14 @@ let WebsiteController = class WebsiteController {
         return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
     }
 };
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "reEvaluateWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Post('create'),

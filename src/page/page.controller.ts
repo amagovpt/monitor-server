@@ -9,6 +9,20 @@ export class PageController {
   constructor(private readonly pageService: PageService) { }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('reEvaluate')
+  async reEvaluatePage(@Request() req: any): Promise<any> {
+    const page = decodeURIComponent(req.body.page);
+
+    return success(await this.pageService.addPageToEvaluate(page));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('evaluationList')
+  async getNumberOfPagesWaitingForEvaluation(): Promise<any> {
+    return success(await this.pageService.findAllInEvaluationList());
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
   async getAllPages(): Promise<any> {
     return success(await this.pageService.findAll());
@@ -41,6 +55,15 @@ export class PageController {
   @Get('studyMonitor/tag/:tag/website/:website')
   async getStudyMonitorUserTagWebsitePages(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
     return success(await this.pageService.findStudyMonitorUserTagWebsitePages(req.user.userId, tag, website));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('add')
+  async addPages(@Request() req: any): Promise<any> {
+    const domainId = req.body.domainId;
+    const uris = JSON.parse(req.body.uris).map((uri: string) => decodeURIComponent(uri));
+    const observatory = JSON.parse(req.body.observatory).map((uri: string) => decodeURIComponent(uri));
+    return success(await this.pageService.addPages(domainId, uris, observatory));
   }
 
   @UseGuards(AuthGuard('jwt-study'))

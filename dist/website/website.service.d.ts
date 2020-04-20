@@ -10,6 +10,7 @@ export declare class WebsiteService {
     private readonly connection;
     private readonly evaluationService;
     constructor(websiteRepository: Repository<Website>, tagRepository: Repository<Tag>, domainRepository: Repository<Domain>, connection: Connection, evaluationService: EvaluationService);
+    addPagesToEvaluate(domainId: number, option: string): Promise<boolean>;
     findAll(): Promise<any>;
     findInfo(websiteId: number): Promise<any>;
     findUserType(username: string): Promise<any>;

@@ -11,10 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const schedule_1 = require("@nestjs/schedule");
+const lodash_clone_1 = __importDefault(require("lodash.clone"));
 const evaluation_entity_1 = require("./evaluation.entity");
 const page_entity_1 = require("../page/page.entity");
 const middleware_1 = require("./middleware");
@@ -23,6 +28,44 @@ let EvaluationService = class EvaluationService {
         this.pageRepository = pageRepository;
         this.evaluationRepository = evaluationRepository;
         this.connection = connection;
+        this.isEvaluating = false;
+    }
+    async evaluatePageList() {
+        if (!this.isEvaluating) {
+            this.isEvaluating = true;
+            const pagesToEvaluate = await typeorm_2.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
+            for (const pte of pagesToEvaluate || []) {
+                let error = null;
+                let evaluation;
+                try {
+                    evaluation = lodash_clone_1.default(await this.evaluateUrl(pte.Url));
+                }
+                catch (e) {
+                    error = e;
+                }
+                const queryRunner = this.connection.createQueryRunner();
+                await queryRunner.connect();
+                await queryRunner.startTransaction();
+                try {
+                    if (!error && evaluation) {
+                        this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+                        await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+                    }
+                    else {
+                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = ? WHERE EvaluationListId = ?`, [error, pte.EvaluationListId]);
+                    }
+                    await queryRunner.commitTransaction();
+                }
+                catch (err) {
+                    await queryRunner.rollbackTransaction();
+                    console.log(err);
+                }
+                finally {
+                    await queryRunner.release();
+                }
+            }
+            this.isEvaluating = false;
+        }
     }
     async findPageFromUrl(url) {
         return this.pageRepository.findOne({ where: { Uri: url } });
@@ -322,6 +365,12 @@ let EvaluationService = class EvaluationService {
         };
     }
 };
+__decorate([
+    schedule_1.Cron('* * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EvaluationService.prototype, "evaluatePageList", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(page_entity_1.Page)),

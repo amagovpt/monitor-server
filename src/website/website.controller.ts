@@ -11,6 +11,15 @@ export class WebsiteController {
   constructor(private readonly websiteService: WebsiteService) { }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('reEvaluate')
+  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
+    const domainId = req.body.domainId;
+    const option = req.body.option;
+
+    return success(await this.websiteService.addPagesToEvaluate(domainId, option));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
   async createWebsite(@Request() req: any): Promise<any> {
     const website = new Website();

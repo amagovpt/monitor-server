@@ -73,7 +73,6 @@ async function init(params) {
                 'QW-BP5',
                 'QW-BP6',
                 'QW-BP7',
-                'QW-BP8',
                 'QW-BP9',
                 'QW-BP10',
                 'QW-BP11',
@@ -81,7 +80,7 @@ async function init(params) {
             ]
         }
     }))[params.url];
-    return { report };
+    return report;
 }
 exports.init = init;
 //# sourceMappingURL=qualweb.js.map

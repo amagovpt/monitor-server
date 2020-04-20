@@ -21,6 +21,11 @@ let TagController = class TagController {
     constructor(tagService) {
         this.tagService = tagService;
     }
+    async reEvaluateWebsitePages(req) {
+        const tagId = req.body.tagId;
+        const option = req.body.option;
+        return response_1.success(await this.tagService.addPagesToEvaluate(tagId, option));
+    }
     async createOfficialTag(req) {
         const tag = new tag_entity_1.Tag();
         tag.Name = req.body.name;
@@ -127,6 +132,14 @@ let TagController = class TagController {
         return response_1.success(await this.tagService.findStudyMonitorUserTagWebsitesPagesData(req.user.userId, tag, website));
     }
 };
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "reEvaluateWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Post('create'),

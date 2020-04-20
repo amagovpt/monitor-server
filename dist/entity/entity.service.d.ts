@@ -4,6 +4,7 @@ export declare class EntityService {
     private readonly entityRepository;
     private readonly connection;
     constructor(entityRepository: Repository<EntityTable>, connection: Connection);
+    addPagesToEvaluate(entityId: number, option: string): Promise<boolean>;
     findAll(): Promise<any>;
     findInfo(entityId: number): Promise<any>;
     findByShortName(shortName: string): Promise<any>;

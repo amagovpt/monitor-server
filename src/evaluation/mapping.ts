@@ -208,6 +208,28 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
 }
 
 function QW_HTML_T1(elements: any, results: any, nodes: any, technique: any): void {
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'areaAltNo', technique.metadata.failed);
+    addToResults(results, 'area_01b');
+    addToNodes(nodes, 'areaAltNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToElements(elements, 'area_01b', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
+  } else if (technique.metadata.outcome === 'passed' || technique.metadata.outcome === 'warning') {
+    addToElements(elements, 'areaAltNo', technique.metadata.passed + technique.metadata.warning);
+    addToResults(results, 'area_01a');
+    addToNodes(nodes, 'areaAltNo', technique.results.filter((r: any) => (r.verdict === 'passed' || r.verdict === 'warning')).map((r: any) => r.pointer));
+  }
+}
+
+function QW_HTML_T2(elements: any, results: any, nodes: any, technique: any): void {
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'tableDataCaption', technique.metadata.failed);
+    addToResults(results, 'table_02');
+    addToNodes(nodes, 'tableDataCaption', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToElements(elements, 'table_02', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
+  }
+}
+
+function QW_HTML_T3(elements: any, results: any, nodes: any, technique: any): void {
   const outsideFieldset = technique.results.filter((r: any) => r.resultCode === 'RC1');
   if (outsideFieldset.length !== 0) {
     addToElements(elements, 'fieldNoForm', outsideFieldset.length);
@@ -223,38 +245,16 @@ function QW_HTML_T1(elements: any, results: any, nodes: any, technique: any): vo
   }
 }
 
-function QW_HTML_T2(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'tableDataCaption', technique.metadata.failed);
-    addToResults(results, 'table_02');
-    addToNodes(nodes, 'tableDataCaption', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
-    addToElements(elements, 'table_02', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
-  }
-}
-
-function QW_HTML_T3(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'areaAltNo', technique.metadata.failed);
-    addToResults(results, 'area_01b');
-    addToNodes(nodes, 'areaAltNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
-    addToElements(elements, 'area_01b', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
-  } else if (technique.metadata.outcome === 'passed' || technique.metadata.outcome === 'warning') {
-    addToElements(elements, 'areaAltNo', technique.metadata.passed + technique.metadata.warning);
-    addToResults(results, 'area_01a');
-    addToNodes(nodes, 'areaAltNo', technique.results.filter((r: any) => (r.verdict === 'passed' || r.verdict === 'warning')).map((r: any) => r.pointer));
-  }
-}
-
 function QW_HTML_T6(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'ehandBoth', technique.metadata.failed);
+  if (technique.metadata.outcome === 'passed') {
+    addToElements(elements, 'ehandBoth', technique.metadata.passed);
     addToResults(results, 'ehandler_03');
-    addToNodes(nodes, 'ehandBoth', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
-  } else if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'ehandBothNo', technique.metadata.passed);
+    addToNodes(nodes, 'ehandBoth', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+  } else if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'ehandBothNo', technique.metadata.failed);
     addToResults(results, 'ehandler_02');
-    addToNodes(nodes, 'ehandBothNo', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
-    addToElements(elements, 'ehandler_02', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
+    addToNodes(nodes, 'ehandBothNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToElements(elements, 'ehandler', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
   }
 }
 
@@ -284,10 +284,12 @@ function QW_HTML_T9(elements: any, results: any, nodes: any, technique: any): vo
 
   const incorrectOrderResults = technique.results.filter((r: any) => r.resultCode === 'RC1');
   if (incorrectOrderResults.length > 0) {
-    addToElements(elements, 'hxNo', incorrectOrderResults.length);
-    addToResults(results, 'hx_02');
-    addToNodes(nodes, 'hxNo', incorrectOrderResults.map((r: any) => r.pointer));
+    addToElements(elements, 'hxSkip', incorrectOrderResults.length);
+    addToResults(results, 'hx_03');
+    addToNodes(nodes, 'hxSkip', incorrectOrderResults.map((r: any) => r.pointer));
   }
+
+  addToElements(elements, 'hx', (technique.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
 }
 
 function QW_HTML_T17(elements: any, results: any, nodes: any, technique: any): void {
@@ -299,10 +301,10 @@ function QW_HTML_T17(elements: any, results: any, nodes: any, technique: any): v
 }
 
 function QW_HTML_T19(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'warning') {
-    addToElements(elements, 'linkRel', technique.metadata.warning);
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'linkRel', technique.metadata.failed);
     addToResults(results, 'link_01');
-    addToNodes(nodes, 'linkRel', technique.results.filter((r: any) => r.verdict === 'warning').map((r: any) => r.pointer)); 
+    addToNodes(nodes, 'linkRel', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer)); 
   }
 }
 
@@ -318,6 +320,7 @@ function QW_HTML_T20(elements: any, results: any, nodes: any, technique: any): v
   }
 }
 
+// TODO: mudara para BP quando for feita
 function QW_HTML_T23(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'a', 0);
@@ -329,9 +332,9 @@ function QW_HTML_T23(elements: any, results: any, nodes: any, technique: any): v
 function QW_HTML_T25(elements: any, results: any, nodes: any, technique: any): void {
   const incorrectLabelResults = technique.results.filter((r: any) => (r.resultCode === 'RC1' || r.resultCode === 'RC2' || r.resultCode === 'RC3'));
   if (incorrectLabelResults.length > 0) {
-    addToElements(elements, 'w3cValidatorErrors', incorrectLabelResults);
+    addToElements(elements, 'labelPosNo', incorrectLabelResults);
     addToResults(results, 'label_02');
-    addToNodes(nodes, 'w3cValidatorErrors', incorrectLabelResults.map((r: any) => r.pointer));
+    addToNodes(nodes, 'labelPosNo', incorrectLabelResults.map((r: any) => r.pointer));
   }
 }
 
@@ -401,10 +404,10 @@ function QW_HTML_T37(elements: any, results: any, nodes: any, technique: any): v
 }
 
 function QW_HTML_T38(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'aSkipFirst', technique.metadata.passed);
+  if (technique.metadata.outcome === 'warning') {
+    addToElements(elements, 'aSkipFirst', technique.metadata.warning);
     addToResults(results, 'a_01a');
-    addToNodes(nodes, 'aSkipFirst', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'aSkipFirst', technique.results.filter((r: any) => r.verdict === 'warning').map((r: any) => r.pointer));
   } else if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'aSkipFirst', 0);
     addToResults(results, 'a_01b');
@@ -421,10 +424,11 @@ function QW_HTML_T40(elements: any, results: any, nodes: any, technique: any): v
 }
 
 function QW_HTML_T41(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'scopeNo', technique.metadata.failed);
+  const incorrectScope = technique.results.filter((r: any) => r.resultCode === 'RC2' || r.resultCode === 'RC4');
+  if (incorrectScope.length > 0) {
+    addToElements(elements, 'scopeNo', incorrectScope.length);
     addToResults(results, 'scope_01');
-    addToNodes(nodes, 'scopeNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'scopeNo', incorrectScope.map((r: any) => r.pointer));
   }
 }
 

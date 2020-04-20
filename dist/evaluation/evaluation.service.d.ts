@@ -5,7 +5,9 @@ export declare class EvaluationService {
     private readonly pageRepository;
     private readonly evaluationRepository;
     private readonly connection;
+    private isEvaluating;
     constructor(pageRepository: Repository<Page>, evaluationRepository: Repository<Evaluation>, connection: Connection);
+    evaluatePageList(): Promise<void>;
     findPageFromUrl(url: string): Promise<any>;
     isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any>;
     isPageFromStudyMonitorUser(userId: number, tag: string, website: string, pageId: number): Promise<any>;

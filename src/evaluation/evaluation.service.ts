@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
+import { Connection, Repository, getManager, IsNull } from 'typeorm';
+import { Cron } from '@nestjs/schedule';
+import clone from 'lodash.clone';
 import { Evaluation } from './evaluation.entity';
 import { Page } from '../page/page.entity';
 import { executeUrlEvaluation } from './middleware';
@@ -8,13 +10,63 @@ import { executeUrlEvaluation } from './middleware';
 @Injectable()
 export class EvaluationService {
 
+  private isEvaluating: boolean;
+
   constructor(
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     @InjectRepository(Evaluation)
     private readonly evaluationRepository: Repository<Evaluation>,
     private readonly connection: Connection
-  ) {}
+  ) {
+    this.isEvaluating = false;
+  }
+
+  @Cron('* * * * *')
+  async evaluatePageList(): Promise<void> {
+    // Called every minute
+    if (!this.isEvaluating) {
+      this.isEvaluating = true;
+
+      const pagesToEvaluate = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
+      
+      for (const pte of pagesToEvaluate || []) {
+        let error = null;
+        let evaluation: any;
+        try {
+          evaluation = clone(await this.evaluateUrl(pte.Url));
+        } catch (e) {
+          error = e;
+        }
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        await queryRunner.connect();
+        
+        await queryRunner.startTransaction();
+
+        try {
+          if (!error && evaluation) {
+            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+
+            await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+          } else {
+            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = ? WHERE EvaluationListId = ?`,[error, pte.EvaluationListId]);
+          }
+
+          await queryRunner.commitTransaction();
+        } catch (err) {
+          // since we have errors lets rollback the changes we made
+          await queryRunner.rollbackTransaction();
+          console.log(err);
+        } finally {
+          await queryRunner.release();
+        }
+      }
+
+      this.isEvaluating = false;
+    }
+  }
 
   async findPageFromUrl(url: string): Promise<any> {
     return this.pageRepository.findOne({ where: { Uri: url } });

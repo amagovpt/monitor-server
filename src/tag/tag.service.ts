@@ -14,6 +14,52 @@ export class TagService {
     private readonly connection: Connection
   ) {}
 
+  async addPagesToEvaluate(tagId: number, option: string): Promise<boolean> {
+    const pages = await this.tagRepository.query(`
+      SELECT
+        p.PageId, 
+        p.Uri
+      FROM
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        tw.TagId = ? AND
+        w.WebsiteId = tw.WebsiteId AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1 AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE ?
+    `, [tagId, option === 'all' ? '1__' : '1_1']);
+
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    
+    await queryRunner.startTransaction();
+
+    let error = false;
+    try {
+      for (const page of pages || []) {
+        await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      console.log(err);
+      error = true;
+    } finally {
+      await queryRunner.release();
+    }
+
+    return !error;
+  }
+
   findByTagName(tagName: string): Promise<Tag | undefined> {
     return this.tagRepository.findOne({ where: { Name: tagName } });
   }

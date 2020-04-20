@@ -4,6 +4,7 @@ export declare class TagService {
     private readonly tagRepository;
     private readonly connection;
     constructor(tagRepository: Repository<Tag>, connection: Connection);
+    addPagesToEvaluate(tagId: number, option: string): Promise<boolean>;
     findByTagName(tagName: string): Promise<Tag | undefined>;
     findByOfficialTagName(tagName: string): Promise<Tag | undefined>;
     findInfo(tagId: number): Promise<any>;

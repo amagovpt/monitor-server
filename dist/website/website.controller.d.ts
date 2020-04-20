@@ -2,6 +2,7 @@ import { WebsiteService } from './website.service';
 export declare class WebsiteController {
     private readonly websiteService;
     constructor(websiteService: WebsiteService);
+    reEvaluateWebsitePages(req: any): Promise<any>;
     createWebsite(req: any): Promise<any>;
     updateWebsite(req: any): Promise<any>;
     updateWebsitePagesObservatory(req: any): Promise<any>;

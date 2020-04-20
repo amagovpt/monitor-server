@@ -2,6 +2,7 @@ import { TagService } from './tag.service';
 export declare class TagController {
     private readonly tagService;
     constructor(tagService: TagService);
+    reEvaluateWebsitePages(req: any): Promise<any>;
     createOfficialTag(req: any): Promise<any>;
     updateOfficialTag(req: any): Promise<any>;
     deleteOfficialTag(req: any): Promise<any>;

@@ -18,9 +18,6 @@ import { DomainModule } from './domain/domain.module';
 import { EntityModule } from './entity/entity.module';
 import { EvaluationModule } from './evaluation/evaluation.module';
 import { AmpModule } from './amp/amp.module';
-import { AdminModule } from './admin/admin.module';
-import { MonitorModule } from './monitor/monitor.module';
-import { StudiesModule } from './studies/studies.module';
 import { StampModule } from './stamp/stamp.module';
 import { CrawlerModule } from './crawler/crawler.module';
 
@@ -54,9 +51,6 @@ const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString())
     EntityModule,
     EvaluationModule,
     AmpModule,
-    AdminModule,
-    MonitorModule,
-    StudiesModule,
     StampModule,
     CrawlerModule,
     NestCrawlerModule
