@@ -367,20 +367,17 @@ let WebsiteService = class WebsiteService {
             newDomain.Start_Date = insertWebsite.Creation_Date;
             newDomain.Active = 1;
             const insertDomain = await queryRunner.manager.save(newDomain);
-            console.log(insertDomain);
             for (const url of pages || []) {
                 const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
                 if (page) {
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
                 }
                 else {
-                    const evaluation = await this.evaluationService.evaluateUrl(url);
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = url;
                     newPage.Show_In = '000';
                     newPage.Creation_Date = newWebsite.Creation_Date;
                     const insertPage = await queryRunner.manager.save(newPage);
-                    await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '01');
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, insertPage.PageId]);
                     const existingDomain = await queryRunner.manager.query(`SELECT distinct d.DomainId, d.Url 
             FROM
@@ -401,6 +398,7 @@ let WebsiteService = class WebsiteService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, newPage.PageId]);
                     }
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '00', page.Creation_Date]);
                 }
             }
             await queryRunner.commitTransaction();

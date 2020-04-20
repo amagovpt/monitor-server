@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Request, UseGuards, Param } from '@nestjs/common';
+import { Controller, Post, Get, Request, UseGuards, Param, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PageService } from './page.service';
 import { success } from '../lib/response';
@@ -64,6 +64,51 @@ export class PageController {
     const uris = JSON.parse(req.body.uris).map((uri: string) => decodeURIComponent(uri));
     const observatory = JSON.parse(req.body.observatory).map((uri: string) => decodeURIComponent(uri));
     return success(await this.pageService.addPages(domainId, uris, observatory));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('page/evaluate')
+  async evaluatePage(@Request() req: any): Promise<any> {
+    const url = decodeURIComponent(req.body.url);
+    const page = await this.pageService.findPageFromUrl(url);
+
+    if (page) {
+      return success(await this.pageService.addPageToEvaluate(url, '10'));
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Post('myMonitor/evaluate')
+  async evaluateMyMonitorWebsitePage(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const url = decodeURIComponent(req.body.url);
+    const page = await this.pageService.findPageFromUrl(url);
+    const isUserPage = await this.pageService.isPageFromMyMonitorUser(userId, page.PageId);
+
+    if (isUserPage) {
+      return success(await this.pageService.addPageToEvaluate(url, '01'));
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/evaluate')
+  async evaluateStudyMonitorTagWebsitePage(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const url = decodeURIComponent(req.body.url);
+    const page = await this.pageService.findPageFromUrl(url);
+    const isUserPage = await this.pageService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
+    
+    if (isUserPage) {
+      return success(await this.pageService.addPageToEvaluate(url, '00'));
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 
   @UseGuards(AuthGuard('jwt-study'))

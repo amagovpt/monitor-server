@@ -41,10 +41,10 @@ export async function init(params: any): Promise<any> {
         'QW-HTML-T35',
         'QW-HTML-T37',
         'QW-HTML-T38',
-        'QW-HTML-T40',
+        //'QW-HTML-T40', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
         'QW-HTML-T41',
         'QW-HTML-T42',
-        'QW-HTML-T43',
+        //'QW-HTML-T43', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
       ]
     },
     'css-techniques': {
@@ -66,7 +66,7 @@ export async function init(params: any): Promise<any> {
         'QW-BP5',
         'QW-BP6',
         'QW-BP7',
-        //'QW-BP8',
+        //'QW-BP8', //TODO: needs fix - error on https://rtp.pt
         'QW-BP9',
         'QW-BP10',
         'QW-BP11',

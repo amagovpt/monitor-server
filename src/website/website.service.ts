@@ -398,13 +398,13 @@ export class WebsiteService {
       newDomain.Active = 1;
 
       const insertDomain = await queryRunner.manager.save(newDomain);
-      console.log(insertDomain)
+      
       for (const url of pages || []) {
         const page = await queryRunner.manager.findOne(Page, { where: { Uri: url } });
         if (page) {
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
         } else {
-          const evaluation = await this.evaluationService.evaluateUrl(url);
+          //const evaluation = await this.evaluationService.evaluateUrl(url);
 
           const newPage = new Page();
           newPage.Uri = url;
@@ -413,7 +413,7 @@ export class WebsiteService {
 
           const insertPage = await queryRunner.manager.save(newPage);
 
-          await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '01');
+          //await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '01');
           
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, insertPage.PageId]);
           
@@ -437,6 +437,8 @@ export class WebsiteService {
           if (existingDomain.length > 0) {
             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, newPage.PageId]);
           }
+
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '00', page.Creation_Date]);
         }
       }
 

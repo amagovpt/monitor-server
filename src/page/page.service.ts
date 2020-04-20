@@ -179,7 +179,54 @@ export class PageService {
     return pages;
   }
 
-  async addPageToEvaluate(url: string): Promise<boolean> {
+  async findPageFromUrl(url: string): Promise<any> {
+    return this.pageRepository.findOne({ where: { Uri: url } });
+  }
+
+  async isPageFromStudyMonitorUser(userId: number, tag: string, website: string, pageId: number): Promise<any> {
+    const manager = getManager();
+    const pages = await manager.query(`SELECT p.* FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        t.Name = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.PageId = ?
+      `, [tag, userId, website, userId, pageId]);
+
+    return pages.length > 0;
+  }
+
+  async isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any> {
+    const manager = getManager();
+    const pages = await manager.query(`SELECT p.* FROM
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.PageId = ?
+      `, [userId, pageId]);
+
+    return pages.length > 0;
+  }
+
+  async addPageToEvaluate(url: string, showTo: string = '10'): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -188,7 +235,7 @@ export class PageService {
     try {
       const page = await queryRunner.manager.findOne(Page, { where: { Uri: url }});
 
-      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, showTo, new Date()]);
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -429,7 +476,7 @@ export class PageService {
                 d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
           }
         } else {
-          const evaluation = await this.evaluationService.evaluateUrl(uri);
+          //const evaluation = await this.evaluationService.evaluateUrl(uri);
           const newPage = new Page();
           newPage.Uri = uri;
           newPage.Show_In = '000';
@@ -437,7 +484,7 @@ export class PageService {
 
           const insertPage = await queryRunner.manager.save(newPage);
 
-          await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
+          //await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
 
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -477,6 +524,8 @@ export class PageService {
           if (existingDomain.length > 0) {
             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
           }
+
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '00', insertPage.Creation_Date]);
         }
       }
 
@@ -491,8 +540,8 @@ export class PageService {
       await queryRunner.release();
     }
 
-    //return !hasError;
-    return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
+    return !hasError;
+    //return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
   }
 
   async removeStudyMonitorUserTagWebsitePages(userId: number, tag: string, website: string, pagesId: number[]): Promise<any> {

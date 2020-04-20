@@ -1,16 +1,10 @@
-import { Connection, Repository } from 'typeorm';
+import { Connection } from 'typeorm';
 import { Evaluation } from './evaluation.entity';
-import { Page } from '../page/page.entity';
 export declare class EvaluationService {
-    private readonly pageRepository;
-    private readonly evaluationRepository;
     private readonly connection;
     private isEvaluating;
-    constructor(pageRepository: Repository<Page>, evaluationRepository: Repository<Evaluation>, connection: Connection);
+    constructor(connection: Connection);
     evaluatePageList(): Promise<void>;
-    findPageFromUrl(url: string): Promise<any>;
-    isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any>;
-    isPageFromStudyMonitorUser(userId: number, tag: string, website: string, pageId: number): Promise<any>;
     evaluateUrl(url: string): Promise<any>;
     createOne(evaluation: Evaluation): Promise<any>;
     evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any>;

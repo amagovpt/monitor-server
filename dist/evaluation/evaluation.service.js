@@ -8,32 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
+const typeorm_1 = require("typeorm");
 const schedule_1 = require("@nestjs/schedule");
 const lodash_clone_1 = __importDefault(require("lodash.clone"));
 const evaluation_entity_1 = require("./evaluation.entity");
-const page_entity_1 = require("../page/page.entity");
 const middleware_1 = require("./middleware");
 let EvaluationService = class EvaluationService {
-    constructor(pageRepository, evaluationRepository, connection) {
-        this.pageRepository = pageRepository;
-        this.evaluationRepository = evaluationRepository;
+    constructor(connection) {
         this.connection = connection;
         this.isEvaluating = false;
     }
     async evaluatePageList() {
         if (!this.isEvaluating) {
             this.isEvaluating = true;
-            const pagesToEvaluate = await typeorm_2.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
+            const pagesToEvaluate = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
             for (const pte of pagesToEvaluate || []) {
                 let error = null;
                 let evaluation;
@@ -41,7 +34,7 @@ let EvaluationService = class EvaluationService {
                     evaluation = lodash_clone_1.default(await this.evaluateUrl(pte.Url));
                 }
                 catch (e) {
-                    error = e;
+                    error = e.stack;
                 }
                 const queryRunner = this.connection.createQueryRunner();
                 await queryRunner.connect();
@@ -52,7 +45,7 @@ let EvaluationService = class EvaluationService {
                         await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
                     }
                     else {
-                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = ? WHERE EvaluationListId = ?`, [error, pte.EvaluationListId]);
+                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
                     }
                     await queryRunner.commitTransaction();
                 }
@@ -66,48 +59,6 @@ let EvaluationService = class EvaluationService {
             }
             this.isEvaluating = false;
         }
-    }
-    async findPageFromUrl(url) {
-        return this.pageRepository.findOne({ where: { Uri: url } });
-    }
-    async isPageFromMyMonitorUser(userId, pageId) {
-        const manager = typeorm_2.getManager();
-        const pages = await manager.query(`SELECT p.* FROM
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        dp.PageId = p.PageId AND
-        p.PageId = ?
-      `, [userId, pageId]);
-        return pages.length > 0;
-    }
-    async isPageFromStudyMonitorUser(userId, tag, website, pageId) {
-        const manager = typeorm_2.getManager();
-        const pages = await manager.query(`SELECT p.* FROM
-        Tag as t,
-        TagWebsite as tw,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        t.Name = ? AND
-        t.UserId = ? AND
-        tw.TagId = t.TagId AND
-        w.WebsiteId = tw.WebsiteId AND
-        w.Name = ? AND
-        w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        dp.PageId = p.PageId AND
-        p.PageId = ?
-      `, [tag, userId, website, userId, pageId]);
-        return pages.length > 0;
     }
     evaluateUrl(url) {
         return middleware_1.executeUrlEvaluation(url);
@@ -172,7 +123,7 @@ let EvaluationService = class EvaluationService {
         await queryRunner.manager.save(newEvaluation);
     }
     async findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url) {
-        const manager = typeorm_2.getManager();
+        const manager = typeorm_1.getManager();
         const evaluation = (await manager.query(`SELECT e.* 
       FROM
         Website as w,
@@ -212,7 +163,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async findStudyMonitorUserTagWebsitePageNewestEvaluation(userId, tag, website, url) {
-        const manager = typeorm_2.getManager();
+        const manager = typeorm_1.getManager();
         const evaluation = (await manager.query(`SELECT e.* 
       FROM
         Tag as t,
@@ -257,7 +208,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async findAllEvaluationsFromPage(type, page) {
-        const manager = typeorm_2.getManager();
+        const manager = typeorm_1.getManager();
         let query = '';
         if (type === 'admin') {
             query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
@@ -319,7 +270,7 @@ let EvaluationService = class EvaluationService {
         return evaluations;
     }
     async findEvaluationById(url, id) {
-        const manager = typeorm_2.getManager();
+        const manager = typeorm_1.getManager();
         const evaluation = await manager.findOne(evaluation_entity_1.Evaluation, { where: { EvaluationId: id } });
         const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
         return {
@@ -347,7 +298,7 @@ let EvaluationService = class EvaluationService {
         else {
             throw new common_1.InternalServerErrorException();
         }
-        const manager = typeorm_2.getManager();
+        const manager = typeorm_1.getManager();
         const evaluation = (await manager.query(query, [url]))[0];
         const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
         return {
@@ -373,11 +324,7 @@ __decorate([
 ], EvaluationService.prototype, "evaluatePageList", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
-    __param(0, typeorm_1.InjectRepository(page_entity_1.Page)),
-    __param(1, typeorm_1.InjectRepository(evaluation_entity_1.Evaluation)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
-        typeorm_2.Connection])
+    __metadata("design:paramtypes", [typeorm_1.Connection])
 ], EvaluationService);
 exports.EvaluationService = EvaluationService;
 //# sourceMappingURL=evaluation.service.js.map

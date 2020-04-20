@@ -174,14 +174,56 @@ let PageService = class PageService {
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
         return pages;
     }
-    async addPageToEvaluate(url) {
+    async findPageFromUrl(url) {
+        return this.pageRepository.findOne({ where: { Uri: url } });
+    }
+    async isPageFromStudyMonitorUser(userId, tag, website, pageId) {
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`SELECT p.* FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        t.Name = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.PageId = ?
+      `, [tag, userId, website, userId, pageId]);
+        return pages.length > 0;
+    }
+    async isPageFromMyMonitorUser(userId, pageId) {
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`SELECT p.* FROM
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+      WHERE
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        dp.PageId = p.PageId AND
+        p.PageId = ?
+      `, [userId, pageId]);
+        return pages.length > 0;
+    }
+    async addPageToEvaluate(url, showTo = '10') {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
             const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
-            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, showTo, new Date()]);
             await queryRunner.commitTransaction();
         }
         catch (err) {
@@ -369,13 +411,11 @@ let PageService = class PageService {
                     }
                 }
                 else {
-                    const evaluation = await this.evaluationService.evaluateUrl(uri);
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = uri;
                     newPage.Show_In = '000';
                     newPage.Creation_Date = new Date();
                     const insertPage = await queryRunner.manager.save(newPage);
-                    await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
               d.DomainId, 
@@ -412,6 +452,7 @@ let PageService = class PageService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
                     }
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '00', insertPage.Creation_Date]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -424,7 +465,7 @@ let PageService = class PageService {
         finally {
             await queryRunner.release();
         }
-        return this.findStudyMonitorUserTagWebsitePages(userId, tag, website);
+        return !hasError;
     }
     async removeStudyMonitorUserTagWebsitePages(userId, tag, website, pagesId) {
         const queryRunner = this.connection.createQueryRunner();

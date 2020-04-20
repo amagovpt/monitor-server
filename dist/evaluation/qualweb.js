@@ -48,10 +48,8 @@ async function init(params) {
                 'QW-HTML-T35',
                 'QW-HTML-T37',
                 'QW-HTML-T38',
-                'QW-HTML-T40',
                 'QW-HTML-T41',
                 'QW-HTML-T42',
-                'QW-HTML-T43',
             ]
         },
         'css-techniques': {

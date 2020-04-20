@@ -53,6 +53,42 @@ let PageController = class PageController {
         const observatory = JSON.parse(req.body.observatory).map((uri) => decodeURIComponent(uri));
         return response_1.success(await this.pageService.addPages(domainId, uris, observatory));
     }
+    async evaluatePage(req) {
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.pageService.findPageFromUrl(url);
+        if (page) {
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '10'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
+    }
+    async evaluateMyMonitorWebsitePage(req) {
+        const userId = req.user.userId;
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.pageService.findPageFromUrl(url);
+        const isUserPage = await this.pageService.isPageFromMyMonitorUser(userId, page.PageId);
+        if (isUserPage) {
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '01'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
+    }
+    async evaluateStudyMonitorTagWebsitePage(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const website = req.body.website;
+        const url = decodeURIComponent(req.body.url);
+        const page = await this.pageService.findPageFromUrl(url);
+        const isUserPage = await this.pageService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
+        if (isUserPage) {
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '00'));
+        }
+        else {
+            throw new common_1.UnauthorizedException();
+        }
+    }
     async createStudyMonitorUserTagWebsitePages(req) {
         const tag = req.body.tag;
         const website = req.body.website;
@@ -150,6 +186,30 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PageController.prototype, "addPages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('page/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "evaluatePage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('myMonitor/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "evaluateMyMonitorWebsitePage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/evaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PageController.prototype, "evaluateStudyMonitorTagWebsitePage", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
     common_1.Post('studyMonitor/create'),

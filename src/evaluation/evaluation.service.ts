@@ -1,10 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager, IsNull } from 'typeorm';
+import { Connection, getManager } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import clone from 'lodash.clone';
 import { Evaluation } from './evaluation.entity';
-import { Page } from '../page/page.entity';
 import { executeUrlEvaluation } from './middleware';
 
 @Injectable()
@@ -13,10 +11,6 @@ export class EvaluationService {
   private isEvaluating: boolean;
 
   constructor(
-    @InjectRepository(Page)
-    private readonly pageRepository: Repository<Page>,
-    @InjectRepository(Evaluation)
-    private readonly evaluationRepository: Repository<Evaluation>,
     private readonly connection: Connection
   ) {
     this.isEvaluating = false;
@@ -36,7 +30,7 @@ export class EvaluationService {
         try {
           evaluation = clone(await this.evaluateUrl(pte.Url));
         } catch (e) {
-          error = e;
+          error = e.stack;
         }
 
         const queryRunner = this.connection.createQueryRunner();
@@ -51,7 +45,7 @@ export class EvaluationService {
 
             await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
           } else {
-            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = ? WHERE EvaluationListId = ?`,[error, pte.EvaluationListId]);
+            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
           }
 
           await queryRunner.commitTransaction();
@@ -66,53 +60,6 @@ export class EvaluationService {
 
       this.isEvaluating = false;
     }
-  }
-
-  async findPageFromUrl(url: string): Promise<any> {
-    return this.pageRepository.findOne({ where: { Uri: url } });
-  }
-
-  async isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(`SELECT p.* FROM
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        dp.PageId = p.PageId AND
-        p.PageId = ?
-      `, [userId, pageId]);
-
-    return pages.length > 0;
-  }
-
-  async isPageFromStudyMonitorUser(userId: number, tag: string, website: string, pageId: number): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(`SELECT p.* FROM
-        Tag as t,
-        TagWebsite as tw,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        t.Name = ? AND
-        t.UserId = ? AND
-        tw.TagId = t.TagId AND
-        w.WebsiteId = tw.WebsiteId AND
-        w.Name = ? AND
-        w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        dp.PageId = p.PageId AND
-        p.PageId = ?
-      `, [tag, userId, website, userId, pageId]);
-
-    return pages.length > 0;
   }
 
   evaluateUrl(url: string): Promise<any> {
