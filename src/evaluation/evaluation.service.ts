@@ -16,13 +16,70 @@ export class EvaluationService {
     this.isEvaluating = false;
   }
 
-  @Cron('* * * * *')
+  @Cron('* * * * *') // Called every minute
   async evaluatePageList(): Promise<void> {
-    // Called every minute
-    if (!this.isEvaluating) {
-      this.isEvaluating = true;
+    if (process.env.NODE_APP_INSTANCE === '0') {
+      if (!this.isEvaluating) {
+        this.isEvaluating = true;
 
-      const pagesToEvaluate = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
+        const pagesToEvaluate = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date ACS LIMIT 100`);
+        
+        for (const pte of pagesToEvaluate || []) {
+          let error = null;
+          let evaluation: any;
+          try {
+            evaluation = clone(await this.evaluateUrl(pte.Url));
+          } catch (e) {
+            error = e.stack;
+          }
+
+          const queryRunner = this.connection.createQueryRunner();
+
+          await queryRunner.connect();
+          
+          await queryRunner.startTransaction();
+
+          try {
+            if (!error && evaluation) {
+              this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+
+              await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+            } else {
+              await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
+            }
+
+            await queryRunner.commitTransaction();
+          } catch (err) {
+            // since we have errors lets rollback the changes we made
+            await queryRunner.rollbackTransaction();
+            console.log(err);
+          } finally {
+            await queryRunner.release();
+          }
+        }
+
+        this.isEvaluating = false;
+      }
+    }
+  }
+
+  @Cron('0 0 * * 0') // Called every minute
+  async evaluateOldPages(): Promise<void> {
+    if (process.env.NODE_APP_INSTANCE === '1') {
+
+      const pagesToEvaluate = await getManager().query(`
+        SELECT DISTINCT p.PageId, p.Uri, e.Evaluation_Date
+        FROM 
+          Page as p, 
+          Evaluation as e 
+        WHERE
+          e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )  
+        ORDER BY e.Evaluation_Date ASC LIMIT 100
+      `);
       
       for (const pte of pagesToEvaluate || []) {
         let error = null;
@@ -41,11 +98,7 @@ export class EvaluationService {
 
         try {
           if (!error && evaluation) {
-            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
-
-            await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
-          } else {
-            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
+            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, '10');
           }
 
           await queryRunner.commitTransaction();
@@ -57,8 +110,6 @@ export class EvaluationService {
           await queryRunner.release();
         }
       }
-
-      this.isEvaluating = false;
     }
   }
 

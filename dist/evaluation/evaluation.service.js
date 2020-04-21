@@ -24,9 +24,59 @@ let EvaluationService = class EvaluationService {
         this.isEvaluating = false;
     }
     async evaluatePageList() {
-        if (!this.isEvaluating) {
-            this.isEvaluating = true;
-            const pagesToEvaluate = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date DESC`);
+        if (process.env.NODE_APP_INSTANCE === '0') {
+            if (!this.isEvaluating) {
+                this.isEvaluating = true;
+                const pagesToEvaluate = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date ACS LIMIT 100`);
+                for (const pte of pagesToEvaluate || []) {
+                    let error = null;
+                    let evaluation;
+                    try {
+                        evaluation = lodash_clone_1.default(await this.evaluateUrl(pte.Url));
+                    }
+                    catch (e) {
+                        error = e.stack;
+                    }
+                    const queryRunner = this.connection.createQueryRunner();
+                    await queryRunner.connect();
+                    await queryRunner.startTransaction();
+                    try {
+                        if (!error && evaluation) {
+                            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+                            await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+                        }
+                        else {
+                            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
+                        }
+                        await queryRunner.commitTransaction();
+                    }
+                    catch (err) {
+                        await queryRunner.rollbackTransaction();
+                        console.log(err);
+                    }
+                    finally {
+                        await queryRunner.release();
+                    }
+                }
+                this.isEvaluating = false;
+            }
+        }
+    }
+    async evaluateOldPages() {
+        if (process.env.NODE_APP_INSTANCE === '1') {
+            const pagesToEvaluate = await typeorm_1.getManager().query(`
+        SELECT DISTINCT p.PageId, p.Uri, e.Evaluation_Date
+        FROM 
+          Page as p, 
+          Evaluation as e 
+        WHERE
+          e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )  
+        ORDER BY e.Evaluation_Date ASC LIMIT 100
+      `);
             for (const pte of pagesToEvaluate || []) {
                 let error = null;
                 let evaluation;
@@ -41,11 +91,7 @@ let EvaluationService = class EvaluationService {
                 await queryRunner.startTransaction();
                 try {
                     if (!error && evaluation) {
-                        this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
-                        await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
-                    }
-                    else {
-                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
+                        this.savePageEvaluation(queryRunner, pte.PageId, evaluation, '10');
                     }
                     await queryRunner.commitTransaction();
                 }
@@ -57,7 +103,6 @@ let EvaluationService = class EvaluationService {
                     await queryRunner.release();
                 }
             }
-            this.isEvaluating = false;
         }
     }
     evaluateUrl(url) {
@@ -322,6 +367,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "evaluatePageList", null);
+__decorate([
+    schedule_1.Cron('0 0 * * 0'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EvaluationService.prototype, "evaluateOldPages", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [typeorm_1.Connection])

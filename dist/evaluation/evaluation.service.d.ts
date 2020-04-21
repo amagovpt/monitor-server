@@ -5,6 +5,7 @@ export declare class EvaluationService {
     private isEvaluating;
     constructor(connection: Connection);
     evaluatePageList(): Promise<void>;
+    evaluateOldPages(): Promise<void>;
     evaluateUrl(url: string): Promise<any>;
     createOne(evaluation: Evaluation): Promise<any>;
     evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any>;
