@@ -1,0 +1,17 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { WebsiteService } from './website.service';
+import { Website } from './website.entity';
+import { Tag } from '../tag/tag.entity';
+import { Page } from '../page/page.entity';
+import { Domain } from '../domain/domain.entity';
+import { WebsiteController } from './website.controller';
+import { EvaluationModule } from '../evaluation/evaluation.module';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Tag, Website, Domain, Page]), EvaluationModule],
+  exports: [WebsiteService],
+  providers: [WebsiteService],
+  controllers: [WebsiteController]
+})
+export class WebsiteModule {}
