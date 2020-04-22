@@ -3,7 +3,7 @@ import { Connection, getManager } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import clone from 'lodash.clone';
 import { Evaluation } from './evaluation.entity';
-import { executeUrlEvaluation } from './middleware';
+import { initEvaluator, executeUrlEvaluation } from './middleware';
 
 @Injectable()
 export class EvaluationService {
@@ -25,6 +25,8 @@ export class EvaluationService {
     this.isEvaluatingUserInstance4 = false;
     this.isEvaluatingUserInstance5 = false;
     this.isEvaluatingUserInstance6 = false;
+
+    initEvaluator();
   }
 
   @Cron('* * * * *') // Called every minute

@@ -27,6 +27,7 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingUserInstance4 = false;
         this.isEvaluatingUserInstance5 = false;
         this.isEvaluatingUserInstance6 = false;
+        middleware_1.initEvaluator();
     }
     async instance1EvaluatePageList() {
         if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {

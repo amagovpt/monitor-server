@@ -170,8 +170,12 @@ function parseEvaluation(evaluation: any): any {
   return report;
 }
 
+export async function initEvaluator(): Promise<void> {
+  await qualweb.init();
+}
+
 export async function executeUrlEvaluation(url: string): Promise<any> {
-  const evaluation = await qualweb.init({ url });
+  const evaluation = await qualweb.evaluate({ url });
   return parseEvaluation(evaluation);
 }
 

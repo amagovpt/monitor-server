@@ -8,7 +8,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@qualweb/core"));
-async function init(params) {
+async function init() {
+    await core.start();
+}
+exports.init = init;
+async function evaluate(params) {
     const report = (await core.evaluate({
         url: params.url,
         'act-rules': {
@@ -30,7 +34,6 @@ async function init(params) {
                 'QW-HTML-T1',
                 'QW-HTML-T2',
                 'QW-HTML-T3',
-                'QW-HTML-T5',
                 'QW-HTML-T6',
                 'QW-HTML-T7',
                 'QW-HTML-T8',
@@ -38,7 +41,6 @@ async function init(params) {
                 'QW-HTML-T17',
                 'QW-HTML-T19',
                 'QW-HTML-T20',
-                'QW-HTML-T23',
                 'QW-HTML-T25',
                 'QW-HTML-T28',
                 'QW-HTML-T29',
@@ -48,8 +50,10 @@ async function init(params) {
                 'QW-HTML-T35',
                 'QW-HTML-T37',
                 'QW-HTML-T38',
+                'QW-HTML-T40',
                 'QW-HTML-T41',
                 'QW-HTML-T42',
+                'QW-HTML-T43',
             ]
         },
         'css-techniques': {
@@ -71,14 +75,18 @@ async function init(params) {
                 'QW-BP5',
                 'QW-BP6',
                 'QW-BP7',
+                'QW-BP8',
                 'QW-BP9',
                 'QW-BP10',
                 'QW-BP11',
                 'QW-BP13',
+                'QW-BP14',
+                'QW-BP15',
+                'QW-BP16'
             ]
         }
     }))[params.url];
     return report;
 }
-exports.init = init;
+exports.evaluate = evaluate;
 //# sourceMappingURL=qualweb.js.map

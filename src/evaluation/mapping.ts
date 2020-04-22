@@ -25,7 +25,6 @@ const html_mapping = {
   'QW-HTML-T17': QW_HTML_T17,
   'QW-HTML-T19': QW_HTML_T19,
   'QW-HTML-T20': QW_HTML_T20,
-  'QW-HTML-T23': QW_HTML_T23,
   'QW-HTML-T25': QW_HTML_T25,
   'QW-HTML-T28': QW_HTML_T28,
   'QW-HTML-T29': QW_HTML_T29,
@@ -64,7 +63,8 @@ const bp_mapping = {
   'QW-BP11': QW_BP11,
   'QW-BP13': QW_BP13,
   'QW-BP14': QW_BP14,
-  'QW-BP15': QW_BP15
+  'QW-BP15': QW_BP15,
+  'QW-BP16': QW_BP16
 };
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
@@ -317,15 +317,6 @@ function QW_HTML_T20(elements: any, results: any, nodes: any, technique: any): v
     addToElements(elements, 'w3cValidatorErrors', technique.metadata.passed);
     addToResults(results, 'w3c_validator_01a');
     addToNodes(nodes, 'w3cValidatorErrors', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
-  }
-}
-
-// TODO: mudara para BP quando for feita
-function QW_HTML_T23(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'a', 0);
-    addToResults(results, 'a_04');
-    addToNodes(nodes, 'a', []);
   }
 }
 
@@ -633,6 +624,14 @@ function QW_BP15(elements: any, results: any, nodes: any, technique: any): void 
     addToElements(elements, 'valueAbsHtml', failedResults.length);
     addToResults(results, 'values_01a');
     addToNodes(nodes, 'valueAbsHtml', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+  }
+}
+
+function QW_BP16(elements: any, results: any, nodes: any, technique: any): void {
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'a', 0);
+    addToResults(results, 'a_04');
+    addToNodes(nodes, 'a', []);
   }
 }
 

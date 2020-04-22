@@ -1,1 +1,2 @@
-export declare function init(params: any): Promise<any>;
+export declare function init(): Promise<void>;
+export declare function evaluate(params: any): Promise<any>;

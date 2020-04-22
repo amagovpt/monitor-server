@@ -1,6 +1,10 @@
 import * as core from '@qualweb/core';
 
-export async function init(params: any): Promise<any> {
+export async function init(): Promise<void> {
+  await core.start();
+}
+
+export async function evaluate(params: any): Promise<any> {
   const report = (await core.evaluate({
     url: params.url,
     'act-rules': {
@@ -23,7 +27,6 @@ export async function init(params: any): Promise<any> {
         'QW-HTML-T1',
         'QW-HTML-T2',
         'QW-HTML-T3',
-        'QW-HTML-T5',
         'QW-HTML-T6',
         'QW-HTML-T7',
         'QW-HTML-T8',
@@ -31,7 +34,6 @@ export async function init(params: any): Promise<any> {
         'QW-HTML-T17',
         'QW-HTML-T19',
         'QW-HTML-T20',
-        'QW-HTML-T23',
         'QW-HTML-T25',
         'QW-HTML-T28',
         'QW-HTML-T29',
@@ -41,10 +43,10 @@ export async function init(params: any): Promise<any> {
         'QW-HTML-T35',
         'QW-HTML-T37',
         'QW-HTML-T38',
-        //'QW-HTML-T40', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
+        'QW-HTML-T40', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
         'QW-HTML-T41',
         'QW-HTML-T42',
-        //'QW-HTML-T43', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
+        'QW-HTML-T43', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
       ]
     },
     'css-techniques': {
@@ -66,11 +68,14 @@ export async function init(params: any): Promise<any> {
         'QW-BP5',
         'QW-BP6',
         'QW-BP7',
-        //'QW-BP8', //TODO: needs fix - error on https://rtp.pt
+        'QW-BP8', //TODO: needs fix - error on https://rtp.pt
         'QW-BP9',
         'QW-BP10',
         'QW-BP11',
         'QW-BP13',
+        'QW-BP14',
+        'QW-BP15',
+        'QW-BP16'
       ]
     }
   }))[params.url];

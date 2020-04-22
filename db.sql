@@ -145,10 +145,12 @@ CREATE TABLE `accessmonitor`.`Invalid_Token` (
 
 CREATE TABLE `Evaluation_List` (
   `EvaluationListId` int(11) NOT NULL AUTO_INCREMENT,
+  `UserId` int(11) DEFAULT NULL,
   `PageId` int(11) NOT NULL,
   `Url` varchar(255) NOT NULL,
   `Show_To` varchar(2) NOT NULL DEFAULT '00',
   `Error` text,
   `Creation_Date` datetime NOT NULL,
+  `Is_Evaluating` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`EvaluationListId`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8;
