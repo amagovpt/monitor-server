@@ -1,7 +1,0 @@
-{
-  "name": "Examinator",
-  "version": "1.0.0",
-  "language": "PHP",
-  "main": "index.php",
-  "command": "php"
-}
