@@ -8,64 +8,112 @@ import { executeUrlEvaluation } from './middleware';
 @Injectable()
 export class EvaluationService {
 
-  private isEvaluating: boolean;
+  private isEvaluatingInstance1: boolean;
+  private isEvaluatingInstance2: boolean;
+  private isEvaluatingInstance3: boolean;
+
+  private isEvaluatingUserInstance4: boolean;
+  private isEvaluatingUserInstance5: boolean;
+  private isEvaluatingUserInstance6: boolean;
 
   constructor(
     private readonly connection: Connection
   ) {
-    this.isEvaluating = false;
+    this.isEvaluatingInstance1 = false;
+    this.isEvaluatingInstance2 = false;
+    this.isEvaluatingInstance3 = false;
+    this.isEvaluatingUserInstance4 = false;
+    this.isEvaluatingUserInstance5 = false;
+    this.isEvaluatingUserInstance6 = false;
   }
 
   @Cron('* * * * *') // Called every minute
-  async evaluatePageList(): Promise<void> {
-    if (process.env.NODE_APP_INSTANCE === '0') {
-      if (!this.isEvaluating) {
-        this.isEvaluating = true;
+  async instance1EvaluatePageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+      if (!this.isEvaluatingInstance1) {
+        this.isEvaluatingInstance1 = true;
 
-        const pagesToEvaluate = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL ORDER BY Creation_Date ACS LIMIT 100`);
-        
-        for (const pte of pagesToEvaluate || []) {
-          let error = null;
-          let evaluation: any;
-          try {
-            evaluation = clone(await this.evaluateUrl(pte.Url));
-          } catch (e) {
-            error = e.stack;
-          }
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
 
-          const queryRunner = this.connection.createQueryRunner();
-
-          await queryRunner.connect();
-          
-          await queryRunner.startTransaction();
-
-          try {
-            if (!error && evaluation) {
-              this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
-
-              await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
-            } else {
-              await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
-            }
-
-            await queryRunner.commitTransaction();
-          } catch (err) {
-            // since we have errors lets rollback the changes we made
-            await queryRunner.rollbackTransaction();
-            console.log(err);
-          } finally {
-            await queryRunner.release();
-          }
-        }
-
-        this.isEvaluating = false;
+        this.isEvaluatingInstance1 = false;
       }
     }
   }
 
-  @Cron('0 0 * * 0') // Called every minute
+  @Cron('*/5 * * * *') // Called every 5 minutes
+  async instance2EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+      if (!this.isEvaluatingInstance2) {
+        this.isEvaluatingInstance2 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingInstance2 = false;
+      }
+    }
+  }
+
+  @Cron('*/10 * * * *') // Called every 10 minutes
+  async instance3EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '2') {
+      if (!this.isEvaluatingInstance3) {
+        this.isEvaluatingInstance3 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingInstance3 = false;
+      }
+    }
+  }
+
+  @Cron('* * * * *') // Called every minute
+  async instance4EvaluateUserPageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '3') {
+      if (!this.isEvaluatingUserInstance4) {
+        this.isEvaluatingUserInstance4 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NOT NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingUserInstance4 = false;
+      }
+    }
+  }
+
+  @Cron('*/5 * * * *') // Called every 5 minutes
+  async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '4') {
+      if (!this.isEvaluatingUserInstance5) {
+        this.isEvaluatingUserInstance5 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NOT NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingUserInstance5 = false;
+      }
+    }
+  }
+
+  @Cron('*/10 * * * *') // Called every 10 minutes
+  async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '5') {
+      if (!this.isEvaluatingUserInstance6) {
+        this.isEvaluatingUserInstance6 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId IS NOT NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingUserInstance6 = false;
+      }
+    }
+  }
+
+  /*@Cron('0 0 * * 0') // Called every minute
   async evaluateOldPages(): Promise<void> {
-    if (process.env.NODE_APP_INSTANCE === '1') {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
 
       const pagesToEvaluate = await getManager().query(`
         SELECT DISTINCT p.PageId, p.Uri, e.Evaluation_Date
@@ -99,6 +147,46 @@ export class EvaluationService {
         try {
           if (!error && evaluation) {
             this.savePageEvaluation(queryRunner, pte.PageId, evaluation, '10');
+          }
+
+          await queryRunner.commitTransaction();
+        } catch (err) {
+          // since we have errors lets rollback the changes we made
+          await queryRunner.rollbackTransaction();
+          console.log(err);
+        } finally {
+          await queryRunner.release();
+        }
+      }
+    }
+  }*/
+
+  private async evaluateInBackground(pages: any[]): Promise<void> {
+    if (pages) {
+      await getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId).join(',')]);
+
+      for (const pte of pages || []) {
+        let error = null;
+        let evaluation: any;
+        try {
+          evaluation = clone(await this.evaluateUrl(pte.Url));
+        } catch (e) {
+          error = e.stack;
+        }
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        await queryRunner.connect();
+        
+        await queryRunner.startTransaction();
+
+        try {
+          if (!error && evaluation) {
+            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+
+            await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+          } else {
+            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
           }
 
           await queryRunner.commitTransaction();

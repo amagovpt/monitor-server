@@ -142,3 +142,13 @@ CREATE TABLE `accessmonitor`.`Invalid_Token` (
   PRIMARY KEY (`TokenId`),
   UNIQUE INDEX `TokenId_UNIQUE` (`TokenId` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `Evaluation_List` (
+  `EvaluationListId` int(11) NOT NULL AUTO_INCREMENT,
+  `PageId` int(11) NOT NULL,
+  `Url` varchar(255) NOT NULL,
+  `Show_To` varchar(2) NOT NULL DEFAULT '00',
+  `Error` text,
+  `Creation_Date` datetime NOT NULL,
+  PRIMARY KEY (`EvaluationListId`)
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8;

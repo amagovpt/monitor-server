@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
-//import csurf from 'csurf';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
@@ -16,6 +15,7 @@ async function bootstrap() {
       max: 1000, // limit each IP to 1000 requests per windowMs
     }),
   );
-  await app.listen(3000);
+
+  await app.listen(process.env.PORT);
 }
 bootstrap();

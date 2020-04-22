@@ -101,9 +101,6 @@ let DomainService = class DomainService {
         return this.domainRepository.findOne({ where: { Url: url } });
     }
     async exists(url) {
-        url = url.replace('https://', '');
-        url = url.replace('http://', '');
-        url = url.replace('www.', '');
         return (await this.domainRepository.query(`SELECT d.*
       FROM
         Domain as d,

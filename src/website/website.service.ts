@@ -438,7 +438,7 @@ export class WebsiteService {
             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, newPage.PageId]);
           }
 
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '00', page.Creation_Date]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', page.Creation_Date]);
         }
       }
 
@@ -525,8 +525,7 @@ export class WebsiteService {
   }
 
   async createOne(website: Website, domain: string, tags: string[]): Promise<boolean> {
-    domain = domain.replace('https://', '').replace('http://', '').replace('www.', '');
-
+  
     if (domain.endsWith('/')) {
       domain = domain.substring(0, domain.length - 1);
     }

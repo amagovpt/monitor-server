@@ -2597,6 +2597,18 @@
         "version": "d4aa3282258ffeb269753793843a5c82f99876333d74f078804f8a7c149f8072",
         "signature": "4f81e19ffbee84620af423617d1768093e90706a4e2ed78c5c39988723f367f1"
       },
+      "../src/page/page.service.ts": {
+        "version": "18fc21736394098e46d701498398edb3b5de3b8201d4ef5082c91461f8b2b688",
+        "signature": "bacd84f26179c5422f329c0494d4f7587627cd821dc26c208fd395642aca9281"
+      },
+      "../src/observatory/observatory.controller.ts": {
+        "version": "615d847ae4007f1939a4659a4e5c5c7354b5fd8a5311d1d4193609c3a16fe825",
+        "signature": "97da43edfe9657813a0952b5b7b98df07788bd3d2ddc5344ae10dce2ba9aa7a0"
+      },
+      "../src/page/page.controller.ts": {
+        "version": "21b53a2402158a54a855d007caa693904edcaefc4f9a87a0717191ebd958fe7b",
+        "signature": "8f7767b65f642242015c201dc048ae0830e5224ac070d5927a8ceedb82304e37"
+      },
       "../node_modules/htmlparser2/lib/Tokenizer.d.ts": {
         "version": "f8f65a4f6575afaabd429db8fd91d3fd7e0bbfe43319e0d820e4fd748c07d41c",
         "signature": "f8f65a4f6575afaabd429db8fd91d3fd7e0bbfe43319e0d820e4fd748c07d41c"
@@ -2698,24 +2710,12 @@
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b"
       },
       "../src/evaluation/middleware.ts": {
-        "version": "98b818616c83e3b5ef96da7208ba7fbb36374c0f80b0f89903426f975bf1e246",
+        "version": "9fdd7b1c45cfeed8f782777de1edf6554242739ecdbc1dffff652b6dede326cd",
         "signature": "711d7a64f99019a5ef66ffd25ab4ef09896f2fa1293884cf1936dd295001a199"
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "c51a321d9cf5a98e949bd0de93f8340f0798bed296c5879ab2619cba46d0b9f6",
-        "signature": "917173728228559727b95cd7b7173647a1e5e65a9132174e6da8c2cfeebab855"
-      },
-      "../src/page/page.service.ts": {
-        "version": "1e13c6af8658268ad4e1e791696c48117eda2fea534c72bbbd0bb0cb83d74770",
-        "signature": "e1870589f5a0a3d1ee92843eab439d680e95f83f792c5d44797f9b5edddc87e3"
-      },
-      "../src/observatory/observatory.controller.ts": {
-        "version": "615d847ae4007f1939a4659a4e5c5c7354b5fd8a5311d1d4193609c3a16fe825",
-        "signature": "97da43edfe9657813a0952b5b7b98df07788bd3d2ddc5344ae10dce2ba9aa7a0"
-      },
-      "../src/page/page.controller.ts": {
-        "version": "d9a5895efb789454e0f3f260072511593d9500232342bdaf216835cb273370f4",
-        "signature": "8f7767b65f642242015c201dc048ae0830e5224ac070d5927a8ceedb82304e37"
+        "version": "5edead238b8750431a2fe0825c02b35501271b41e8bf7e1a4db6712692b2467c",
+        "signature": "7ab08c8be7778d419496517c3575d33207d0abfbafb7983ce4debc53a7a4cf9c"
       },
       "../src/evaluation/evaluation.controller.ts": {
         "version": "316e506256bfd9dc3cd1a025ae567832c2d51cb2de3cbb59c0c71b1d6da0ae16",
@@ -2825,13 +2825,9 @@
         "version": "17868dee2559ec6f6b6f5c996cdf22e9b17da693d8c88ee4635a3a28d8264c61",
         "signature": "17868dee2559ec6f6b6f5c996cdf22e9b17da693d8c88ee4635a3a28d8264c61"
       },
-      "../node_modules/@types/sqlstring/index.d.ts": {
-        "version": "acad1a76c23dfe1665822805e64c079f6707814d81968bb77e3137db50c9298f",
-        "signature": "acad1a76c23dfe1665822805e64c079f6707814d81968bb77e3137db50c9298f"
-      },
       "../src/page/page.gateway.ts": {
-        "version": "42fb22f2e6bc862e00c7683a52dd2e384ee5caaa0bd34f799258925617e2375a",
-        "signature": "78e348b1ba9c1401226c3e73ba5f6ea3bb8653dd2472b52ea00067aa6ba91940"
+        "version": "fff9dd7719601f1edc249b03affd0ac93535e551b698294631390de5209f4b87",
+        "signature": "56f1ae0341d4a1f7fe003b4ea0228f3aaaf674ec566e23d3c02126324e12430f"
       },
       "../src/page/page.module.ts": {
         "version": "2286cb542aa78d0674d9da337cf5b89fe98dad9fdb2fd2c5892d55da87e183ed",
@@ -2858,8 +2854,12 @@
         "signature": "f99fd130788105071b631b3817d6785e42e6dc4417bc4acc92fb26e54b0ed60e"
       },
       "../src/website/website.service.ts": {
-        "version": "908208d506fd48e590961285671983df40e387924f97e1ae37568d6d28d0b6b7",
+        "version": "026180c5a83d1535105e34544d3fd6e405fd5918e9f18770e935073529fb267f",
         "signature": "7939f307d9eef218cb0991c68c4f5af7a9020347bba11fbdbe33d1658414605c"
+      },
+      "../node_modules/@types/sqlstring/index.d.ts": {
+        "version": "acad1a76c23dfe1665822805e64c079f6707814d81968bb77e3137db50c9298f",
+        "signature": "acad1a76c23dfe1665822805e64c079f6707814d81968bb77e3137db50c9298f"
       },
       "../src/website/website.controller.ts": {
         "version": "ed325919fc077aeb1656110c56ea5b28373ed301b72fe9d14b1a426c6becc0db",
@@ -2870,7 +2870,7 @@
         "signature": "f7594e019e0e00e21e252a045c9087758d7649128bbd91f1e9e3db822cf827a3"
       },
       "../src/domain/domain.service.ts": {
-        "version": "654cc5adb98e73ebda904136b928cf798a222c91a529d5897f4e011d278af360",
+        "version": "4fe9abc2d822fb594a2b82e83642a871bc017a4785571ad116fa49157fc34c0a",
         "signature": "b477c9be11673339a03a0e6a8ccb9465d9e857d5a17a8b9b776a3c2582f812bb"
       },
       "../src/domain/domain.controller.ts": {
@@ -2922,7 +2922,7 @@
         "signature": "1c91f86efb2a480dc37d163391b724688f0c5ba3d3347ccbcb356ff68d495741"
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "06b72131fcbff5c424e21c5f4463eb58751f8207581d75c38d91a3aa471a6d09",
+        "version": "3a91c2fc5a817efeb8f449c322cc45c4aba45fe484e1a3fc2c2b3fe7a0a4dde7",
         "signature": "1a91c85bab579a792787b655948c30b5e5afc37212b9a512f43ca23d136959d0"
       },
       "../src/crawler/crawler.controller.ts": {
@@ -2938,7 +2938,7 @@
         "signature": "b82491e2990291580288c5602d4c017238977749d52b17391f0e45d9a29be644"
       },
       "../src/main.ts": {
-        "version": "ee52c8eda233569b0c24e7aa718d7b58b935ecdb4a7c098dca0ec0f10ededf3a",
+        "version": "8618e8c18a3b0bcd5707324db88329c3910b856c74fb06a1028f82ded46909d5",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
       },
       "../node_modules/@types/anymatch/index.d.ts": {
@@ -8589,6 +8589,37 @@
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
+      "../src/page/page.service.ts": [
+        "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/typeorm/index.d.ts",
+        "../node_modules/typeorm/index.d.ts",
+        "../src/website/website.entity.ts",
+        "../src/page/page.entity.ts",
+        "../src/evaluation/evaluation.entity.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../src/observatory/observatory.controller.ts": [
+        "../node_modules/@nestjs/common/index.d.ts",
+        "../src/page/page.service.ts",
+        "../src/lib/response.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../src/page/page.controller.ts": [
+        "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/passport/index.d.ts",
+        "../src/page/page.service.ts",
+        "../src/lib/response.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
       "../node_modules/htmlparser2/lib/Tokenizer.d.ts": [
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -8802,38 +8833,6 @@
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
-      "../src/page/page.service.ts": [
-        "../node_modules/@nestjs/common/index.d.ts",
-        "../node_modules/@nestjs/typeorm/index.d.ts",
-        "../node_modules/typeorm/index.d.ts",
-        "../src/website/website.entity.ts",
-        "../src/page/page.entity.ts",
-        "../src/evaluation/evaluation.entity.ts",
-        "../src/evaluation/evaluation.service.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/util.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts"
-      ],
-      "../src/observatory/observatory.controller.ts": [
-        "../node_modules/@nestjs/common/index.d.ts",
-        "../src/page/page.service.ts",
-        "../src/lib/response.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/util.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts"
-      ],
-      "../src/page/page.controller.ts": [
-        "../node_modules/@nestjs/common/index.d.ts",
-        "../node_modules/@nestjs/passport/index.d.ts",
-        "../src/page/page.service.ts",
-        "../src/lib/response.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/util.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts"
-      ],
       "../src/evaluation/evaluation.controller.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@nestjs/passport/index.d.ts",
@@ -9040,23 +9039,10 @@
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts"
       ],
-      "../node_modules/@types/sqlstring/index.d.ts": [
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/util.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts"
-      ],
       "../src/page/page.gateway.ts": [
         "../node_modules/@nestjs/websockets/index.d.ts",
         "../node_modules/@types/socket.io/index.d.ts",
-        "../node_modules/@nestjs/typeorm/index.d.ts",
-        "../node_modules/typeorm/index.d.ts",
-        "../node_modules/@types/sqlstring/index.d.ts",
-        "../src/auth/auth.service.ts",
         "../src/evaluation/evaluation.service.ts",
-        "../src/page/page.entity.ts",
-        "../src/evaluation/evaluation.entity.ts",
-        "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -9137,6 +9123,12 @@
         "../src/tag/tag.entity.ts",
         "../src/page/page.entity.ts",
         "../src/evaluation/evaluation.service.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../node_modules/@types/sqlstring/index.d.ts": [
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
@@ -9945,14 +9937,6 @@
         "../node_modules/typeorm/index.d.ts",
         "../src/tag/tag.entity.ts"
       ],
-      "../src/page/page.gateway.ts": [
-        "../node_modules/@nestjs/websockets/index.d.ts",
-        "../node_modules/@types/socket.io/index.d.ts",
-        "../node_modules/typeorm/index.d.ts",
-        "../src/auth/auth.service.ts",
-        "../src/evaluation/evaluation.service.ts",
-        "../src/page/page.entity.ts"
-      ],
       "../node_modules/@nestjs/websockets/exceptions/base-ws-exception-filter.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -9979,6 +9963,10 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "../src/page/page.gateway.ts": [
+        "../node_modules/@types/socket.io/index.d.ts",
+        "../src/evaluation/evaluation.service.ts"
       ],
       "../node_modules/@nestjs/websockets/decorators/message-body.decorator.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
@@ -10017,6 +10005,10 @@
       "../src/evaluation/evaluation.controller.ts": [
         "../src/evaluation/evaluation.service.ts"
       ],
+      "../src/evaluation/evaluation.service.ts": [
+        "../node_modules/typeorm/index.d.ts",
+        "../src/evaluation/evaluation.entity.ts"
+      ],
       "../src/page/page.controller.ts": [
         "../src/page/page.service.ts"
       ],
@@ -10026,12 +10018,7 @@
       "../src/page/page.service.ts": [
         "../node_modules/typeorm/index.d.ts",
         "../src/website/website.entity.ts",
-        "../src/page/page.entity.ts",
-        "../src/evaluation/evaluation.service.ts"
-      ],
-      "../src/evaluation/evaluation.service.ts": [
-        "../node_modules/typeorm/index.d.ts",
-        "../src/evaluation/evaluation.entity.ts"
+        "../src/page/page.entity.ts"
       ],
       "../src/user/user.controller.ts": [
         "../src/user/user.service.ts",

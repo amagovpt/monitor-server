@@ -13,21 +13,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const websockets_1 = require("@nestjs/websockets");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
-const auth_service_1 = require("../auth/auth.service");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
-const page_entity_1 = require("./page.entity");
 let PageGateway = class PageGateway {
-    constructor(authService, evaluationService, pageRepository, connection) {
-        this.authService = authService;
+    constructor(evaluationService) {
         this.evaluationService = evaluationService;
-        this.pageRepository = pageRepository;
-        this.connection = connection;
-    }
-    async handleConnection() {
-    }
-    async handleDisconnect() {
     }
     async evaluateUrl(data, client) {
         const url = decodeURIComponent(data.url);
@@ -48,11 +37,7 @@ __decorate([
 ], PageGateway.prototype, "evaluateUrl", null);
 PageGateway = __decorate([
     websockets_1.WebSocketGateway(),
-    __param(2, typeorm_1.InjectRepository(page_entity_1.Page)),
-    __metadata("design:paramtypes", [auth_service_1.AuthService,
-        evaluation_service_1.EvaluationService,
-        typeorm_2.Repository,
-        typeorm_2.Connection])
+    __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
 ], PageGateway);
 exports.PageGateway = PageGateway;
 //# sourceMappingURL=page.gateway.js.map

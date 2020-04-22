@@ -1,14 +1,33 @@
 module.exports = {
   apps : [{
-    name: "monitor-server",
-    script: "./dist/main.js",
+    name: 'monitor-server',
+    script: './dist/main.js',
+    instances  : -2,
+    exec_mode  : 'cluster',
     env: {
-      NODE_ENV: "development",
+      PORT: 3000,
+      NODE_ENV: 'development',
     },
     env_production: {
-      NODE_ENV: "production",
-    },
+      PORT: 3000,
+      NODE_ENV: 'production',
+    }
+  },
+  {
+    name: 'monitor-server',
+    namespace: 'amp',
+    script: './dist/main.js',
     instances  : 2,
-    exec_mode  : "cluster"
+    exec_mode  : 'cluster',
+    env: {
+      NAMESPACE: 'AMP',
+      PORT: 3001,
+      NODE_ENV: 'development',
+    },
+    env_production: {
+      NAMESPACE: 'AMP',
+      PORT: 3001,
+      NODE_ENV: 'production',
+    }
   }]
 }

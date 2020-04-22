@@ -18,13 +18,11 @@ const typeorm_2 = require("typeorm");
 const website_entity_1 = require("../website/website.entity");
 const page_entity_1 = require("./page.entity");
 const evaluation_entity_1 = require("../evaluation/evaluation.entity");
-const evaluation_service_1 = require("../evaluation/evaluation.service");
 let PageService = class PageService {
-    constructor(websiteRepository, pageRepository, connection, evaluationService) {
+    constructor(websiteRepository, pageRepository, connection) {
         this.websiteRepository = websiteRepository;
         this.pageRepository = pageRepository;
         this.connection = connection;
-        this.evaluationService = evaluationService;
     }
     async findUserType(username) {
         if (username === 'admin') {
@@ -40,7 +38,7 @@ let PageService = class PageService {
     }
     async findAllInEvaluationList() {
         const manager = typeorm_2.getManager();
-        const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List');
+        const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId IS NULL AND Error IS NULL');
         return result[0].Total;
     }
     async findAll() {
@@ -216,14 +214,14 @@ let PageService = class PageService {
       `, [userId, pageId]);
         return pages.length > 0;
     }
-    async addPageToEvaluate(url, showTo = '10') {
+    async addPageToEvaluate(url, showTo = '10', userId = null) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
             const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
-            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, showTo, new Date()]);
+            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date()]);
             await queryRunner.commitTransaction();
         }
         catch (err) {
@@ -322,7 +320,7 @@ let PageService = class PageService {
               d.WebsiteId = w.WebsiteId AND
               d.Url = ? AND
               d.Active = 1`, [insertPage.PageId, website, userId, domain]);
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '01', insertPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '01', insertPage.Creation_Date]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -452,7 +450,7 @@ let PageService = class PageService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
                     }
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '00', insertPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -697,8 +695,7 @@ PageService = __decorate([
     __param(1, typeorm_1.InjectRepository(page_entity_1.Page)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Connection,
-        evaluation_service_1.EvaluationService])
+        typeorm_2.Connection])
 ], PageService);
 exports.PageService = PageService;
 //# sourceMappingURL=page.service.js.map

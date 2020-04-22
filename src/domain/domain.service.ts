@@ -106,9 +106,6 @@ export class DomainService {
   }
 
   async exists(url: string): Promise<any> {
-    url = url.replace('https://', '');
-    url = url.replace('http://', '');
-    url = url.replace('www.', '');
     return (await this.domainRepository.query(`SELECT d.*
       FROM
         Domain as d,

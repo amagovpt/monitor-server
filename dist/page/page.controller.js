@@ -69,7 +69,7 @@ let PageController = class PageController {
         const page = await this.pageService.findPageFromUrl(url);
         const isUserPage = await this.pageService.isPageFromMyMonitorUser(userId, page.PageId);
         if (isUserPage) {
-            return response_1.success(await this.pageService.addPageToEvaluate(url, '01'));
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '01', userId));
         }
         else {
             throw new common_1.UnauthorizedException();
@@ -83,7 +83,7 @@ let PageController = class PageController {
         const page = await this.pageService.findPageFromUrl(url);
         const isUserPage = await this.pageService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
         if (isUserPage) {
-            return response_1.success(await this.pageService.addPageToEvaluate(url, '00'));
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '00', userId));
         }
         else {
             throw new common_1.UnauthorizedException();

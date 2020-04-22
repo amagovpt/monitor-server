@@ -56,7 +56,7 @@ export class CrawlerService {
   private crawler(domain: string, max_depth: number, max_pages: number, crawl_domain_id: number): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
     return new Promise(async (resolve, reject) => {
-      const crawler = Crawler('http://' + domain);
+      const crawler = Crawler(domain);
       let urlList = [];
       let pageNumber = 0;
       let emit = false;

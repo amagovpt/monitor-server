@@ -27,21 +27,21 @@ function generateScore(report: any): string {
     switch (value['type']) {
       case 'true':
       case 'decr':
-        if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
+        if ((value['elem'] === 'all') || report.data['elems'][test] !== undefined) {
           if (report.data['elems'][value['test']] !== undefined) {
             calc = true;
           }
         }
         break;
       case 'fals':
-        if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
+        if ((value['elem'] === 'all') || report.data['elems'][test]) {
           if (report.data['elems'][value['test']] === undefined) {
             calc = true;
           }
         }
         break;
       case 'prop':
-        if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
+        if (report.data['elems'][test] && report.data['elems'][value['test']]) {
           calc = true;
         }
         break;
@@ -50,7 +50,7 @@ function generateScore(report: any): string {
     if (calc) {
       const C = parseFloat(tests[test]['trust']);
 
-      const E = report['data'].elems[tests[test]['elem']];
+      const E = report['data'].elems[test];
       const S = report['data'].elems[tests[test]['test']];
 
       let R = 0;

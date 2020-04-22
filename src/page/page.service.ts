@@ -4,7 +4,6 @@ import { Connection, Repository, getManager, Like } from 'typeorm';
 import { Website } from '../website/website.entity';
 import { Page } from './page.entity';
 import { Evaluation } from '../evaluation/evaluation.entity';
-import { EvaluationService } from '../evaluation/evaluation.service';
 
 @Injectable()
 export class PageService {
@@ -14,8 +13,7 @@ export class PageService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
-    private readonly connection: Connection,
-    private readonly evaluationService: EvaluationService
+    private readonly connection: Connection
   ) {}
 
   async findUserType(username: string): Promise<any> {
@@ -34,7 +32,7 @@ export class PageService {
 
   async findAllInEvaluationList(): Promise<number> {
     const manager = getManager();
-    const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List');
+    const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId IS NULL AND Error IS NULL');
     return result[0].Total;
   }
 
@@ -226,7 +224,7 @@ export class PageService {
     return pages.length > 0;
   }
 
-  async addPageToEvaluate(url: string, showTo: string = '10'): Promise<boolean> {
+  async addPageToEvaluate(url: string, showTo: string = '10', userId: number | null = null): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -235,7 +233,7 @@ export class PageService {
     try {
       const page = await queryRunner.manager.findOne(Page, { where: { Uri: url }});
 
-      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, showTo, new Date()]);
+      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date()]);
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -326,40 +324,12 @@ export class PageService {
           await queryRunner.manager.update(Page, { PageId: page.PageId }, { Show_In: showIn });
           await queryRunner.manager.update(Evaluation, { PageId: page.PageId, Show_To: Like('1_') }, { Show_To: '11' });
         } else {
-          //const evaluation = <any> await this.evaluationService.evaluateUrl(uri);
-          
           const newPage = new Page();
           newPage.Uri = uri;
           newPage.Show_In = '010';
           newPage.Creation_Date = new Date();
 
           const insertPage = await queryRunner.manager.save(newPage);
-
-          /*const webpage = Buffer.from(evaluation.pagecode).toString('base64');
-          const data = evaluation.data;
-
-          data.title = data.title.replace(/"/g, '');
-
-          const conform = data.conform.split('@');
-          const tot = Buffer.from(JSON.stringify(data.tot)).toString('base64');
-          const nodes = Buffer.from(JSON.stringify(data.nodes)).toString('base64');
-          const elems = Buffer.from(JSON.stringify(data.elems)).toString('base64');
-
-          const newEvaluation = new Evaluation();
-          newEvaluation.PageId = insertPage.PageId;
-          newEvaluation.Title = data.title;
-          newEvaluation.Score = data.score;
-          newEvaluation.Pagecode = webpage;
-          newEvaluation.Tot = tot;
-          newEvaluation.Nodes = nodes;
-          newEvaluation.Errors = elems;
-          newEvaluation.A = conform[0];
-          newEvaluation.AA = conform[1];
-          newEvaluation.AAA = conform[2];
-          newEvaluation.Evaluation_Date = data.date;
-          newEvaluation.Show_To = '01';
-
-          await queryRunner.manager.save(newEvaluation);*/
 
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -375,7 +345,7 @@ export class PageService {
               d.Url = ? AND
               d.Active = 1`, [insertPage.PageId, website, userId, domain]);
 
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '01', insertPage.Creation_Date]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '01', insertPage.Creation_Date]);
         }
       }
 
@@ -476,15 +446,12 @@ export class PageService {
                 d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
           }
         } else {
-          //const evaluation = await this.evaluationService.evaluateUrl(uri);
           const newPage = new Page();
           newPage.Uri = uri;
           newPage.Show_In = '000';
           newPage.Creation_Date = new Date();
 
           const insertPage = await queryRunner.manager.save(newPage);
-
-          //await this.evaluationService.savePageEvaluation(queryRunner, insertPage.PageId, evaluation, '00');
 
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
             SELECT 
@@ -525,7 +492,7 @@ export class PageService {
             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
           }
 
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, insertPage.Uri, '00', insertPage.Creation_Date]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date]);
         }
       }
 

@@ -88,7 +88,7 @@ export class PageController {
     const isUserPage = await this.pageService.isPageFromMyMonitorUser(userId, page.PageId);
 
     if (isUserPage) {
-      return success(await this.pageService.addPageToEvaluate(url, '01'));
+      return success(await this.pageService.addPageToEvaluate(url, '01', userId));
     } else {
       throw new UnauthorizedException();
     }
@@ -105,7 +105,7 @@ export class PageController {
     const isUserPage = await this.pageService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
     
     if (isUserPage) {
-      return success(await this.pageService.addPageToEvaluate(url, '00'));
+      return success(await this.pageService.addPageToEvaluate(url, '00', userId));
     } else {
       throw new UnauthorizedException();
     }
