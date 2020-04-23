@@ -11,13 +11,51 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const htmlparser = __importStar(require("htmlparser2"));
-const CSSselect = __importStar(require("css-select"));
+const css_select_1 = __importDefault(require("css-select"));
 const lodash_clone_1 = __importDefault(require("lodash.clone"));
 const qualweb = __importStar(require("./qualweb"));
 const tests_1 = __importDefault(require("./tests"));
 const testsColors_1 = __importDefault(require("./testsColors"));
 const security_1 = require("../lib/security");
 const mapping_1 = require("./mapping");
+function completeMissingReportElements(report) {
+    let _dom = {};
+    const handler = new htmlparser.DomHandler((error, dom) => {
+        if (error) {
+            throw new Error();
+        }
+        else {
+            _dom = lodash_clone_1.default(dom);
+        }
+    });
+    const parser = new htmlparser.Parser(handler);
+    parser.write(report.pagecode.replace(/(\r\n|\n|\r|\t)/gm, ''));
+    parser.end();
+    const img = css_select_1.default('img', _dom);
+    report.data.elems['img'] = img.length;
+    const area = css_select_1.default('area', _dom);
+    report.data.elems['area'] = area.length;
+    const inpImg = css_select_1.default('a', _dom);
+    report.data.elems['inpImg'] = inpImg.length;
+    const a = css_select_1.default('a', _dom);
+    report.data.elems['a'] = a.length;
+    const hx = css_select_1.default('h1, h2, h3, h4, h5, h6', _dom);
+    report.data.elems['hx'] = hx.length;
+    const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
+    const label = css_select_1.default('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
+    report.data.elems['label'] = label.length;
+    const form = css_select_1.default('form', _dom);
+    report.data.elems['form'] = form.length;
+    const table = css_select_1.default('table', _dom);
+    report.data.elems['tableData'] = table.length;
+    report.data.elems['tableLayout'] = table.length;
+    const tabletable = css_select_1.default('table table', _dom);
+    report.data.elems['tableNested'] = tabletable.length;
+    const iframe = css_select_1.default('iframe', _dom);
+    report.data.elems['iframe'] = iframe.length;
+    const ehandler = css_select_1.default('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
+    report.data.elems['ehandler'] = ehandler.length;
+}
 function generateScore(report) {
     let SS = 0;
     let PP = 0;
@@ -32,28 +70,28 @@ function generateScore(report) {
         switch (value['type']) {
             case 'true':
             case 'decr':
-                if ((value['elem'] === 'all') || report.data['elems'][test] !== undefined) {
+                if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
                     if (report.data['elems'][value['test']] !== undefined) {
                         calc = true;
                     }
                 }
                 break;
             case 'fals':
-                if ((value['elem'] === 'all') || report.data['elems'][test]) {
+                if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
                     if (report.data['elems'][value['test']] === undefined) {
                         calc = true;
                     }
                 }
                 break;
             case 'prop':
-                if (report.data['elems'][test] && report.data['elems'][value['test']]) {
+                if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
                     calc = true;
                 }
                 break;
         }
         if (calc) {
             const C = parseFloat(tests_1.default[test]['trust']);
-            const E = report['data'].elems[test];
+            const E = report['data'].elems[tests_1.default[test]['elem']];
             const S = report['data'].elems[tests_1.default[test]['test']];
             let R = 0;
             let N = 0;
@@ -102,7 +140,7 @@ function getHtmlLang(html) {
     const parser = new htmlparser.Parser(handler);
     parser.write(html.replace(/(\r\n|\n|\r|\t)/gm, ''));
     parser.end();
-    const htmlElement = CSSselect.selectOne('html', _dom);
+    const htmlElement = css_select_1.default.selectOne('html', _dom);
     if (htmlElement && htmlElement.attribs && htmlElement.attribs.lang) {
         lang = htmlElement.attribs.lang;
     }
@@ -151,6 +189,7 @@ function parseEvaluation(evaluation) {
     report['data'].tot.results = lodash_clone_1.default(results);
     report['data'].conform = calculateConform(report['data'].tot.results);
     report['data'].tot.info.conform = lodash_clone_1.default(report['data'].conform);
+    completeMissingReportElements(report);
     report['data'].score = generateScore(report);
     report['data'].tot.info.score = lodash_clone_1.default(report['data'].score);
     return report;

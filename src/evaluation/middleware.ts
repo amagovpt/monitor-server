@@ -1,5 +1,5 @@
 import * as htmlparser from 'htmlparser2';
-import * as CSSselect from 'css-select';
+import CSSselect from 'css-select';
 import clone from 'lodash.clone';
 import * as qualweb from './qualweb';
 
@@ -8,6 +8,58 @@ import testsColors from './testsColors';
 
 import { generateMd5Hash } from '../lib/security';
 import { getElementsMapping } from './mapping';
+
+function completeMissingReportElements(report: any): void {
+  let _dom = {};
+
+  const handler = new htmlparser.DomHandler((error, dom) => {
+    if (error) {
+      throw new Error();
+    } else {
+      _dom = clone(dom);
+    }
+  });
+
+  const parser = new htmlparser.Parser(handler);
+  parser.write(report.pagecode.replace(/(\r\n|\n|\r|\t)/gm, ''));
+  parser.end();
+
+  const img = CSSselect('img', _dom);
+  report.data.elems['img'] = img.length;
+
+  const area = CSSselect('area', _dom);
+  report.data.elems['area'] = area.length;
+
+  const inpImg = CSSselect('a', _dom);
+  report.data.elems['inpImg'] = inpImg.length;
+
+  const a = CSSselect('a', _dom);
+  report.data.elems['a'] = a.length;
+
+  const hx = CSSselect('h1, h2, h3, h4, h5, h6', _dom);
+  report.data.elems['hx'] = hx.length;
+
+  const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
+
+  const label = CSSselect('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
+  report.data.elems['label'] = label.length;
+
+  const form = CSSselect('form', _dom);
+  report.data.elems['form'] = form.length;
+
+  const table = CSSselect('table', _dom);
+  report.data.elems['tableData'] = table.length;
+  report.data.elems['tableLayout'] = table.length;
+
+  const tabletable = CSSselect('table table', _dom);
+  report.data.elems['tableNested'] = tabletable.length;
+
+  const iframe = CSSselect('iframe', _dom);
+  report.data.elems['iframe'] = iframe.length;
+
+  const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
+  report.data.elems['ehandler'] = ehandler.length;
+}
 
 function generateScore(report: any): string {
 
@@ -27,21 +79,21 @@ function generateScore(report: any): string {
     switch (value['type']) {
       case 'true':
       case 'decr':
-        if ((value['elem'] === 'all') || report.data['elems'][test] !== undefined) {
+        if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
           if (report.data['elems'][value['test']] !== undefined) {
             calc = true;
           }
         }
         break;
       case 'fals':
-        if ((value['elem'] === 'all') || report.data['elems'][test]) {
+        if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
           if (report.data['elems'][value['test']] === undefined) {
             calc = true;
           }
         }
         break;
       case 'prop':
-        if (report.data['elems'][test] && report.data['elems'][value['test']]) {
+        if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
           calc = true;
         }
         break;
@@ -50,7 +102,7 @@ function generateScore(report: any): string {
     if (calc) {
       const C = parseFloat(tests[test]['trust']);
 
-      const E = report['data'].elems[test];
+      const E = report['data'].elems[tests[test]['elem']];
       const S = report['data'].elems[tests[test]['test']];
 
       let R = 0;
@@ -163,6 +215,8 @@ function parseEvaluation(evaluation: any): any {
   report['data'].tot.results = clone(results);
   report['data'].conform = calculateConform(report['data'].tot.results);
   report['data'].tot.info.conform = clone(report['data'].conform);
+
+  completeMissingReportElements(report);
 
   report['data'].score = generateScore(report);
   report['data'].tot.info.score = clone(report['data'].score);

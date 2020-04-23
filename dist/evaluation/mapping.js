@@ -129,7 +129,6 @@ function QW_ACT_R5(elements, results, nodes, rule) {
     }
 }
 function QW_ACT_R6(elements, results, nodes, rule) {
-    addToElements(elements, 'inpImg', rule.results.filter((r) => r.verdict !== 'inapplicable').length);
     if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'inpImgAltNo', rule.metadata.passed);
         addToResults(results, 'inp_img_01a');
@@ -159,11 +158,9 @@ function QW_ACT_R16(elements, results, nodes, rule) {
         addToElements(elements, 'inputLabelNo', rule.metadata.failed);
         addToResults(results, 'input_02');
         addToNodes(nodes, 'inputLabelNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'input_02', (rule.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_ACT_R17(elements, results, nodes, rule) {
-    addToElements(elements, 'img', rule.results.filter((r) => r.verdict !== 'inapplicable').length);
     if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'imgAltNo', rule.metadata.passed);
         addToResults(results, 'img_01a');
@@ -203,7 +200,6 @@ function QW_HTML_T1(elements, results, nodes, technique) {
         addToElements(elements, 'areaAltNo', technique.metadata.failed);
         addToResults(results, 'area_01b');
         addToNodes(nodes, 'areaAltNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'area_01b', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
     else if (technique.metadata.outcome === 'passed' || technique.metadata.outcome === 'warning') {
         addToElements(elements, 'areaAltNo', technique.metadata.passed + technique.metadata.warning);
@@ -216,7 +212,6 @@ function QW_HTML_T2(elements, results, nodes, technique) {
         addToElements(elements, 'tableDataCaption', technique.metadata.failed);
         addToResults(results, 'table_02');
         addToNodes(nodes, 'tableDataCaption', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'table_02', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_HTML_T3(elements, results, nodes, technique) {
@@ -243,7 +238,6 @@ function QW_HTML_T6(elements, results, nodes, technique) {
         addToElements(elements, 'ehandBothNo', technique.metadata.failed);
         addToResults(results, 'ehandler_02');
         addToNodes(nodes, 'ehandBothNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'ehandler', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_HTML_T7(elements, results, nodes, technique) {
@@ -273,7 +267,6 @@ function QW_HTML_T9(elements, results, nodes, technique) {
         addToResults(results, 'hx_03');
         addToNodes(nodes, 'hxSkip', incorrectOrderResults.map((r) => r.pointer));
     }
-    addToElements(elements, 'hx', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
 }
 function QW_HTML_T17(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
@@ -340,7 +333,6 @@ function QW_HTML_T32(elements, results, nodes, technique) {
         addToElements(elements, 'formSubmitNo', technique.metadata.failed);
         addToResults(results, 'form_01b');
         addToNodes(nodes, 'formSubmitNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'form_01b', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_HTML_T34(elements, results, nodes, technique) {
@@ -401,7 +393,6 @@ function QW_HTML_T42(elements, results, nodes, technique) {
         addToElements(elements, 'ehandTagNo', technique.metadata.failed);
         addToResults(results, 'ehandler_04');
         addToNodes(nodes, 'ehandTagNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'ehandler_04', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_HTML_T43(elements, results, nodes, technique) {
@@ -416,7 +407,6 @@ function QW_CSS_T1(elements, results, nodes, technique) {
         addToElements(elements, 'fontAbsVal', technique.metadata.failed);
         addToResults(results, 'font_02');
         addToNodes(nodes, 'fontAbsVal', undefined);
-        addToElements(elements, 'fontValues', technique.results.filter((r) => r.verdict !== 'inapplicable').length);
     }
 }
 function QW_CSS_T2(elements, results, nodes, technique) {
@@ -476,7 +466,6 @@ function QW_BP2(elements, results, nodes, technique) {
         addToElements(elements, 'imgAltLong', technique.metadata.failed);
         addToResults(results, 'img_04');
         addToNodes(nodes, 'imgAltLong', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'img_04', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_BP3(elements, results, nodes, technique) {
@@ -484,7 +473,6 @@ function QW_BP3(elements, results, nodes, technique) {
         addToElements(elements, 'aTitleMatch', technique.metadata.failed);
         addToResults(results, 'a_05');
         addToNodes(nodes, 'aTitleMatch', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'a_05', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_BP4(elements, results, nodes, technique) {
@@ -499,7 +487,6 @@ function QW_BP5(elements, results, nodes, technique) {
         addToElements(elements, 'tableNested', technique.metadata.failed);
         addToResults(results, 'table_04');
         addToNodes(nodes, 'tableNested', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'table_04', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_BP6(elements, results, nodes, technique) {
@@ -528,7 +515,6 @@ function QW_BP9(elements, results, nodes, technique) {
         addToElements(elements, 'tableLayoutCaption', technique.metadata.passed);
         addToResults(results, 'table_01');
         addToNodes(nodes, 'tableLayoutCaption', technique.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
-        addToElements(elements, 'table_01', (technique.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_BP10(elements, results, nodes, technique) {
