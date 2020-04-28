@@ -165,7 +165,7 @@ export class EvaluationService {
 
   private async evaluateInBackground(pages: any[]): Promise<void> {
     if (pages) {
-      await getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId).join(',')]);
+      await getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId)]);
 
       for (const pte of pages || []) {
         let error = null;
@@ -188,7 +188,7 @@ export class EvaluationService {
 
             await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
           } else {
-            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
+            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?", Is_Evaluating = 0 WHERE EvaluationListId = ?`,[error.toString(), pte.EvaluationListId]);
           }
 
           await queryRunner.commitTransaction();
