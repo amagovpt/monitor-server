@@ -19,7 +19,7 @@ export class StampController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('website')
   async generateWebsiteDigitalStamp(@Request() req: any): Promise<any> {
-    const websiteId = parseInt(SqlString.escape(req.body.websiteId));
+    const websiteId = req.body.websiteId;
     const name = req.body.name;
     return success(await this.stampService.generateWebsiteDigitalStamp(websiteId, name));
   }

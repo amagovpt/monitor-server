@@ -153,25 +153,23 @@ export class StampService {
       this.addCircle(badge, centerX, centerX, centerY, grey);
 
       if (percentage < 50) {
-
-        let rads = (percentage * 180 / 50) * (Math.PI / 180);
+        const rads = (percentage * 180 / 50) * (Math.PI / 180);
         progressXRightPie = centerX + Math.sin(rads) * centerX // radius
         progressYRightPie = centerY - Math.cos(rads) * centerY // radius
 
         this.addPath(badge, "M " + centerX + "," + centerY + " L " + centerX + "," + 0 + " A " + centerX + "," + centerY + " 0 0,1 " + progressXRightPie + "," + progressYRightPie + " Z", accent);
       } else {
-        let half = percentage - 50
-        let rads = (half * 180 / 50) * (Math.PI / 180);
+        const half = percentage - 50
+        const rads = (half * 180 / 50) * (Math.PI / 180);
 
         progressXRightPie = w / 2
         progressYRightPie = h
         progressXLeftPie = centerX - Math.sin(rads) * centerX // radius
         progressYLeftPie = centerY + Math.cos(rads) * centerY // radius
 
-    
+  
         this.addPath(badge, "M " + centerX + "," + centerY + " L " + centerX + "," + 0 + " A " + centerX + "," + centerY + " 0 0,1 " + progressXRightPie + "," + progressYRightPie + " Z", accent);
         this.addPath(badge, "M " + centerX + "," + centerY + " L " + centerX + "," + h + " A " + centerX + "," + centerY + " 0 0,1 " + progressXLeftPie  + "," + progressYLeftPie  + " Z", accent);
-
       }
 
       this.addCircle(badge, centerX * 0.85, centerX, centerY, background);
