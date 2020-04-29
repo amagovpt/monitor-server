@@ -43,7 +43,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/5 * * * *') // Called every 5 minutes
+  @Cron('*/2 * * * *') // Called every 2 minutes
   async instance2EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
       if (!this.isEvaluatingInstance2) {
@@ -57,7 +57,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/10 * * * *') // Called every 10 minutes
+  @Cron('*/3 * * * *') // Called every 3 minutes
   async instance3EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '2') {
       if (!this.isEvaluatingInstance3) {
@@ -85,7 +85,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/5 * * * *') // Called every 5 minutes
+  @Cron('*/2 * * * *') // Called every 2 minutes
   async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '4') {
       if (!this.isEvaluatingUserInstance5) {
@@ -99,7 +99,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/10 * * * *') // Called every 10 minutes
+  @Cron('*/3 * * * *') // Called every 3 minutes
   async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '5') {
       if (!this.isEvaluatingUserInstance6) {

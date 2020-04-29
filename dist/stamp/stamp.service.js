@@ -13,7 +13,6 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("typeorm");
 const fs_extra_1 = require("fs-extra");
 const svg_builder_1 = __importDefault(require("svg-builder"));
-const tests_1 = __importDefault(require("../evaluation/tests"));
 let StampService = class StampService {
     async generateAllWebsitesDigitalStamp() {
         const manager = typeorm_1.getManager();
@@ -96,23 +95,44 @@ let StampService = class StampService {
                 }
             };
             let score = 0;
+            const passed = {
+                A: 0,
+                AA: 0,
+                AAA: 0
+            };
             for (const page of pages || []) {
                 score += parseFloat(page.Score);
-                const tot = JSON.parse(Buffer.from(page.Tot, 'base64').toString());
-                for (const res in tot.results || {}) {
-                    const test = tests_1.default[res];
-                    if (test) {
-                        const lvl = test['level'].toUpperCase();
-                        const r = test.result;
-                        hasLevelError[lvl][r]++;
+                if (page.A === 0) {
+                    passed.A++;
+                    if (page.AA === 0) {
+                        passed.AA++;
+                        if (page.AAA === 0) {
+                            passed.AAA++;
+                        }
                     }
                 }
             }
-            const levelToShow = hasLevelError.A.failed === 0 ? hasLevelError.AA.failed === 0 ? 'AAA' : 'AA' : 'A';
-            const totalErrors = hasLevelError[levelToShow].failed + hasLevelError[levelToShow].passed;
+            let levelToShow = '';
+            let percentage = 0;
+            if (passed.A === 0) {
+                levelToShow = 'Não conforme';
+                percentage = 0;
+            }
+            else if (passed.A > passed.AA) {
+                levelToShow = 'A';
+                percentage = Math.round((passed.A / pages.length) * 100);
+            }
+            else if (passed.AA > passed.AAA) {
+                levelToShow = 'AA';
+                percentage = Math.round((passed.AA / pages.length) * 100);
+            }
+            else {
+                levelToShow = 'AAA';
+                percentage = Math.round((passed.AAA / pages.length) * 100);
+            }
             const fixedScore = (score / pages.length).toFixed(1);
             const path = __dirname + '/../../public/stamps/' + websiteId + '.svg';
-            hasError = await this.generateSVG(500, 500, Math.round((hasLevelError[levelToShow].passed / totalErrors) * 100), levelToShow, fixedScore, path);
+            hasError = !await this.generateSVG(500, 500, percentage, levelToShow, fixedScore, path);
         }
         catch (err) {
             console.log(err);
@@ -141,14 +161,14 @@ let StampService = class StampService {
             svg_builder_1.default.width(w).height(h);
             this.addCircle(svg_builder_1.default, centerX, centerX, centerY, grey);
             if (percentage < 50) {
-                let rads = (percentage * 180 / 50) * (Math.PI / 180);
+                const rads = (percentage * 180 / 50) * (Math.PI / 180);
                 progressXRightPie = centerX + Math.sin(rads) * centerX;
                 progressYRightPie = centerY - Math.cos(rads) * centerY;
                 this.addPath(svg_builder_1.default, "M " + centerX + "," + centerY + " L " + centerX + "," + 0 + " A " + centerX + "," + centerY + " 0 0,1 " + progressXRightPie + "," + progressYRightPie + " Z", accent);
             }
             else {
-                let half = percentage - 50;
-                let rads = (half * 180 / 50) * (Math.PI / 180);
+                const half = percentage - 50;
+                const rads = (half * 180 / 50) * (Math.PI / 180);
                 progressXRightPie = w / 2;
                 progressYRightPie = h;
                 progressXLeftPie = centerX - Math.sin(rads) * centerX;

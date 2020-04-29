@@ -91,7 +91,13 @@ let EvaluationService = class EvaluationService {
     }
     async evaluateInBackground(pages) {
         if (pages) {
-            await typeorm_1.getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId).join(',')]);
+            try {
+                await typeorm_1.getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId)]);
+            }
+            catch (err) {
+                console.log(err);
+                throw err;
+            }
             for (const pte of pages || []) {
                 let error = null;
                 let evaluation;
@@ -110,7 +116,7 @@ let EvaluationService = class EvaluationService {
                         await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
                     }
                     else {
-                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
+                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
                     }
                     await queryRunner.commitTransaction();
                 }
@@ -387,13 +393,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance1EvaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/5 * * * *'),
+    schedule_1.Cron('*/2 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance2EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/10 * * * *'),
+    schedule_1.Cron('*/3 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -405,13 +411,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance4EvaluateUserPageList", null);
 __decorate([
-    schedule_1.Cron('*/5 * * * *'),
+    schedule_1.Cron('*/2 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance5EvaluateUserPageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/10 * * * *'),
+    schedule_1.Cron('*/3 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

@@ -96,10 +96,24 @@ export class StampService {
 
       let score = 0;
 
+      const passed = {
+        A: 0,
+        AA: 0,
+        AAA: 0
+      };
+
       for (const page of pages || []) {
         score += parseFloat(page.Score);
-
-        const tot = JSON.parse(Buffer.from(page.Tot, 'base64').toString());
+        if (page.A === 0) {
+          passed.A++;
+          if (page.AA === 0) {
+            passed.AA++;
+            if (page.AAA === 0) {
+              passed.AAA++;
+            }
+          }
+        }
+        /*const tot = JSON.parse(Buffer.from(page.Tot, 'base64').toString());
         for (const res in tot.results || {}) {
           const test = tests[res];
           if (test) {
@@ -107,17 +121,34 @@ export class StampService {
             const r = test.result;
             hasLevelError[lvl][r]++;
           }
-        }
+        }*/
       }
 
-      const levelToShow = hasLevelError.A.failed === 0 ? hasLevelError.AA.failed === 0 ? 'AAA' : 'AA' : 'A';
+      let levelToShow = '';
+      let percentage = 0;
 
-      const totalErrors = hasLevelError[levelToShow].failed + hasLevelError[levelToShow].passed;
+      if (passed.A === 0) {
+        levelToShow = 'Não conforme';
+        percentage = 0;
+      } else if (passed.A > passed.AA) {
+        levelToShow = 'A';
+        percentage = Math.round((passed.A / pages.length) * 100);
+      } else if (passed.AA > passed.AAA) {
+        levelToShow = 'AA';
+        percentage = Math.round((passed.AA / pages.length) * 100);
+      } else {
+        levelToShow = 'AAA';
+        percentage = Math.round((passed.AAA / pages.length) * 100);
+      }
+
+      //const levelToShow = hasLevelError.A.failed === 0 ? hasLevelError.AA.failed === 0 ? 'AAA' : 'AA' : 'A';
+
+      //const totalErrors = hasLevelError[levelToShow].failed + hasLevelError[levelToShow].passed;
       const fixedScore = (score / pages.length).toFixed(1);
       
       const path = __dirname + '/../../public/stamps/' + websiteId + '.svg';
 
-      hasError = await this.generateSVG(500, 500, Math.round((hasLevelError[levelToShow].passed / totalErrors) * 100), levelToShow, fixedScore, path);
+      hasError = !await this.generateSVG(500, 500, percentage, levelToShow, fixedScore, path);
     } catch (err) {
       console.log(err);
       hasError = true;

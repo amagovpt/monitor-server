@@ -16,7 +16,7 @@ async function bootstrap() {
         windowMs: 15 * 60 * 1000,
         max: 1000,
     }));
-    await app.listen(process.env.PORT);
+    await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
