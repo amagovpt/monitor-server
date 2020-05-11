@@ -291,7 +291,7 @@ export class PageService {
           const insertPage = await queryRunner.manager.save(newPage);
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
 
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, uri, '10', newPage.Creation_Date]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, -1, uri, '10', newPage.Creation_Date]);
         }
       }
       await queryRunner.commitTransaction();

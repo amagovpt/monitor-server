@@ -6,8 +6,11 @@ export declare class CrawlerService {
     private readonly crawlPageRepository;
     private readonly newCrawler;
     private readonly connection;
+    private isCrawling;
+    private browser;
     constructor(crawlDomainRepository: Repository<CrawlDomain>, crawlPageRepository: Repository<CrawlPage>, newCrawler: NestCrawlerService, connection: Connection);
-    crawl(url: string): void;
+    nestCrawl(): Promise<void>;
+    private crawl;
     private crawler;
     findAll(): Promise<any>;
     getConfig(): any;

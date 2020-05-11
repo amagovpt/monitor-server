@@ -112,7 +112,7 @@ let AuthService = class AuthService {
     }
 };
 __decorate([
-    schedule_1.Cron('0 0 * * *'),
+    schedule_1.Cron(schedule_1.CronExpression.EVERY_DAY_AT_MIDNIGHT),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

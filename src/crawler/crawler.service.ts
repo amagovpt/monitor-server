@@ -1,13 +1,18 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { NestCrawlerService } from 'nest-crawler';
 import { CrawlDomain, CrawlPage } from './crawler.entity';
 import { readFileSync, writeFileSync } from 'fs';
 import Crawler from 'simplecrawler';
+import puppeteer from 'puppeteer';
 
 @Injectable()
 export class CrawlerService {
+
+  private isCrawling: boolean;
+  private browser: puppeteer.Browser;
 
   constructor(
     @InjectRepository(CrawlDomain)
@@ -16,41 +21,119 @@ export class CrawlerService {
     private readonly crawlPageRepository: Repository<CrawlPage>,
     private readonly newCrawler: NestCrawlerService,
     private readonly connection: Connection
-  ) {}
+  ) {
+    this.isCrawling = false;
 
-  public crawl(url: string): void{
-    const urls = new Array<string>();
+    puppeteer.launch().then(browser => {
+      this.browser = browser;
+    });
+  }
 
-    this.newCrawler.fetch({
-      target: {
-        url,
-        iterator: {
-          selector: 'a',
-          convert: (x: string) => {
-            x = decodeURIComponent(x);
-            if (!x.startsWith('#')) {
-              if (x !== url && url.startsWith(x) && !urls.includes(x)) {
-                console.log(x);
-                urls.push(x);
-                return `${x}`;
-              } else if (x.startsWith('/') && !urls.includes(`${url}${x}`)) {
-                console.log(x);
-                urls.push(`${url}${x}`);
-                return `${url}${x}`;
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async nestCrawl(): Promise<void> {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+      if (!this.isCrawling) {
+        this.isCrawling = true;
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        try {
+          await queryRunner.connect();
+          await queryRunner.startTransaction();
+
+          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+          if (domain.length > 0) {
+            const urls = await this.crawl(domain[0].DomainUri);
+
+            for (const url of urls || []) {
+              const newCrawlPage = new CrawlPage();
+              newCrawlPage.Uri = url;
+              newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+              await queryRunner.manager.save(newCrawlPage);
+            }
+
+            await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+          }
+          await queryRunner.commitTransaction();
+        } catch (err) {
+          // since we have errors lets rollback the changes we made
+          await queryRunner.rollbackTransaction();
+          console.error(err);
+        } finally {
+          // you need to release a queryRunner which was manually instantiated
+          await queryRunner.release();
+        }
+
+        this.isCrawling = false;
+      }
+    }
+  }
+
+  private async crawl(url: string): Promise<string[]> {
+    const page = await this.browser.newPage();
+
+    await page.goto(url, {
+      timeout: 0,
+      waitUntil: ['networkidle2', 'domcontentloaded']
+    });
+
+    const urls = await page.evaluate((url) => {
+      const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json".split('|');
+
+      const links = document.querySelectorAll('body a');
+
+      const urls = new Array();
+
+      for (const link of links || []) {
+        if (link.hasAttribute('href')) {
+          const href = link.getAttribute('href');
+
+          if (href && href.trim() && (href.startsWith(url) || href.startsWith('/'))) {
+            let valid = true;
+            for (const not of notHtml || []) {
+              if (href.endsWith(not)) {
+                valid = false;
+                break;
               }
             }
 
-            return x;
-          },
-        },
-      },
-      fetch: (data: any, index: number, url: string) => ({
-        title: '.title > a',
-      })
-    }).then(pages => {
-      console.log(pages);
-      console.log(urls);
+            if (valid) {
+              try {
+                if (href.startsWith(url)) {
+                  const parsedUrl = new URL(href);
+                  if (!parsedUrl.hash.trim()) {
+                    urls.push(href);
+                  }
+                } else {
+                  const parsedUrl = new URL(url + href);
+                  if (!parsedUrl.hash.trim()) {
+                    urls.push(href);
+                  }
+                }
+              } catch (err) {
+
+              }
+            }
+          }
+        }
+      }
+
+      return urls;
+    }, url);
+
+    const unique = urls.filter((v, i, self) => {
+      return self.indexOf(v) === i;
     });
+
+    const normalizedUrls = unique.map(u => {
+      if (u.startsWith(url)) {
+        return u;
+      } else {
+        return url + u;
+      }
+    });
+
+    return normalizedUrls;
   }
 
   private crawler(domain: string, max_depth: number, max_pages: number, crawl_domain_id: number): Promise<any> {
@@ -150,7 +233,7 @@ export class CrawlerService {
       newCrawlDomain.SubDomainUri = subDomain;
 
       const insertCrawlDomain = await queryRunner.manager.save(newCrawlDomain);
-      this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
+      //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
 
       await queryRunner.commitTransaction();
     } catch (err) {

@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { InvalidToken } from './invalid-token.entity';
 import { comparePasswordHash } from '../lib/security';
-import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) { }
 
-  @Cron('0 0 * * *')
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanInvalidSessionTokens(): Promise<void> {
     // Called at midnight every day
     const manager = getManager();

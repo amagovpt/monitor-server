@@ -2,7 +2,6 @@ import { CrawlerService } from './crawler.service';
 export declare class CrawlerController {
     private readonly crawlerService;
     constructor(crawlerService: CrawlerService);
-    test(): Promise<any>;
     getAll(): Promise<any>;
     getConfig(): Promise<any>;
     setConfig(req: any): Promise<any>;

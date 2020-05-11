@@ -7,12 +7,7 @@ import { success } from '../lib/response';
 export class CrawlerController {
 
   constructor(private readonly crawlerService: CrawlerService) { }
-
-  @Get('test')
-  async test(): Promise<any> {
-    return success(this.crawlerService.crawl('https://ciencias.ulisboa.pt'));
-  }
-
+  
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('all')
   async getAll(): Promise<any> {
