@@ -5,8 +5,7 @@ export async function init(): Promise<void> {
 }
 
 export async function evaluate(params: any): Promise<any> {
-  const report = (await core.evaluate({
-    url: params.url,
+  const options = {
     'act-rules': {
       rules: [
         'QW-ACT-R1', 
@@ -78,7 +77,21 @@ export async function evaluate(params: any): Promise<any> {
         'QW-BP16'
       ]
     }
-  }))[params.url];
+  };
+
+  if (params.url) {
+    options['url'] = params.url;
+  } else if (params.html) {
+    options['html'] = params.html;
+  }
+
+  let report = (await core.evaluate(options));
+
+  if (params.url) {
+    report = report[params.url];
+  } else if (params.html) {
+    report = report['customHtml'];
+  }
   
   return report;
 }

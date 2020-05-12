@@ -234,5 +234,6 @@ export async function executeUrlEvaluation(url: string): Promise<any> {
 }
 
 export async function executeHtmlEvaluation(html: string): Promise<any> {
-  //TODO: implementar no qualweb - avaliar codigo HTML enviado
+  const evaluation = await qualweb.evaluate({ html });
+  return parseEvaluation(evaluation);
 }

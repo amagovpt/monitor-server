@@ -3,7 +3,7 @@ import { Connection, getManager } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import clone from 'lodash.clone';
 import { Evaluation } from './evaluation.entity';
-import { initEvaluator, executeUrlEvaluation } from './middleware';
+import { initEvaluator, executeUrlEvaluation, executeHtmlEvaluation } from './middleware';
 
 @Injectable()
 export class EvaluationService {
@@ -210,6 +210,10 @@ export class EvaluationService {
 
   evaluateUrl(url: string): Promise<any> {
     return executeUrlEvaluation(url);
+  }
+
+  evaluateHtml(html: string): Promise<any> {
+    return executeHtmlEvaluation(html);
   }
 
   async createOne(evaluation: Evaluation): Promise<any> {
