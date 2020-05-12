@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Request, UseGuards, Param, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Request, UseGuards, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { EvaluationService } from './evaluation.service';
 import { success } from '../lib/response';
@@ -45,5 +45,11 @@ export class EvaluationController {
   async getUserPageEvaluation(@Param('type') type: string, @Param('url') url: string): Promise<any> {
     url = decodeURIComponent(url);
     return success(await this.evaluationService.findUserPageEvaluation(url, type));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('list/tryAgain')
+  async tryAgainPageEvaluation(@Request() req: any): Promise<any> {
+    return success(await this.evaluationService.tryAgainEvaluation(req.body.evaluationListId));
   }
 }

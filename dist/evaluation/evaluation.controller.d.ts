@@ -7,4 +7,5 @@ export declare class EvaluationController {
     getListOfPageEvaluations(req: any, type: string, page: string): Promise<any>;
     getPageEvaluation(url: string, evaluationId: number): Promise<any>;
     getUserPageEvaluation(type: string, url: string): Promise<any>;
+    tryAgainPageEvaluation(req: any): Promise<any>;
 }

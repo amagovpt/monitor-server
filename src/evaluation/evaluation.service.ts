@@ -29,7 +29,7 @@ export class EvaluationService {
     initEvaluator();
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // Called every minute
+  @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
       if (!this.isEvaluatingInstance1) {
@@ -43,7 +43,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/2 * * * *') // Called every 2 minutes
+  @Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
   async instance2EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
       if (!this.isEvaluatingInstance2) {
@@ -57,7 +57,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/3 * * * *') // Called every 3 minutes
+  @Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
   async instance3EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '2') {
       if (!this.isEvaluatingInstance3) {
@@ -71,7 +71,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // Called every minute
+  @Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   async instance4EvaluateUserPageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '3') {
       if (!this.isEvaluatingUserInstance4) {
@@ -85,7 +85,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/2 * * * *') // Called every 2 minutes
+  @Cron('*/2 * * * *') // Called every 2 minutes - USERS EVALUATIONS
   async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '4') {
       if (!this.isEvaluatingUserInstance5) {
@@ -99,7 +99,7 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/3 * * * *') // Called every 3 minutes
+  @Cron('*/3 * * * *') // Called every 3 minutes - USERS EVALUATIONS
   async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '5') {
       if (!this.isEvaluatingUserInstance6) {
@@ -492,5 +492,28 @@ export class EvaluationService {
         date: evaluation.Evaluation_Date
       }
     };
+  }
+
+  async tryAgainEvaluation(evaluationListId: number): Promise<boolean> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`, [evaluationListId]);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
   }
 }

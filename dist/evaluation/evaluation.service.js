@@ -388,6 +388,24 @@ let EvaluationService = class EvaluationService {
             }
         };
     }
+    async tryAgainEvaluation(evaluationListId) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`, [evaluationListId]);
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
 };
 __decorate([
     schedule_1.Cron(schedule_1.CronExpression.EVERY_MINUTE),
