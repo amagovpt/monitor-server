@@ -17,6 +17,7 @@ export declare class EvaluationService {
     instance6EvaluateUserPageListevaluatePageList(): Promise<void>;
     private evaluateInBackground;
     evaluateUrl(url: string): Promise<any>;
+    evaluateHtml(html: string): Promise<any>;
     createOne(evaluation: Evaluation): Promise<any>;
     evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any>;
     savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string): Promise<any>;

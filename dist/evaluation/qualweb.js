@@ -13,8 +13,7 @@ async function init() {
 }
 exports.init = init;
 async function evaluate(params) {
-    const report = (await core.evaluate({
-        url: params.url,
+    const options = {
         'act-rules': {
             rules: [
                 'QW-ACT-R1',
@@ -85,7 +84,20 @@ async function evaluate(params) {
                 'QW-BP16'
             ]
         }
-    }))[params.url];
+    };
+    if (params.url) {
+        options['url'] = params.url;
+    }
+    else if (params.html) {
+        options['html'] = params.html;
+    }
+    let report = (await core.evaluate(options));
+    if (params.url) {
+        report = report[params.url];
+    }
+    else if (params.html) {
+        report = report['customHtml'];
+    }
     return report;
 }
 exports.evaluate = evaluate;

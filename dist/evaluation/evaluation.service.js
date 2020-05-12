@@ -133,6 +133,9 @@ let EvaluationService = class EvaluationService {
     evaluateUrl(url) {
         return middleware_1.executeUrlEvaluation(url);
     }
+    evaluateHtml(html) {
+        return middleware_1.executeHtmlEvaluation(html);
+    }
     async createOne(evaluation) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();

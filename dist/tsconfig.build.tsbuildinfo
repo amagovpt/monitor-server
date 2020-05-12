@@ -2614,7 +2614,7 @@
         "signature": "4f81e19ffbee84620af423617d1768093e90706a4e2ed78c5c39988723f367f1"
       },
       "../src/page/page.service.ts": {
-        "version": "e47682a0ad807ac9081641921940691be06fb9f0bd0a445e24770c0009ca8546",
+        "version": "b438f2a815b7d7a6135aeb865800a11aac19804c2f0d7d820a055ac0552845de",
         "signature": "bacd84f26179c5422f329c0494d4f7587627cd821dc26c208fd395642aca9281"
       },
       "../src/observatory/observatory.controller.ts": {
@@ -2706,7 +2706,7 @@
         "signature": "80a65fb9accc71da572f36d828bde067c79e314179b7b433c5b2ca1a916774ce"
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "e3ec54f3c85fa626e8bad24cbdd1d5827c608818717b94536d348743410fb3e5",
+        "version": "2dfff1bb1dd0c6b4b32a64a9e9e7cb04ecf98cb0495380260af65dfb465f9c47",
         "signature": "aeb617b40253dae050a4ade007c4a13be53033b5bcc2b6c30a38f10ef1aa2408"
       },
       "../src/evaluation/tests.ts": {
@@ -2726,12 +2726,12 @@
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b"
       },
       "../src/evaluation/middleware.ts": {
-        "version": "3a204d9df8cc07bd636698104ce2003d6ae1decba6351bf346bc304ea6f127ed",
+        "version": "29a3291e6f9e918ce57c10b19ef1c8f0b28a109b31b1553e0bf680cd18755b7c",
         "signature": "3ba36369478a18472ee6c06ba9fe80d6444ddda53ffc037f63cb1e372b5e6bc6"
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "42960018a7906b0265571707290c3f100db6a6f5abb785f1556fc43b6989a07d",
-        "signature": "7ab08c8be7778d419496517c3575d33207d0abfbafb7983ce4debc53a7a4cf9c"
+        "version": "aca052606e7ddfa20afddf07ca08ab8242a618baaf3672036f35e2081949b33a",
+        "signature": "177e9605846bf5afb4288199639bae6e1c130f414e408410642f78758205ce80"
       },
       "../src/evaluation/evaluation.controller.ts": {
         "version": "316e506256bfd9dc3cd1a025ae567832c2d51cb2de3cbb59c0c71b1d6da0ae16",
@@ -2914,8 +2914,8 @@
         "signature": "bcd6fd79c82f52bcfee80974e62657403a1ffd1338563f9d4448f67f57ff922d"
       },
       "../src/amp/amp.controller.ts": {
-        "version": "3da5dcffe052b525be269f2ac8e1ed84a71a8a725232f51422cd54009bd2c00c",
-        "signature": "a2e35c9a711e671519fd405ddeb4fd043f9c121d4b1fa644116bb641b38e9dd7"
+        "version": "8f6aeb95dee820b903aa65a6b0b2d837523529750a632b8b1afdfdf6e3ccfb42",
+        "signature": "11fb7ded0e2f2f918bb093970dafac686aeeacac02f3a332e9b1a7d3444d956e"
       },
       "../src/amp/amp.module.ts": {
         "version": "15e7a888eb0a84bbbc3ffb7c6b3137c60b514b1e2ce6f2246b3705eef3fc0ded",
@@ -2950,7 +2950,7 @@
         "signature": "688569813a054fe56083a123a3ea32dcaa04d07719a1adca36c6387349fd6da2"
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "c4011e4c70f495c57b866520459802e2f9457c2ef098f8cfa0d96cb1538d8b2a",
+        "version": "8986f462cbd96ca9d88697d851c300db02ba6e3df13e087dfa45ea375a87509a",
         "signature": "896bc529174c0a62bec3cb1c602e801d9c7c240e2f2a6e5a409e12139384b0cf"
       },
       "../src/crawler/crawler.controller.ts": {
@@ -17240,7 +17240,6 @@
       "../src/user/user.module.ts",
       "../src/page/page.entity.ts",
       "../src/evaluation/evaluation.entity.ts",
-      "../src/page/page.service.ts",
       "../src/observatory/observatory.controller.ts",
       "../src/page/page.controller.ts",
       "../node_modules/htmlparser2/lib/Tokenizer.d.ts",
@@ -17324,6 +17323,7 @@
       "../node_modules/@types/puppeteer/Errors.d.ts",
       "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts",
       "../node_modules/@types/puppeteer/index.d.ts",
+      "../src/crawler/crawler.service.ts",
       "../src/crawler/crawler.controller.ts",
       "../src/crawler/crawler.module.ts",
       "../src/app.module.ts",
@@ -17370,7 +17370,7 @@
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
       "../node_modules/@types/yauzl/index.d.ts",
-      "../src/crawler/crawler.service.ts"
+      "../src/page/page.service.ts"
     ]
   },
   "version": "3.8.3"

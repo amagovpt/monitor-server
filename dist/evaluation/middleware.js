@@ -204,6 +204,8 @@ async function executeUrlEvaluation(url) {
 }
 exports.executeUrlEvaluation = executeUrlEvaluation;
 async function executeHtmlEvaluation(html) {
+    const evaluation = await qualweb.evaluate({ html });
+    return parseEvaluation(evaluation);
 }
 exports.executeHtmlEvaluation = executeHtmlEvaluation;
 //# sourceMappingURL=middleware.js.map

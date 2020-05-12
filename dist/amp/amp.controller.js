@@ -22,6 +22,9 @@ let AmpController = class AmpController {
     async evaluateUrl(url) {
         return response_1.success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
     }
+    async evaluateHtml(req) {
+        return response_1.success(await this.evaluationService.evaluateHtml(req.body.html));
+    }
 };
 __decorate([
     common_1.Get('eval/:url'),
@@ -30,6 +33,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AmpController.prototype, "evaluateUrl", null);
+__decorate([
+    common_1.Post('eval/html'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AmpController.prototype, "evaluateHtml", null);
 AmpController = __decorate([
     common_1.Controller('amp'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])

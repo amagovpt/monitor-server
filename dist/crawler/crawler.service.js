@@ -36,33 +36,35 @@ let CrawlerService = class CrawlerService {
         });
     }
     async nestCrawl() {
-        if (!this.isCrawling) {
-            this.isCrawling = true;
-            const queryRunner = this.connection.createQueryRunner();
-            try {
-                await queryRunner.connect();
-                await queryRunner.startTransaction();
-                const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
-                if (domain.length > 0) {
-                    const urls = await this.crawl(domain[0].DomainUri);
-                    for (const url of urls || []) {
-                        const newCrawlPage = new crawler_entity_1.CrawlPage();
-                        newCrawlPage.Uri = url;
-                        newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-                        await queryRunner.manager.save(newCrawlPage);
+        if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+            if (!this.isCrawling) {
+                this.isCrawling = true;
+                const queryRunner = this.connection.createQueryRunner();
+                try {
+                    await queryRunner.connect();
+                    await queryRunner.startTransaction();
+                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                    if (domain.length > 0) {
+                        const urls = await this.crawl(domain[0].DomainUri);
+                        for (const url of urls || []) {
+                            const newCrawlPage = new crawler_entity_1.CrawlPage();
+                            newCrawlPage.Uri = url;
+                            newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+                            await queryRunner.manager.save(newCrawlPage);
+                        }
+                        await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
                     }
-                    await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+                    await queryRunner.commitTransaction();
                 }
-                await queryRunner.commitTransaction();
+                catch (err) {
+                    await queryRunner.rollbackTransaction();
+                    console.error(err);
+                }
+                finally {
+                    await queryRunner.release();
+                }
+                this.isCrawling = false;
             }
-            catch (err) {
-                await queryRunner.rollbackTransaction();
-                console.error(err);
-            }
-            finally {
-                await queryRunner.release();
-            }
-            this.isCrawling = false;
         }
     }
     async crawl(url) {

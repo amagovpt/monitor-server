@@ -38,17 +38,18 @@ export class PageService {
 
   async findAll(): Promise<any> {
     const manager = getManager();
-    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date 
+    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.Error, el.Is_Evaluating 
       FROM 
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
           WHERE PageId = p.PageId
           ORDER BY Evaluation_Date DESC LIMIT 1
-        ) 
+        )
+        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId
       WHERE
         LOWER(p.Show_In) LIKE '1%'
-      GROUP BY p.PageId, e.Score, e.Evaluation_Date`);
+      GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.Error, el.Is_Evaluating`);
     return pages;
   }
 
@@ -291,7 +292,7 @@ export class PageService {
           const insertPage = await queryRunner.manager.save(newPage);
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
 
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [insertPage.PageId, -1, uri, '10', newPage.Creation_Date]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, -1, uri, '10', newPage.Creation_Date]);
         }
       }
       await queryRunner.commitTransaction();
