@@ -2890,7 +2890,7 @@
         "signature": "f7594e019e0e00e21e252a045c9087758d7649128bbd91f1e9e3db822cf827a3"
       },
       "../src/domain/domain.service.ts": {
-        "version": "6136e61ae4d1f11469d309e2f7581af32a48b832ca5a31fcf2f4415013daf942",
+        "version": "04580d9488e75af016c630d78b5f8421b9f32ef065e8d816e30b6d506defeec3",
         "signature": "b477c9be11673339a03a0e6a8ccb9465d9e857d5a17a8b9b776a3c2582f812bb"
       },
       "../src/domain/domain.controller.ts": {

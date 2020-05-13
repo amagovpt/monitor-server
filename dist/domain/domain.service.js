@@ -166,6 +166,7 @@ let DomainService = class DomainService {
           e.AAA,
           e.Score,
           e.Errors,
+          e.Tot,
           e.Evaluation_Date,
           el.EvaluationListId, el.Error, el.Is_Evaluating
         FROM 
@@ -199,7 +200,7 @@ let DomainService = class DomainService {
             p.PageId = dp.PageId AND
             p.Show_In LIKE ?
           )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
             return pages;
         }
         else {
@@ -210,6 +211,7 @@ let DomainService = class DomainService {
           e.AAA,
           e.Score,
           e.Errors,
+          e.Tot,
           e.Evaluation_Date,
           el.EvaluationListId, el.Error, el.Is_Evaluating
         FROM 
@@ -232,7 +234,7 @@ let DomainService = class DomainService {
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE ?
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [user.toLowerCase(), domain.toLowerCase(), flags]);
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [user.toLowerCase(), domain.toLowerCase(), flags]);
             return pages;
         }
     }
