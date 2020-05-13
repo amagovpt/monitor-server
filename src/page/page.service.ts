@@ -46,7 +46,7 @@ export class PageService {
           WHERE PageId = p.PageId
           ORDER BY Evaluation_Date DESC LIMIT 1
         )
-        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId
+        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
       WHERE
         LOWER(p.Show_In) LIKE '1%'
       GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`);

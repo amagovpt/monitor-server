@@ -2618,7 +2618,7 @@
         "signature": "4f81e19ffbee84620af423617d1768093e90706a4e2ed78c5c39988723f367f1"
       },
       "../src/page/page.service.ts": {
-        "version": "97b49b5e1ca8a6cc7f8589a5bfe8c3487a7af8647d8aa4576047d294ff550c44",
+        "version": "a5efa53c9507960332efb9e567432a99043b388368ce5a45d5da40f4431724d4",
         "signature": "bacd84f26179c5422f329c0494d4f7587627cd821dc26c208fd395642aca9281"
       },
       "../src/observatory/observatory.controller.ts": {
@@ -2890,7 +2890,7 @@
         "signature": "f7594e019e0e00e21e252a045c9087758d7649128bbd91f1e9e3db822cf827a3"
       },
       "../src/domain/domain.service.ts": {
-        "version": "4fe9abc2d822fb594a2b82e83642a871bc017a4785571ad116fa49157fc34c0a",
+        "version": "6136e61ae4d1f11469d309e2f7581af32a48b832ca5a31fcf2f4415013daf942",
         "signature": "b477c9be11673339a03a0e6a8ccb9465d9e857d5a17a8b9b776a3c2582f812bb"
       },
       "../src/domain/domain.controller.ts": {
@@ -17331,8 +17331,8 @@
       "../src/tag/tag.module.ts",
       "../src/website/website.service.ts",
       "../node_modules/@types/sqlstring/index.d.ts",
+      "../src/website/website.controller.ts",
       "../src/website/website.module.ts",
-      "../src/domain/domain.service.ts",
       "../src/domain/domain.controller.ts",
       "../src/domain/domain.module.ts",
       "../src/entity/entity.entity.ts",
@@ -17395,7 +17395,7 @@
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
       "../node_modules/@types/yauzl/index.d.ts",
-      "../src/website/website.controller.ts"
+      "../src/domain/domain.service.ts"
     ]
   },
   "version": "3.8.3"

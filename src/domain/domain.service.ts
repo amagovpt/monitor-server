@@ -180,14 +180,16 @@ export class DomainService {
           e.AAA,
           e.Score,
           e.Errors,
-          e.Evaluation_Date 
+          e.Evaluation_Date,
+          el.EvaluationListId, el.Error, el.Is_Evaluating
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
             WHERE PageId = p.PageId 
             ORDER BY Evaluation_Date DESC LIMIT 1
-          ),
+          )
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1,
           User as u,
           Website as w,
           Domain as d,
@@ -211,7 +213,7 @@ export class DomainService {
             p.PageId = dp.PageId AND
             p.Show_In LIKE ?
           )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
       
       return pages;
     } else {
@@ -222,14 +224,16 @@ export class DomainService {
           e.AAA,
           e.Score,
           e.Errors,
-          e.Evaluation_Date 
+          e.Evaluation_Date,
+          el.EvaluationListId, el.Error, el.Is_Evaluating
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
             WHERE PageId = p.PageId 
             ORDER BY Evaluation_Date DESC LIMIT 1
-          ),
+          )
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = u.UserId,
           User as u,
           Website as w,
           Domain as d,
@@ -242,7 +246,7 @@ export class DomainService {
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE ?
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date`, [user.toLowerCase(), domain.toLowerCase(), flags]);
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [user.toLowerCase(), domain.toLowerCase(), flags]);
 
       return pages;
     }
