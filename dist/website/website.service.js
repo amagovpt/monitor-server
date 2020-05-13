@@ -46,7 +46,11 @@ let WebsiteService = class WebsiteService {
         let error = false;
         try {
             for (const page of pages || []) {
-                await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+                try {
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
+                }
+                catch (_) {
+                }
             }
             await queryRunner.commitTransaction();
         }
@@ -210,6 +214,99 @@ let WebsiteService = class WebsiteService {
         w.UserId = ?
       GROUP BY w.WebsiteId, d.Url`, [userId]);
         return websites;
+    }
+    async reEvaluateMyMonitorWebsite(userId, websiteName) {
+        const website = await this.websiteRepository.findOne({ where: { UserId: userId, Name: websiteName } });
+        if (!website) {
+            throw new common_1.InternalServerErrorException();
+        }
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`SELECT 
+        distinct p.*
+      FROM 
+        Page as p,
+        Website as w,
+        Domain as d,
+        DomainPage as dp
+      WHERE
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE '_1_'`, [website.Name, website.UserId]);
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let error = false;
+        try {
+            for (const page of pages || []) {
+                try {
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '01', new Date()]);
+                }
+                catch (_) {
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            console.log(err);
+            error = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !error;
+    }
+    async reEvaluateStudyMonitorWebsite(userId, tag, website) {
+        const manager = typeorm_2.getManager();
+        const websiteExists = await manager.query(`SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`, [userId, website.toLowerCase()]);
+        if (!websiteExists) {
+            throw new common_1.InternalServerErrorException();
+        }
+        const pages = await manager.query(`SELECT 
+        distinct p.*
+      FROM 
+        Page as p,
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let error = false;
+        try {
+            for (const page of pages || []) {
+                try {
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', new Date()]);
+                }
+                catch (_) {
+                }
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            console.log(err);
+            error = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !error;
     }
     async findAllFromStudyMonitorUserTag(userId, tagName) {
         const tag = await this.tagRepository.findOne({ where: { UserId: userId, Name: tagName } });

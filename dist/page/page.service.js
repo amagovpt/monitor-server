@@ -119,6 +119,7 @@ let PageService = class PageService {
       e.A,
       e.AA,
       e.AAA,
+      e.Tot,
       e.Errors,
       e.Evaluation_Date
     FROM 

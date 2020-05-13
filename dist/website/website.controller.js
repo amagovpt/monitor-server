@@ -133,6 +133,17 @@ let WebsiteController = class WebsiteController {
     async getMyMonitorUserWebsites(req) {
         return response_1.success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
     }
+    async reEvaluateMyMonitorUserWebsitePages(req) {
+        const userId = req.user.userId;
+        const website = req.body.website;
+        return response_1.success(await this.websiteService.reEvaluateMyMonitorWebsite(userId, website));
+    }
+    async reEvaluateStudyMonitorUserTagWebsitePages(req) {
+        const userId = req.user.userId;
+        const tag = req.body.tag;
+        const website = req.body.website;
+        return response_1.success(await this.websiteService.reEvaluateStudyMonitorWebsite(userId, tag, website));
+    }
     async getStudyMonitorUserTagWebsites(req, tag) {
         const userId = req.user.userId;
         return response_1.success(await this.websiteService.findAllFromStudyMonitorUserTag(userId, tag));
@@ -327,6 +338,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getMyMonitorUserWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('myMonitor/reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "reEvaluateMyMonitorUserWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('studyMonitor/reEvaluate'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsiteController.prototype, "reEvaluateStudyMonitorUserTagWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
     common_1.Get('studyMonitor/tag/:tag'),

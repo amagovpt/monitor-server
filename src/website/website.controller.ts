@@ -180,6 +180,25 @@ export class WebsiteController {
     return success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
   }
 
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Post('myMonitor/reEvaluate')
+  async reEvaluateMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const website = req.body.website;
+
+    return success(await this.websiteService.reEvaluateMyMonitorWebsite(userId, website));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Post('studyMonitor/reEvaluate')
+  async reEvaluateStudyMonitorUserTagWebsitePages(@Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    const tag = req.body.tag;
+    const website = req.body.website;
+
+    return success(await this.websiteService.reEvaluateStudyMonitorWebsite(userId, tag, website));
+  }
+
   @UseGuards(AuthGuard('jwt-study'))
   @Get('studyMonitor/tag/:tag')
   async getStudyMonitorUserTagWebsites(@Request() req: any, @Param('tag') tag: string): Promise<any> {

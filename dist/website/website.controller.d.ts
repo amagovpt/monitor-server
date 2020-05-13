@@ -21,6 +21,8 @@ export declare class WebsiteController {
     getNumberOfObservatoryTags(): Promise<any>;
     checkIfWebsiteExists(name: string): Promise<any>;
     getMyMonitorUserWebsites(req: any): Promise<any>;
+    reEvaluateMyMonitorUserWebsitePages(req: any): Promise<any>;
+    reEvaluateStudyMonitorUserTagWebsitePages(req: any): Promise<any>;
     getStudyMonitorUserTagWebsites(req: any, tag: string): Promise<any>;
     getStudyMonitorUserOtherTagsWebsites(req: any, tag: string): Promise<any>;
     checkIfStudyMonitorUserTagWebsiteNameExists(req: any, tag: string, website: string): Promise<any>;

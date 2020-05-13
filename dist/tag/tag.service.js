@@ -49,7 +49,11 @@ let TagService = class TagService {
         let error = false;
         try {
             for (const page of pages || []) {
-                await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?)`, [page.PageId, page.Uri, '10', new Date()]);
+                try {
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
+                }
+                catch (_) {
+                }
             }
             await queryRunner.commitTransaction();
         }
