@@ -43,7 +43,7 @@ let CrawlerService = class CrawlerService {
                 try {
                     await queryRunner.connect();
                     await queryRunner.startTransaction();
-                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                     if (domain.length > 0) {
                         const urls = await this.crawl(domain[0].DomainUri);
                         for (const url of urls || []) {
@@ -67,6 +67,36 @@ let CrawlerService = class CrawlerService {
             }
         }
     }
+    async nestCrawlUser() {
+        if (!this.isCrawling) {
+            this.isCrawling = true;
+            const queryRunner = this.connection.createQueryRunner();
+            try {
+                await queryRunner.connect();
+                await queryRunner.startTransaction();
+                const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId != -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                if (domain.length > 0) {
+                    const urls = await this.crawl(domain[0].DomainUri);
+                    for (const url of urls || []) {
+                        const newCrawlPage = new crawler_entity_1.CrawlPage();
+                        newCrawlPage.Uri = url;
+                        newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+                        await queryRunner.manager.save(newCrawlPage);
+                    }
+                    await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+                }
+                await queryRunner.commitTransaction();
+            }
+            catch (err) {
+                await queryRunner.rollbackTransaction();
+                console.error(err);
+            }
+            finally {
+                await queryRunner.release();
+            }
+            this.isCrawling = false;
+        }
+    }
     async crawl(url) {
         const page = await this.browser.newPage();
         await page.goto(url, {
@@ -74,7 +104,7 @@ let CrawlerService = class CrawlerService {
             waitUntil: ['networkidle2', 'domcontentloaded']
         });
         const urls = await page.evaluate((url) => {
-            const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json".split('|');
+            const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json'.split('|');
             const links = document.querySelectorAll('body a');
             const urls = new Array();
             for (const link of links || []) {
@@ -111,6 +141,7 @@ let CrawlerService = class CrawlerService {
             }
             return urls;
         }, url);
+        await page.close();
         const unique = urls.filter((v, i, self) => {
             return self.indexOf(v) === i;
         });
@@ -194,13 +225,48 @@ let CrawlerService = class CrawlerService {
         const page = await this.crawlDomainRepository.findOne({ where: { SubDomainUri: subDomain } });
         return page ? page.Done === 1 ? 2 : 1 : 0;
     }
-    async crawlDomain(subDomain, domain, domainId, maxDepth, maxPages) {
+    async isUserCrawlerDone(userId, domainId) {
+        const page = await this.crawlDomainRepository.findOne({ where: { UserId: userId, DomainId: domainId } });
+        if (page) {
+            return page.Done === 1;
+        }
+        else {
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async getUserCrawlResults(userId, domainId) {
+        const manager = typeorm_2.getManager();
+        const pages = await manager.query(`
+      SELECT
+        cp.*
+      FROM
+        CrawlDomain as cd,
+        CrawlPage as cp
+      WHERE
+        cd.UserId = ? AND
+        cd.DomainId = ? AND
+        cp.CrawlDomainId = cd.CrawlDomainId
+    `, [userId, domainId]);
+        return pages;
+    }
+    async deleteUserCrawler(userId, domainId) {
+        try {
+            await this.crawlDomainRepository.delete({ UserId: userId, DomainId: domainId });
+            return true;
+        }
+        catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
+    async crawlDomain(userId, subDomain, domain, domainId, maxDepth, maxPages) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
             const newCrawlDomain = new crawler_entity_1.CrawlDomain();
+            newCrawlDomain.UserId = userId;
             newCrawlDomain.DomainUri = domain;
             newCrawlDomain.DomainId = domainId;
             newCrawlDomain.Creation_Date = new Date();
@@ -225,12 +291,33 @@ let CrawlerService = class CrawlerService {
         const pages = await manager.query(`SELECT cp.Uri,cp.CrawlId,cd.Creation_Date
       FROM CrawlPage as cp,
       CrawlDomain as cd
-      WHERE cd.CrawlDomainId = ? AND cp.CrawlDomainId = cd.CrawlDomainId`, [crawlDomainID]);
+      WHERE cd.CrawlDomainId = ? AND cd.UserId = -1 AND cp.CrawlDomainId = cd.CrawlDomainId`, [crawlDomainID]);
         return pages;
     }
     async delete(crawlDomainId) {
-        await this.crawlDomainRepository.delete({ CrawlDomainId: crawlDomainId });
-        return true;
+        try {
+            await this.crawlDomainRepository.delete({ CrawlDomainId: crawlDomainId });
+            return true;
+        }
+        catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
+    async getDomainId(userId, domain) {
+        const manager = typeorm_2.getManager();
+        const _domain = await manager.query(`
+      SELECT d.DomainId
+      FROM
+        Domain as d,
+        Website as w
+      WHERE
+        d.Url = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        w.UserId = ?
+      LIMIT 1
+    `, [domain, userId]);
+        return _domain[0].DomainId;
     }
 };
 __decorate([
@@ -239,6 +326,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CrawlerService.prototype, "nestCrawl", null);
+__decorate([
+    schedule_1.Cron(schedule_1.CronExpression.EVERY_30_SECONDS),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CrawlerService.prototype, "nestCrawlUser", null);
 CrawlerService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(crawler_entity_1.CrawlDomain)),

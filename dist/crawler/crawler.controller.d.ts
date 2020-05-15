@@ -7,6 +7,14 @@ export declare class CrawlerController {
     setConfig(req: any): Promise<any>;
     isSubDomainDone(subDomain: string): Promise<any>;
     crawlPage(req: any): Promise<any>;
+    crawlUserPage(req: any): Promise<any>;
+    checkCrawlUserPage(req: any): Promise<any>;
+    getCrawlUserPageResults(req: any): Promise<any>;
+    deleteCrawlUserPage(req: any): Promise<any>;
+    crawlStudiesUserPage(req: any): Promise<any>;
+    checkStudiesCrawlUserPage(req: any): Promise<any>;
+    getCrawlStudiesUserPageResults(req: any): Promise<any>;
+    deleteCrawlStudiesUserPage(req: any): Promise<any>;
     deleteCrawl(req: any): Promise<any>;
     getCrawlResultsCrawlDomainID(crawlDomainId: string): Promise<any>;
 }

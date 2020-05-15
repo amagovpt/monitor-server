@@ -5,6 +5,7 @@ export declare class CrawlPage {
 }
 export declare class CrawlDomain {
     CrawlDomainId: number;
+    UserId: number;
     DomainUri: string;
     DomainId: number;
     Creation_Date: any;

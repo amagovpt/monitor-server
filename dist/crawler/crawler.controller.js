@@ -41,7 +41,55 @@ let CrawlerController = class CrawlerController {
         const subDomain = req.body.subDomain;
         const maxDepth = req.body.max_depth;
         const maxPages = req.body.max_pages;
-        return response_1.success(await this.crawlerService.crawlDomain(subDomain, domain, domainId, maxDepth, maxPages));
+        return response_1.success(await this.crawlerService.crawlDomain(-1, subDomain, domain, domainId, maxDepth, maxPages));
+    }
+    async crawlUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null));
+    }
+    async checkCrawlUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.isUserCrawlerDone(userId, domainId));
+    }
+    async getCrawlUserPageResults(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.getUserCrawlResults(userId, domainId));
+    }
+    async deleteCrawlUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.deleteUserCrawler(userId, domainId));
+    }
+    async crawlStudiesUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null));
+    }
+    async checkStudiesCrawlUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.isUserCrawlerDone(userId, domainId));
+    }
+    async getCrawlStudiesUserPageResults(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.getUserCrawlResults(userId, domainId));
+    }
+    async deleteCrawlStudiesUserPage(req) {
+        const userId = req.user.userId;
+        const domain = req.body.domain;
+        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        return response_1.success(await this.crawlerService.deleteUserCrawler(userId, domainId));
     }
     async deleteCrawl(req) {
         const crawlDomainId = req.body.crawlDomainId;
@@ -89,6 +137,70 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CrawlerController.prototype, "crawlPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('crawlUser'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "crawlUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('crawlUserCheck'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "checkCrawlUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('crawlUserResults'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "getCrawlUserPageResults", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+    common_1.Post('crawlUserDelete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "deleteCrawlUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('crawlStudiesUser'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "crawlStudiesUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('crawlStudiesUserCheck'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "checkStudiesCrawlUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('crawlStudiesUserResults'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "getCrawlStudiesUserPageResults", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Post('crawlStudiesUserDelete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "deleteCrawlStudiesUserPage", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
     common_1.Post('delete'),

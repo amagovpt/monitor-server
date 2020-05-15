@@ -31,6 +31,12 @@ export class CrawlDomain {
   CrawlDomainId: number;
 
   @Column({
+    type: 'int',
+    nullable: false
+  })
+  UserId: number;
+
+  @Column({
     type: 'varchar',
     length: 255,
     nullable: false

@@ -2938,8 +2938,8 @@
         "signature": "a96142234c25a70033189ef6dc60d0bddb9a2b232256bc8e8b0533e6bd950cb3"
       },
       "../src/crawler/crawler.entity.ts": {
-        "version": "64b155911e007c5ed5c081576fb2a2de9e0800de620d117499a8cb2a749ff95e",
-        "signature": "1c91f86efb2a480dc37d163391b724688f0c5ba3d3347ccbcb356ff68d495741"
+        "version": "22c2725c3f0082768a1422a8af0a36eaf6d58ec8de467365adc894d70853e98c",
+        "signature": "0b13fc9fda05042bfd3363e04964fd4a11c4badef59b14cdedcdf432b48a1579"
       },
       "../node_modules/@types/puppeteer/Errors.d.ts": {
         "version": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
@@ -2954,12 +2954,12 @@
         "signature": "9950042938c240c7eb3abbf56d072454260ab925476b9364deaf7bf9cfc9e7fa"
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "8986f462cbd96ca9d88697d851c300db02ba6e3df13e087dfa45ea375a87509a",
-        "signature": "896bc529174c0a62bec3cb1c602e801d9c7c240e2f2a6e5a409e12139384b0cf"
+        "version": "4b36714303595dffac6806aac5a8d532db6a1393c9d34fe5daf95fbfd03c557a",
+        "signature": "1b5b70f66ae5bd6c5773127df4675536e0e8eadd087a45757081916bec99b25a"
       },
       "../src/crawler/crawler.controller.ts": {
-        "version": "6d5d8f9c5483004fb3bef61a3fb3013f1fe004581f891986f8ba11832db0aadc",
-        "signature": "a3d1f6d6fb72bafc1947a204489b65ec4aa73032515509f548f30f85868b49af"
+        "version": "5c0e4e97e32a415d23e69fc2a0b6b2ab3d303f375ef7a588f84bb45cf1fd82bc",
+        "signature": "2f5cb059612761b5ca1667a05481526283eeaf419b66e5eaedee78a4b8a26fdf"
       },
       "../src/crawler/crawler.module.ts": {
         "version": "69b2c40c6279dd677b89a4cfcd880b437a10efa5c63a182f9dbeab626beafc56",
@@ -17333,6 +17333,7 @@
       "../node_modules/@types/sqlstring/index.d.ts",
       "../src/website/website.controller.ts",
       "../src/website/website.module.ts",
+      "../src/domain/domain.service.ts",
       "../src/domain/domain.controller.ts",
       "../src/domain/domain.module.ts",
       "../src/entity/entity.entity.ts",
@@ -17349,7 +17350,6 @@
       "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts",
       "../node_modules/@types/puppeteer/index.d.ts",
       "../src/crawler/crawler.service.ts",
-      "../src/crawler/crawler.controller.ts",
       "../src/crawler/crawler.module.ts",
       "../src/app.module.ts",
       "../src/main.ts",
@@ -17395,7 +17395,7 @@
       "../node_modules/@types/yargs-parser/index.d.ts",
       "../node_modules/@types/yargs/index.d.ts",
       "../node_modules/@types/yauzl/index.d.ts",
-      "../src/domain/domain.service.ts"
+      "../src/crawler/crawler.controller.ts"
     ]
   },
   "version": "3.8.3"

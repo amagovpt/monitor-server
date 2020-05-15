@@ -24,9 +24,11 @@ export class CrawlerService {
   ) {
     this.isCrawling = false;
 
-    puppeteer.launch().then(browser => {
-      this.browser = browser;
-    });
+    //if (process.env.NAMESPACE !== 'AMP' && (process.env.NODE_APP_INSTANCE === '0' || process.env.NODE_APP_INSTANCE === '1')) {
+      puppeteer.launch().then(browser => {
+        this.browser = browser;
+      });
+    //}
   }
 
   @Cron(CronExpression.EVERY_30_SECONDS)
@@ -41,7 +43,7 @@ export class CrawlerService {
           await queryRunner.connect();
           await queryRunner.startTransaction();
 
-          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
           if (domain.length > 0) {
             const urls = await this.crawl(domain[0].DomainUri);
 
@@ -69,16 +71,57 @@ export class CrawlerService {
     }
   }
 
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async nestCrawlUser(): Promise<void> {
+    //if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+      if (!this.isCrawling) {
+        this.isCrawling = true;
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        try {
+          await queryRunner.connect();
+          await queryRunner.startTransaction();
+
+          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId != -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+          
+          if (domain.length > 0) {
+            const urls = await this.crawl(domain[0].DomainUri);
+
+            for (const url of urls || []) {
+              const newCrawlPage = new CrawlPage();
+              newCrawlPage.Uri = url;
+              newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+              await queryRunner.manager.save(newCrawlPage);
+            }
+
+            await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+          }
+          await queryRunner.commitTransaction();
+        } catch (err) {
+          // since we have errors lets rollback the changes we made
+          await queryRunner.rollbackTransaction();
+          console.error(err);
+        } finally {
+          // you need to release a queryRunner which was manually instantiated
+          await queryRunner.release();
+        }
+
+        this.isCrawling = false;
+      }
+    //}
+  }
+
   private async crawl(url: string): Promise<string[]> {
     const page = await this.browser.newPage();
-
+    
     await page.goto(url, {
       timeout: 0,
       waitUntil: ['networkidle2', 'domcontentloaded']
     });
 
     const urls = await page.evaluate((url) => {
-      const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json".split('|');
+      const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json'.split('|');
 
       const links = document.querySelectorAll('body a');
 
@@ -120,6 +163,8 @@ export class CrawlerService {
 
       return urls;
     }, url);
+
+    await page.close();
 
     const unique = urls.filter((v, i, self) => {
       return self.indexOf(v) === i;
@@ -218,7 +263,45 @@ export class CrawlerService {
     return page ? page.Done === 1 ? 2 : 1 : 0;
   }
 
-  async crawlDomain(subDomain: string, domain: string, domainId: number, maxDepth: number, maxPages: number): Promise<any> {
+  async isUserCrawlerDone(userId: number, domainId: number): Promise<boolean> {
+    const page = await this.crawlDomainRepository.findOne({ where: { UserId: userId, DomainId: domainId }});
+
+    if (page) {
+      return page.Done === 1;
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getUserCrawlResults(userId: number, domainId: number): Promise<boolean> {
+    const manager = getManager();
+
+    const pages = await manager.query(`
+      SELECT
+        cp.*
+      FROM
+        CrawlDomain as cd,
+        CrawlPage as cp
+      WHERE
+        cd.UserId = ? AND
+        cd.DomainId = ? AND
+        cp.CrawlDomainId = cd.CrawlDomainId
+    `, [userId, domainId]);
+
+    return pages;
+  }
+
+  async deleteUserCrawler(userId: number, domainId: number): Promise<boolean> {
+    try {
+      await this.crawlDomainRepository.delete({ UserId: userId, DomainId: domainId });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async crawlDomain(userId: number, subDomain: string, domain: string, domainId: number, maxDepth: number, maxPages: number): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -227,6 +310,7 @@ export class CrawlerService {
     let hasError = false;
     try {
       const newCrawlDomain = new CrawlDomain();
+      newCrawlDomain.UserId = userId;
       newCrawlDomain.DomainUri = domain;
       newCrawlDomain.DomainId = domainId;
       newCrawlDomain.Creation_Date = new Date();
@@ -258,13 +342,35 @@ export class CrawlerService {
     const pages = await manager.query(`SELECT cp.Uri,cp.CrawlId,cd.Creation_Date
       FROM CrawlPage as cp,
       CrawlDomain as cd
-      WHERE cd.CrawlDomainId = ? AND cp.CrawlDomainId = cd.CrawlDomainId`, [crawlDomainID]);
+      WHERE cd.CrawlDomainId = ? AND cd.UserId = -1 AND cp.CrawlDomainId = cd.CrawlDomainId`, [crawlDomainID]);
 
     return pages;
   }
 
   async delete(crawlDomainId: number): Promise<any> {
-    await this.crawlDomainRepository.delete({ CrawlDomainId: crawlDomainId });
-    return true;
+    try {
+      await this.crawlDomainRepository.delete({ CrawlDomainId: crawlDomainId });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async getDomainId(userId: number, domain: string): Promise<number> {
+    const manager = getManager();
+    const _domain = await manager.query(`
+      SELECT d.DomainId
+      FROM
+        Domain as d,
+        Website as w
+      WHERE
+        d.Url = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        w.UserId = ?
+      LIMIT 1
+    `, [domain, userId]);
+
+    return _domain[0].DomainId;
   }
 }

@@ -47,6 +47,13 @@ __decorate([
 ], CrawlDomain.prototype, "CrawlDomainId", void 0);
 __decorate([
     typeorm_1.Column({
+        type: 'int',
+        nullable: false
+    }),
+    __metadata("design:type", Number)
+], CrawlDomain.prototype, "UserId", void 0);
+__decorate([
+    typeorm_1.Column({
         type: 'varchar',
         length: 255,
         nullable: false
