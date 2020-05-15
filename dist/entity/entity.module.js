@@ -6,20 +6,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EntityModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const entity_service_1 = require("./entity.service");
 const entity_entity_1 = require("./entity.entity");
 const entity_controller_1 = require("./entity.controller");
-let EntityModule = class EntityModule {
-};
-EntityModule = __decorate([
-    common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([entity_entity_1.EntityTable])],
-        exports: [entity_service_1.EntityService],
-        providers: [entity_service_1.EntityService],
-        controllers: [entity_controller_1.EntityController]
-    })
-], EntityModule);
+let EntityModule = (() => {
+    let EntityModule = class EntityModule {
+    };
+    EntityModule = __decorate([
+        common_1.Module({
+            imports: [typeorm_1.TypeOrmModule.forFeature([entity_entity_1.EntityTable])],
+            exports: [entity_service_1.EntityService],
+            providers: [entity_service_1.EntityService],
+            controllers: [entity_controller_1.EntityController]
+        })
+    ], EntityModule);
+    return EntityModule;
+})();
 exports.EntityModule = EntityModule;
 //# sourceMappingURL=entity.module.js.map

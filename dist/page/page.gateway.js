@@ -12,32 +12,36 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PageGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
-let PageGateway = class PageGateway {
-    constructor(evaluationService) {
-        this.evaluationService = evaluationService;
-    }
-    async evaluateUrl(data, client) {
-        const url = decodeURIComponent(data.url);
-        const evaluation = await this.evaluationService.evaluateUrl(url);
-        client.emit('result', evaluation);
-    }
-};
-__decorate([
-    websockets_1.WebSocketServer(),
-    __metadata("design:type", Object)
-], PageGateway.prototype, "server", void 0);
-__decorate([
-    websockets_1.SubscribeMessage('evaluation'),
-    __param(0, websockets_1.MessageBody()), __param(1, websockets_1.ConnectedSocket()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], PageGateway.prototype, "evaluateUrl", null);
-PageGateway = __decorate([
-    websockets_1.WebSocketGateway(),
-    __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
-], PageGateway);
+let PageGateway = (() => {
+    let PageGateway = class PageGateway {
+        constructor(evaluationService) {
+            this.evaluationService = evaluationService;
+        }
+        async evaluateUrl(data, client) {
+            const url = decodeURIComponent(data.url);
+            const evaluation = await this.evaluationService.evaluateUrl(url);
+            client.emit('result', evaluation);
+        }
+    };
+    __decorate([
+        websockets_1.WebSocketServer(),
+        __metadata("design:type", Object)
+    ], PageGateway.prototype, "server", void 0);
+    __decorate([
+        websockets_1.SubscribeMessage('evaluation'),
+        __param(0, websockets_1.MessageBody()), __param(1, websockets_1.ConnectedSocket()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object, Object]),
+        __metadata("design:returntype", Promise)
+    ], PageGateway.prototype, "evaluateUrl", null);
+    PageGateway = __decorate([
+        websockets_1.WebSocketGateway(),
+        __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
+    ], PageGateway);
+    return PageGateway;
+})();
 exports.PageGateway = PageGateway;
 //# sourceMappingURL=page.gateway.js.map

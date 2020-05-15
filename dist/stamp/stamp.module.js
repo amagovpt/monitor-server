@@ -6,16 +6,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.StampModule = void 0;
 const common_1 = require("@nestjs/common");
 const stamp_service_1 = require("./stamp.service");
 const stamp_controller_1 = require("./stamp.controller");
-let StampModule = class StampModule {
-};
-StampModule = __decorate([
-    common_1.Module({
-        providers: [stamp_service_1.StampService],
-        controllers: [stamp_controller_1.StampController]
-    })
-], StampModule);
+let StampModule = (() => {
+    let StampModule = class StampModule {
+    };
+    StampModule = __decorate([
+        common_1.Module({
+            providers: [stamp_service_1.StampService],
+            controllers: [stamp_controller_1.StampController]
+        })
+    ], StampModule);
+    return StampModule;
+})();
 exports.StampModule = StampModule;
 //# sourceMappingURL=stamp.module.js.map

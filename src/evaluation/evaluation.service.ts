@@ -178,6 +178,7 @@ export class EvaluationService {
         try {
           evaluation = clone(await this.evaluateUrl(pte.Url));
         } catch (e) {
+          //console.log(e);
           error = e.stack;
         }
 

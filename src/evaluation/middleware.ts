@@ -139,7 +139,7 @@ function generateScore(report: any): string {
 
 function calculateCssRules(evaluation: any): number {
   const cssReport = evaluation.modules['css-techniques'];
-  return Object.keys(cssReport.techniques).length;
+  return Object.keys(cssReport.assertions).length;
 }
 
 function getHtmlLang(html: string): string {
@@ -220,7 +220,7 @@ function parseEvaluation(evaluation: any): any {
 
   report['data'].score = generateScore(report);
   report['data'].tot.info.score = clone(report['data'].score);
-
+  
   return report;
 }
 

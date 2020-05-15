@@ -86,9 +86,9 @@ export async function evaluate(params: any): Promise<any> {
   }
 
   let report = (await core.evaluate(options));
-
+  
   if (params.url) {
-    report = report[params.url];
+    report = Object.values(report)[0];
   } else if (params.html) {
     report = report['customHtml'];
   }

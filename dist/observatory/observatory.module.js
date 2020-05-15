@@ -6,17 +6,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ObservatoryModule = void 0;
 const common_1 = require("@nestjs/common");
 const observatory_controller_1 = require("./observatory.controller");
 const page_module_1 = require("../page/page.module");
-let ObservatoryModule = class ObservatoryModule {
-};
-ObservatoryModule = __decorate([
-    common_1.Module({
-        imports: [page_module_1.PageModule],
-        controllers: [observatory_controller_1.ObservatoryController],
-        providers: []
-    })
-], ObservatoryModule);
+let ObservatoryModule = (() => {
+    let ObservatoryModule = class ObservatoryModule {
+    };
+    ObservatoryModule = __decorate([
+        common_1.Module({
+            imports: [page_module_1.PageModule],
+            controllers: [observatory_controller_1.ObservatoryController],
+            providers: []
+        })
+    ], ObservatoryModule);
+    return ObservatoryModule;
+})();
 exports.ObservatoryModule = ObservatoryModule;
 //# sourceMappingURL=observatory.module.js.map

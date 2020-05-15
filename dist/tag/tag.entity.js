@@ -9,53 +9,57 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tag = void 0;
 const typeorm_1 = require("typeorm");
 const website_entity_1 = require("../website/website.entity");
-let Tag = class Tag {
-};
-__decorate([
-    typeorm_1.PrimaryGeneratedColumn({
-        type: 'int'
-    }),
-    __metadata("design:type", Number)
-], Tag.prototype, "TagId", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'int',
-        nullable: true
-    }),
-    __metadata("design:type", Number)
-], Tag.prototype, "UserId", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false
-    }),
-    __metadata("design:type", String)
-], Tag.prototype, "Name", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'tinyint',
-        width: 1,
-        nullable: false
-    }),
-    __metadata("design:type", Number)
-], Tag.prototype, "Show_in_Observatorio", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'datetime',
-        nullable: false
-    }),
-    __metadata("design:type", Object)
-], Tag.prototype, "Creation_Date", void 0);
-__decorate([
-    typeorm_1.ManyToMany(type => website_entity_1.Website),
-    typeorm_1.JoinTable(),
-    __metadata("design:type", Array)
-], Tag.prototype, "Websites", void 0);
-Tag = __decorate([
-    typeorm_1.Entity('Tag')
-], Tag);
+let Tag = (() => {
+    let Tag = class Tag {
+    };
+    __decorate([
+        typeorm_1.PrimaryGeneratedColumn({
+            type: 'int'
+        }),
+        __metadata("design:type", Number)
+    ], Tag.prototype, "TagId", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'int',
+            nullable: true
+        }),
+        __metadata("design:type", Number)
+    ], Tag.prototype, "UserId", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 255,
+            nullable: false
+        }),
+        __metadata("design:type", String)
+    ], Tag.prototype, "Name", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'tinyint',
+            width: 1,
+            nullable: false
+        }),
+        __metadata("design:type", Number)
+    ], Tag.prototype, "Show_in_Observatorio", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'datetime',
+            nullable: false
+        }),
+        __metadata("design:type", Object)
+    ], Tag.prototype, "Creation_Date", void 0);
+    __decorate([
+        typeorm_1.ManyToMany(type => website_entity_1.Website),
+        typeorm_1.JoinTable(),
+        __metadata("design:type", Array)
+    ], Tag.prototype, "Websites", void 0);
+    Tag = __decorate([
+        typeorm_1.Entity('Tag')
+    ], Tag);
+    return Tag;
+})();
 exports.Tag = Tag;
 //# sourceMappingURL=tag.entity.js.map

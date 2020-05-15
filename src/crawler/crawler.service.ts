@@ -24,11 +24,11 @@ export class CrawlerService {
   ) {
     this.isCrawling = false;
 
-    //if (process.env.NAMESPACE !== 'AMP' && (process.env.NODE_APP_INSTANCE === '0' || process.env.NODE_APP_INSTANCE === '1')) {
+    if (process.env.NAMESPACE !== 'AMP' && (process.env.NODE_APP_INSTANCE === '0' || process.env.NODE_APP_INSTANCE === '1')) {
       puppeteer.launch().then(browser => {
         this.browser = browser;
       });
-    //}
+    }
   }
 
   @Cron(CronExpression.EVERY_30_SECONDS)
@@ -73,7 +73,7 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawlUser(): Promise<void> {
-    //if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
       if (!this.isCrawling) {
         this.isCrawling = true;
 
@@ -109,7 +109,7 @@ export class CrawlerService {
 
         this.isCrawling = false;
       }
-    //}
+    }
   }
 
   private async crawl(url: string): Promise<string[]> {

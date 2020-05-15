@@ -9,42 +9,46 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EntityTable = void 0;
 const typeorm_1 = require("typeorm");
-let EntityTable = class EntityTable {
-};
-__decorate([
-    typeorm_1.PrimaryGeneratedColumn({
-        type: 'int'
-    }),
-    __metadata("design:type", Number)
-], EntityTable.prototype, "EntityId", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false,
-        unique: true
-    }),
-    __metadata("design:type", String)
-], EntityTable.prototype, "Short_Name", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false,
-        unique: true
-    }),
-    __metadata("design:type", String)
-], EntityTable.prototype, "Long_Name", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'datetime',
-        nullable: false
-    }),
-    __metadata("design:type", Object)
-], EntityTable.prototype, "Creation_Date", void 0);
-EntityTable = __decorate([
-    typeorm_1.Entity('Entity')
-], EntityTable);
+let EntityTable = (() => {
+    let EntityTable = class EntityTable {
+    };
+    __decorate([
+        typeorm_1.PrimaryGeneratedColumn({
+            type: 'int'
+        }),
+        __metadata("design:type", Number)
+    ], EntityTable.prototype, "EntityId", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 255,
+            nullable: false,
+            unique: true
+        }),
+        __metadata("design:type", String)
+    ], EntityTable.prototype, "Short_Name", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 255,
+            nullable: false,
+            unique: true
+        }),
+        __metadata("design:type", String)
+    ], EntityTable.prototype, "Long_Name", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'datetime',
+            nullable: false
+        }),
+        __metadata("design:type", Object)
+    ], EntityTable.prototype, "Creation_Date", void 0);
+    EntityTable = __decorate([
+        typeorm_1.Entity('Entity')
+    ], EntityTable);
+    return EntityTable;
+})();
 exports.EntityTable = EntityTable;
 //# sourceMappingURL=entity.entity.js.map

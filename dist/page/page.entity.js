@@ -9,41 +9,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Page = void 0;
 const typeorm_1 = require("typeorm");
-let Page = class Page {
-};
-__decorate([
-    typeorm_1.PrimaryGeneratedColumn({
-        type: 'int'
-    }),
-    __metadata("design:type", Number)
-], Page.prototype, "PageId", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false
-    }),
-    __metadata("design:type", String)
-], Page.prototype, "Uri", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'varchar',
-        length: 3,
-        nullable: false,
-        default: '000'
-    }),
-    __metadata("design:type", String)
-], Page.prototype, "Show_In", void 0);
-__decorate([
-    typeorm_1.Column({
-        type: 'datetime',
-        nullable: false
-    }),
-    __metadata("design:type", Object)
-], Page.prototype, "Creation_Date", void 0);
-Page = __decorate([
-    typeorm_1.Entity('Page')
-], Page);
+let Page = (() => {
+    let Page = class Page {
+    };
+    __decorate([
+        typeorm_1.PrimaryGeneratedColumn({
+            type: 'int'
+        }),
+        __metadata("design:type", Number)
+    ], Page.prototype, "PageId", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 255,
+            nullable: false
+        }),
+        __metadata("design:type", String)
+    ], Page.prototype, "Uri", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 3,
+            nullable: false,
+            default: '000'
+        }),
+        __metadata("design:type", String)
+    ], Page.prototype, "Show_In", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'datetime',
+            nullable: false
+        }),
+        __metadata("design:type", Object)
+    ], Page.prototype, "Creation_Date", void 0);
+    Page = __decorate([
+        typeorm_1.Entity('Page')
+    ], Page);
+    return Page;
+})();
 exports.Page = Page;
 //# sourceMappingURL=page.entity.js.map

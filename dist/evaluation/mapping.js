@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getElementsMapping = void 0;
 const xpath_1 = __importDefault(require("./xpath"));
 const act_mapping = {
     'QW-ACT-R1': QW_ACT_R1,
@@ -612,19 +613,19 @@ function getElementsMapping(evaluation) {
             act_mapping[rule](elements, results, nodes, evaluation.modules['act-rules'].rules[rule]);
         }
     }
-    for (const technique of Object.keys(evaluation.modules['html-techniques'].techniques) || []) {
+    for (const technique of Object.keys(evaluation.modules['html-techniques'].assertions) || []) {
         if (html_mapping[technique] !== undefined) {
-            html_mapping[technique](elements, results, nodes, evaluation.modules['html-techniques'].techniques[technique]);
+            html_mapping[technique](elements, results, nodes, evaluation.modules['html-techniques'].assertions[technique]);
         }
     }
-    for (const technique of Object.keys(evaluation.modules['css-techniques'].techniques) || []) {
+    for (const technique of Object.keys(evaluation.modules['css-techniques'].assertions) || []) {
         if (css_mapping[technique] !== undefined) {
-            css_mapping[technique](elements, results, nodes, evaluation.modules['css-techniques'].techniques[technique]);
+            css_mapping[technique](elements, results, nodes, evaluation.modules['css-techniques'].assertions[technique]);
         }
     }
-    for (const technique of Object.keys(evaluation.modules['best-practices']['best-practices']) || []) {
+    for (const technique of Object.keys(evaluation.modules['best-practices'].assertions) || []) {
         if (bp_mapping[technique] !== undefined) {
-            bp_mapping[technique](elements, results, nodes, evaluation.modules['best-practices']['best-practices'][technique]);
+            bp_mapping[technique](elements, results, nodes, evaluation.modules['best-practices'].assertions[technique]);
         }
     }
     return { elements, results, nodes };

@@ -12,37 +12,41 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AmpController = void 0;
 const common_1 = require("@nestjs/common");
 const evaluation_service_1 = require("../evaluation/evaluation.service");
 const response_1 = require("../lib/response");
-let AmpController = class AmpController {
-    constructor(evaluationService) {
-        this.evaluationService = evaluationService;
-    }
-    async evaluateUrl(url) {
-        return response_1.success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
-    }
-    async evaluateHtml(req) {
-        return response_1.success(await this.evaluationService.evaluateHtml(req.body.html));
-    }
-};
-__decorate([
-    common_1.Get('eval/:url'),
-    __param(0, common_1.Param('url')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AmpController.prototype, "evaluateUrl", null);
-__decorate([
-    common_1.Post('eval/html'),
-    __param(0, common_1.Request()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AmpController.prototype, "evaluateHtml", null);
-AmpController = __decorate([
-    common_1.Controller('amp'),
-    __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
-], AmpController);
+let AmpController = (() => {
+    let AmpController = class AmpController {
+        constructor(evaluationService) {
+            this.evaluationService = evaluationService;
+        }
+        async evaluateUrl(url) {
+            return response_1.success(await this.evaluationService.evaluateUrl(decodeURIComponent(url)));
+        }
+        async evaluateHtml(req) {
+            return response_1.success(await this.evaluationService.evaluateHtml(req.body.html));
+        }
+    };
+    __decorate([
+        common_1.Get('eval/:url'),
+        __param(0, common_1.Param('url')),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [String]),
+        __metadata("design:returntype", Promise)
+    ], AmpController.prototype, "evaluateUrl", null);
+    __decorate([
+        common_1.Post('eval/html'),
+        __param(0, common_1.Request()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object]),
+        __metadata("design:returntype", Promise)
+    ], AmpController.prototype, "evaluateHtml", null);
+    AmpController = __decorate([
+        common_1.Controller('amp'),
+        __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])
+    ], AmpController);
+    return AmpController;
+})();
 exports.AmpController = AmpController;
 //# sourceMappingURL=amp.controller.js.map

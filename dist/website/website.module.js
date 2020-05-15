@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.WebsiteModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const website_service_1 = require("./website.service");
@@ -15,15 +16,18 @@ const page_entity_1 = require("../page/page.entity");
 const domain_entity_1 = require("../domain/domain.entity");
 const website_controller_1 = require("./website.controller");
 const evaluation_module_1 = require("../evaluation/evaluation.module");
-let WebsiteModule = class WebsiteModule {
-};
-WebsiteModule = __decorate([
-    common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([tag_entity_1.Tag, website_entity_1.Website, domain_entity_1.Domain, page_entity_1.Page]), evaluation_module_1.EvaluationModule],
-        exports: [website_service_1.WebsiteService],
-        providers: [website_service_1.WebsiteService],
-        controllers: [website_controller_1.WebsiteController]
-    })
-], WebsiteModule);
+let WebsiteModule = (() => {
+    let WebsiteModule = class WebsiteModule {
+    };
+    WebsiteModule = __decorate([
+        common_1.Module({
+            imports: [typeorm_1.TypeOrmModule.forFeature([tag_entity_1.Tag, website_entity_1.Website, domain_entity_1.Domain, page_entity_1.Page]), evaluation_module_1.EvaluationModule],
+            exports: [website_service_1.WebsiteService],
+            providers: [website_service_1.WebsiteService],
+            controllers: [website_controller_1.WebsiteController]
+        })
+    ], WebsiteModule);
+    return WebsiteModule;
+})();
 exports.WebsiteModule = WebsiteModule;
 //# sourceMappingURL=website.module.js.map
