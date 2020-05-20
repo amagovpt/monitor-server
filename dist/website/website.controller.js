@@ -144,6 +144,12 @@ let WebsiteController = (() => {
         async checkIfWebsiteExists(name) {
             return response_1.success(!!await this.websiteService.findByName(name));
         }
+        async checkIfIsInObservatory(req) {
+            return response_1.success(await this.websiteService.isInObservatory(req.user.userId, req.body.website));
+        }
+        async transferObservatoryPages(req) {
+            return response_1.success(await this.websiteService.transferObservatoryPages(req.user.userId, req.body.website));
+        }
         async getMyMonitorUserWebsites(req) {
             return response_1.success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));
         }
@@ -344,6 +350,22 @@ let WebsiteController = (() => {
         __metadata("design:paramtypes", [String]),
         __metadata("design:returntype", Promise)
     ], WebsiteController.prototype, "checkIfWebsiteExists", null);
+    __decorate([
+        common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+        common_1.Post('isInObservatory'),
+        __param(0, common_1.Request()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object]),
+        __metadata("design:returntype", Promise)
+    ], WebsiteController.prototype, "checkIfIsInObservatory", null);
+    __decorate([
+        common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
+        common_1.Post('transferObservatoryPages'),
+        __param(0, common_1.Request()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object]),
+        __metadata("design:returntype", Promise)
+    ], WebsiteController.prototype, "transferObservatoryPages", null);
     __decorate([
         common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
         common_1.Get('myMonitor'),

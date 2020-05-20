@@ -21,6 +21,8 @@ export declare class WebsiteService {
     findAllWithoutUser(): Promise<any>;
     findAllWithoutEntity(): Promise<any>;
     findAllFromMyMonitorUser(userId: number): Promise<any>;
+    isInObservatory(userId: number, website: string): Promise<any>;
+    transferObservatoryPages(userId: number, website: string): Promise<any>;
     reEvaluateMyMonitorWebsite(userId: number, websiteName: string): Promise<any>;
     reEvaluateStudyMonitorWebsite(userId: number, tag: string, website: string): Promise<boolean>;
     findAllFromStudyMonitorUserTag(userId: number, tagName: string): Promise<any>;

@@ -20,6 +20,8 @@ export declare class WebsiteController {
     getNumberOfMyMonitorUsers(): Promise<any>;
     getNumberOfObservatoryTags(): Promise<any>;
     checkIfWebsiteExists(name: string): Promise<any>;
+    checkIfIsInObservatory(req: any): Promise<any>;
+    transferObservatoryPages(req: any): Promise<any>;
     getMyMonitorUserWebsites(req: any): Promise<any>;
     reEvaluateMyMonitorUserWebsitePages(req: any): Promise<any>;
     reEvaluateStudyMonitorUserTagWebsitePages(req: any): Promise<any>;

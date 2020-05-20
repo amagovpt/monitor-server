@@ -175,6 +175,18 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))
+  @Post('isInObservatory')
+  async checkIfIsInObservatory(@Request() req: any): Promise<any> {
+    return success(await this.websiteService.isInObservatory(req.user.userId, req.body.website));
+  }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
+  @Post('transferObservatoryPages')
+  async transferObservatoryPages(@Request() req: any): Promise<any> {
+    return success(await this.websiteService.transferObservatoryPages(req.user.userId, req.body.website));
+  }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
   @Get('myMonitor')
   async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
     return success(await this.websiteService.findAllFromMyMonitorUser(req.user.userId));

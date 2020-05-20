@@ -229,6 +229,88 @@ export class WebsiteService {
     return websites;
   }
 
+  async isInObservatory(userId: number, website: string): Promise<any> {
+    const manager = getManager();
+
+    const tags = await manager.query(`
+      SELECT t.* 
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w
+      WHERE
+        w.UserId = ? AND
+        w.Name = ? AND
+        tw.WebsiteId = w.WebsiteId AND
+        t.TagId = tw.TagId AND
+        t.UserId IS NULL AND
+        t.Show_In_Observatorio = 1
+    `, [userId, website]);
+
+    return tags.length > 0;
+  }
+
+  async transferObservatoryPages(userId: number, website: string): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    
+    await queryRunner.startTransaction();
+
+    let error = false;
+    try {
+      const pages = await queryRunner.manager.query(`
+        SELECT
+          p.* 
+        FROM
+          Tag as t,
+          TagWebsite as tw,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+        WHERE
+          w.UserId = ? AND
+          w.Name = ? AND
+          tw.WebsiteId = w.WebsiteId AND
+          t.TagId = tw.TagId AND
+          t.UserId IS NULL AND
+          t.Show_In_Observatorio = 1 AND
+          d.WebsiteId = w.WebsiteId AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId and
+          p.Show_In LIKE "_01"
+      `, [userId, website]);
+
+      for (const page of pages || []) {
+        const evaluation = await queryRunner.manager.query(`
+          SELECT * 
+          FROM 
+            Evaluation 
+          WHERE 
+            PageId = ? AND
+            Show_To LIKE "1_"
+          ORDER BY Evaluation_Date DESC LIMIT 1
+        `, [page.PageId]);
+        if (evaluation.length > 0) {
+          await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [page.Show_In[0] + '1' + page.Show_In[2], page.PageId]);
+          await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [evaluation[0].Show_To[0] + '1', evaluation[0].EvaluationId]);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      console.log(err);
+      error = true;
+    } finally {
+      await queryRunner.release();
+    }
+
+    return !error;
+  }
+
   async reEvaluateMyMonitorWebsite(userId: number, websiteName: string): Promise<any> {
     const website = await this.websiteRepository.findOne({ where: { UserId: userId, Name: websiteName } });
     if (!website) {
