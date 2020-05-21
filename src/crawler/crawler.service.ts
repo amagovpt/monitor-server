@@ -131,7 +131,7 @@ export class CrawlerService {
         if (link.hasAttribute('href')) {
           const href = link.getAttribute('href');
 
-          if (href && href.trim() && (href.startsWith(url) || href.startsWith('/'))) {
+          if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || (!href.startsWith('http') && !href.startsWith('#')))) {
             let valid = true;
             for (const not of notHtml || []) {
               if (href.endsWith(not)) {
@@ -142,16 +142,17 @@ export class CrawlerService {
 
             if (valid) {
               try {
+                let correctUrl = '';
                 if (href.startsWith(url)) {
-                  const parsedUrl = new URL(href);
-                  if (!parsedUrl.hash.trim()) {
-                    urls.push(href);
-                  }
+                  correctUrl = href;
+                } else if (!href.startsWith('/')) {
+                  correctUrl = url + '/' + href;
                 } else {
-                  const parsedUrl = new URL(url + href);
-                  if (!parsedUrl.hash.trim()) {
-                    urls.push(href);
-                  }
+                  correctUrl = url + href;
+                }
+                const parsedUrl = new URL(correctUrl);
+                if (!parsedUrl.hash.trim()) {
+                  urls.push(correctUrl);
                 }
               } catch (err) {
 
@@ -243,7 +244,7 @@ export class CrawlerService {
   }
 
   findAll(): Promise<any> {
-    return this.crawlDomainRepository.find();
+    return this.crawlDomainRepository.find({ where: { UserId: -1 }});
   }
   
   getConfig(): any {

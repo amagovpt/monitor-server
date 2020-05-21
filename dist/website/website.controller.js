@@ -142,7 +142,7 @@ let WebsiteController = (() => {
             return response_1.success(await this.websiteService.findNumberOfObservatory());
         }
         async checkIfWebsiteExists(name) {
-            return response_1.success(!!await this.websiteService.findByName(name));
+            return response_1.success(!!await this.websiteService.findByOfficialName(name));
         }
         async checkIfIsInObservatory(req) {
             return response_1.success(await this.websiteService.isInObservatory(req.user.userId, req.body.website));

@@ -17,7 +17,7 @@ export declare class WebsiteService {
     findAllDomains(user: string, type: string, website: string, flags: string): Promise<void>;
     findAllPages(websiteId: number): Promise<any>;
     findAllOfficial(): Promise<any>;
-    findByName(name: string): Promise<any>;
+    findByOfficialName(name: string): Promise<any>;
     findAllWithoutUser(): Promise<any>;
     findAllWithoutEntity(): Promise<any>;
     findAllFromMyMonitorUser(userId: number): Promise<any>;

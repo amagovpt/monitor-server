@@ -3602,8 +3602,8 @@
         "affectsGlobalScope": false
       },
       "../src/website/website.service.ts": {
-        "version": "743b0e473428a6d51d711673598b21a19fc5e96466823095f6613478878c3790",
-        "signature": "cdb1caa9f37a1a02472bcc25d281c7aeacc9dcebd6375dc95e231c10e92d0222",
+        "version": "8ab75db14b7548c11b5cb955ffe936578424bcf5d3ab68f17743e0fed6fb4ec5",
+        "signature": "cc7e110c5995096da9425c5e436d6943edb37cd8ae1ae914301ff38508b0b8a5",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/sqlstring/index.d.ts": {
@@ -3612,7 +3612,7 @@
         "affectsGlobalScope": false
       },
       "../src/website/website.controller.ts": {
-        "version": "0af507c5461b0ad8c9cce92babb074973d5471844e053f4d67cad933120db8fd",
+        "version": "dd66950092fa86384933d7557b17c5bbb0646531ca54555eba66db36b59e5e0c",
         "signature": "a718f357eb4e3768761312b088c4abf6f6c55acfd1c9c90a736d4a3b3d81ba0a",
         "affectsGlobalScope": false
       },
@@ -3702,7 +3702,7 @@
         "affectsGlobalScope": false
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "ff9ce62ce8fa588f7668e0b64ec99498664182fde7ae48db804995fba23d6dd3",
+        "version": "9d9def60132e3ebc5be3bf0bea85715260b7c1823761b6cc7ccddd5bac545ae0",
         "signature": "1b5b70f66ae5bd6c5773127df4675536e0e8eadd087a45757081916bec99b25a",
         "affectsGlobalScope": false
       },

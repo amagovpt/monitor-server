@@ -184,8 +184,8 @@ let WebsiteService = (() => {
         w.Deleted = "0"`);
             return websites;
         }
-        async findByName(name) {
-            return this.websiteRepository.findOne({ where: { Name: name } });
+        async findByOfficialName(name) {
+            return this.websiteRepository.findOne({ where: { Name: name, UserId: typeorm_2.IsNull(), Deleted: 0 } });
         }
         async findAllWithoutUser() {
             const manager = typeorm_2.getManager();

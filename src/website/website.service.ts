@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
+import { Connection, Repository, getManager, IsNull } from 'typeorm';
 import { Website } from './website.entity';
 import { Domain } from '../domain/domain.entity';
 import { Tag } from '../tag/tag.entity';
@@ -192,8 +192,8 @@ export class WebsiteService {
     return websites;
   }
 
-  async findByName(name: string): Promise<any> {
-    return this.websiteRepository.findOne({ where: { Name: name }});
+  async findByOfficialName(name: string): Promise<any> {
+    return this.websiteRepository.findOne({ where: { Name: name, UserId: IsNull(), Deleted: 0 }});
   }
 
   async findAllWithoutUser(): Promise<any> {

@@ -171,7 +171,7 @@ export class WebsiteController {
   @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/:name')
   async checkIfWebsiteExists(@Param('name') name: string): Promise<any> {
-    return success(!!await this.websiteService.findByName(name));
+    return success(!!await this.websiteService.findByOfficialName(name));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))

@@ -116,7 +116,7 @@ let CrawlerService = (() => {
                 for (const link of links || []) {
                     if (link.hasAttribute('href')) {
                         const href = link.getAttribute('href');
-                        if (href && href.trim() && (href.startsWith(url) || href.startsWith('/'))) {
+                        if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || (!href.startsWith('http') && !href.startsWith('#')))) {
                             let valid = true;
                             for (const not of notHtml || []) {
                                 if (href.endsWith(not)) {
@@ -126,17 +126,19 @@ let CrawlerService = (() => {
                             }
                             if (valid) {
                                 try {
+                                    let correctUrl = '';
                                     if (href.startsWith(url)) {
-                                        const parsedUrl = new URL(href);
-                                        if (!parsedUrl.hash.trim()) {
-                                            urls.push(href);
-                                        }
+                                        correctUrl = href;
+                                    }
+                                    else if (!href.startsWith('/')) {
+                                        correctUrl = url + '/' + href;
                                     }
                                     else {
-                                        const parsedUrl = new URL(url + href);
-                                        if (!parsedUrl.hash.trim()) {
-                                            urls.push(href);
-                                        }
+                                        correctUrl = url + href;
+                                    }
+                                    const parsedUrl = new URL(correctUrl);
+                                    if (!parsedUrl.hash.trim()) {
+                                        urls.push(correctUrl);
                                     }
                                 }
                                 catch (err) {
@@ -216,7 +218,7 @@ let CrawlerService = (() => {
             });
         }
         findAll() {
-            return this.crawlDomainRepository.find();
+            return this.crawlDomainRepository.find({ where: { UserId: -1 } });
         }
         getConfig() {
             const content = fs_1.readFileSync(__dirname + '/../../public/crawlerConfig.json');
