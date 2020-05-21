@@ -42,9 +42,10 @@ let UserController = (() => {
             user.Type = req.body.type;
             user.Register_Date = new Date();
             user.Unique_Hash = security_1.createRandomUniqueHash();
+            const tags = JSON.parse(req.body.tags);
             const websites = JSON.parse(req.body.websites);
             const transfer = !!req.body.transfer;
-            const createSuccess = await this.userService.createOne(user, websites, transfer);
+            const createSuccess = await this.userService.createOne(user, tags, websites, transfer);
             if (!createSuccess) {
                 throw new common_1.InternalServerErrorException();
             }

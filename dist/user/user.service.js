@@ -19,6 +19,7 @@ const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const tag_entity_1 = require("../tag/tag.entity");
 const website_entity_1 = require("../website/website.entity");
+const domain_entity_1 = require("../domain/domain.entity");
 const security_1 = require("../lib/security");
 let UserService = (() => {
     let UserService = class UserService {
@@ -259,7 +260,7 @@ let UserService = (() => {
         async findStudyMonitorUserTagByName(userId, name) {
             return await this.tagRepository.findOne({ where: { Name: name, UserId: userId } });
         }
-        async createOne(user, websites, transfer) {
+        async createOne(user, tags, websites, transfer) {
             const queryRunner = this.connection.createQueryRunner();
             await queryRunner.connect();
             await queryRunner.startTransaction();
@@ -281,11 +282,51 @@ let UserService = (() => {
               e.PageId = p.PageId`, [websites]);
                     }
                 }
+                else if (user.Type === 'studies' && tags.length > 0) {
+                    const copyTags = await queryRunner.manager.query(`SELECT * FROM Tag WHERE TagId IN (?)`, [tags]);
+                    for (const tag of copyTags || []) {
+                        const newTag = new tag_entity_1.Tag();
+                        newTag.Name = tag.Name;
+                        newTag.UserId = insertUser.UserId;
+                        newTag.Show_in_Observatorio = 0;
+                        newTag.Creation_Date = new Date();
+                        const insertTag = await queryRunner.manager.save(newTag);
+                        const copyWebsites = await queryRunner.manager.query(`
+            SELECT w.*
+            FROM
+              TagWebsite as tw,
+              Website as w
+            WHERE
+              tw.TagId = ? AND
+              w.WebsiteId = tw.WebsiteId  
+          `, [tag.TagId]);
+                        for (const website of copyWebsites || []) {
+                            const newWebsite = new website_entity_1.Website();
+                            newWebsite.Name = website.Name;
+                            newWebsite.UserId = insertUser.UserId;
+                            newWebsite.Creation_Date = new Date();
+                            const insertWebsite = await queryRunner.manager.save(newWebsite);
+                            await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.TagId, insertWebsite.WebsiteId]);
+                            const domain = await queryRunner.manager.query(`SELECT * FROM Domain WHERE WebsiteId = ? AND Active = 1`, [website.WebsiteId]);
+                            const newDomain = new domain_entity_1.Domain();
+                            newDomain.WebsiteId = insertWebsite.WebsiteId;
+                            newDomain.Active = 1;
+                            newDomain.Start_Date = new Date();
+                            newDomain.Url = domain[0].Url;
+                            const insertDomain = await queryRunner.manager.save(newDomain);
+                            const pages = await queryRunner.manager.query(`SELECT * FROM DomainPage WHERE DomainId = ?`, [domain[0].DomainId]);
+                            for (const page of pages || []) {
+                                await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
+                            }
+                        }
+                    }
+                }
                 await queryRunner.commitTransaction();
             }
             catch (err) {
                 await queryRunner.rollbackTransaction();
                 hasError = true;
+                console.log(err);
             }
             finally {
                 await queryRunner.release();

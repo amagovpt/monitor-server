@@ -3251,13 +3251,18 @@
         "signature": "b20bc6dc10eb360140952f9c699ed4e2c788675c0b07ee215701bd9678a9372a",
         "affectsGlobalScope": false
       },
+      "../src/domain/domain.entity.ts": {
+        "version": "d0ddbe8b3ef6161d30303b3d6f22fc9d2e1c3e546decbce04efa7b2e176d21d7",
+        "signature": "3a9d2270505b11456a2760decd0fb92e871884fd8d4689f268863b2adcdf2849",
+        "affectsGlobalScope": false
+      },
       "../src/user/user.service.ts": {
-        "version": "a124871446c991b9e20ad5f963042a75c58922d9ddb906f959f7977fb3aa6bf3",
-        "signature": "6e26cd2e0a3996738bc63eb7d3891bad3960db56fea8bc21cccb7c44169c75b9",
+        "version": "d19c0da33e47f788b3f0aac9bb15d46b4ad6548c800383a44d1ba67eb70d81d8",
+        "signature": "11b6831df90f164594291cc78d70a42ae5123a26fa98684bb21f53fb678041fb",
         "affectsGlobalScope": false
       },
       "../src/user/user.controller.ts": {
-        "version": "42705538747e7adecd71bffc92ab82d431483e1250a939a542d4ac10ca9cf5b5",
+        "version": "6998a262fa260f9717c942eac8d00dc51ec4c88753c03f1839a02039da9d979f",
         "signature": "bf0f8f65d208a19c15fe9d7e06542955ea5c60067d85b923e74d08a55200214b",
         "affectsGlobalScope": false
       },
@@ -3579,11 +3584,6 @@
       "../src/observatory/observatory.module.ts": {
         "version": "81a3a8c683fa9c80a4a6f8aadcf2e76f547e39b432e0670650ed0751c4b26732",
         "signature": "2abe8230f07884874f683a5ea95b22a74edf370149fdb911a64877e9ecd2450d",
-        "affectsGlobalScope": false
-      },
-      "../src/domain/domain.entity.ts": {
-        "version": "d0ddbe8b3ef6161d30303b3d6f22fc9d2e1c3e546decbce04efa7b2e176d21d7",
-        "signature": "3a9d2270505b11456a2760decd0fb92e871884fd8d4689f268863b2adcdf2849",
         "affectsGlobalScope": false
       },
       "../src/tag/tag.service.ts": {
@@ -11283,6 +11283,7 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/typeorm/index.d.ts",
+        "../src/domain/domain.entity.ts",
         "../src/lib/security.ts",
         "../src/tag/tag.entity.ts",
         "../src/user/user.entity.ts",

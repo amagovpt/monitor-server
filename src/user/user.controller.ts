@@ -38,10 +38,11 @@ export class UserController {
     user.Register_Date = new Date();
     user.Unique_Hash = createRandomUniqueHash();
 
+    const tags = JSON.parse(req.body.tags);
     const websites = JSON.parse(req.body.websites);
     const transfer = !!req.body.transfer;
     
-    const createSuccess = await this.userService.createOne(user, websites, transfer);
+    const createSuccess = await this.userService.createOne(user, tags, websites, transfer);
     if (!createSuccess) {
       throw new InternalServerErrorException();
     }
