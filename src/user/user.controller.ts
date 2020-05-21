@@ -26,9 +26,33 @@ export class UserController {
     return success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
   }
 
+  private passwordValidator(password: string): boolean {
+    const isShort = password.length < 8 || password.length === 0;
+
+    const hasUpperCase = password.toLowerCase() !== password;
+
+    const hasLowerCase = password.toUpperCase() !== password;
+
+    const specialFormat = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    const hasSpecial = specialFormat.test(password);
+
+    const numberFormat = /\d/g;
+    const hasNumber = numberFormat.test(password);
+
+    if (isShort || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
+      return false;
+    }
+  
+    return true;
+  }
+
   @UseGuards(AuthGuard('jwt-admin'))
   @Post('create')
   async createUser(@Request() req: any): Promise<any> {
+    if (!this.passwordValidator(req.body.password)) {
+      throw new InternalServerErrorException();
+    }
+
     const user = new User();
     user.Username = req.body.username;
     user.Password = await generatePasswordHash(req.body.password);
@@ -56,6 +80,10 @@ export class UserController {
     const userId = req.body.userId;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
+
+    if (!this.passwordValidator(password)) {
+      throw new InternalServerErrorException();
+    }
 
     if (password !== confirmPassword) {
       return success(false);
