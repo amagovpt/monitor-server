@@ -4,6 +4,7 @@ export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
     changeUserPassword(req: any): Promise<any>;
+    private passwordValidator;
     createUser(req: any): Promise<any>;
     updateUser(req: any): Promise<any>;
     deleteUser(req: any): Promise<any>;

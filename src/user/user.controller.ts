@@ -15,6 +15,11 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Post('changePassword')
   async changeUserPassword(@Request() req: any): Promise<any> {
+
+    if (!this.passwordValidator(req.body.newPassword)) {
+      throw new InternalServerErrorException();
+    }
+
     const password = req.body.password;
     const newPassword = req.body.newPassword;
     const confirmNewPassword = req.body.confirmPassword;

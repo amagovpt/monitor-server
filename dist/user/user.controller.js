@@ -25,6 +25,9 @@ let UserController = (() => {
             this.userService = userService;
         }
         async changeUserPassword(req) {
+            if (!this.passwordValidator(req.body.newPassword)) {
+                throw new common_1.InternalServerErrorException();
+            }
             const password = req.body.password;
             const newPassword = req.body.newPassword;
             const confirmNewPassword = req.body.confirmPassword;
@@ -33,7 +36,23 @@ let UserController = (() => {
             }
             return response_1.success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
         }
+        passwordValidator(password) {
+            const isShort = password.length < 8 || password.length === 0;
+            const hasUpperCase = password.toLowerCase() !== password;
+            const hasLowerCase = password.toUpperCase() !== password;
+            const specialFormat = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+            const hasSpecial = specialFormat.test(password);
+            const numberFormat = /\d/g;
+            const hasNumber = numberFormat.test(password);
+            if (isShort || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
+                return false;
+            }
+            return true;
+        }
         async createUser(req) {
+            if (!this.passwordValidator(req.body.password)) {
+                throw new common_1.InternalServerErrorException();
+            }
             const user = new user_entity_1.User();
             user.Username = req.body.username;
             user.Password = await security_1.generatePasswordHash(req.body.password);
@@ -55,6 +74,9 @@ let UserController = (() => {
             const userId = req.body.userId;
             const password = req.body.password;
             const confirmPassword = req.body.confirmPassword;
+            if (!this.passwordValidator(password)) {
+                throw new common_1.InternalServerErrorException();
+            }
             if (password !== confirmPassword) {
                 return response_1.success(false);
             }

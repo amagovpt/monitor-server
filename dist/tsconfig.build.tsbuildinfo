@@ -3262,8 +3262,8 @@
         "affectsGlobalScope": false
       },
       "../src/user/user.controller.ts": {
-        "version": "6998a262fa260f9717c942eac8d00dc51ec4c88753c03f1839a02039da9d979f",
-        "signature": "bf0f8f65d208a19c15fe9d7e06542955ea5c60067d85b923e74d08a55200214b",
+        "version": "0b180fed3ca1480fc25109627f2d32bf2bd758fc6e884e4f45d92bd056c933d3",
+        "signature": "55c6a4d6de48ab15237a3364e4e75e59695466755e7ef4a93c66352e6ef944f0",
         "affectsGlobalScope": false
       },
       "../src/user/user.module.ts": {
