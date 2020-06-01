@@ -3397,7 +3397,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "da3838922d214bad1e633ab52ccb7a73ed08750536dc2c7cec3e69015043c60e",
+        "version": "dee836c84a6f8de341df9fefb8b05bf53776b1cea9f6e2d491f9503fb350be04",
         "signature": "aeb617b40253dae050a4ade007c4a13be53033b5bcc2b6c30a38f10ef1aa2408",
         "affectsGlobalScope": false
       },
@@ -3702,7 +3702,7 @@
         "affectsGlobalScope": false
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "9d9def60132e3ebc5be3bf0bea85715260b7c1823761b6cc7ccddd5bac545ae0",
+        "version": "d922a62cabc9a8522237a0f1c37775f4df0d6cf8dc1cec9aa5fa95bf5cdd676b",
         "signature": "1b5b70f66ae5bd6c5773127df4675536e0e8eadd087a45757081916bec99b25a",
         "affectsGlobalScope": false
       },

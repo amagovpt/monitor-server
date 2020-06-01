@@ -92,6 +92,6 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     report = report['customHtml'];
   }
-  console.log(report);
+  
   return report;
 }

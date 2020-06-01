@@ -111,7 +111,6 @@ async function evaluate(params) {
     else if (params.html) {
         report = report['customHtml'];
     }
-    console.log(report);
     return report;
 }
 exports.evaluate = evaluate;

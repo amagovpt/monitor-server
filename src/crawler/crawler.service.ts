@@ -259,7 +259,7 @@ export class CrawlerService {
   }
 
   async isCrawlSubDomainDone(subDomain: string): Promise<any> {
-    const page = await this.crawlDomainRepository.findOne({ where: { SubDomainUri: subDomain }});
+    const page = await this.crawlDomainRepository.findOne({ where: { UserId: -1, SubDomainUri: subDomain }});
 
     return page ? page.Done === 1 ? 2 : 1 : 0;
   }

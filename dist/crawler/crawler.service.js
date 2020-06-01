@@ -230,7 +230,7 @@ let CrawlerService = (() => {
             return true;
         }
         async isCrawlSubDomainDone(subDomain) {
-            const page = await this.crawlDomainRepository.findOne({ where: { SubDomainUri: subDomain } });
+            const page = await this.crawlDomainRepository.findOne({ where: { UserId: -1, SubDomainUri: subDomain } });
             return page ? page.Done === 1 ? 2 : 1 : 0;
         }
         async isUserCrawlerDone(userId, domainId) {
