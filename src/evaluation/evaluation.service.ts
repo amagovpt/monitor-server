@@ -31,7 +31,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+    if (process.env.ID === '0') {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
 
@@ -45,7 +45,7 @@ export class EvaluationService {
 
   @Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
   async instance2EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+    if (process.env.ID === '1') {
       if (!this.isEvaluatingInstance2) {
         this.isEvaluatingInstance2 = true;
 
@@ -59,7 +59,7 @@ export class EvaluationService {
 
   @Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
   async instance3EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '2') {
+    if (process.env.ID === '2') {
       if (!this.isEvaluatingInstance3) {
         this.isEvaluatingInstance3 = true;
 
@@ -73,7 +73,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   async instance4EvaluateUserPageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '3') {
+    if (process.env.ID === '3') {
       if (!this.isEvaluatingUserInstance4) {
         this.isEvaluatingUserInstance4 = true;
 
@@ -87,7 +87,7 @@ export class EvaluationService {
 
   @Cron('*/2 * * * *') // Called every 2 minutes - USERS EVALUATIONS
   async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '4') {
+    if (process.env.ID === '4') {
       if (!this.isEvaluatingUserInstance5) {
         this.isEvaluatingUserInstance5 = true;
 
@@ -101,7 +101,7 @@ export class EvaluationService {
 
   @Cron('*/3 * * * *') // Called every 3 minutes - USERS EVALUATIONS
   async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '5') {
+    if (process.env.ID === '5') {
       if (!this.isEvaluatingUserInstance6) {
         this.isEvaluatingUserInstance6 = true;
 

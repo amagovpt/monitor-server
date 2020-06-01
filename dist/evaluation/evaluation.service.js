@@ -32,7 +32,7 @@ let EvaluationService = (() => {
             middleware_1.initEvaluator();
         }
         async instance1EvaluatePageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+            if (process.env.ID === '0') {
                 if (!this.isEvaluatingInstance1) {
                     this.isEvaluatingInstance1 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -42,7 +42,7 @@ let EvaluationService = (() => {
             }
         }
         async instance2EvaluatePageListevaluatePageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+            if (process.env.ID === '1') {
                 if (!this.isEvaluatingInstance2) {
                     this.isEvaluatingInstance2 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -52,7 +52,7 @@ let EvaluationService = (() => {
             }
         }
         async instance3EvaluatePageListevaluatePageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '2') {
+            if (process.env.ID === '2') {
                 if (!this.isEvaluatingInstance3) {
                     this.isEvaluatingInstance3 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -62,7 +62,7 @@ let EvaluationService = (() => {
             }
         }
         async instance4EvaluateUserPageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '3') {
+            if (process.env.ID === '3') {
                 if (!this.isEvaluatingUserInstance4) {
                     this.isEvaluatingUserInstance4 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -72,7 +72,7 @@ let EvaluationService = (() => {
             }
         }
         async instance5EvaluateUserPageListevaluatePageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '4') {
+            if (process.env.ID === '4') {
                 if (!this.isEvaluatingUserInstance5) {
                     this.isEvaluatingUserInstance5 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -82,7 +82,7 @@ let EvaluationService = (() => {
             }
         }
         async instance6EvaluateUserPageListevaluatePageList() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '5') {
+            if (process.env.ID === '5') {
                 if (!this.isEvaluatingUserInstance6) {
                     this.isEvaluatingUserInstance6 = true;
                     const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);

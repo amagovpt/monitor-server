@@ -33,14 +33,14 @@ let CrawlerService = (() => {
             this.newCrawler = newCrawler;
             this.connection = connection;
             this.isCrawling = false;
-            if (process.env.NAMESPACE !== 'AMP' && (process.env.NODE_APP_INSTANCE === '0' || process.env.NODE_APP_INSTANCE === '1')) {
+            if (process.env.ID === '0' || process.env.ID === '1') {
                 puppeteer_1.default.launch().then(browser => {
                     this.browser = browser;
                 });
             }
         }
         async nestCrawl() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '0') {
+            if (process.env.ID === '0') {
                 if (!this.isCrawling) {
                     this.isCrawling = true;
                     const queryRunner = this.connection.createQueryRunner();
@@ -72,7 +72,8 @@ let CrawlerService = (() => {
             }
         }
         async nestCrawlUser() {
-            if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
+            console.log(process.env.ID);
+            if (process.env.ID === '1') {
                 if (!this.isCrawling) {
                     this.isCrawling = true;
                     const queryRunner = this.connection.createQueryRunner();
