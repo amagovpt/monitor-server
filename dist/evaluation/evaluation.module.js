@@ -13,18 +13,15 @@ const evaluation_service_1 = require("./evaluation.service");
 const evaluation_entity_1 = require("./evaluation.entity");
 const evaluation_controller_1 = require("./evaluation.controller");
 const page_entity_1 = require("../page/page.entity");
-let EvaluationModule = (() => {
-    let EvaluationModule = class EvaluationModule {
-    };
-    EvaluationModule = __decorate([
-        common_1.Module({
-            imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page, evaluation_entity_1.Evaluation])],
-            exports: [evaluation_service_1.EvaluationService],
-            providers: [evaluation_service_1.EvaluationService],
-            controllers: [evaluation_controller_1.EvaluationController]
-        })
-    ], EvaluationModule);
-    return EvaluationModule;
-})();
+let EvaluationModule = class EvaluationModule {
+};
+EvaluationModule = __decorate([
+    common_1.Module({
+        imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page, evaluation_entity_1.Evaluation])],
+        exports: [evaluation_service_1.EvaluationService],
+        providers: [evaluation_service_1.EvaluationService],
+        controllers: [evaluation_controller_1.EvaluationController]
+    })
+], EvaluationModule);
 exports.EvaluationModule = EvaluationModule;
 //# sourceMappingURL=evaluation.module.js.map

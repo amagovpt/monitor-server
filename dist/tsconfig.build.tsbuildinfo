@@ -717,8 +717,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/interfaces/nest-application.interface.d.ts": {
-        "version": "b15afa7d29ede876c0af93e15c8e56216ac7f1f4edac7e6bb86c72dadaa3cc14",
-        "signature": "b15afa7d29ede876c0af93e15c8e56216ac7f1f4edac7e6bb86c72dadaa3cc14",
+        "version": "d95b5f1a2b166ea7a379d72f9e3e624153d277c2ad9ae6f0c1a8be6813efa203",
+        "signature": "d95b5f1a2b166ea7a379d72f9e3e624153d277c2ad9ae6f0c1a8be6813efa203",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/interfaces/nest-microservice.interface.d.ts": {
@@ -726,9 +726,14 @@
         "signature": "724aa59b0f1e9fd6c6eed858e2ebdb4d2e58db1844c278637b971e18cf30173f",
         "affectsGlobalScope": false
       },
+      "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts": {
+        "version": "4880c2a2caa941aff7f91f51948ebfb10f15283ff0b163f8ea2a74499add61aa",
+        "signature": "4880c2a2caa941aff7f91f51948ebfb10f15283ff0b163f8ea2a74499add61aa",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@nestjs/common/interfaces/index.d.ts": {
-        "version": "38cb6f57f0de73c21b00cd4c0b31495d6efffe29b5059dff5b2d269df382f11e",
-        "signature": "38cb6f57f0de73c21b00cd4c0b31495d6efffe29b5059dff5b2d269df382f11e",
+        "version": "cdc89eac93b07401862e3d8f1cdf5f5a9dbc6a9e5d7ee72003de5c1db2297512",
+        "signature": "cdc89eac93b07401862e3d8f1cdf5f5a9dbc6a9e5d7ee72003de5c1db2297512",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/cache/interfaces/cache-manager.interface.d.ts": {
@@ -762,13 +767,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/core/dependencies.decorator.d.ts": {
-        "version": "ffd0ca854a06b0a6c8378590497d2601d5905b95fae2b8ca0b0e241007e18211",
-        "signature": "ffd0ca854a06b0a6c8378590497d2601d5905b95fae2b8ca0b0e241007e18211",
+        "version": "0fdb1ed509382bd388896d3770655b0cda8c80c36f8c54b3899992f7a3a8665c",
+        "signature": "0fdb1ed509382bd388896d3770655b0cda8c80c36f8c54b3899992f7a3a8665c",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/core/exception-filters.decorator.d.ts": {
-        "version": "4b6c56d861c833a6bee06fe4c5a7bb53109e1b517285d62137cb67bd8bc8f241",
-        "signature": "4b6c56d861c833a6bee06fe4c5a7bb53109e1b517285d62137cb67bd8bc8f241",
+        "version": "d97b96b6ecd4ee03f9f1170722c825ef778430a6a0d7aab03b8929012bf773cd",
+        "signature": "d97b96b6ecd4ee03f9f1170722c825ef778430a6a0d7aab03b8929012bf773cd",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/core/inject.decorator.d.ts": {
@@ -787,8 +792,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/core/set-metadata.decorator.d.ts": {
-        "version": "7c69e28f6ba1c9c40e38eefd402e41e2af2663900a907fea3f865d86fa3eea4b",
-        "signature": "7c69e28f6ba1c9c40e38eefd402e41e2af2663900a907fea3f865d86fa3eea4b",
+        "version": "476b5c25e85b94e15d761bb9503f55fb11e81167df451f187f5080fca825273b",
+        "signature": "476b5c25e85b94e15d761bb9503f55fb11e81167df451f187f5080fca825273b",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/core/use-guards.decorator.d.ts": {
@@ -862,8 +867,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/http/redirect.decorator.d.ts": {
-        "version": "48543818639cec62796b1c0ef30a72baa25c66e951235688f29ca6817558ae9e",
-        "signature": "48543818639cec62796b1c0ef30a72baa25c66e951235688f29ca6817558ae9e",
+        "version": "a3684ea9719122f9477902acd08cd363a6f3cff6d493df89d4dc12fa58204e27",
+        "signature": "a3684ea9719122f9477902acd08cd363a6f3cff6d493df89d4dc12fa58204e27",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/decorators/http/index.d.ts": {
@@ -1117,8 +1122,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/utils/forward-ref.util.d.ts": {
-        "version": "32bfcf96237a731330aed173e8f52d20dd5b705b803c3870280ccb2eb703f6a2",
-        "signature": "32bfcf96237a731330aed173e8f52d20dd5b705b803c3870280ccb2eb703f6a2",
+        "version": "5df9a68835c1e020625127d8c951c90808d319c811fc3a780d24f64053192ea4",
+        "signature": "5df9a68835c1e020625127d8c951c90808d319c811fc3a780d24f64053192ea4",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/utils/index.d.ts": {
@@ -1127,8 +1132,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/index.d.ts": {
-        "version": "abec56db8d9e8c0be53354ab0f3e6bc5a888ea005f32e43f9893ae1e49360db7",
-        "signature": "abec56db8d9e8c0be53354ab0f3e6bc5a888ea005f32e43f9893ae1e49360db7",
+        "version": "20ee20a65a201299c1f4ba6fe931f3ad46d67e8a8cc2a52b9d162bb77aca23e6",
+        "signature": "20ee20a65a201299c1f4ba6fe931f3ad46d67e8a8cc2a52b9d162bb77aca23e6",
         "affectsGlobalScope": false
       },
       "../src/app.service.ts": {
@@ -1182,8 +1187,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/naming-strategy/NamingStrategyInterface.d.ts": {
-        "version": "7577d6da81781d111d4ccea8defbfbf4904bd1407fac823639b7203d30b59f52",
-        "signature": "7577d6da81781d111d4ccea8defbfbf4904bd1407fac823639b7203d30b59f52",
+        "version": "426600545c519edaa799d0bc0d410101d6f42cf063e9e5679233de94b6231622",
+        "signature": "426600545c519edaa799d0bc0d410101d6f42cf063e9e5679233de94b6231622",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/metadata-args/CheckMetadataArgs.d.ts": {
@@ -1287,8 +1292,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/query-builder/QueryExpressionMap.d.ts": {
-        "version": "322318ad7cbaa9e66b36520e3ac4efc85e5253254eeeb820e9ebc087bcee47e7",
-        "signature": "322318ad7cbaa9e66b36520e3ac4efc85e5253254eeeb820e9ebc087bcee47e7",
+        "version": "0c9233c6aa33633c047b63621ae8bb09a87e2f2756a97599a5f4aa23dd26607f",
+        "signature": "0c9233c6aa33633c047b63621ae8bb09a87e2f2756a97599a5f4aa23dd26607f",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/query-builder/Brackets.d.ts": {
@@ -1422,8 +1427,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/query-builder/SelectQueryBuilder.d.ts": {
-        "version": "3d6c700cbdc361e05e2455ee8c78855e3e8588c102de7eef78dc7cff29e53375",
-        "signature": "3d6c700cbdc361e05e2455ee8c78855e3e8588c102de7eef78dc7cff29e53375",
+        "version": "3a3c5e524ecd9a28ed089e7e289dd6bab06b84594ec6e75b951d9f13bea0371a",
+        "signature": "3a3c5e524ecd9a28ed089e7e289dd6bab06b84594ec6e75b951d9f13bea0371a",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/metadata-args/RelationIdMetadataArgs.d.ts": {
@@ -1512,8 +1517,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/metadata/EntityMetadata.d.ts": {
-        "version": "7e1ac1e4162eb6d578e3365e3a060525fef4e614f20d8620c19a9da29d7f7ce3",
-        "signature": "7e1ac1e4162eb6d578e3365e3a060525fef4e614f20d8620c19a9da29d7f7ce3",
+        "version": "4d6b0705644bcfc1cd5ef0497524bc49626caacb4531591cea2251bbd193de96",
+        "signature": "4d6b0705644bcfc1cd5ef0497524bc49626caacb4531591cea2251bbd193de96",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/metadata-args/IndexMetadataArgs.d.ts": {
@@ -1607,8 +1612,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/find-options/FindOneOptions.d.ts": {
-        "version": "3740ff30cd9bd331c2e72d9cc61e9ad28c355f19b541f626dd839348f2761886",
-        "signature": "3740ff30cd9bd331c2e72d9cc61e9ad28c355f19b541f626dd839348f2761886",
+        "version": "34b8cbbc74427f19025ae9a460c7eca4dd57f95861f2b31eb92ca2d958d4ea7c",
+        "signature": "34b8cbbc74427f19025ae9a460c7eca4dd57f95861f2b31eb92ca2d958d4ea7c",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/find-options/FindManyOptions.d.ts": {
@@ -1632,13 +1637,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/mongodb/typings.d.ts": {
-        "version": "7a097f6ea82785c0f9556d0af6ce50393a72645626cd791eb347af28f8a9d748",
-        "signature": "7a097f6ea82785c0f9556d0af6ce50393a72645626cd791eb347af28f8a9d748",
+        "version": "7a37aff73aa8cae7bbf546c5302da12a89189548cd7b77df66250ff9e23f86d6",
+        "signature": "7a37aff73aa8cae7bbf546c5302da12a89189548cd7b77df66250ff9e23f86d6",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/repository/Repository.d.ts": {
-        "version": "fc3f7e1594feda03b4d274521511a4b781d4db518c5ddda67b1d26694693ba92",
-        "signature": "fc3f7e1594feda03b4d274521511a4b781d4db518c5ddda67b1d26694693ba92",
+        "version": "35e9d5e09c047f08d130fd65c9a4089c9b1951a43a66f2f3c158f27c380bd887",
+        "signature": "35e9d5e09c047f08d130fd65c9a4089c9b1951a43a66f2f3c158f27c380bd887",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/schema-builder/options/ViewOptions.d.ts": {
@@ -1727,8 +1732,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/entity-manager/EntityManager.d.ts": {
-        "version": "bc33bbe1bc6b70aba94514275a3b07b2e9b4590777437840401d5c1cd2ed9f17",
-        "signature": "bc33bbe1bc6b70aba94514275a3b07b2e9b4590777437840401d5c1cd2ed9f17",
+        "version": "d11a0d86b3788ecce628d239bf0cb25431d253b9865a8273ecdf547cf225f6bc",
+        "signature": "d11a0d86b3788ecce628d239bf0cb25431d253b9865a8273ecdf547cf225f6bc",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/query-runner/QueryRunner.d.ts": {
@@ -1757,8 +1762,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/types/DatabaseType.d.ts": {
-        "version": "5e93433faeaf1000678ecbdf4cc0d3051bda3d16f10d56e93ebbdf243a62be21",
-        "signature": "5e93433faeaf1000678ecbdf4cc0d3051bda3d16f10d56e93ebbdf243a62be21",
+        "version": "ad9ead8fa69199f6b962826ca3e222b05df9223c0270f596ca0637c89003e654",
+        "signature": "ad9ead8fa69199f6b962826ca3e222b05df9223c0270f596ca0637c89003e654",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/logger/Logger.d.ts": {
@@ -1817,8 +1822,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/postgres/PostgresConnectionCredentialsOptions.d.ts": {
-        "version": "1f1c63cc03e86f753a12a3a68797bc92e490f4a47b94b997a09b7ebc48129931",
-        "signature": "1f1c63cc03e86f753a12a3a68797bc92e490f4a47b94b997a09b7ebc48129931",
+        "version": "32f9169fb6cad29917b3f1670550df48ba30dee34dcb0bffaed13947b2e0d2d2",
+        "signature": "32f9169fb6cad29917b3f1670550df48ba30dee34dcb0bffaed13947b2e0d2d2",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/postgres/PostgresConnectionOptions.d.ts": {
@@ -1887,13 +1892,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionOptions.d.ts": {
-        "version": "43d1916056479da180ddacdbc5af79121712f1ce1ed21c7de170900eedb2e44f",
-        "signature": "43d1916056479da180ddacdbc5af79121712f1ce1ed21c7de170900eedb2e44f",
+        "version": "60ef12966c0669779f670eb715558170e6c997ec23b73b89dd30fc6263a3118f",
+        "signature": "60ef12966c0669779f670eb715558170e6c997ec23b73b89dd30fc6263a3118f",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/sap/SapConnectionCredentialsOptions.d.ts": {
-        "version": "7b8fe8fd6655e58cd43d0ec83ff8ac5100dfdafa7dbaf520ba92a9315098eab0",
-        "signature": "7b8fe8fd6655e58cd43d0ec83ff8ac5100dfdafa7dbaf520ba92a9315098eab0",
+        "version": "d51a2e050c8a131b13ec9330a0869e5ac75b9ac4ebde52d5f474e819510b5263",
+        "signature": "d51a2e050c8a131b13ec9330a0869e5ac75b9ac4ebde52d5f474e819510b5263",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/sap/SapConnectionOptions.d.ts": {
@@ -1901,9 +1906,14 @@
         "signature": "e8673f544fbdf3fcdefe68fb3f91321b2fc899437b4b2798232654a3a0f55dbf",
         "affectsGlobalScope": false
       },
+      "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts": {
+        "version": "d98affbef6414d13f9bbe20f726a7b5fe6820ec412433055c737099c82861ae2",
+        "signature": "d98affbef6414d13f9bbe20f726a7b5fe6820ec412433055c737099c82861ae2",
+        "affectsGlobalScope": false
+      },
       "../node_modules/typeorm/connection/ConnectionOptions.d.ts": {
-        "version": "d2f20b0d82449b8c76a74e2d12065dbb22ae7807eaee8e8e077ff6047200fdfb",
-        "signature": "d2f20b0d82449b8c76a74e2d12065dbb22ae7807eaee8e8e077ff6047200fdfb",
+        "version": "04c1953d20a7be06e5bfbe64580293aa870d6b60425a1cf2fad149761048f94f",
+        "signature": "04c1953d20a7be06e5bfbe64580293aa870d6b60425a1cf2fad149761048f94f",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/entity-manager/SqljsEntityManager.d.ts": {
@@ -2071,9 +2081,14 @@
         "signature": "7055acd12ac5463f7160e924fc4260cb0e5f4bb1d28e9550240c512724a79c11",
         "affectsGlobalScope": false
       },
+      "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts": {
+        "version": "0dcd8a4a8314acf13bfb6074f9a7ccafef02ff93294c0c033643f99687cd121a",
+        "signature": "0dcd8a4a8314acf13bfb6074f9a7ccafef02ff93294c0c033643f99687cd121a",
+        "affectsGlobalScope": false
+      },
       "../node_modules/typeorm/decorator/columns/ViewColumn.d.ts": {
-        "version": "505306deffa43fa10bf6a873176665efe02be6fc311fa0afb6c67a4165b0c9d9",
-        "signature": "505306deffa43fa10bf6a873176665efe02be6fc311fa0afb6c67a4165b0c9d9",
+        "version": "f1578cf866255ba52ca03962c874a14a9071440ce3d0b778d48ac184d42c9fab",
+        "signature": "f1578cf866255ba52ca03962c874a14a9071440ce3d0b778d48ac184d42c9fab",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/decorator/columns/ObjectIdColumn.d.ts": {
@@ -2177,8 +2192,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/decorator/entity/Entity.d.ts": {
-        "version": "cd894571629313b7a6c4ef065884aaf719e7f4e18289927b4a198639f3e65dac",
-        "signature": "cd894571629313b7a6c4ef065884aaf719e7f4e18289927b4a198639f3e65dac",
+        "version": "abf8381c92ecec6fd58bc2530aa20b270f2179637aea1adff7c6037de55ca0c9",
+        "signature": "abf8381c92ecec6fd58bc2530aa20b270f2179637aea1adff7c6037de55ca0c9",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/decorator/entity/ChildEntity.d.ts": {
@@ -2357,8 +2372,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/repository/BaseEntity.d.ts": {
-        "version": "34b520beaa5f925a8ccba789352e19287fdc61ba7e66d5f9618a031067565223",
-        "signature": "34b520beaa5f925a8ccba789352e19287fdc61ba7e66d5f9618a031067565223",
+        "version": "f626de98fb8781df6e273a24fe56261791a4f6c12edead9890c768cb0bfa30df",
+        "signature": "f626de98fb8781df6e273a24fe56261791a4f6c12edead9890c768cb0bfa30df",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/driver/sqlserver/MssqlParameter.d.ts": {
@@ -2377,8 +2392,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/naming-strategy/DefaultNamingStrategy.d.ts": {
-        "version": "30e2ef3512f3c1c9886b63ac92c4ac1737c65c7ef30168d23c1e101b52e90b3c",
-        "signature": "30e2ef3512f3c1c9886b63ac92c4ac1737c65c7ef30168d23c1e101b52e90b3c",
+        "version": "f5839b540a4dc9aedf088407f84786ed022f89f1e06bca967a88dc23fea1d46d",
+        "signature": "f5839b540a4dc9aedf088407f84786ed022f89f1e06bca967a88dc23fea1d46d",
         "affectsGlobalScope": false
       },
       "../node_modules/typeorm/util/PromiseUtils.d.ts": {
@@ -2391,14 +2406,19 @@
         "signature": "26d590f7fc94dc8bd476aab67a6047b39a72b0dcbdb7c5ce1dbd369762d63e4f",
         "affectsGlobalScope": false
       },
+      "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts": {
+        "version": "e15db0d01139d39213a40639352debd92786f311e0421c21ac97c2ca4003a299",
+        "signature": "e15db0d01139d39213a40639352debd92786f311e0421c21ac97c2ca4003a299",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.decorators.d.ts": {
-        "version": "d7c96b1fc407d8fb5e973d594bd93771677bcacc0298f00dae5e642b0a30ad27",
-        "signature": "d7c96b1fc407d8fb5e973d594bd93771677bcacc0298f00dae5e642b0a30ad27",
+        "version": "cd2afab7b5206a624ef3a603568ce42a7c65e7e4958f1c9518b70580523db653",
+        "signature": "cd2afab7b5206a624ef3a603568ce42a7c65e7e4958f1c9518b70580523db653",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.utils.d.ts": {
-        "version": "51dbabe71c84fd06b659ea96be3c6d547611e04395f41aa22e6476e6d77f3003",
-        "signature": "51dbabe71c84fd06b659ea96be3c6d547611e04395f41aa22e6476e6d77f3003",
+        "version": "e3453c7c86e7621fb38373a07174adb72b6508a066a934cbd437386f3eb4481f",
+        "signature": "e3453c7c86e7621fb38373a07174adb72b6508a066a934cbd437386f3eb4481f",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/common/index.d.ts": {
@@ -2407,8 +2427,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts": {
-        "version": "d3bd992bcb5c75b46701c89194bbece1927c2f83805bdf544def33dccb8e2923",
-        "signature": "d3bd992bcb5c75b46701c89194bbece1927c2f83805bdf544def33dccb8e2923",
+        "version": "3e123c397e8b6a50de4da383e7508c91e09a4fe62a8661a4a07c383c175ff83d",
+        "signature": "3e123c397e8b6a50de4da383e7508c91e09a4fe62a8661a4a07c383c175ff83d",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/interfaces/index.d.ts": {
@@ -2417,8 +2437,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/typeorm.module.d.ts": {
-        "version": "9923c28300ed7b187fe639664a8fdf662ba7b1f183c9aa49d8c14acc5ace2083",
-        "signature": "9923c28300ed7b187fe639664a8fdf662ba7b1f183c9aa49d8c14acc5ace2083",
+        "version": "506ddc141d91c4155d39ce3125a92b4636ed10db070c0cfdac7e54376178c30c",
+        "signature": "506ddc141d91c4155d39ce3125a92b4636ed10db070c0cfdac7e54376178c30c",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/typeorm/dist/index.d.ts": {
@@ -2512,8 +2532,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/core/injector/module.d.ts": {
-        "version": "44d4dde705386194a19d8d11dc114c85372792aa755207a68c9d3dbc54684e85",
-        "signature": "44d4dde705386194a19d8d11dc114c85372792aa755207a68c9d3dbc54684e85",
+        "version": "3567bf24724bd85350a97909a4323b806c77707c3954501836a5aae7201480b3",
+        "signature": "3567bf24724bd85350a97909a4323b806c77707c3954501836a5aae7201480b3",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/core/injector/instance-wrapper.d.ts": {
@@ -2622,8 +2642,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/core/nest-application.d.ts": {
-        "version": "49e690498c2f120a39e03cd3d526f23f06963b51c48f84af94c4099a3fbb1358",
-        "signature": "49e690498c2f120a39e03cd3d526f23f06963b51c48f84af94c4099a3fbb1358",
+        "version": "398ee5590d2e022f7c00f0c1f049db902cd8c7a2bf9bfacac5bef35cc8977aa7",
+        "signature": "398ee5590d2e022f7c00f0c1f049db902cd8c7a2bf9bfacac5bef35cc8977aa7",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/common/interfaces/microservices/nest-microservice-options.interface.d.ts": {
@@ -2712,8 +2732,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/globals.d.ts": {
-        "version": "53b53e40cdadf9d10ddd96151480c648bf2461cc7e43d305052459940a994c05",
-        "signature": "53b53e40cdadf9d10ddd96151480c648bf2461cc7e43d305052459940a994c05",
+        "version": "2dd7dbacbd70cc156185235140b7b6682c002c1ea678dd87d7a20589d4555fc0",
+        "signature": "2dd7dbacbd70cc156185235140b7b6682c002c1ea678dd87d7a20589d4555fc0",
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/async_hooks.d.ts": {
@@ -2727,8 +2747,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/child_process.d.ts": {
-        "version": "fa943836191d443840b5fc1ba1450a706c83ca437de44d5fee2a5c9a9281ed0a",
-        "signature": "fa943836191d443840b5fc1ba1450a706c83ca437de44d5fee2a5c9a9281ed0a",
+        "version": "465150173a56b943b2f6d8918e35c89d8386ffd37aa466e486ca54db54d6cee7",
+        "signature": "465150173a56b943b2f6d8918e35c89d8386ffd37aa466e486ca54db54d6cee7",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/cluster.d.ts": {
@@ -2767,8 +2787,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/events.d.ts": {
-        "version": "5ffa4219ee64e130980a4231392cbc628544df137ccf650ae8d76e0a1744fd2b",
-        "signature": "5ffa4219ee64e130980a4231392cbc628544df137ccf650ae8d76e0a1744fd2b",
+        "version": "eaa8136bb11fbea5bdaf29e06aa45a1969ddd39fbfb5fe58a01f00d7f1562cd9",
+        "signature": "eaa8136bb11fbea5bdaf29e06aa45a1969ddd39fbfb5fe58a01f00d7f1562cd9",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/fs.d.ts": {
@@ -2782,13 +2802,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/http.d.ts": {
-        "version": "b5fd0a137bd6d0afe291d465e99c7469b082b66b3ee89273b3b22801b6c2948e",
-        "signature": "b5fd0a137bd6d0afe291d465e99c7469b082b66b3ee89273b3b22801b6c2948e",
+        "version": "9440dcf960685f7ec10856891a6cebb52a5ae8cef6a2e85daf9476dafd346cbe",
+        "signature": "9440dcf960685f7ec10856891a6cebb52a5ae8cef6a2e85daf9476dafd346cbe",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/http2.d.ts": {
-        "version": "2927d4b5a6df18d3cbf35e30b44dd2cc7f45c74fb8978594192c33bc1dd584c0",
-        "signature": "2927d4b5a6df18d3cbf35e30b44dd2cc7f45c74fb8978594192c33bc1dd584c0",
+        "version": "5d9394b829cfd504b2fe17287aaad8ce1dcfb2a2183c962a90a85b96da2c1c90",
+        "signature": "5d9394b829cfd504b2fe17287aaad8ce1dcfb2a2183c962a90a85b96da2c1c90",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/https.d.ts": {
@@ -2852,8 +2872,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/stream.d.ts": {
-        "version": "bc63cc31a7a7b4117e0462fbdb7a08aab5d59b4b8c8f464fe4c984977ec462d4",
-        "signature": "bc63cc31a7a7b4117e0462fbdb7a08aab5d59b4b8c8f464fe4c984977ec462d4",
+        "version": "406a63c7e94107394341e97dbdc3312a1ecea75571d067a69eaa213786d9f154",
+        "signature": "406a63c7e94107394341e97dbdc3312a1ecea75571d067a69eaa213786d9f154",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/string_decoder.d.ts": {
@@ -2887,8 +2907,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/util.d.ts": {
-        "version": "893d1b5dd98f1c01a0ec4122dfd7f774e0fa1560e1aa19e509c96ed543c6244e",
-        "signature": "893d1b5dd98f1c01a0ec4122dfd7f774e0fa1560e1aa19e509c96ed543c6244e",
+        "version": "baa711b17f67390c60eac3c70a1391b23a8e3833cb723b2d7336d4817a22455c",
+        "signature": "baa711b17f67390c60eac3c70a1391b23a8e3833cb723b2d7336d4817a22455c",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/v8.d.ts": {
@@ -2912,8 +2932,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/base.d.ts": {
-        "version": "92d6395892ec8da8c51def5a12b012fa63309d06b4933a35ced5c732bda5ca11",
-        "signature": "92d6395892ec8da8c51def5a12b012fa63309d06b4933a35ced5c732bda5ca11",
+        "version": "b46af749e3574b83bccc0ec829322b15e834ae90b45760eebc75a189c28c0868",
+        "signature": "b46af749e3574b83bccc0ec829322b15e834ae90b45760eebc75a189c28c0868",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/ts3.2/fs.d.ts": {
@@ -2932,9 +2952,14 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/ts3.2/base.d.ts": {
-        "version": "8a70903bbbdad1d58e3936ca90b3ad993e54827ea324e20f2f63cef4e14e9d55",
-        "signature": "8a70903bbbdad1d58e3936ca90b3ad993e54827ea324e20f2f63cef4e14e9d55",
+        "version": "4cef33b2997388559c39b2f98c37e8319ad61e30a1f0edc55c53913f2250bade",
+        "signature": "4cef33b2997388559c39b2f98c37e8319ad61e30a1f0edc55c53913f2250bade",
         "affectsGlobalScope": false
+      },
+      "../node_modules/@types/node/ts3.5/globals.global.d.ts": {
+        "version": "2708349d5a11a5c2e5f3a0765259ebe7ee00cdcc8161cb9990cb4910328442a1",
+        "signature": "2708349d5a11a5c2e5f3a0765259ebe7ee00cdcc8161cb9990cb4910328442a1",
+        "affectsGlobalScope": true
       },
       "../node_modules/@types/node/ts3.5/wasi.d.ts": {
         "version": "0b3fef11ea6208c4cb3715c9aa108766ce98fc726bfba68cc23b25ce944ce9c0",
@@ -2942,8 +2967,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/ts3.5/base.d.ts": {
-        "version": "d8f4f38ca537e6e6d38579c881125b81b546ffae0dd216f68269e72636af43ae",
-        "signature": "d8f4f38ca537e6e6d38579c881125b81b546ffae0dd216f68269e72636af43ae",
+        "version": "255dbc5a5acef2b83b47145042aa0127ebf7fe24cd5ce6afaaaf5c8fc2c5eb96",
+        "signature": "255dbc5a5acef2b83b47145042aa0127ebf7fe24cd5ce6afaaaf5c8fc2c5eb96",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/ts3.7/assert.d.ts": {
@@ -3417,12 +3442,12 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/mapping.ts": {
-        "version": "30e37629900c8e2d6bd6184d0b3a6dce07ddba3aceb77a1de2709c40dda73885",
+        "version": "3d07ca9141d6f14182366e77a0be2e22330b86e79ac2ce5670e40d55955ce300",
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b",
         "affectsGlobalScope": false
       },
       "../src/evaluation/middleware.ts": {
-        "version": "421366ff3238f403d129ea937e627b444a4f8f22850dc2a5b69b895b1b1598e3",
+        "version": "cf858d3bb9744f0bebc65dac38f1d799d31537d3dd782e0fbdf2ef018d33ea8f",
         "signature": "3ba36369478a18472ee6c06ba9fe80d6444ddda53ffc037f63cb1e372b5e6bc6",
         "affectsGlobalScope": false
       },
@@ -3562,13 +3587,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/engine.io/index.d.ts": {
-        "version": "e0a85f336d89aa63f7e01ba3959912f9dc7cdaf467ecd9b4f46e9039721b785b",
-        "signature": "e0a85f336d89aa63f7e01ba3959912f9dc7cdaf467ecd9b4f46e9039721b785b",
+        "version": "2bc5a885dc91b4006192c477dfae4f2856e5809c6ffbf62cc242ac010f15ab51",
+        "signature": "2bc5a885dc91b4006192c477dfae4f2856e5809c6ffbf62cc242ac010f15ab51",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/socket.io/index.d.ts": {
-        "version": "5d8a9c26d244ab6e1e32595f958e8d43655b12dbf48c02eafc29e7a3576ad717",
-        "signature": "5d8a9c26d244ab6e1e32595f958e8d43655b12dbf48c02eafc29e7a3576ad717",
+        "version": "5da61a50104ace8da85aed7e4fbf1258b34d8f6b6b5058b42cc4bfe257e86ba8",
+        "signature": "5da61a50104ace8da85aed7e4fbf1258b34d8f6b6b5058b42cc4bfe257e86ba8",
         "affectsGlobalScope": false
       },
       "../src/page/page.gateway.ts": {
@@ -3692,17 +3717,17 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts": {
-        "version": "14a0185954b9d1130a9ab87c75011a97ac48c0253fd37a344a066c2c63fc59fb",
-        "signature": "14a0185954b9d1130a9ab87c75011a97ac48c0253fd37a344a066c2c63fc59fb",
+        "version": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
+        "signature": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/puppeteer/index.d.ts": {
-        "version": "9950042938c240c7eb3abbf56d072454260ab925476b9364deaf7bf9cfc9e7fa",
-        "signature": "9950042938c240c7eb3abbf56d072454260ab925476b9364deaf7bf9cfc9e7fa",
+        "version": "e6d6a2e677810547ee595e350f08c7b932b8a024d12bfd257b3dbf6cbd93bbb1",
+        "signature": "e6d6a2e677810547ee595e350f08c7b932b8a024d12bfd257b3dbf6cbd93bbb1",
         "affectsGlobalScope": false
       },
       "../src/crawler/crawler.service.ts": {
-        "version": "1b7d9ece79c2c49a41c1c31b5a776169b68518e1ef9df00037be863973d11522",
+        "version": "5ff9761dd3af163f19f9415166146715b05743db5e3baca1388f01d7cd3890d8",
         "signature": "1b5b70f66ae5bd6c5773127df4675536e0e8eadd087a45757081916bec99b25a",
         "affectsGlobalScope": false
       },
@@ -3842,13 +3867,18 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/jest/index.d.ts": {
-        "version": "f624e578325b8c58e55b30c998b1f4c3ec1b61a9fa66373da4250c89b7880d44",
-        "signature": "f624e578325b8c58e55b30c998b1f4c3ec1b61a9fa66373da4250c89b7880d44",
+        "version": "7f8f56da66b0e04878603f35e4f4022689231b1ebca0e29426f471407cefffab",
+        "signature": "7f8f56da66b0e04878603f35e4f4022689231b1ebca0e29426f471407cefffab",
+        "affectsGlobalScope": true
+      },
+      "../node_modules/@types/jest/ts3.2/index.d.ts": {
+        "version": "d3002f620eab4bf6476c9da5c0efb2041d46f7df8b3032a5631bd206abef2c75",
+        "signature": "d3002f620eab4bf6476c9da5c0efb2041d46f7df8b3032a5631bd206abef2c75",
         "affectsGlobalScope": true
       },
       "../node_modules/@types/json-schema/index.d.ts": {
-        "version": "92bc43ea5584457c9325a3d5b2ce5af77df6d2653be7e4c2e9a626f89293c3c1",
-        "signature": "92bc43ea5584457c9325a3d5b2ce5af77df6d2653be7e4c2e9a626f89293c3c1",
+        "version": "ecdf947a5111318568ba99f2a87b8498382d8871207f1bc6271ff3b9536a2448",
+        "signature": "ecdf947a5111318568ba99f2a87b8498382d8871207f1bc6271ff3b9536a2448",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/json5/index.d.ts": {
@@ -3864,6 +3894,11 @@
       "../node_modules/@types/normalize-package-data/index.d.ts": {
         "version": "c9ad058b2cc9ce6dc2ed92960d6d009e8c04bef46d3f5312283debca6869f613",
         "signature": "c9ad058b2cc9ce6dc2ed92960d6d009e8c04bef46d3f5312283debca6869f613",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/parse-json/index.d.ts": {
+        "version": "2b8264b2fefd7367e0f20e2c04eed5d3038831fe00f5efbc110ff0131aab899b",
+        "signature": "2b8264b2fefd7367e0f20e2c04eed5d3038831fe00f5efbc110ff0131aab899b",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/prettier/index.d.ts": {
@@ -3892,8 +3927,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/tapable/index.d.ts": {
-        "version": "963e0182287755a18c98493cd70f6747b776f1a54c8620353e1f8e2e17b6cd3a",
-        "signature": "963e0182287755a18c98493cd70f6747b776f1a54c8620353e1f8e2e17b6cd3a",
+        "version": "d558a0fe921ebcc88d3212c2c42108abf9f0d694d67ebdeba37d7728c044f579",
+        "signature": "d558a0fe921ebcc88d3212c2c42108abf9f0d694d67ebdeba37d7728c044f579",
         "affectsGlobalScope": false
       },
       "../node_modules/source-map/source-map.d.ts": {
@@ -3902,8 +3937,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/uglify-js/index.d.ts": {
-        "version": "37905e395de724c812e06fee83592614acc55639771a9fbded7d49c8f179dd60",
-        "signature": "37905e395de724c812e06fee83592614acc55639771a9fbded7d49c8f179dd60",
+        "version": "65940ce496aeee89da612bab18a9ecabef9077ffe7593a3e84ac75d9219df991",
+        "signature": "65940ce496aeee89da612bab18a9ecabef9077ffe7593a3e84ac75d9219df991",
         "affectsGlobalScope": false
       },
       "../node_modules/anymatch/index.d.ts": {
@@ -3911,14 +3946,19 @@
         "signature": "4fb0b7d532aa6fb850b6cd2f1ee4f00802d877b5c66a51903bc1fb0624126349",
         "affectsGlobalScope": false
       },
+      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts": {
+        "version": "b90c59ac4682368a01c83881b814738eb151de8a58f52eb7edadea2bcffb11b9",
+        "signature": "b90c59ac4682368a01c83881b814738eb151de8a58f52eb7edadea2bcffb11b9",
+        "affectsGlobalScope": false
+      },
       "../node_modules/@types/webpack-sources/index.d.ts": {
-        "version": "d55cc13acdfa6c943725250fe4ee3b269e2b0f4098aef46713bc2fbec38d197f",
-        "signature": "d55cc13acdfa6c943725250fe4ee3b269e2b0f4098aef46713bc2fbec38d197f",
+        "version": "8636764b1f9f29c1290bff39be2e55940d6b7f7a071f33f967b72d5eff27b0c6",
+        "signature": "8636764b1f9f29c1290bff39be2e55940d6b7f7a071f33f967b72d5eff27b0c6",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/webpack/index.d.ts": {
-        "version": "65cd6ad8dae18becaa70173b0edf278ec4b656a5091398bc7b93d3d4a4b0354f",
-        "signature": "65cd6ad8dae18becaa70173b0edf278ec4b656a5091398bc7b93d3d4a4b0354f",
+        "version": "dfdccc7162f5a0faf8bb3f95864a490250798ed75c4f84c5ab429065fd9be284",
+        "signature": "dfdccc7162f5a0faf8bb3f95864a490250798ed75c4f84c5ab429065fd9be284",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/yargs-parser/index.d.ts": {
@@ -4769,6 +4809,7 @@
         "../node_modules/@nestjs/common/interfaces/hooks/index.d.ts",
         "../node_modules/@nestjs/common/interfaces/http/http-server.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/injectable.interface.d.ts",
+        "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/middleware/index.d.ts",
         "../node_modules/@nestjs/common/interfaces/modules/dynamic-module.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/modules/forward-reference.interface.d.ts",
@@ -4789,6 +4830,13 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@nestjs/common/interfaces/injectable.interface.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -5795,6 +5843,7 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.decorators.d.ts": [
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -5804,6 +5853,7 @@
       ],
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.utils.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -5821,6 +5871,14 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/index.d.ts"
       ],
       "../node_modules/@nestjs/typeorm/dist/interfaces/index.d.ts": [
         "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts",
@@ -5842,6 +5900,7 @@
       ],
       "../node_modules/@nestjs/typeorm/dist/typeorm.module.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -6239,6 +6298,14 @@
         "../node_modules/jest-diff/build/index.d.ts",
         "../node_modules/pretty-format/build/index.d.ts"
       ],
+      "../node_modules/@types/jest/ts3.2/index.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/jest/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
       "../node_modules/@types/json-schema/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -6632,7 +6699,15 @@
         "../node_modules/@types/node/ts3.2/base.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/ts3.5/globals.global.d.ts",
         "../node_modules/@types/node/ts3.5/wasi.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@types/node/ts3.5/globals.global.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/node/ts3.5/wasi.d.ts": [
@@ -6723,6 +6798,13 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/normalize-package-data/index.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@types/parse-json/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -6826,6 +6908,7 @@
       "../node_modules/@types/socket.io/index.d.ts": [
         "../node_modules/@types/engine.io/index.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/events.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
@@ -6896,7 +6979,14 @@
         "../node_modules/@types/node/ts3.7/index.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/source-map/source-map.d.ts"
+        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
+      ],
+      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/webpack/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -8044,6 +8134,7 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/cockroachdb/CockroachConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/cordova/CordovaConnectionOptions.d.ts",
@@ -8197,7 +8288,8 @@
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
-        "../node_modules/@types/node/util.d.ts"
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts"
       ],
       "../node_modules/typeorm/decorator/entity-view/ViewEntity.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -8431,6 +8523,13 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
+      "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
       "../node_modules/typeorm/decorator/options/ViewEntityOptions.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -8586,6 +8685,14 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/typeorm/driver/Query.d.ts"
+      ],
+      "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/connection/BaseConnectionOptions.d.ts"
       ],
       "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionCredentialsOptions.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -12160,6 +12267,7 @@
         "../node_modules/@nestjs/common/interfaces/hooks/index.d.ts",
         "../node_modules/@nestjs/common/interfaces/http/http-server.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/injectable.interface.d.ts",
+        "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/middleware/index.d.ts",
         "../node_modules/@nestjs/common/interfaces/modules/dynamic-module.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/modules/forward-reference.interface.d.ts",
@@ -12180,6 +12288,13 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@nestjs/common/interfaces/injectable.interface.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -13186,6 +13301,7 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.decorators.d.ts": [
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -13195,6 +13311,7 @@
       ],
       "../node_modules/@nestjs/typeorm/dist/common/typeorm.utils.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -13212,6 +13329,14 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/index.d.ts"
       ],
       "../node_modules/@nestjs/typeorm/dist/interfaces/index.d.ts": [
         "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts",
@@ -13233,6 +13358,7 @@
       ],
       "../node_modules/@nestjs/typeorm/dist/typeorm.module.d.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
         "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -13630,6 +13756,14 @@
         "../node_modules/jest-diff/build/index.d.ts",
         "../node_modules/pretty-format/build/index.d.ts"
       ],
+      "../node_modules/@types/jest/ts3.2/index.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/jest/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
       "../node_modules/@types/json-schema/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -14023,7 +14157,15 @@
         "../node_modules/@types/node/ts3.2/base.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/ts3.5/globals.global.d.ts",
         "../node_modules/@types/node/ts3.5/wasi.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@types/node/ts3.5/globals.global.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/node/ts3.5/wasi.d.ts": [
@@ -14114,6 +14256,13 @@
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/normalize-package-data/index.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
+      "../node_modules/@types/parse-json/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -14217,6 +14366,7 @@
       "../node_modules/@types/socket.io/index.d.ts": [
         "../node_modules/@types/engine.io/index.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/events.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
@@ -14287,7 +14437,14 @@
         "../node_modules/@types/node/ts3.7/index.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/source-map/source-map.d.ts"
+        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
+      ],
+      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@types/webpack/index.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -15435,6 +15592,7 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/cockroachdb/CockroachConnectionOptions.d.ts",
         "../node_modules/typeorm/driver/cordova/CordovaConnectionOptions.d.ts",
@@ -15588,7 +15746,8 @@
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
-        "../node_modules/@types/node/util.d.ts"
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts"
       ],
       "../node_modules/typeorm/decorator/entity-view/ViewEntity.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -15822,6 +15981,13 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
+      "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts"
+      ],
       "../node_modules/typeorm/decorator/options/ViewEntityOptions.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -15977,6 +16143,14 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts",
         "../node_modules/typeorm/driver/Query.d.ts"
+      ],
+      "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts": [
+        "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/fs.d.ts",
+        "../node_modules/@types/node/ts3.2/util.d.ts",
+        "../node_modules/@types/node/util.d.ts",
+        "../node_modules/typeorm/connection/BaseConnectionOptions.d.ts"
       ],
       "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionCredentialsOptions.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
@@ -18154,7 +18328,803 @@
         "../src/website/website.entity.ts"
       ]
     },
-    "semanticDiagnosticsPerFile": []
+    "semanticDiagnosticsPerFile": [
+      "../node_modules/@babel/parser/typings/babel-parser.d.ts",
+      "../node_modules/@babel/types/lib/index.d.ts",
+      "../node_modules/@nestjs/common/cache/cache.constants.d.ts",
+      "../node_modules/@nestjs/common/cache/cache.module.d.ts",
+      "../node_modules/@nestjs/common/cache/decorators/cache-key.decorator.d.ts",
+      "../node_modules/@nestjs/common/cache/decorators/cache-ttl.decorator.d.ts",
+      "../node_modules/@nestjs/common/cache/decorators/index.d.ts",
+      "../node_modules/@nestjs/common/cache/index.d.ts",
+      "../node_modules/@nestjs/common/cache/interceptors/cache.interceptor.d.ts",
+      "../node_modules/@nestjs/common/cache/interceptors/index.d.ts",
+      "../node_modules/@nestjs/common/cache/interfaces/cache-manager.interface.d.ts",
+      "../node_modules/@nestjs/common/cache/interfaces/cache-module.interface.d.ts",
+      "../node_modules/@nestjs/common/cache/interfaces/index.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/apply-decorators.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/bind.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/catch.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/controller.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/dependencies.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/exception-filters.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/index.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/inject.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/injectable.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/optional.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/set-metadata.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/use-guards.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/use-interceptors.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/core/use-pipes.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/create-route-param-metadata.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/header.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/http-code.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/index.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/redirect.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/render.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/request-mapping.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/http/route-params.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/index.d.ts",
+      "../node_modules/@nestjs/common/decorators/modules/global.decorator.d.ts",
+      "../node_modules/@nestjs/common/decorators/modules/index.d.ts",
+      "../node_modules/@nestjs/common/decorators/modules/module.decorator.d.ts",
+      "../node_modules/@nestjs/common/enums/http-status.enum.d.ts",
+      "../node_modules/@nestjs/common/enums/index.d.ts",
+      "../node_modules/@nestjs/common/enums/request-method.enum.d.ts",
+      "../node_modules/@nestjs/common/enums/shutdown-signal.enum.d.ts",
+      "../node_modules/@nestjs/common/exceptions/bad-gateway.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/bad-request.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/conflict.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/forbidden.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/gateway-timeout.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/gone.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/http.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/im-a-teapot.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/index.d.ts",
+      "../node_modules/@nestjs/common/exceptions/internal-server-error.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/method-not-allowed.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/not-acceptable.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/not-found.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/not-implemented.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/payload-too-large.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/request-timeout.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/service-unavailable.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/unauthorized.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/unprocessable-entity.exception.d.ts",
+      "../node_modules/@nestjs/common/exceptions/unsupported-media-type.exception.d.ts",
+      "../node_modules/@nestjs/common/http/http.module.d.ts",
+      "../node_modules/@nestjs/common/http/http.service.d.ts",
+      "../node_modules/@nestjs/common/http/index.d.ts",
+      "../node_modules/@nestjs/common/http/interfaces/http-module.interface.d.ts",
+      "../node_modules/@nestjs/common/http/interfaces/index.d.ts",
+      "../node_modules/@nestjs/common/index.d.ts",
+      "../node_modules/@nestjs/common/interfaces/abstract.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/controllers/controller-metadata.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/controllers/controller.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/exceptions/exception-filter.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/exceptions/rpc-exception-filter.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/exceptions/ws-exception-filter.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/external/class-transform-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/external/cors-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/external/https-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/external/validation-error.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/external/validator-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/arguments-host.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/can-activate.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/custom-route-param-factory.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/execution-context.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/nest-interceptor.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/paramtype.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/features/pipe-transform.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/before-application-shutdown.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/index.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/on-application-bootstrap.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/on-application-shutdown.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/on-destroy.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/hooks/on-init.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/http/http-server.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/index.d.ts",
+      "../node_modules/@nestjs/common/interfaces/injectable.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/microservices/nest-hybrid-application-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/microservices/nest-microservice-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/middleware/index.d.ts",
+      "../node_modules/@nestjs/common/interfaces/middleware/middleware-config-proxy.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/middleware/middleware-configuration.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/middleware/middleware-consumer.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/middleware/nest-middleware.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/modules/dynamic-module.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/modules/forward-reference.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/modules/module-metadata.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/modules/nest-module.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/modules/provider.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/nest-application-context-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/nest-application-context.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/nest-application-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/nest-application.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/nest-microservice.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/scope-options.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/type.interface.d.ts",
+      "../node_modules/@nestjs/common/interfaces/websockets/web-socket-adapter.interface.d.ts",
+      "../node_modules/@nestjs/common/pipes/default-value.pipe.d.ts",
+      "../node_modules/@nestjs/common/pipes/index.d.ts",
+      "../node_modules/@nestjs/common/pipes/parse-array.pipe.d.ts",
+      "../node_modules/@nestjs/common/pipes/parse-bool.pipe.d.ts",
+      "../node_modules/@nestjs/common/pipes/parse-int.pipe.d.ts",
+      "../node_modules/@nestjs/common/pipes/parse-uuid.pipe.d.ts",
+      "../node_modules/@nestjs/common/pipes/validation.pipe.d.ts",
+      "../node_modules/@nestjs/common/serializer/class-serializer.interceptor.d.ts",
+      "../node_modules/@nestjs/common/serializer/decorators/index.d.ts",
+      "../node_modules/@nestjs/common/serializer/decorators/serialize-options.decorator.d.ts",
+      "../node_modules/@nestjs/common/serializer/index.d.ts",
+      "../node_modules/@nestjs/common/services/index.d.ts",
+      "../node_modules/@nestjs/common/services/logger.service.d.ts",
+      "../node_modules/@nestjs/common/utils/forward-ref.util.d.ts",
+      "../node_modules/@nestjs/common/utils/http-error-by-code.util.d.ts",
+      "../node_modules/@nestjs/common/utils/index.d.ts",
+      "../node_modules/@nestjs/core/adapters/http-adapter.d.ts",
+      "../node_modules/@nestjs/core/adapters/index.d.ts",
+      "../node_modules/@nestjs/core/application-config.d.ts",
+      "../node_modules/@nestjs/core/constants.d.ts",
+      "../node_modules/@nestjs/core/discovery/discovery-module.d.ts",
+      "../node_modules/@nestjs/core/discovery/discovery-service.d.ts",
+      "../node_modules/@nestjs/core/discovery/index.d.ts",
+      "../node_modules/@nestjs/core/exceptions/base-exception-filter.d.ts",
+      "../node_modules/@nestjs/core/exceptions/index.d.ts",
+      "../node_modules/@nestjs/core/helpers/context-id-factory.d.ts",
+      "../node_modules/@nestjs/core/helpers/http-adapter-host.d.ts",
+      "../node_modules/@nestjs/core/helpers/index.d.ts",
+      "../node_modules/@nestjs/core/index.d.ts",
+      "../node_modules/@nestjs/core/injector/container.d.ts",
+      "../node_modules/@nestjs/core/injector/index.d.ts",
+      "../node_modules/@nestjs/core/injector/injector.d.ts",
+      "../node_modules/@nestjs/core/injector/inquirer/index.d.ts",
+      "../node_modules/@nestjs/core/injector/inquirer/inquirer-constants.d.ts",
+      "../node_modules/@nestjs/core/injector/instance-wrapper.d.ts",
+      "../node_modules/@nestjs/core/injector/module-ref.d.ts",
+      "../node_modules/@nestjs/core/injector/module-token-factory.d.ts",
+      "../node_modules/@nestjs/core/injector/module.d.ts",
+      "../node_modules/@nestjs/core/injector/modules-container.d.ts",
+      "../node_modules/@nestjs/core/metadata-scanner.d.ts",
+      "../node_modules/@nestjs/core/middleware/builder.d.ts",
+      "../node_modules/@nestjs/core/middleware/index.d.ts",
+      "../node_modules/@nestjs/core/middleware/routes-mapper.d.ts",
+      "../node_modules/@nestjs/core/nest-application-context.d.ts",
+      "../node_modules/@nestjs/core/nest-application.d.ts",
+      "../node_modules/@nestjs/core/nest-factory.d.ts",
+      "../node_modules/@nestjs/core/router/index.d.ts",
+      "../node_modules/@nestjs/core/router/request/index.d.ts",
+      "../node_modules/@nestjs/core/router/request/request-constants.d.ts",
+      "../node_modules/@nestjs/core/services/index.d.ts",
+      "../node_modules/@nestjs/core/services/reflector.service.d.ts",
+      "../node_modules/@nestjs/jwt/dist/index.d.ts",
+      "../node_modules/@nestjs/jwt/dist/interfaces/index.d.ts",
+      "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts",
+      "../node_modules/@nestjs/jwt/dist/jwt.module.d.ts",
+      "../node_modules/@nestjs/jwt/dist/jwt.service.d.ts",
+      "../node_modules/@nestjs/jwt/index.d.ts",
+      "../node_modules/@nestjs/passport/dist/abstract.strategy.d.ts",
+      "../node_modules/@nestjs/passport/dist/auth.guard.d.ts",
+      "../node_modules/@nestjs/passport/dist/index.d.ts",
+      "../node_modules/@nestjs/passport/dist/interfaces/auth-module.options.d.ts",
+      "../node_modules/@nestjs/passport/dist/interfaces/index.d.ts",
+      "../node_modules/@nestjs/passport/dist/interfaces/type.interface.d.ts",
+      "../node_modules/@nestjs/passport/dist/passport.module.d.ts",
+      "../node_modules/@nestjs/passport/dist/passport/passport.serializer.d.ts",
+      "../node_modules/@nestjs/passport/dist/passport/passport.strategy.d.ts",
+      "../node_modules/@nestjs/passport/index.d.ts",
+      "../node_modules/@nestjs/schedule/dist/decorators/cron.decorator.d.ts",
+      "../node_modules/@nestjs/schedule/dist/decorators/index.d.ts",
+      "../node_modules/@nestjs/schedule/dist/decorators/interval.decorator.d.ts",
+      "../node_modules/@nestjs/schedule/dist/decorators/timeout.decorator.d.ts",
+      "../node_modules/@nestjs/schedule/dist/enums/cron-expression.enum.d.ts",
+      "../node_modules/@nestjs/schedule/dist/enums/index.d.ts",
+      "../node_modules/@nestjs/schedule/dist/index.d.ts",
+      "../node_modules/@nestjs/schedule/dist/schedule.module.d.ts",
+      "../node_modules/@nestjs/schedule/dist/scheduler.registry.d.ts",
+      "../node_modules/@nestjs/schedule/index.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/index.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/interfaces/serve-static-options.interface.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/loaders/abstract.loader.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/loaders/express.loader.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/loaders/fastify.loader.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/loaders/noop.loader.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/serve-static.constants.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/serve-static.module.d.ts",
+      "../node_modules/@nestjs/serve-static/dist/serve-static.providers.d.ts",
+      "../node_modules/@nestjs/serve-static/index.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/common/index.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/common/typeorm.decorators.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/common/typeorm.utils.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/index.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/interfaces/index.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/interfaces/typeorm-options.interface.d.ts",
+      "../node_modules/@nestjs/typeorm/dist/typeorm.module.d.ts",
+      "../node_modules/@nestjs/typeorm/index.d.ts",
+      "../node_modules/@nestjs/websockets/adapters/index.d.ts",
+      "../node_modules/@nestjs/websockets/adapters/ws-adapter.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/connected-socket.decorator.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/gateway-server.decorator.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/index.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/message-body.decorator.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/socket-gateway.decorator.d.ts",
+      "../node_modules/@nestjs/websockets/decorators/subscribe-message.decorator.d.ts",
+      "../node_modules/@nestjs/websockets/errors/index.d.ts",
+      "../node_modules/@nestjs/websockets/errors/ws-exception.d.ts",
+      "../node_modules/@nestjs/websockets/exceptions/base-ws-exception-filter.d.ts",
+      "../node_modules/@nestjs/websockets/exceptions/index.d.ts",
+      "../node_modules/@nestjs/websockets/gateway-metadata-explorer.d.ts",
+      "../node_modules/@nestjs/websockets/index.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/gateway-metadata.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/hooks/index.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/hooks/on-gateway-connection.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/hooks/on-gateway-disconnect.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/hooks/on-gateway-init.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/index.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/nest-gateway.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/web-socket-server.interface.d.ts",
+      "../node_modules/@nestjs/websockets/interfaces/ws-response.interface.d.ts",
+      "../node_modules/@types/anymatch/index.d.ts",
+      "../node_modules/@types/babel__core/index.d.ts",
+      "../node_modules/@types/babel__generator/index.d.ts",
+      "../node_modules/@types/babel__template/index.d.ts",
+      "../node_modules/@types/babel__traverse/index.d.ts",
+      "../node_modules/@types/body-parser/index.d.ts",
+      "../node_modules/@types/cheerio/index.d.ts",
+      "../node_modules/@types/color-name/index.d.ts",
+      "../node_modules/@types/connect/index.d.ts",
+      "../node_modules/@types/cookiejar/index.d.ts",
+      "../node_modules/@types/css/index.d.ts",
+      "../node_modules/@types/domhandler/index.d.ts",
+      "../node_modules/@types/engine.io/index.d.ts",
+      "../node_modules/@types/eslint-visitor-keys/index.d.ts",
+      "../node_modules/@types/express-serve-static-core/index.d.ts",
+      "../node_modules/@types/express/index.d.ts",
+      "../node_modules/@types/graceful-fs/index.d.ts",
+      "../node_modules/@types/istanbul-lib-coverage/index.d.ts",
+      "../node_modules/@types/istanbul-lib-report/index.d.ts",
+      "../node_modules/@types/istanbul-reports/index.d.ts",
+      "../node_modules/@types/jest/index.d.ts",
+      "../node_modules/@types/jest/ts3.2/index.d.ts",
+      "../node_modules/@types/json-schema/index.d.ts",
+      "../node_modules/@types/json5/index.d.ts",
+      "../node_modules/@types/jsonwebtoken/index.d.ts",
+      "../node_modules/@types/mime-types/index.d.ts",
+      "../node_modules/@types/mime/index.d.ts",
+      "../node_modules/@types/node/async_hooks.d.ts",
+      "../node_modules/@types/node/base.d.ts",
+      "../node_modules/@types/node/buffer.d.ts",
+      "../node_modules/@types/node/child_process.d.ts",
+      "../node_modules/@types/node/cluster.d.ts",
+      "../node_modules/@types/node/console.d.ts",
+      "../node_modules/@types/node/constants.d.ts",
+      "../node_modules/@types/node/crypto.d.ts",
+      "../node_modules/@types/node/dgram.d.ts",
+      "../node_modules/@types/node/dns.d.ts",
+      "../node_modules/@types/node/domain.d.ts",
+      "../node_modules/@types/node/events.d.ts",
+      "../node_modules/@types/node/fs.d.ts",
+      "../node_modules/@types/node/fs/promises.d.ts",
+      "../node_modules/@types/node/globals.d.ts",
+      "../node_modules/@types/node/http.d.ts",
+      "../node_modules/@types/node/http2.d.ts",
+      "../node_modules/@types/node/https.d.ts",
+      "../node_modules/@types/node/inspector.d.ts",
+      "../node_modules/@types/node/module.d.ts",
+      "../node_modules/@types/node/net.d.ts",
+      "../node_modules/@types/node/os.d.ts",
+      "../node_modules/@types/node/path.d.ts",
+      "../node_modules/@types/node/perf_hooks.d.ts",
+      "../node_modules/@types/node/process.d.ts",
+      "../node_modules/@types/node/punycode.d.ts",
+      "../node_modules/@types/node/querystring.d.ts",
+      "../node_modules/@types/node/readline.d.ts",
+      "../node_modules/@types/node/repl.d.ts",
+      "../node_modules/@types/node/stream.d.ts",
+      "../node_modules/@types/node/string_decoder.d.ts",
+      "../node_modules/@types/node/timers.d.ts",
+      "../node_modules/@types/node/tls.d.ts",
+      "../node_modules/@types/node/trace_events.d.ts",
+      "../node_modules/@types/node/ts3.2/base.d.ts",
+      "../node_modules/@types/node/ts3.2/fs.d.ts",
+      "../node_modules/@types/node/ts3.2/globals.d.ts",
+      "../node_modules/@types/node/ts3.2/util.d.ts",
+      "../node_modules/@types/node/ts3.5/base.d.ts",
+      "../node_modules/@types/node/ts3.5/globals.global.d.ts",
+      "../node_modules/@types/node/ts3.5/wasi.d.ts",
+      "../node_modules/@types/node/ts3.7/assert.d.ts",
+      "../node_modules/@types/node/ts3.7/base.d.ts",
+      "../node_modules/@types/node/ts3.7/index.d.ts",
+      "../node_modules/@types/node/tty.d.ts",
+      "../node_modules/@types/node/url.d.ts",
+      "../node_modules/@types/node/util.d.ts",
+      "../node_modules/@types/node/v8.d.ts",
+      "../node_modules/@types/node/vm.d.ts",
+      "../node_modules/@types/node/worker_threads.d.ts",
+      "../node_modules/@types/node/zlib.d.ts",
+      "../node_modules/@types/normalize-package-data/index.d.ts",
+      "../node_modules/@types/parse-json/index.d.ts",
+      "../node_modules/@types/passport-jwt/index.d.ts",
+      "../node_modules/@types/passport-local/index.d.ts",
+      "../node_modules/@types/passport-strategy/index.d.ts",
+      "../node_modules/@types/passport/index.d.ts",
+      "../node_modules/@types/prettier/index.d.ts",
+      "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts",
+      "../node_modules/@types/puppeteer/Errors.d.ts",
+      "../node_modules/@types/puppeteer/index.d.ts",
+      "../node_modules/@types/qs/index.d.ts",
+      "../node_modules/@types/range-parser/index.d.ts",
+      "../node_modules/@types/serve-static/index.d.ts",
+      "../node_modules/@types/socket.io/index.d.ts",
+      "../node_modules/@types/source-list-map/index.d.ts",
+      "../node_modules/@types/sqlstring/index.d.ts",
+      "../node_modules/@types/stack-utils/index.d.ts",
+      "../node_modules/@types/superagent/index.d.ts",
+      "../node_modules/@types/supertest/index.d.ts",
+      "../node_modules/@types/tapable/index.d.ts",
+      "../node_modules/@types/uglify-js/index.d.ts",
+      "../node_modules/@types/webpack-sources/index.d.ts",
+      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts",
+      "../node_modules/@types/webpack/index.d.ts",
+      "../node_modules/@types/yargs-parser/index.d.ts",
+      "../node_modules/@types/yargs/index.d.ts",
+      "../node_modules/@types/yauzl/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/dist/interfaces/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/dist/lib/index.d.ts",
+      "../node_modules/@web-master/node-web-crawler/index.d.ts",
+      "../node_modules/@web-master/node-web-fetch/dist/index.d.ts",
+      "../node_modules/@web-master/node-web-fetch/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/dist/interfaces/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/dist/lib/index.d.ts",
+      "../node_modules/@web-master/node-web-scraper/index.d.ts",
+      "../node_modules/anymatch/index.d.ts",
+      "../node_modules/axios/index.d.ts",
+      "../node_modules/css-select/index.d.ts",
+      "../node_modules/dom-serializer/index.d.ts",
+      "../node_modules/domelementtype/lib/index.d.ts",
+      "../node_modules/domhandler/lib/index.d.ts",
+      "../node_modules/domhandler/lib/node.d.ts",
+      "../node_modules/domutils/lib/helpers.d.ts",
+      "../node_modules/domutils/lib/index.d.ts",
+      "../node_modules/domutils/lib/legacy.d.ts",
+      "../node_modules/domutils/lib/manipulation.d.ts",
+      "../node_modules/domutils/lib/querying.d.ts",
+      "../node_modules/domutils/lib/stringify.d.ts",
+      "../node_modules/domutils/lib/tagtypes.d.ts",
+      "../node_modules/domutils/lib/traversal.d.ts",
+      "../node_modules/htmlparser2/lib/CollectingHandler.d.ts",
+      "../node_modules/htmlparser2/lib/FeedHandler.d.ts",
+      "../node_modules/htmlparser2/lib/MultiplexHandler.d.ts",
+      "../node_modules/htmlparser2/lib/Parser.d.ts",
+      "../node_modules/htmlparser2/lib/Tokenizer.d.ts",
+      "../node_modules/htmlparser2/lib/WritableStream.d.ts",
+      "../node_modules/htmlparser2/lib/index.d.ts",
+      "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
+      "../node_modules/jest-diff/build/diffLines.d.ts",
+      "../node_modules/jest-diff/build/index.d.ts",
+      "../node_modules/jest-diff/build/printDiffs.d.ts",
+      "../node_modules/jest-diff/build/types.d.ts",
+      "../node_modules/nest-crawler/dist/crawler.module.d.ts",
+      "../node_modules/nest-crawler/dist/crawler.service.d.ts",
+      "../node_modules/nest-crawler/dist/index.d.ts",
+      "../node_modules/nest-crawler/dist/utils/index.d.ts",
+      "../node_modules/pretty-format/build/index.d.ts",
+      "../node_modules/pretty-format/build/types.d.ts",
+      "../node_modules/reflect-metadata/index.d.ts",
+      "../node_modules/rxjs/index.d.ts",
+      "../node_modules/rxjs/internal/AsyncSubject.d.ts",
+      "../node_modules/rxjs/internal/BehaviorSubject.d.ts",
+      "../node_modules/rxjs/internal/InnerSubscriber.d.ts",
+      "../node_modules/rxjs/internal/Notification.d.ts",
+      "../node_modules/rxjs/internal/Observable.d.ts",
+      "../node_modules/rxjs/internal/Operator.d.ts",
+      "../node_modules/rxjs/internal/OuterSubscriber.d.ts",
+      "../node_modules/rxjs/internal/ReplaySubject.d.ts",
+      "../node_modules/rxjs/internal/Scheduler.d.ts",
+      "../node_modules/rxjs/internal/Subject.d.ts",
+      "../node_modules/rxjs/internal/Subscriber.d.ts",
+      "../node_modules/rxjs/internal/Subscription.d.ts",
+      "../node_modules/rxjs/internal/config.d.ts",
+      "../node_modules/rxjs/internal/observable/ConnectableObservable.d.ts",
+      "../node_modules/rxjs/internal/observable/bindCallback.d.ts",
+      "../node_modules/rxjs/internal/observable/bindNodeCallback.d.ts",
+      "../node_modules/rxjs/internal/observable/combineLatest.d.ts",
+      "../node_modules/rxjs/internal/observable/concat.d.ts",
+      "../node_modules/rxjs/internal/observable/defer.d.ts",
+      "../node_modules/rxjs/internal/observable/empty.d.ts",
+      "../node_modules/rxjs/internal/observable/forkJoin.d.ts",
+      "../node_modules/rxjs/internal/observable/from.d.ts",
+      "../node_modules/rxjs/internal/observable/fromEvent.d.ts",
+      "../node_modules/rxjs/internal/observable/fromEventPattern.d.ts",
+      "../node_modules/rxjs/internal/observable/generate.d.ts",
+      "../node_modules/rxjs/internal/observable/iif.d.ts",
+      "../node_modules/rxjs/internal/observable/interval.d.ts",
+      "../node_modules/rxjs/internal/observable/merge.d.ts",
+      "../node_modules/rxjs/internal/observable/never.d.ts",
+      "../node_modules/rxjs/internal/observable/of.d.ts",
+      "../node_modules/rxjs/internal/observable/onErrorResumeNext.d.ts",
+      "../node_modules/rxjs/internal/observable/pairs.d.ts",
+      "../node_modules/rxjs/internal/observable/partition.d.ts",
+      "../node_modules/rxjs/internal/observable/race.d.ts",
+      "../node_modules/rxjs/internal/observable/range.d.ts",
+      "../node_modules/rxjs/internal/observable/throwError.d.ts",
+      "../node_modules/rxjs/internal/observable/timer.d.ts",
+      "../node_modules/rxjs/internal/observable/using.d.ts",
+      "../node_modules/rxjs/internal/observable/zip.d.ts",
+      "../node_modules/rxjs/internal/operators/groupBy.d.ts",
+      "../node_modules/rxjs/internal/scheduled/scheduled.d.ts",
+      "../node_modules/rxjs/internal/scheduler/Action.d.ts",
+      "../node_modules/rxjs/internal/scheduler/AnimationFrameScheduler.d.ts",
+      "../node_modules/rxjs/internal/scheduler/AsapScheduler.d.ts",
+      "../node_modules/rxjs/internal/scheduler/AsyncAction.d.ts",
+      "../node_modules/rxjs/internal/scheduler/AsyncScheduler.d.ts",
+      "../node_modules/rxjs/internal/scheduler/QueueScheduler.d.ts",
+      "../node_modules/rxjs/internal/scheduler/VirtualTimeScheduler.d.ts",
+      "../node_modules/rxjs/internal/scheduler/animationFrame.d.ts",
+      "../node_modules/rxjs/internal/scheduler/asap.d.ts",
+      "../node_modules/rxjs/internal/scheduler/async.d.ts",
+      "../node_modules/rxjs/internal/scheduler/queue.d.ts",
+      "../node_modules/rxjs/internal/symbol/observable.d.ts",
+      "../node_modules/rxjs/internal/types.d.ts",
+      "../node_modules/rxjs/internal/util/ArgumentOutOfRangeError.d.ts",
+      "../node_modules/rxjs/internal/util/EmptyError.d.ts",
+      "../node_modules/rxjs/internal/util/ObjectUnsubscribedError.d.ts",
+      "../node_modules/rxjs/internal/util/TimeoutError.d.ts",
+      "../node_modules/rxjs/internal/util/UnsubscriptionError.d.ts",
+      "../node_modules/rxjs/internal/util/identity.d.ts",
+      "../node_modules/rxjs/internal/util/isObservable.d.ts",
+      "../node_modules/rxjs/internal/util/noop.d.ts",
+      "../node_modules/rxjs/internal/util/pipe.d.ts",
+      "../node_modules/scrape-it/lib/index.d.ts",
+      "../node_modules/source-map/source-map.d.ts",
+      "../node_modules/typeorm/cache/QueryResultCache.d.ts",
+      "../node_modules/typeorm/cache/QueryResultCacheOptions.d.ts",
+      "../node_modules/typeorm/common/DeepPartial.d.ts",
+      "../node_modules/typeorm/common/ObjectLiteral.d.ts",
+      "../node_modules/typeorm/common/ObjectType.d.ts",
+      "../node_modules/typeorm/connection/BaseConnectionOptions.d.ts",
+      "../node_modules/typeorm/connection/Connection.d.ts",
+      "../node_modules/typeorm/connection/ConnectionManager.d.ts",
+      "../node_modules/typeorm/connection/ConnectionOptions.d.ts",
+      "../node_modules/typeorm/connection/ConnectionOptionsReader.d.ts",
+      "../node_modules/typeorm/container.d.ts",
+      "../node_modules/typeorm/decorator/Check.d.ts",
+      "../node_modules/typeorm/decorator/EntityRepository.d.ts",
+      "../node_modules/typeorm/decorator/Exclusion.d.ts",
+      "../node_modules/typeorm/decorator/Generated.d.ts",
+      "../node_modules/typeorm/decorator/Index.d.ts",
+      "../node_modules/typeorm/decorator/Unique.d.ts",
+      "../node_modules/typeorm/decorator/columns/Column.d.ts",
+      "../node_modules/typeorm/decorator/columns/CreateDateColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/DeleteDateColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/ObjectIdColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/PrimaryColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/PrimaryGeneratedColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/UpdateDateColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/VersionColumn.d.ts",
+      "../node_modules/typeorm/decorator/columns/ViewColumn.d.ts",
+      "../node_modules/typeorm/decorator/entity-view/ViewEntity.d.ts",
+      "../node_modules/typeorm/decorator/entity/ChildEntity.d.ts",
+      "../node_modules/typeorm/decorator/entity/Entity.d.ts",
+      "../node_modules/typeorm/decorator/entity/TableInheritance.d.ts",
+      "../node_modules/typeorm/decorator/listeners/AfterInsert.d.ts",
+      "../node_modules/typeorm/decorator/listeners/AfterLoad.d.ts",
+      "../node_modules/typeorm/decorator/listeners/AfterRemove.d.ts",
+      "../node_modules/typeorm/decorator/listeners/AfterUpdate.d.ts",
+      "../node_modules/typeorm/decorator/listeners/BeforeInsert.d.ts",
+      "../node_modules/typeorm/decorator/listeners/BeforeRemove.d.ts",
+      "../node_modules/typeorm/decorator/listeners/BeforeUpdate.d.ts",
+      "../node_modules/typeorm/decorator/listeners/EventSubscriber.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnCommonOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnEmbeddedOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnEnumOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnHstoreOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnNumericOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnWithLengthOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ColumnWithWidthOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/EntityOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/IndexOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/JoinColumnOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/JoinTableMultipleColumnsOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/JoinTableOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/PrimaryGeneratedColumnNumericOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/PrimaryGeneratedColumnUUIDOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/RelationOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/SpatialColumnOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/TransactionOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ValueTransformer.d.ts",
+      "../node_modules/typeorm/decorator/options/ViewColumnOptions.d.ts",
+      "../node_modules/typeorm/decorator/options/ViewEntityOptions.d.ts",
+      "../node_modules/typeorm/decorator/relations/JoinColumn.d.ts",
+      "../node_modules/typeorm/decorator/relations/JoinTable.d.ts",
+      "../node_modules/typeorm/decorator/relations/ManyToMany.d.ts",
+      "../node_modules/typeorm/decorator/relations/ManyToOne.d.ts",
+      "../node_modules/typeorm/decorator/relations/OneToMany.d.ts",
+      "../node_modules/typeorm/decorator/relations/OneToOne.d.ts",
+      "../node_modules/typeorm/decorator/relations/RelationCount.d.ts",
+      "../node_modules/typeorm/decorator/relations/RelationId.d.ts",
+      "../node_modules/typeorm/decorator/transaction/Transaction.d.ts",
+      "../node_modules/typeorm/decorator/transaction/TransactionManager.d.ts",
+      "../node_modules/typeorm/decorator/transaction/TransactionRepository.d.ts",
+      "../node_modules/typeorm/decorator/tree/Tree.d.ts",
+      "../node_modules/typeorm/decorator/tree/TreeChildren.d.ts",
+      "../node_modules/typeorm/decorator/tree/TreeLevelColumn.d.ts",
+      "../node_modules/typeorm/decorator/tree/TreeParent.d.ts",
+      "../node_modules/typeorm/driver/Driver.d.ts",
+      "../node_modules/typeorm/driver/Query.d.ts",
+      "../node_modules/typeorm/driver/SqlInMemory.d.ts",
+      "../node_modules/typeorm/driver/aurora-data-api-pg/AuroraDataApiPostgresConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/aurora-data-api/AuroraDataApiConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/cockroachdb/CockroachConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/cockroachdb/CockroachConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/cordova/CordovaConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/expo/ExpoConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/mongodb/MongoConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/mongodb/MongoQueryRunner.d.ts",
+      "../node_modules/typeorm/driver/mongodb/typings.d.ts",
+      "../node_modules/typeorm/driver/mysql/MysqlConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/mysql/MysqlConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/nativescript/NativescriptConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/oracle/OracleConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/oracle/OracleConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/postgres/PostgresConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/postgres/PostgresConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/react-native/ReactNativeConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/sap/SapConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/sap/SapConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/sqlite/SqliteConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/sqljs/SqljsConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/sqlserver/MssqlParameter.d.ts",
+      "../node_modules/typeorm/driver/sqlserver/SqlServerConnectionCredentialsOptions.d.ts",
+      "../node_modules/typeorm/driver/sqlserver/SqlServerConnectionOptions.d.ts",
+      "../node_modules/typeorm/driver/types/ColumnTypes.d.ts",
+      "../node_modules/typeorm/driver/types/DataTypeDefaults.d.ts",
+      "../node_modules/typeorm/driver/types/DatabaseType.d.ts",
+      "../node_modules/typeorm/driver/types/IsolationLevel.d.ts",
+      "../node_modules/typeorm/driver/types/MappedColumnTypes.d.ts",
+      "../node_modules/typeorm/entity-manager/EntityManager.d.ts",
+      "../node_modules/typeorm/entity-manager/MongoEntityManager.d.ts",
+      "../node_modules/typeorm/entity-manager/SqljsEntityManager.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchema.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaCheckOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaColumnOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaExclusionOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaIndexOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaRelationOptions.d.ts",
+      "../node_modules/typeorm/entity-schema/EntitySchemaUniqueOptions.d.ts",
+      "../node_modules/typeorm/error/QueryFailedError.d.ts",
+      "../node_modules/typeorm/find-options/FindConditions.d.ts",
+      "../node_modules/typeorm/find-options/FindManyOptions.d.ts",
+      "../node_modules/typeorm/find-options/FindOneOptions.d.ts",
+      "../node_modules/typeorm/find-options/FindOperator.d.ts",
+      "../node_modules/typeorm/find-options/FindOperatorType.d.ts",
+      "../node_modules/typeorm/find-options/FindOptionsUtils.d.ts",
+      "../node_modules/typeorm/find-options/JoinOptions.d.ts",
+      "../node_modules/typeorm/find-options/OrderByCondition.d.ts",
+      "../node_modules/typeorm/find-options/operator/Any.d.ts",
+      "../node_modules/typeorm/find-options/operator/Between.d.ts",
+      "../node_modules/typeorm/find-options/operator/Equal.d.ts",
+      "../node_modules/typeorm/find-options/operator/In.d.ts",
+      "../node_modules/typeorm/find-options/operator/IsNull.d.ts",
+      "../node_modules/typeorm/find-options/operator/LessThan.d.ts",
+      "../node_modules/typeorm/find-options/operator/LessThanOrEqual.d.ts",
+      "../node_modules/typeorm/find-options/operator/Like.d.ts",
+      "../node_modules/typeorm/find-options/operator/MoreThan.d.ts",
+      "../node_modules/typeorm/find-options/operator/MoreThanOrEqual.d.ts",
+      "../node_modules/typeorm/find-options/operator/Not.d.ts",
+      "../node_modules/typeorm/find-options/operator/Raw.d.ts",
+      "../node_modules/typeorm/index.d.ts",
+      "../node_modules/typeorm/logger/AdvancedConsoleLogger.d.ts",
+      "../node_modules/typeorm/logger/FileLogger.d.ts",
+      "../node_modules/typeorm/logger/Logger.d.ts",
+      "../node_modules/typeorm/logger/LoggerOptions.d.ts",
+      "../node_modules/typeorm/logger/SimpleConsoleLogger.d.ts",
+      "../node_modules/typeorm/metadata-args/CheckMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/ColumnMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/DiscriminatorValueMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/EmbeddedMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/EntityListenerMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/EntityRepositoryMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/EntitySubscriberMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/ExclusionMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/GeneratedMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/IndexMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/InheritanceMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/JoinColumnMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/JoinTableMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/MetadataArgsStorage.d.ts",
+      "../node_modules/typeorm/metadata-args/NamingStrategyMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/RelationCountMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/RelationIdMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/RelationMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/TableMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/TransactionEntityMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/TransactionRepositoryMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/TreeMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/UniqueMetadataArgs.d.ts",
+      "../node_modules/typeorm/metadata-args/types/ColumnMode.d.ts",
+      "../node_modules/typeorm/metadata/CheckMetadata.d.ts",
+      "../node_modules/typeorm/metadata/ColumnMetadata.d.ts",
+      "../node_modules/typeorm/metadata/EmbeddedMetadata.d.ts",
+      "../node_modules/typeorm/metadata/EntityListenerMetadata.d.ts",
+      "../node_modules/typeorm/metadata/EntityMetadata.d.ts",
+      "../node_modules/typeorm/metadata/ExclusionMetadata.d.ts",
+      "../node_modules/typeorm/metadata/ForeignKeyMetadata.d.ts",
+      "../node_modules/typeorm/metadata/IndexMetadata.d.ts",
+      "../node_modules/typeorm/metadata/RelationCountMetadata.d.ts",
+      "../node_modules/typeorm/metadata/RelationIdMetadata.d.ts",
+      "../node_modules/typeorm/metadata/RelationMetadata.d.ts",
+      "../node_modules/typeorm/metadata/UniqueMetadata.d.ts",
+      "../node_modules/typeorm/metadata/types/DeferrableType.d.ts",
+      "../node_modules/typeorm/metadata/types/EventListenerTypes.d.ts",
+      "../node_modules/typeorm/metadata/types/OnDeleteType.d.ts",
+      "../node_modules/typeorm/metadata/types/OnUpdateType.d.ts",
+      "../node_modules/typeorm/metadata/types/PropertyTypeInFunction.d.ts",
+      "../node_modules/typeorm/metadata/types/RelationTypeInFunction.d.ts",
+      "../node_modules/typeorm/metadata/types/RelationTypes.d.ts",
+      "../node_modules/typeorm/metadata/types/TableTypes.d.ts",
+      "../node_modules/typeorm/metadata/types/TreeTypes.d.ts",
+      "../node_modules/typeorm/migration/Migration.d.ts",
+      "../node_modules/typeorm/migration/MigrationExecutor.d.ts",
+      "../node_modules/typeorm/migration/MigrationInterface.d.ts",
+      "../node_modules/typeorm/naming-strategy/DefaultNamingStrategy.d.ts",
+      "../node_modules/typeorm/naming-strategy/NamingStrategyInterface.d.ts",
+      "../node_modules/typeorm/platform/PlatformTools.d.ts",
+      "../node_modules/typeorm/query-builder/Alias.d.ts",
+      "../node_modules/typeorm/query-builder/Brackets.d.ts",
+      "../node_modules/typeorm/query-builder/DeleteQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/InsertQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/JoinAttribute.d.ts",
+      "../node_modules/typeorm/query-builder/QueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/QueryExpressionMap.d.ts",
+      "../node_modules/typeorm/query-builder/QueryPartialEntity.d.ts",
+      "../node_modules/typeorm/query-builder/RelationIdLoader.d.ts",
+      "../node_modules/typeorm/query-builder/RelationLoader.d.ts",
+      "../node_modules/typeorm/query-builder/RelationQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/SelectQuery.d.ts",
+      "../node_modules/typeorm/query-builder/SelectQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/SelectQueryBuilderOption.d.ts",
+      "../node_modules/typeorm/query-builder/SoftDeleteQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/UpdateQueryBuilder.d.ts",
+      "../node_modules/typeorm/query-builder/WhereExpression.d.ts",
+      "../node_modules/typeorm/query-builder/relation-count/RelationCountAttribute.d.ts",
+      "../node_modules/typeorm/query-builder/relation-id/RelationIdAttribute.d.ts",
+      "../node_modules/typeorm/query-builder/result/DeleteResult.d.ts",
+      "../node_modules/typeorm/query-builder/result/InsertResult.d.ts",
+      "../node_modules/typeorm/query-builder/result/UpdateResult.d.ts",
+      "../node_modules/typeorm/query-builder/transformer/PlainObjectToNewEntityTransformer.d.ts",
+      "../node_modules/typeorm/query-runner/QueryRunner.d.ts",
+      "../node_modules/typeorm/repository/AbstractRepository.d.ts",
+      "../node_modules/typeorm/repository/BaseEntity.d.ts",
+      "../node_modules/typeorm/repository/MongoRepository.d.ts",
+      "../node_modules/typeorm/repository/RemoveOptions.d.ts",
+      "../node_modules/typeorm/repository/Repository.d.ts",
+      "../node_modules/typeorm/repository/SaveOptions.d.ts",
+      "../node_modules/typeorm/repository/TreeRepository.d.ts",
+      "../node_modules/typeorm/schema-builder/SchemaBuilder.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableCheckOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableColumnOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableExclusionOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableForeignKeyOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableIndexOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/TableUniqueOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/options/ViewOptions.d.ts",
+      "../node_modules/typeorm/schema-builder/table/Table.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableCheck.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableColumn.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableExclusion.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableForeignKey.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableIndex.d.ts",
+      "../node_modules/typeorm/schema-builder/table/TableUnique.d.ts",
+      "../node_modules/typeorm/schema-builder/view/View.d.ts",
+      "../node_modules/typeorm/subscriber/Broadcaster.d.ts",
+      "../node_modules/typeorm/subscriber/BroadcasterResult.d.ts",
+      "../node_modules/typeorm/subscriber/EntitySubscriberInterface.d.ts",
+      "../node_modules/typeorm/subscriber/event/InsertEvent.d.ts",
+      "../node_modules/typeorm/subscriber/event/LoadEvent.d.ts",
+      "../node_modules/typeorm/subscriber/event/RemoveEvent.d.ts",
+      "../node_modules/typeorm/subscriber/event/UpdateEvent.d.ts",
+      "../node_modules/typeorm/util/PromiseUtils.d.ts",
+      "../node_modules/typescript/lib/lib.dom.d.ts",
+      "../node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "../node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "../node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "../node_modules/typescript/lib/lib.es2016.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.full.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "../node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.asyncgenerator.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.asynciterable.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.intl.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.promise.d.ts",
+      "../node_modules/typescript/lib/lib.es2018.regexp.d.ts",
+      "../node_modules/typescript/lib/lib.es2020.bigint.d.ts",
+      "../node_modules/typescript/lib/lib.es5.d.ts",
+      "../node_modules/typescript/lib/lib.esnext.intl.d.ts",
+      "../node_modules/typescript/lib/lib.scripthost.d.ts",
+      "../node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "../src/amp/amp.controller.ts",
+      "../src/amp/amp.module.ts",
+      "../src/app.controller.ts",
+      "../src/app.module.ts",
+      "../src/app.service.ts",
+      "../src/auth/auth.controller.ts",
+      "../src/auth/auth.module.ts",
+      "../src/auth/auth.service.ts",
+      "../src/auth/constants.ts",
+      "../src/auth/invalid-token.entity.ts",
+      "../src/auth/jwt-admin.strategy.ts",
+      "../src/auth/jwt-monitor.strategy.ts",
+      "../src/auth/jwt-study.strategy.ts",
+      "../src/auth/jwt.strategy.ts",
+      "../src/auth/local.strategy.ts",
+      "../src/crawler/crawler.controller.ts",
+      "../src/crawler/crawler.entity.ts",
+      "../src/crawler/crawler.module.ts",
+      "../src/crawler/crawler.service.ts",
+      "../src/domain/domain.controller.ts",
+      "../src/domain/domain.entity.ts",
+      "../src/domain/domain.module.ts",
+      "../src/domain/domain.service.ts",
+      "../src/entity/entity.controller.ts",
+      "../src/entity/entity.entity.ts",
+      "../src/entity/entity.module.ts",
+      "../src/entity/entity.service.ts",
+      "../src/evaluation/evaluation.controller.ts",
+      "../src/evaluation/evaluation.entity.ts",
+      "../src/evaluation/evaluation.module.ts",
+      "../src/evaluation/evaluation.service.ts",
+      "../src/evaluation/mapping.ts",
+      "../src/evaluation/middleware.ts",
+      "../src/evaluation/qualweb.ts",
+      "../src/evaluation/tests.ts",
+      "../src/evaluation/testsColors.ts",
+      "../src/evaluation/xpath.ts",
+      "../src/lib/response.ts",
+      "../src/lib/security.ts",
+      "../src/main.ts",
+      "../src/observatory/observatory.controller.ts",
+      "../src/observatory/observatory.module.ts",
+      "../src/page/page.controller.ts",
+      "../src/page/page.entity.ts",
+      "../src/page/page.gateway.ts",
+      "../src/page/page.module.ts",
+      "../src/page/page.service.ts",
+      "../src/stamp/stamp.controller.ts",
+      "../src/stamp/stamp.module.ts",
+      "../src/stamp/stamp.service.ts",
+      "../src/tag/tag.controller.ts",
+      "../src/tag/tag.entity.ts",
+      "../src/tag/tag.module.ts",
+      "../src/tag/tag.service.ts",
+      "../src/user/user.controller.ts",
+      "../src/user/user.entity.ts",
+      "../src/user/user.module.ts",
+      "../src/user/user.service.ts",
+      "../src/website/website.controller.ts",
+      "../src/website/website.entity.ts",
+      "../src/website/website.module.ts",
+      "../src/website/website.service.ts"
+    ]
   },
-  "version": "3.9.2"
+  "version": "3.9.5"
 }

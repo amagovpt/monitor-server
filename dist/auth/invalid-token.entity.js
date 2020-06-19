@@ -11,33 +11,30 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvalidToken = void 0;
 const typeorm_1 = require("typeorm");
-let InvalidToken = (() => {
-    let InvalidToken = class InvalidToken {
-    };
-    __decorate([
-        typeorm_1.PrimaryGeneratedColumn({
-            type: 'int'
-        }),
-        __metadata("design:type", Number)
-    ], InvalidToken.prototype, "TokenId", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'text',
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], InvalidToken.prototype, "Token", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'datetime',
-            nullable: false
-        }),
-        __metadata("design:type", Object)
-    ], InvalidToken.prototype, "Expiration_Date", void 0);
-    InvalidToken = __decorate([
-        typeorm_1.Entity('Invalid_Token')
-    ], InvalidToken);
-    return InvalidToken;
-})();
+let InvalidToken = class InvalidToken {
+};
+__decorate([
+    typeorm_1.PrimaryGeneratedColumn({
+        type: 'int'
+    }),
+    __metadata("design:type", Number)
+], InvalidToken.prototype, "TokenId", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'text',
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], InvalidToken.prototype, "Token", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'datetime',
+        nullable: false
+    }),
+    __metadata("design:type", Object)
+], InvalidToken.prototype, "Expiration_Date", void 0);
+InvalidToken = __decorate([
+    typeorm_1.Entity('Invalid_Token')
+], InvalidToken);
 exports.InvalidToken = InvalidToken;
 //# sourceMappingURL=invalid-token.entity.js.map

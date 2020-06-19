@@ -13,21 +13,18 @@ const nest_crawler_1 = require("nest-crawler");
 const crawler_controller_1 = require("./crawler.controller");
 const crawler_service_1 = require("./crawler.service");
 const crawler_entity_1 = require("./crawler.entity");
-let CrawlerModule = (() => {
-    let CrawlerModule = class CrawlerModule {
-    };
-    CrawlerModule = __decorate([
-        common_1.Module({
-            imports: [
-                typeorm_1.TypeOrmModule.forFeature([crawler_entity_1.CrawlDomain, crawler_entity_1.CrawlPage]),
-                nest_crawler_1.NestCrawlerModule
-            ],
-            controllers: [crawler_controller_1.CrawlerController],
-            providers: [crawler_service_1.CrawlerService],
-            exports: [crawler_service_1.CrawlerService]
-        })
-    ], CrawlerModule);
-    return CrawlerModule;
-})();
+let CrawlerModule = class CrawlerModule {
+};
+CrawlerModule = __decorate([
+    common_1.Module({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([crawler_entity_1.CrawlDomain, crawler_entity_1.CrawlPage]),
+            nest_crawler_1.NestCrawlerModule
+        ],
+        controllers: [crawler_controller_1.CrawlerController],
+        providers: [crawler_service_1.CrawlerService],
+        exports: [crawler_service_1.CrawlerService]
+    })
+], CrawlerModule);
 exports.CrawlerModule = CrawlerModule;
 //# sourceMappingURL=crawler.module.js.map

@@ -20,32 +20,29 @@ const jwt_admin_strategy_1 = require("./jwt-admin.strategy");
 const jwt_monitor_strategy_1 = require("./jwt-monitor.strategy");
 const jwt_study_strategy_1 = require("./jwt-study.strategy");
 const constants_1 = require("./constants");
-let AuthModule = (() => {
-    let AuthModule = class AuthModule {
-    };
-    AuthModule = __decorate([
-        common_1.Module({
-            imports: [
-                typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, invalid_token_entity_1.InvalidToken]),
-                jwt_1.JwtModule.register({
-                    publicKey: constants_1.jwtConstants.publicKey,
-                    privateKey: constants_1.jwtConstants.privateKey,
-                    signOptions: { expiresIn: '1d' },
-                })
-            ],
-            exports: [auth_service_1.AuthService],
-            providers: [
-                auth_service_1.AuthService,
-                local_strategy_1.LocalStrategy,
-                jwt_strategy_1.JwtStrategy,
-                jwt_admin_strategy_1.JwtAdminStrategy,
-                jwt_monitor_strategy_1.JwtMonitorStrategy,
-                jwt_study_strategy_1.JwtStudyStrategy
-            ],
-            controllers: [auth_controller_1.AuthController]
-        })
-    ], AuthModule);
-    return AuthModule;
-})();
+let AuthModule = class AuthModule {
+};
+AuthModule = __decorate([
+    common_1.Module({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, invalid_token_entity_1.InvalidToken]),
+            jwt_1.JwtModule.register({
+                publicKey: constants_1.jwtConstants.publicKey,
+                privateKey: constants_1.jwtConstants.privateKey,
+                signOptions: { expiresIn: '1d' },
+            })
+        ],
+        exports: [auth_service_1.AuthService],
+        providers: [
+            auth_service_1.AuthService,
+            local_strategy_1.LocalStrategy,
+            jwt_strategy_1.JwtStrategy,
+            jwt_admin_strategy_1.JwtAdminStrategy,
+            jwt_monitor_strategy_1.JwtMonitorStrategy,
+            jwt_study_strategy_1.JwtStudyStrategy
+        ],
+        controllers: [auth_controller_1.AuthController]
+    })
+], AuthModule);
 exports.AuthModule = AuthModule;
 //# sourceMappingURL=auth.module.js.map

@@ -17,52 +17,51 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const domain_entity_1 = require("./domain.entity");
-let DomainService = (() => {
-    let DomainService = class DomainService {
-        constructor(domainRepository, connection) {
-            this.domainRepository = domainRepository;
-            this.connection = connection;
+let DomainService = class DomainService {
+    constructor(domainRepository, connection) {
+        this.domainRepository = domainRepository;
+        this.connection = connection;
+    }
+    async create(domain) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(domain_entity_1.Domain, { WebsiteId: domain.WebsiteId, Active: 1 }, { End_Date: domain.Start_Date, Active: 0 });
+            await queryRunner.manager.save(domain);
+            await queryRunner.commitTransaction();
         }
-        async create(domain) {
-            const queryRunner = this.connection.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            let hasError = false;
-            try {
-                await queryRunner.manager.update(domain_entity_1.Domain, { WebsiteId: domain.WebsiteId, Active: 1 }, { End_Date: domain.Start_Date, Active: 0 });
-                await queryRunner.manager.save(domain);
-                await queryRunner.commitTransaction();
-            }
-            catch (err) {
-                await queryRunner.rollbackTransaction();
-                hasError = true;
-            }
-            finally {
-                await queryRunner.release();
-            }
-            return !hasError;
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
         }
-        async update(domainId, url) {
-            const queryRunner = this.connection.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            let hasError = false;
-            try {
-                await queryRunner.manager.update(domain_entity_1.Domain, { DomainId: domainId }, { Url: url });
-                await queryRunner.commitTransaction();
-            }
-            catch (err) {
-                await queryRunner.rollbackTransaction();
-                hasError = true;
-            }
-            finally {
-                await queryRunner.release();
-            }
-            return !hasError;
+        finally {
+            await queryRunner.release();
         }
-        async findAll() {
-            const manager = typeorm_2.getManager();
-            const domains = await manager.query(`SELECT d.*, COUNT(distinct p.PageId) as Pages, u.Username as User
+        return !hasError;
+    }
+    async update(domainId, url) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            await queryRunner.manager.update(domain_entity_1.Domain, { DomainId: domainId }, { Url: url });
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
+    async findAll() {
+        const manager = typeorm_2.getManager();
+        const domains = await manager.query(`SELECT d.*, COUNT(distinct p.PageId) as Pages, u.Username as User
       FROM
         Domain as d
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
@@ -73,11 +72,11 @@ let DomainService = (() => {
         (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
         w.Deleted = "0"
       GROUP BY d.DomainId`);
-            return domains;
-        }
-        async findAllOfficial() {
-            const manager = typeorm_2.getManager();
-            const domains = await manager.query(`SELECT
+        return domains;
+    }
+    async findAllOfficial() {
+        const manager = typeorm_2.getManager();
+        const domains = await manager.query(`SELECT
         d.*,
         COUNT(distinct dp.PageId) as Pages
       FROM
@@ -97,13 +96,13 @@ let DomainService = (() => {
         ) AND
         w.Deleted = "0"
       GROUP BY d.DomainId`);
-            return domains;
-        }
-        async findByUrl(url) {
-            return this.domainRepository.findOne({ where: { Url: url } });
-        }
-        async exists(url) {
-            return (await this.domainRepository.query(`SELECT d.*
+        return domains;
+    }
+    async findByUrl(url) {
+        return this.domainRepository.findOne({ where: { Url: url } });
+    }
+    async exists(url) {
+        return (await this.domainRepository.query(`SELECT d.*
       FROM
         Domain as d,
         Website as w,
@@ -114,10 +113,10 @@ let DomainService = (() => {
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
       LIMIT 1`)).length > 0;
-        }
-        async findMyMonitorUserWebsiteDomain(userId, website) {
-            const manager = typeorm_2.getManager();
-            const domain = await manager.query(`SELECT d.Url FROM 
+    }
+    async findMyMonitorUserWebsiteDomain(userId, website) {
+        const manager = typeorm_2.getManager();
+        const domain = await manager.query(`SELECT d.Url FROM 
         Website as w,
         Domain as d
       WHERE
@@ -126,11 +125,11 @@ let DomainService = (() => {
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1
       LIMIT 1`, [userId, website]);
-            return domain ? domain[0].Url : null;
-        }
-        async findStudyMonitorUserTagWebsiteDomain(userId, tag, website) {
-            const manager = typeorm_2.getManager();
-            const domain = await manager.query(`SELECT d.Url FROM 
+        return domain ? domain[0].Url : null;
+    }
+    async findStudyMonitorUserTagWebsiteDomain(userId, tag, website) {
+        const manager = typeorm_2.getManager();
+        const domain = await manager.query(`SELECT d.Url FROM 
         Tag as t,
         TagWebsite as tw,
         Website as w,
@@ -144,24 +143,24 @@ let DomainService = (() => {
         LOWER(w.Name) = ? AND
         d.WebsiteId = w.WebsiteId
       LIMIT 1`, [tag.toLowerCase(), userId, userId, website.toLowerCase()]);
-            return domain ? domain[0].Url : null;
+        return domain ? domain[0].Url : null;
+    }
+    async findUserType(username) {
+        if (username === 'admin') {
+            return 'nimda';
         }
-        async findUserType(username) {
-            if (username === 'admin') {
-                return 'nimda';
-            }
-            const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
-            if (user) {
-                return user[0].Type;
-            }
-            else {
-                return null;
-            }
+        const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
+        if (user) {
+            return user[0].Type;
         }
-        async findAllDomainPages(user, type, domain, flags) {
-            const manager = typeorm_2.getManager();
-            if (type === 'nimda') {
-                const pages = await manager.query(`SELECT 
+        else {
+            return null;
+        }
+    }
+    async findAllDomainPages(user, type, domain, flags) {
+        const manager = typeorm_2.getManager();
+        if (type === 'nimda') {
+            const pages = await manager.query(`SELECT 
           p.*,
           e.A,
           e.AA,
@@ -203,10 +202,10 @@ let DomainService = (() => {
             p.Show_In LIKE ?
           )
         GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
-                return pages;
-            }
-            else {
-                const pages = await manager.query(`SELECT 
+            return pages;
+        }
+        else {
+            const pages = await manager.query(`SELECT 
           p.*,
           e.A,
           e.AA,
@@ -237,17 +236,15 @@ let DomainService = (() => {
           p.PageId = dp.PageId AND
           p.Show_In LIKE ?
         GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [user.toLowerCase(), domain.toLowerCase(), flags]);
-                return pages;
-            }
+            return pages;
         }
-    };
-    DomainService = __decorate([
-        common_1.Injectable(),
-        __param(0, typeorm_1.InjectRepository(domain_entity_1.Domain)),
-        __metadata("design:paramtypes", [typeorm_2.Repository,
-            typeorm_2.Connection])
-    ], DomainService);
-    return DomainService;
-})();
+    }
+};
+DomainService = __decorate([
+    common_1.Injectable(),
+    __param(0, typeorm_1.InjectRepository(domain_entity_1.Domain)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Connection])
+], DomainService);
 exports.DomainService = DomainService;
 //# sourceMappingURL=domain.service.js.map

@@ -10,16 +10,13 @@ exports.AmpModule = void 0;
 const common_1 = require("@nestjs/common");
 const amp_controller_1 = require("./amp.controller");
 const evaluation_module_1 = require("../evaluation/evaluation.module");
-let AmpModule = (() => {
-    let AmpModule = class AmpModule {
-    };
-    AmpModule = __decorate([
-        common_1.Module({
-            imports: [evaluation_module_1.EvaluationModule],
-            controllers: [amp_controller_1.AmpController]
-        })
-    ], AmpModule);
-    return AmpModule;
-})();
+let AmpModule = class AmpModule {
+};
+AmpModule = __decorate([
+    common_1.Module({
+        imports: [evaluation_module_1.EvaluationModule],
+        controllers: [amp_controller_1.AmpController]
+    })
+], AmpModule);
 exports.AmpModule = AmpModule;
 //# sourceMappingURL=amp.module.js.map

@@ -171,14 +171,12 @@ function QW_ACT_R17(elements, results, nodes, rule) {
         addToElements(elements, 'imgAltNo', rule.metadata.failed);
         addToResults(results, 'img_01b');
         addToNodes(nodes, 'imgAltNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-        addToElements(elements, 'img_01b', (rule.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
     const imgEmptyAlt = rule.results.filter((r) => r.resultCode === 'RC6');
     if (imgEmptyAlt.length > 0) {
         addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
         addToResults(results, 'img_02');
         addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r) => r.pointer));
-        addToElements(elements, 'img_02', (rule.results.filter((r) => r.verdict !== 'inapplicable')).length);
     }
 }
 function QW_ACT_R18(elements, results, nodes, rule) {
@@ -407,47 +405,47 @@ function QW_CSS_T1(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'fontAbsVal', technique.metadata.failed);
         addToResults(results, 'font_02');
-        addToNodes(nodes, 'fontAbsVal', undefined);
+        addToNodes(nodes, 'fontAbsVal', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
 }
 function QW_CSS_T2(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'justifiedCss', technique.metadata.failed);
         addToResults(results, 'justif_txt_02');
-        addToNodes(nodes, 'justifiedCss', undefined);
+        addToNodes(nodes, 'justifiedCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
 }
 function QW_CSS_T3(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'lineHeightNo', technique.metadata.failed);
         addToResults(results, 'css_01');
-        addToNodes(nodes, 'lineHeightNo', undefined);
+        addToNodes(nodes, 'lineHeightNo', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
 }
 function QW_CSS_T5(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'valueAbsCss', technique.metadata.failed);
         addToResults(results, 'values_02a');
-        addToNodes(nodes, 'valueAbsCss', undefined);
+        addToNodes(nodes, 'valueAbsCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
     if (technique.metadata.passed > 0) {
         addToElements(elements, 'valueRelCss', technique.metadata.passed);
         addToResults(results, 'values_02b');
-        addToNodes(nodes, 'valueRelCss', undefined);
+        addToNodes(nodes, 'valueRelCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'passed'))]);
     }
 }
 function QW_CSS_T6(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'cssBlink', technique.metadata.failed);
         addToResults(results, 'blink_02');
-        addToNodes(nodes, 'cssBlink', undefined);
+        addToNodes(nodes, 'cssBlink', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
 }
 function QW_CSS_T7(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'colorFgBgNo', technique.metadata.failed);
         addToResults(results, 'color_01');
-        addToNodes(nodes, 'colorFgBgNo', undefined);
+        addToNodes(nodes, 'colorFgBgNo', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
     }
 }
 function QW_BP1(elements, results, nodes, technique) {
@@ -586,12 +584,13 @@ function addToResults(results, key) {
 function addToNodes(nodes, key, selectors) {
     for (const selector of selectors || []) {
         if (selector !== undefined && !nodes[key]) {
-            nodes[key] = convert_css_selector_to_xpath(selector);
+            nodes[key] = selector;
         }
         else if (selector !== undefined) {
-            nodes[key] += '|' + convert_css_selector_to_xpath(selector);
+            nodes[key] += '|' + selector;
         }
         else if (xpath_1.default[key]) {
+            console.log(xpath_1.default[key]);
             nodes[key] = xpath_1.default[key];
         }
     }
@@ -608,9 +607,9 @@ function getElementsMapping(evaluation) {
     const elements = {};
     const results = {};
     const nodes = {};
-    for (const rule of Object.keys(evaluation.modules['act-rules'].rules) || []) {
+    for (const rule of Object.keys(evaluation.modules['act-rules'].assertions) || []) {
         if (act_mapping[rule] !== undefined) {
-            act_mapping[rule](elements, results, nodes, evaluation.modules['act-rules'].rules[rule]);
+            act_mapping[rule](elements, results, nodes, evaluation.modules['act-rules'].assertions[rule]);
         }
     }
     for (const technique of Object.keys(evaluation.modules['html-techniques'].assertions) || []) {

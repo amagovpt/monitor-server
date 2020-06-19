@@ -63,8 +63,8 @@ function completeMissingReportElements(report: any): void {
 
 function generateScore(report: any): string {
 
-  let SS = 0;
-  let PP = 0;
+  let rel = 0;
+  let pon = 0;
 
   for (const test in tests || {}) {
     const value = tests[test];
@@ -86,21 +86,21 @@ function generateScore(report: any): string {
         }
         break;
       case 'fals':
-        if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
+        if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
           if (report.data['elems'][value['test']] === undefined) {
             calc = true;
           }
         }
         break;
       case 'prop':
-        if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
+        if (report.data['elems'][value['elem']] !== undefined && report.data['elems'][value['test']] !== undefined) {
           calc = true;
         }
         break;
     }
 
     if (calc) {
-      const C = parseFloat(tests[test]['trust']);
+      /*const C = parseFloat(tests[test]['trust']);
 
       const E = report['data'].elems[tests[test]['elem']];
       const S = report['data'].elems[tests[test]['test']];
@@ -111,7 +111,7 @@ function generateScore(report: any): string {
         if (w > 1) {
           if (tests[test]['type'] === 'prop') {
             R += +(w * C).toFixed(2);
-            const op = tests[test]['score'] * (1 - (S / E));
+            const op = tests[test]['score'] - ((tests[test]['score'] / E) * S); //tests[test]['score'] * (1 - (S / E));
             N = op < 1 ? 1 : op;
           } else if (tests[test]['type'] === 'decr') {
             const T = tests[test]['top'];
@@ -128,13 +128,80 @@ function generateScore(report: any): string {
           }
         }
       }
-
+      
       PP += +(R / 5).toFixed(2);
-      SS += +(N * +(R / 5).toFixed(2)).toFixed(1);
+      SS += +(N * +(R / 5).toFixed(2)).toFixed(1);*/
+      let temp = null;
+      if (tests[test]['type'] === 'prop') {
+        temp = calculateProp(value, report);
+      } else if (tests[test]['type'] === 'decr') {
+        temp = calculateDecr(value, report);
+      } else {
+        temp = calculateTrueFalse(value);
+      }
+      //console.log(test, temp);
+      const rr = Math.round(temp['r'] / 5);
+      const pp = Math.round(temp['p'] / 5);
+      const ss = Math.round(temp['s'] * pp);
+      rel += ss;
+      pon += pp;
     }
   }
+  
+  return (rel / pon).toFixed(1);
+}
 
-  return (SS / PP).toFixed(1);
+function calculateTrueFalse(v) {
+  const score = v['score'];
+  const ret = {s: score, p: 0, r: 0};
+  for (const w in v['dis']) {
+    if (parseInt(w) > 1) {
+      const p = Math.round(v['trust'] * parseInt(w));
+      const r = Math.round(score * p);
+      ret['p'] += p;
+      ret['r'] += r;
+    }
+  }
+  return ret;
+}
+
+function calculateDecr(v, report) {
+  const test = report.data.elems[v['test']];
+  const limit = v['top'];
+  const steps = v['steps'];
+  const score = v['score'];
+  const errors = test - limit;
+  const minus = errors > 0 ? Math.round(errors / steps) : 0;
+  const op = score - minus;
+  const rr = op < 1 ? 1 : op;
+  const ret = {s: rr, p: 0, r: 0};
+  for (const w in v['dis']) {
+    if (parseInt(w) > 1) {
+      const p = Math.round(v['trust'] * parseInt(w));
+      const r = Math.round(rr * p);
+      ret['p'] += p;
+      ret['r'] += r;
+    }
+  }
+  return ret;
+}
+
+function calculateProp(v, report) {
+  const elem = report.data.elems[v['elem']];
+  const test = report.data.elems[v['test']];
+  const score = v['score'];
+  const op = score - ((score / elem) * test);
+  const rr = op < 1 ? 1 : op;
+  const ret = {s: rr, p: 0, r: 0};
+  for (const w in v['dis']) {
+    if (parseInt(w) > 1) {
+      const p = Math.round(v['trust'] * parseInt(w));
+      const r = Math.round(rr * p);
+      ret['p'] += p;
+      ret['r'] += r;
+    }
+  }
+  return ret;
 }
 
 function calculateCssRules(evaluation: any): number {

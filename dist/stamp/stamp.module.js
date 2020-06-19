@@ -10,16 +10,13 @@ exports.StampModule = void 0;
 const common_1 = require("@nestjs/common");
 const stamp_service_1 = require("./stamp.service");
 const stamp_controller_1 = require("./stamp.controller");
-let StampModule = (() => {
-    let StampModule = class StampModule {
-    };
-    StampModule = __decorate([
-        common_1.Module({
-            providers: [stamp_service_1.StampService],
-            controllers: [stamp_controller_1.StampController]
-        })
-    ], StampModule);
-    return StampModule;
-})();
+let StampModule = class StampModule {
+};
+StampModule = __decorate([
+    common_1.Module({
+        providers: [stamp_service_1.StampService],
+        controllers: [stamp_controller_1.StampController]
+    })
+], StampModule);
 exports.StampModule = StampModule;
 //# sourceMappingURL=stamp.module.js.map

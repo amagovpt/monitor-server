@@ -10,17 +10,14 @@ exports.ObservatoryModule = void 0;
 const common_1 = require("@nestjs/common");
 const observatory_controller_1 = require("./observatory.controller");
 const page_module_1 = require("../page/page.module");
-let ObservatoryModule = (() => {
-    let ObservatoryModule = class ObservatoryModule {
-    };
-    ObservatoryModule = __decorate([
-        common_1.Module({
-            imports: [page_module_1.PageModule],
-            controllers: [observatory_controller_1.ObservatoryController],
-            providers: []
-        })
-    ], ObservatoryModule);
-    return ObservatoryModule;
-})();
+let ObservatoryModule = class ObservatoryModule {
+};
+ObservatoryModule = __decorate([
+    common_1.Module({
+        imports: [page_module_1.PageModule],
+        controllers: [observatory_controller_1.ObservatoryController],
+        providers: []
+    })
+], ObservatoryModule);
 exports.ObservatoryModule = ObservatoryModule;
 //# sourceMappingURL=observatory.module.js.map

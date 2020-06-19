@@ -17,18 +17,15 @@ const evaluation_module_1 = require("../evaluation/evaluation.module");
 const website_entity_1 = require("../website/website.entity");
 const evaluation_entity_1 = require("../evaluation/evaluation.entity");
 const page_gateway_1 = require("./page.gateway");
-let PageModule = (() => {
-    let PageModule = class PageModule {
-    };
-    PageModule = __decorate([
-        common_1.Module({
-            imports: [typeorm_1.TypeOrmModule.forFeature([website_entity_1.Website, page_entity_1.Page, evaluation_entity_1.Evaluation]), auth_module_1.AuthModule, evaluation_module_1.EvaluationModule],
-            exports: [page_service_1.PageService],
-            providers: [page_service_1.PageService, page_gateway_1.PageGateway],
-            controllers: [page_controller_1.PageController]
-        })
-    ], PageModule);
-    return PageModule;
-})();
+let PageModule = class PageModule {
+};
+PageModule = __decorate([
+    common_1.Module({
+        imports: [typeorm_1.TypeOrmModule.forFeature([website_entity_1.Website, page_entity_1.Page, evaluation_entity_1.Evaluation]), auth_module_1.AuthModule, evaluation_module_1.EvaluationModule],
+        exports: [page_service_1.PageService],
+        providers: [page_service_1.PageService, page_gateway_1.PageGateway],
+        controllers: [page_controller_1.PageController]
+    })
+], PageModule);
 exports.PageModule = PageModule;
 //# sourceMappingURL=page.module.js.map

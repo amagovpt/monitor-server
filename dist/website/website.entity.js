@@ -12,62 +12,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Website = void 0;
 const typeorm_1 = require("typeorm");
 const tag_entity_1 = require("../tag/tag.entity");
-let Website = (() => {
-    let Website = class Website {
-    };
-    __decorate([
-        typeorm_1.PrimaryGeneratedColumn({
-            type: 'int'
-        }),
-        __metadata("design:type", Number)
-    ], Website.prototype, "WebsiteId", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'int',
-            nullable: true
-        }),
-        __metadata("design:type", Number)
-    ], Website.prototype, "EntityId", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'int',
-            nullable: true
-        }),
-        __metadata("design:type", Number)
-    ], Website.prototype, "UserId", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], Website.prototype, "Name", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'datetime',
-            nullable: false
-        }),
-        __metadata("design:type", Object)
-    ], Website.prototype, "Creation_Date", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'tinyint',
-            width: 1,
-            nullable: false,
-            default: 0
-        }),
-        __metadata("design:type", Number)
-    ], Website.prototype, "Deleted", void 0);
-    __decorate([
-        typeorm_1.ManyToMany(type => tag_entity_1.Tag),
-        typeorm_1.JoinTable(),
-        __metadata("design:type", Array)
-    ], Website.prototype, "Tags", void 0);
-    Website = __decorate([
-        typeorm_1.Entity('Website')
-    ], Website);
-    return Website;
-})();
+let Website = class Website {
+};
+__decorate([
+    typeorm_1.PrimaryGeneratedColumn({
+        type: 'int'
+    }),
+    __metadata("design:type", Number)
+], Website.prototype, "WebsiteId", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'int',
+        nullable: true
+    }),
+    __metadata("design:type", Number)
+], Website.prototype, "EntityId", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'int',
+        nullable: true
+    }),
+    __metadata("design:type", Number)
+], Website.prototype, "UserId", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], Website.prototype, "Name", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'datetime',
+        nullable: false
+    }),
+    __metadata("design:type", Object)
+], Website.prototype, "Creation_Date", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'tinyint',
+        width: 1,
+        nullable: false,
+        default: 0
+    }),
+    __metadata("design:type", Number)
+], Website.prototype, "Deleted", void 0);
+__decorate([
+    typeorm_1.ManyToMany(type => tag_entity_1.Tag),
+    typeorm_1.JoinTable(),
+    __metadata("design:type", Array)
+], Website.prototype, "Tags", void 0);
+Website = __decorate([
+    typeorm_1.Entity('Website')
+], Website);
 exports.Website = Website;
 //# sourceMappingURL=website.entity.js.map

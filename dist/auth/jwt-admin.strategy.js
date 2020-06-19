@@ -15,32 +15,29 @@ const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const constants_1 = require("./constants");
 const auth_service_1 = require("./auth.service");
-let JwtAdminStrategy = (() => {
-    let JwtAdminStrategy = class JwtAdminStrategy extends passport_1.PassportStrategy(passport_jwt_1.Strategy, 'jwt-admin') {
-        constructor(authService) {
-            super({
-                jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-                ignoreExpiration: false,
-                secretOrKey: constants_1.jwtConstants.privateKey,
-            });
-            this.authService = authService;
+let JwtAdminStrategy = class JwtAdminStrategy extends passport_1.PassportStrategy(passport_jwt_1.Strategy, 'jwt-admin') {
+    constructor(authService) {
+        super({
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: constants_1.jwtConstants.privateKey,
+        });
+        this.authService = authService;
+    }
+    async validate(payload) {
+        const valid = await this.authService.verifyUserPayload(payload);
+        delete payload.exp;
+        const token = this.authService.signToken(payload);
+        const isBlackListed = await this.authService.isTokenBlackListed(token);
+        if (!valid || payload.type !== 'nimda' || isBlackListed) {
+            throw new common_1.UnauthorizedException();
         }
-        async validate(payload) {
-            const valid = await this.authService.verifyUserPayload(payload);
-            delete payload.exp;
-            const token = this.authService.signToken(payload);
-            const isBlackListed = await this.authService.isTokenBlackListed(token);
-            if (!valid || payload.type !== 'nimda' || isBlackListed) {
-                throw new common_1.UnauthorizedException();
-            }
-            return { userId: payload.sub, username: payload.username };
-        }
-    };
-    JwtAdminStrategy = __decorate([
-        common_1.Injectable(),
-        __metadata("design:paramtypes", [auth_service_1.AuthService])
-    ], JwtAdminStrategy);
-    return JwtAdminStrategy;
-})();
+        return { userId: payload.sub, username: payload.username };
+    }
+};
+JwtAdminStrategy = __decorate([
+    common_1.Injectable(),
+    __metadata("design:paramtypes", [auth_service_1.AuthService])
+], JwtAdminStrategy);
 exports.JwtAdminStrategy = JwtAdminStrategy;
 //# sourceMappingURL=jwt-admin.strategy.js.map

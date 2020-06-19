@@ -12,18 +12,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const domain_service_1 = require("./domain.service");
 const domain_entity_1 = require("./domain.entity");
 const domain_controller_1 = require("./domain.controller");
-let DomainModule = (() => {
-    let DomainModule = class DomainModule {
-    };
-    DomainModule = __decorate([
-        common_1.Module({
-            imports: [typeorm_1.TypeOrmModule.forFeature([domain_entity_1.Domain])],
-            exports: [domain_service_1.DomainService],
-            providers: [domain_service_1.DomainService],
-            controllers: [domain_controller_1.DomainController]
-        })
-    ], DomainModule);
-    return DomainModule;
-})();
+let DomainModule = class DomainModule {
+};
+DomainModule = __decorate([
+    common_1.Module({
+        imports: [typeorm_1.TypeOrmModule.forFeature([domain_entity_1.Domain])],
+        exports: [domain_service_1.DomainService],
+        providers: [domain_service_1.DomainService],
+        controllers: [domain_controller_1.DomainController]
+    })
+], DomainModule);
 exports.DomainModule = DomainModule;
 //# sourceMappingURL=domain.module.js.map

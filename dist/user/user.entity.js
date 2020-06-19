@@ -11,82 +11,79 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
-let User = (() => {
-    let User = class User {
-    };
-    __decorate([
-        typeorm_1.PrimaryGeneratedColumn({
-            type: 'int'
-        }),
-        __metadata("design:type", Number)
-    ], User.prototype, "UserId", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            unique: true,
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Username", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Password", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 45,
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Type", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            nullable: true
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Names", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            nullable: true
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Emails", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'datetime',
-            nullable: false
-        }),
-        __metadata("design:type", Object)
-    ], User.prototype, "Register_Date", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'datetime',
-            nullable: true
-        }),
-        __metadata("design:type", Object)
-    ], User.prototype, "Last_Login", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 255,
-            nullable: false
-        }),
-        __metadata("design:type", String)
-    ], User.prototype, "Unique_Hash", void 0);
-    User = __decorate([
-        typeorm_1.Entity('User')
-    ], User);
-    return User;
-})();
+let User = class User {
+};
+__decorate([
+    typeorm_1.PrimaryGeneratedColumn({
+        type: 'int'
+    }),
+    __metadata("design:type", Number)
+], User.prototype, "UserId", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        unique: true,
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Username", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Password", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 45,
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Type", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Names", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Emails", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'datetime',
+        nullable: false
+    }),
+    __metadata("design:type", Object)
+], User.prototype, "Register_Date", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'datetime',
+        nullable: true
+    }),
+    __metadata("design:type", Object)
+], User.prototype, "Last_Login", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'varchar',
+        length: 255,
+        nullable: false
+    }),
+    __metadata("design:type", String)
+], User.prototype, "Unique_Hash", void 0);
+User = __decorate([
+    typeorm_1.Entity('User')
+], User);
 exports.User = User;
 //# sourceMappingURL=user.entity.js.map

@@ -19,263 +19,260 @@ const user_service_1 = require("./user.service");
 const user_entity_1 = require("./user.entity");
 const security_1 = require("../lib/security");
 const response_1 = require("../lib/response");
-let UserController = (() => {
-    let UserController = class UserController {
-        constructor(userService) {
-            this.userService = userService;
+let UserController = class UserController {
+    constructor(userService) {
+        this.userService = userService;
+    }
+    async changeUserPassword(req) {
+        if (!this.passwordValidator(req.body.newPassword)) {
+            throw new common_1.InternalServerErrorException();
         }
-        async changeUserPassword(req) {
-            if (!this.passwordValidator(req.body.newPassword)) {
-                throw new common_1.InternalServerErrorException();
-            }
-            const password = req.body.password;
-            const newPassword = req.body.newPassword;
-            const confirmNewPassword = req.body.confirmPassword;
-            if (newPassword !== confirmNewPassword) {
-                throw new common_1.UnauthorizedException();
-            }
-            return response_1.success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
+        const password = req.body.password;
+        const newPassword = req.body.newPassword;
+        const confirmNewPassword = req.body.confirmPassword;
+        if (newPassword !== confirmNewPassword) {
+            throw new common_1.UnauthorizedException();
         }
-        passwordValidator(password) {
-            const isShort = password.length < 8 || password.length === 0;
-            const hasUpperCase = password.toLowerCase() !== password;
-            const hasLowerCase = password.toUpperCase() !== password;
-            const specialFormat = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-            const hasSpecial = specialFormat.test(password);
-            const numberFormat = /\d/g;
-            const hasNumber = numberFormat.test(password);
-            if (isShort || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
-                return false;
-            }
-            return true;
+        return response_1.success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
+    }
+    passwordValidator(password) {
+        const isShort = password.length < 8 || password.length === 0;
+        const hasUpperCase = password.toLowerCase() !== password;
+        const hasLowerCase = password.toUpperCase() !== password;
+        const specialFormat = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        const hasSpecial = specialFormat.test(password);
+        const numberFormat = /\d/g;
+        const hasNumber = numberFormat.test(password);
+        if (isShort || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
+            return false;
         }
-        async createUser(req) {
-            if (!this.passwordValidator(req.body.password)) {
-                throw new common_1.InternalServerErrorException();
-            }
-            const user = new user_entity_1.User();
-            user.Username = req.body.username;
-            user.Password = await security_1.generatePasswordHash(req.body.password);
-            user.Names = req.body.names;
-            user.Emails = req.body.emails;
-            user.Type = req.body.type;
-            user.Register_Date = new Date();
-            user.Unique_Hash = security_1.createRandomUniqueHash();
-            const tags = JSON.parse(req.body.tags);
-            const websites = JSON.parse(req.body.websites);
-            const transfer = !!req.body.transfer;
-            const createSuccess = await this.userService.createOne(user, tags, websites, transfer);
-            if (!createSuccess) {
-                throw new common_1.InternalServerErrorException();
-            }
-            return response_1.success(true);
+        return true;
+    }
+    async createUser(req) {
+        if (!this.passwordValidator(req.body.password)) {
+            throw new common_1.InternalServerErrorException();
         }
-        async updateUser(req) {
-            const userId = req.body.userId;
-            const password = req.body.password;
-            const confirmPassword = req.body.confirmPassword;
-            if (!this.passwordValidator(password)) {
-                throw new common_1.InternalServerErrorException();
-            }
-            if (password !== confirmPassword) {
-                return response_1.success(false);
-            }
-            const names = req.body.names;
-            const emails = req.body.emails;
-            const app = req.body.app;
-            const websites = JSON.parse(req.body.websites);
-            const defaultWebsites = JSON.parse(req.body.defaultWebsites);
-            const transfer = !!req.body.transfer;
-            const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
-            if (!updateSuccess) {
-                throw new common_1.InternalServerErrorException();
-            }
-            return response_1.success(true);
+        const user = new user_entity_1.User();
+        user.Username = req.body.username;
+        user.Password = await security_1.generatePasswordHash(req.body.password);
+        user.Names = req.body.names;
+        user.Emails = req.body.emails;
+        user.Type = req.body.type;
+        user.Register_Date = new Date();
+        user.Unique_Hash = security_1.createRandomUniqueHash();
+        const tags = JSON.parse(req.body.tags);
+        const websites = JSON.parse(req.body.websites);
+        const transfer = !!req.body.transfer;
+        const createSuccess = await this.userService.createOne(user, tags, websites, transfer);
+        if (!createSuccess) {
+            throw new common_1.InternalServerErrorException();
         }
-        async deleteUser(req) {
-            const userId = req.body.userId;
-            const app = req.body.app;
-            const deleteSuccess = await this.userService.delete(userId, app);
-            if (!deleteSuccess) {
-                throw new common_1.InternalServerErrorException();
-            }
-            return response_1.success(true);
+        return response_1.success(true);
+    }
+    async updateUser(req) {
+        const userId = req.body.userId;
+        const password = req.body.password;
+        const confirmPassword = req.body.confirmPassword;
+        if (!this.passwordValidator(password)) {
+            throw new common_1.InternalServerErrorException();
         }
-        getUser(id) {
-            return this.userService.findById(id);
+        if (password !== confirmPassword) {
+            return response_1.success(false);
         }
-        async getUserInfo(userId) {
-            return response_1.success(await this.userService.findInfo(userId));
+        const names = req.body.names;
+        const emails = req.body.emails;
+        const app = req.body.app;
+        const websites = JSON.parse(req.body.websites);
+        const defaultWebsites = JSON.parse(req.body.defaultWebsites);
+        const transfer = !!req.body.transfer;
+        const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
+        if (!updateSuccess) {
+            throw new common_1.InternalServerErrorException();
         }
-        async checkIfUsernameExists(username) {
-            return response_1.success(!!await this.userService.findByUsername(username.toLowerCase()));
+        return response_1.success(true);
+    }
+    async deleteUser(req) {
+        const userId = req.body.userId;
+        const app = req.body.app;
+        const deleteSuccess = await this.userService.delete(userId, app);
+        if (!deleteSuccess) {
+            throw new common_1.InternalServerErrorException();
         }
-        async getAllNonAdminUsers() {
-            return response_1.success(await this.userService.findAllNonAdmin());
+        return response_1.success(true);
+    }
+    getUser(id) {
+        return this.userService.findById(id);
+    }
+    async getUserInfo(userId) {
+        return response_1.success(await this.userService.findInfo(userId));
+    }
+    async checkIfUsernameExists(username) {
+        return response_1.success(!!await this.userService.findByUsername(username.toLowerCase()));
+    }
+    async getAllNonAdminUsers() {
+        return response_1.success(await this.userService.findAllNonAdmin());
+    }
+    async getAllMyMonitorUsers() {
+        return response_1.success(await this.userService.findAllFromMyMonitor());
+    }
+    async getNumberOfStudyMonitorUsers() {
+        return response_1.success(await this.userService.findNumberOfStudyMonitor());
+    }
+    async getNumberOfMyMonitorUsers() {
+        return response_1.success(await this.userService.findNumberOfMyMonitor());
+    }
+    async checkIfUserTagNameExists(req, name) {
+        if (name) {
+            return response_1.success(!!await this.userService.findStudyMonitorUserTagByName(req.user.userId, name));
         }
-        async getAllMyMonitorUsers() {
-            return response_1.success(await this.userService.findAllFromMyMonitor());
+        else {
+            return response_1.success(false);
         }
-        async getNumberOfStudyMonitorUsers() {
-            return response_1.success(await this.userService.findNumberOfStudyMonitor());
+    }
+    async getUserType(user) {
+        if (user) {
+            return response_1.success(await this.userService.findType(user));
         }
-        async getNumberOfMyMonitorUsers() {
-            return response_1.success(await this.userService.findNumberOfMyMonitor());
+        else {
+            return response_1.success(null);
         }
-        async checkIfUserTagNameExists(req, name) {
-            if (name) {
-                return response_1.success(!!await this.userService.findStudyMonitorUserTagByName(req.user.userId, name));
-            }
-            else {
-                return response_1.success(false);
-            }
+    }
+    async getListOfUserWebsites(user) {
+        if (user) {
+            return response_1.success(await this.userService.findAllWebsites(user));
         }
-        async getUserType(user) {
-            if (user) {
-                return response_1.success(await this.userService.findType(user));
-            }
-            else {
-                return response_1.success(null);
-            }
+        else {
+            throw new common_1.InternalServerErrorException();
         }
-        async getListOfUserWebsites(user) {
-            if (user) {
-                return response_1.success(await this.userService.findAllWebsites(user));
-            }
-            else {
-                throw new common_1.InternalServerErrorException();
-            }
+    }
+    async getListOfUserTags(user) {
+        if (user) {
+            return response_1.success(await this.userService.findAllTags(user));
         }
-        async getListOfUserTags(user) {
-            if (user) {
-                return response_1.success(await this.userService.findAllTags(user));
-            }
-            else {
-                throw new common_1.InternalServerErrorException();
-            }
+        else {
+            throw new common_1.InternalServerErrorException();
         }
-    };
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt')),
-        common_1.Post('changePassword'),
-        __param(0, common_1.Request()),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Object]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "changeUserPassword", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Post('create'),
-        __param(0, common_1.Request()),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Object]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "createUser", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Post('update'),
-        __param(0, common_1.Request()),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Object]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "updateUser", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Post('delete'),
-        __param(0, common_1.Request()),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Object]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "deleteUser", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('get/:id'),
-        __param(0, common_1.Param('id')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getUser", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('info/:userId'),
-        __param(0, common_1.Param('userId')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Number]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getUserInfo", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('exists/:username'),
-        __param(0, common_1.Param('username')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "checkIfUsernameExists", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('all'),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getAllNonAdminUsers", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('myMonitor'),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getAllMyMonitorUsers", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('studyMonitor/total'),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getNumberOfStudyMonitorUsers", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('myMonitor/total'),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getNumberOfMyMonitorUsers", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-        common_1.Get('tag/nameExists/:name'),
-        __param(0, common_1.Request()), __param(1, common_1.Param('name')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Object, String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "checkIfUserTagNameExists", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('type/:user'),
-        __param(0, common_1.Param('user')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getUserType", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('websites/:user'),
-        __param(0, common_1.Param('user')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getListOfUserWebsites", null);
-    __decorate([
-        common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-        common_1.Get('tags/:user'),
-        __param(0, common_1.Param('user')),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String]),
-        __metadata("design:returntype", Promise)
-    ], UserController.prototype, "getListOfUserTags", null);
-    UserController = __decorate([
-        common_1.Controller('user'),
-        __metadata("design:paramtypes", [user_service_1.UserService])
-    ], UserController);
-    return UserController;
-})();
+    }
+};
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt')),
+    common_1.Post('changePassword'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changeUserPassword", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('create'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('update'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Post('delete'),
+    __param(0, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('get/:id'),
+    __param(0, common_1.Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUser", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('info/:userId'),
+    __param(0, common_1.Param('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUserInfo", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('exists/:username'),
+    __param(0, common_1.Param('username')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "checkIfUsernameExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('all'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllNonAdminUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('myMonitor'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllMyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('studyMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getNumberOfStudyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('myMonitor/total'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getNumberOfMyMonitorUsers", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('tag/nameExists/:name'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('name')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "checkIfUserTagNameExists", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('type/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUserType", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('websites/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getListOfUserWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('tags/:user'),
+    __param(0, common_1.Param('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getListOfUserTags", null);
+UserController = __decorate([
+    common_1.Controller('user'),
+    __metadata("design:paramtypes", [user_service_1.UserService])
+], UserController);
 exports.UserController = UserController;
 //# sourceMappingURL=user.controller.js.map

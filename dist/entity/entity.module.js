@@ -12,18 +12,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const entity_service_1 = require("./entity.service");
 const entity_entity_1 = require("./entity.entity");
 const entity_controller_1 = require("./entity.controller");
-let EntityModule = (() => {
-    let EntityModule = class EntityModule {
-    };
-    EntityModule = __decorate([
-        common_1.Module({
-            imports: [typeorm_1.TypeOrmModule.forFeature([entity_entity_1.EntityTable])],
-            exports: [entity_service_1.EntityService],
-            providers: [entity_service_1.EntityService],
-            controllers: [entity_controller_1.EntityController]
-        })
-    ], EntityModule);
-    return EntityModule;
-})();
+let EntityModule = class EntityModule {
+};
+EntityModule = __decorate([
+    common_1.Module({
+        imports: [typeorm_1.TypeOrmModule.forFeature([entity_entity_1.EntityTable])],
+        exports: [entity_service_1.EntityService],
+        providers: [entity_service_1.EntityService],
+        controllers: [entity_controller_1.EntityController]
+    })
+], EntityModule);
 exports.EntityModule = EntityModule;
 //# sourceMappingURL=entity.module.js.map

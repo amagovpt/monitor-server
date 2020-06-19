@@ -14,7 +14,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -70,8 +70,8 @@ function completeMissingReportElements(report) {
     report.data.elems['ehandler'] = ehandler.length;
 }
 function generateScore(report) {
-    let SS = 0;
-    let PP = 0;
+    let rel = 0;
+    let pon = 0;
     for (const test in tests_1.default || {}) {
         const value = tests_1.default[test];
         if (report.data.elems.frame) {
@@ -90,50 +90,87 @@ function generateScore(report) {
                 }
                 break;
             case 'fals':
-                if ((value['elem'] === 'all') || report.data['elems'][value['elem']]) {
+                if ((value['elem'] === 'all') || report.data['elems'][value['elem']] !== undefined) {
                     if (report.data['elems'][value['test']] === undefined) {
                         calc = true;
                     }
                 }
                 break;
             case 'prop':
-                if (report.data['elems'][value['elem']] && report.data['elems'][value['test']]) {
+                if (report.data['elems'][value['elem']] !== undefined && report.data['elems'][value['test']] !== undefined) {
                     calc = true;
                 }
                 break;
         }
         if (calc) {
-            const C = parseFloat(tests_1.default[test]['trust']);
-            const E = report['data'].elems[tests_1.default[test]['elem']];
-            const S = report['data'].elems[tests_1.default[test]['test']];
-            let R = 0;
-            let N = 0;
-            for (const w of value['dis']) {
-                if (w > 1) {
-                    if (tests_1.default[test]['type'] === 'prop') {
-                        R += +(w * C).toFixed(2);
-                        const op = tests_1.default[test]['score'] * (1 - (S / E));
-                        N = op < 1 ? 1 : op;
-                    }
-                    else if (tests_1.default[test]['type'] === 'decr') {
-                        const T = tests_1.default[test]['top'];
-                        const F = tests_1.default[test]['steps'];
-                        const errors = S > T ? (S - T) / F : 0;
-                        R += +(w * C).toFixed(2);
-                        const op = (tests_1.default[test]['score'] - errors);
-                        N = op < 1 ? 1 : op;
-                    }
-                    else if (tests_1.default[test]['type'] === 'true' || tests_1.default[test]['type'] === 'fals') {
-                        R += +(w * C).toFixed(2);
-                        N = tests_1.default[test]['score'];
-                    }
-                }
+            let temp = null;
+            if (tests_1.default[test]['type'] === 'prop') {
+                temp = calculateProp(value, report);
             }
-            PP += +(R / 5).toFixed(2);
-            SS += +(N * +(R / 5).toFixed(2)).toFixed(1);
+            else if (tests_1.default[test]['type'] === 'decr') {
+                temp = calculateDecr(value, report);
+            }
+            else {
+                temp = calculateTrueFalse(value);
+            }
+            const rr = Math.round(temp['r'] / 5);
+            const pp = Math.round(temp['p'] / 5);
+            const ss = Math.round(temp['s'] * pp);
+            rel += ss;
+            pon += pp;
         }
     }
-    return (SS / PP).toFixed(1);
+    return (rel / pon).toFixed(1);
+}
+function calculateTrueFalse(v) {
+    const score = v['score'];
+    const ret = { s: score, p: 0, r: 0 };
+    for (const w in v['dis']) {
+        if (parseInt(w) > 1) {
+            const p = Math.round(v['trust'] * parseInt(w));
+            const r = Math.round(score * p);
+            ret['p'] += p;
+            ret['r'] += r;
+        }
+    }
+    return ret;
+}
+function calculateDecr(v, report) {
+    const test = report.data.elems[v['test']];
+    const limit = v['top'];
+    const steps = v['steps'];
+    const score = v['score'];
+    const errors = test - limit;
+    const minus = errors > 0 ? Math.round(errors / steps) : 0;
+    const op = score - minus;
+    const rr = op < 1 ? 1 : op;
+    const ret = { s: rr, p: 0, r: 0 };
+    for (const w in v['dis']) {
+        if (parseInt(w) > 1) {
+            const p = Math.round(v['trust'] * parseInt(w));
+            const r = Math.round(rr * p);
+            ret['p'] += p;
+            ret['r'] += r;
+        }
+    }
+    return ret;
+}
+function calculateProp(v, report) {
+    const elem = report.data.elems[v['elem']];
+    const test = report.data.elems[v['test']];
+    const score = v['score'];
+    const op = score - ((score / elem) * test);
+    const rr = op < 1 ? 1 : op;
+    const ret = { s: rr, p: 0, r: 0 };
+    for (const w in v['dis']) {
+        if (parseInt(w) > 1) {
+            const p = Math.round(v['trust'] * parseInt(w));
+            const r = Math.round(rr * p);
+            ret['p'] += p;
+            ret['r'] += r;
+        }
+    }
+    return ret;
 }
 function calculateCssRules(evaluation) {
     const cssReport = evaluation.modules['css-techniques'];
