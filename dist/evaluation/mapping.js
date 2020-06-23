@@ -296,7 +296,7 @@ function QW_HTML_T20(elements, results, nodes, technique) {
 function QW_HTML_T25(elements, results, nodes, technique) {
     const incorrectLabelResults = technique.results.filter((r) => (r.resultCode === 'RC1' || r.resultCode === 'RC2' || r.resultCode === 'RC3'));
     if (incorrectLabelResults.length > 0) {
-        addToElements(elements, 'labelPosNo', incorrectLabelResults);
+        addToElements(elements, 'labelPosNo', incorrectLabelResults.length);
         addToResults(results, 'label_02');
         addToNodes(nodes, 'labelPosNo', incorrectLabelResults.map((r) => r.pointer));
     }
@@ -503,10 +503,10 @@ function QW_BP7(elements, results, nodes, technique) {
     }
 }
 function QW_BP8(elements, results, nodes, technique) {
-    if (technique.metadata.outcome === 'passed') {
-        addToElements(elements, 'hxNo', technique.metadata.passed);
+    if (technique.metadata.outcome === 'failed') {
+        addToElements(elements, 'hxNo', technique.metadata.failed);
         addToResults(results, 'hx_02');
-        addToNodes(nodes, 'hxNo', technique.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
+        addToNodes(nodes, 'hxNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
     }
 }
 function QW_BP9(elements, results, nodes, technique) {
@@ -584,10 +584,10 @@ function addToResults(results, key) {
 function addToNodes(nodes, key, selectors) {
     for (const selector of selectors || []) {
         if (selector !== undefined && !nodes[key]) {
-            nodes[key] = selector;
+            nodes[key] = selector.substring(6);
         }
         else if (selector !== undefined) {
-            nodes[key] += '|' + selector;
+            nodes[key] += ', ' + selector.substring(6);
         }
         else if (xpath_1.default[key]) {
             console.log(xpath_1.default[key]);

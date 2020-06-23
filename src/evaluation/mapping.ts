@@ -315,7 +315,7 @@ function QW_HTML_T20(elements: any, results: any, nodes: any, technique: any): v
 function QW_HTML_T25(elements: any, results: any, nodes: any, technique: any): void {
   const incorrectLabelResults = technique.results.filter((r: any) => (r.resultCode === 'RC1' || r.resultCode === 'RC2' || r.resultCode === 'RC3'));
   if (incorrectLabelResults.length > 0) {
-    addToElements(elements, 'labelPosNo', incorrectLabelResults);
+    addToElements(elements, 'labelPosNo', incorrectLabelResults.length);
     addToResults(results, 'label_02');
     addToNodes(nodes, 'labelPosNo', incorrectLabelResults.map((r: any) => r.pointer));
   }
@@ -544,10 +544,10 @@ function QW_BP7(elements: any, results: any, nodes: any, technique: any): void {
 }
 
 function QW_BP8(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'hxNo', technique.metadata.passed);
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'hxNo', technique.metadata.failed);
     addToResults(results, 'hx_02');
-    addToNodes(nodes, 'hxNo', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'hxNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -635,9 +635,9 @@ function addToResults(results: any, key: string): void {
 function addToNodes(nodes: any, key: string, selectors: string[]): void {
   for (const selector of selectors || []) {
     if (selector !== undefined && !nodes[key]) {
-      nodes[key] = selector; //convert_css_selector_to_xpath(selector);
+      nodes[key] = selector.substring(6); //convert_css_selector_to_xpath(selector);
     } else if (selector !== undefined) {
-      nodes[key] += '|' + selector; //convert_css_selector_to_xpath(selector);
+      nodes[key] += ', ' + selector.substring(6); //convert_css_selector_to_xpath(selector);
     } else if (xpath[key]) {
       console.log(xpath[key]);
       nodes[key] = xpath[key];

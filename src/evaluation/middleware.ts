@@ -65,8 +65,11 @@ function generateScore(report: any): string {
 
   let rel = 0;
   let pon = 0;
-
-  for (const test in tests || {}) {
+  
+  //let SS = 0;
+  //let PP = 0;
+  //for (const test in tests || {}) {
+  for (const test in report.data.tot.results) {  
     const value = tests[test];
 
     if (report.data.elems.frame) {
@@ -74,7 +77,7 @@ function generateScore(report: any): string {
         continue;
       }
     }
-
+    
     let calc = false;
     switch (value['type']) {
       case 'true':
@@ -111,7 +114,7 @@ function generateScore(report: any): string {
         if (w > 1) {
           if (tests[test]['type'] === 'prop') {
             R += +(w * C).toFixed(2);
-            const op = tests[test]['score'] - ((tests[test]['score'] / E) * S); //tests[test]['score'] * (1 - (S / E));
+            const op = tests[test]['score'] * (1 - (S / E));
             N = op < 1 ? 1 : op;
           } else if (tests[test]['type'] === 'decr') {
             const T = tests[test]['top'];
@@ -139,27 +142,26 @@ function generateScore(report: any): string {
       } else {
         temp = calculateTrueFalse(value);
       }
-      //console.log(test, temp);
-      const rr = Math.round(temp['r'] / 5);
-      const pp = Math.round(temp['p'] / 5);
-      const ss = Math.round(temp['s'] * pp);
+      
+      const pp = temp['p'] / 5;
+      const ss = temp['s'] * pp;
       rel += ss;
       pon += pp;
     }
+    
   }
   
   return (rel / pon).toFixed(1);
+  //return (SS / PP).toFixed(1);
 }
 
 function calculateTrueFalse(v) {
   const score = v['score'];
-  const ret = {s: score, p: 0, r: 0};
+  const ret = {s: score, p: 0};
   for (const w in v['dis']) {
-    if (parseInt(w) > 1) {
-      const p = Math.round(v['trust'] * parseInt(w));
-      const r = Math.round(score * p);
+    if (parseInt(v.dis[w]) > 1) {
+      const p = +v['trust'] * parseInt(v.dis[w]);
       ret['p'] += p;
-      ret['r'] += r;
     }
   }
   return ret;
@@ -174,13 +176,11 @@ function calculateDecr(v, report) {
   const minus = errors > 0 ? Math.round(errors / steps) : 0;
   const op = score - minus;
   const rr = op < 1 ? 1 : op;
-  const ret = {s: rr, p: 0, r: 0};
+  const ret = {s: rr, p: 0};
   for (const w in v['dis']) {
-    if (parseInt(w) > 1) {
-      const p = Math.round(v['trust'] * parseInt(w));
-      const r = Math.round(rr * p);
+    if (parseInt(v.dis[w]) > 1) {
+      const p = +v['trust'] * parseInt(v.dis[w]);
       ret['p'] += p;
-      ret['r'] += r;
     }
   }
   return ret;
@@ -192,16 +192,14 @@ function calculateProp(v, report) {
   const score = v['score'];
   const op = score - ((score / elem) * test);
   const rr = op < 1 ? 1 : op;
-  const ret = {s: rr, p: 0, r: 0};
+  const ret = {s: rr, p: 0};
   for (const w in v['dis']) {
-    if (parseInt(w) > 1) {
-      const p = Math.round(v['trust'] * parseInt(w));
-      const r = Math.round(rr * p);
+    if (parseInt(v.dis[w]) > 1) {
+      const p = +v['trust'] * parseInt(v.dis[w]);
       ret['p'] += p;
-      ret['r'] += r;
     }
   }
-  return ret;
+  return clone(ret);
 }
 
 function calculateCssRules(evaluation: any): number {

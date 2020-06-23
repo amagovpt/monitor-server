@@ -72,7 +72,7 @@ function completeMissingReportElements(report) {
 function generateScore(report) {
     let rel = 0;
     let pon = 0;
-    for (const test in tests_1.default || {}) {
+    for (const test in report.data.tot.results) {
         const value = tests_1.default[test];
         if (report.data.elems.frame) {
             if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
@@ -113,9 +113,8 @@ function generateScore(report) {
             else {
                 temp = calculateTrueFalse(value);
             }
-            const rr = Math.round(temp['r'] / 5);
-            const pp = Math.round(temp['p'] / 5);
-            const ss = Math.round(temp['s'] * pp);
+            const pp = temp['p'] / 5;
+            const ss = temp['s'] * pp;
             rel += ss;
             pon += pp;
         }
@@ -124,13 +123,11 @@ function generateScore(report) {
 }
 function calculateTrueFalse(v) {
     const score = v['score'];
-    const ret = { s: score, p: 0, r: 0 };
+    const ret = { s: score, p: 0 };
     for (const w in v['dis']) {
-        if (parseInt(w) > 1) {
-            const p = Math.round(v['trust'] * parseInt(w));
-            const r = Math.round(score * p);
+        if (parseInt(v.dis[w]) > 1) {
+            const p = +v['trust'] * parseInt(v.dis[w]);
             ret['p'] += p;
-            ret['r'] += r;
         }
     }
     return ret;
@@ -144,13 +141,11 @@ function calculateDecr(v, report) {
     const minus = errors > 0 ? Math.round(errors / steps) : 0;
     const op = score - minus;
     const rr = op < 1 ? 1 : op;
-    const ret = { s: rr, p: 0, r: 0 };
+    const ret = { s: rr, p: 0 };
     for (const w in v['dis']) {
-        if (parseInt(w) > 1) {
-            const p = Math.round(v['trust'] * parseInt(w));
-            const r = Math.round(rr * p);
+        if (parseInt(v.dis[w]) > 1) {
+            const p = +v['trust'] * parseInt(v.dis[w]);
             ret['p'] += p;
-            ret['r'] += r;
         }
     }
     return ret;
@@ -161,16 +156,14 @@ function calculateProp(v, report) {
     const score = v['score'];
     const op = score - ((score / elem) * test);
     const rr = op < 1 ? 1 : op;
-    const ret = { s: rr, p: 0, r: 0 };
+    const ret = { s: rr, p: 0 };
     for (const w in v['dis']) {
-        if (parseInt(w) > 1) {
-            const p = Math.round(v['trust'] * parseInt(w));
-            const r = Math.round(rr * p);
+        if (parseInt(v.dis[w]) > 1) {
+            const p = +v['trust'] * parseInt(v.dis[w]);
             ret['p'] += p;
-            ret['r'] += r;
         }
     }
-    return ret;
+    return lodash_clone_1.default(ret);
 }
 function calculateCssRules(evaluation) {
     const cssReport = evaluation.modules['css-techniques'];
