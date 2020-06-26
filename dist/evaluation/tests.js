@@ -807,18 +807,6 @@ exports.default = {
         'dis': '22232',
         'result': 'failed'
     },
-    'id_01': {
-        'type': 'true',
-        'elem': 'id',
-        'test': 'idRep',
-        'score': 3,
-        'level': 'A',
-        'trust': '1',
-        'ref': 'F77',
-        'scs': '4.1.1',
-        'dis': '32321',
-        'result': 'failed'
-    },
     'font_01': {
         'type': 'decr',
         'elem': 'all',

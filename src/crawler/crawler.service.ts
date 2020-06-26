@@ -121,7 +121,7 @@ export class CrawlerService {
     });
 
     const urls = await page.evaluate((url) => {
-      const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json'.split('|');
+      const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt'.split('|');
 
       const links = document.querySelectorAll('body a');
 
@@ -138,6 +138,14 @@ export class CrawlerService {
                 valid = false;
                 break;
               }
+              const parts = href.split('/');
+              if (parts.length > 0) {
+                const lastPart = parts[parts.length - 1];
+                if (lastPart.startsWith('#') || lastPart.startsWith('javascript:') || lastPart.startsWith('tel:') || lastPart.startsWith('mailto:')) {
+                  valid = false;
+                  break;
+                }
+              }
             }
 
             if (valid) {
@@ -151,7 +159,7 @@ export class CrawlerService {
                   correctUrl = url + href;
                 }
                 const parsedUrl = new URL(correctUrl);
-                if (!parsedUrl.hash.trim()) {
+                if (parsedUrl.hash.trim() === '') {
                   urls.push(correctUrl);
                 }
               } catch (err) {

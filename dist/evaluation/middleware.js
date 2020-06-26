@@ -52,7 +52,7 @@ function completeMissingReportElements(report) {
     report.data.elems['inpImg'] = inpImg.length;
     const a = css_select_1.default('a', _dom);
     report.data.elems['a'] = a.length;
-    const hx = css_select_1.default('h1, h2, h3, h4, h5, h6', _dom);
+    const hx = css_select_1.default('h1, h2, h3, h4, h5, h6, [aria-level], [role="heading"]', _dom);
     report.data.elems['hx'] = hx.length;
     const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
     const label = css_select_1.default('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
@@ -62,12 +62,14 @@ function completeMissingReportElements(report) {
     const table = css_select_1.default('table', _dom);
     report.data.elems['tableData'] = table.length;
     report.data.elems['tableLayout'] = table.length;
+    report.data.elems['tableComplex'] = table.length;
     const tabletable = css_select_1.default('table table', _dom);
     report.data.elems['tableNested'] = tabletable.length;
     const iframe = css_select_1.default('iframe', _dom);
     report.data.elems['iframe'] = iframe.length;
     const ehandler = css_select_1.default('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
     report.data.elems['ehandler'] = ehandler.length;
+    report.data.elems['w3cValidator'] = 'true';
 }
 function generateScore(report) {
     let rel = 0;

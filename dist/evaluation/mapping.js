@@ -15,7 +15,6 @@ const act_mapping = {
     'QW-ACT-R9': QW_ACT_R9,
     'QW-ACT-R16': QW_ACT_R16,
     'QW-ACT-R17': QW_ACT_R17,
-    'QW-ACT-R18': QW_ACT_R18,
     'QW-ACT-R19': QW_ACT_R19
 };
 const html_mapping = {
@@ -165,7 +164,7 @@ function QW_ACT_R17(elements, results, nodes, rule) {
     if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'imgAltNo', rule.metadata.passed);
         addToResults(results, 'img_01a');
-        addToNodes(nodes, 'imgAltNo', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
+        addToNodes(nodes, 'img', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
     }
     else if (rule.metadata.outcome === 'failed') {
         addToElements(elements, 'imgAltNo', rule.metadata.failed);
@@ -177,13 +176,6 @@ function QW_ACT_R17(elements, results, nodes, rule) {
         addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
         addToResults(results, 'img_02');
         addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r) => r.pointer));
-    }
-}
-function QW_ACT_R18(elements, results, nodes, rule) {
-    if (rule.metadata.outcome === 'failed') {
-        addToElements(elements, 'idRep', rule.metadata.failed);
-        addToResults(results, 'id_01');
-        addToNodes(nodes, 'idRep', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
     }
 }
 function QW_ACT_R19(elements, results, nodes, rule) {
@@ -584,10 +576,10 @@ function addToResults(results, key) {
 function addToNodes(nodes, key, selectors) {
     for (const selector of selectors || []) {
         if (selector !== undefined && !nodes[key]) {
-            nodes[key] = selector.substring(6);
+            nodes[key] = selectors;
         }
         else if (selector !== undefined) {
-            nodes[key] += ', ' + selector.substring(6);
+            nodes[key] += ', ' + selector;
         }
         else if (xpath_1.default[key]) {
             console.log(xpath_1.default[key]);

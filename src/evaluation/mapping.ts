@@ -10,7 +10,6 @@ const act_mapping = {
   'QW-ACT-R9': QW_ACT_R9,
   'QW-ACT-R16': QW_ACT_R16,
   'QW-ACT-R17': QW_ACT_R17,
-  'QW-ACT-R18': QW_ACT_R18,
   'QW-ACT-R19': QW_ACT_R19
 };
 
@@ -170,7 +169,7 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === 'passed') {
     addToElements(elements, 'imgAltNo', rule.metadata.passed);
     addToResults(results, 'img_01a');
-    addToNodes(nodes, 'imgAltNo', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'img', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
   } else if (rule.metadata.outcome === 'failed') { 
     addToElements(elements, 'imgAltNo', rule.metadata.failed);
     addToResults(results, 'img_01b');
@@ -184,14 +183,6 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
     addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
     addToResults(results, 'img_02');
     addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r: any) => r.pointer));
-  }
-}
-
-function QW_ACT_R18(elements: any, results: any, nodes: any, rule: any): void {
-  if (rule.metadata.outcome === 'failed') {
-    addToElements(elements, 'idRep', rule.metadata.failed);
-    addToResults(results, 'id_01');
-    addToNodes(nodes, 'idRep', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -635,9 +626,9 @@ function addToResults(results: any, key: string): void {
 function addToNodes(nodes: any, key: string, selectors: string[]): void {
   for (const selector of selectors || []) {
     if (selector !== undefined && !nodes[key]) {
-      nodes[key] = selector.substring(6); //convert_css_selector_to_xpath(selector);
+      nodes[key] = selectors; //convert_css_selector_to_xpath(selector);
     } else if (selector !== undefined) {
-      nodes[key] += ', ' + selector.substring(6); //convert_css_selector_to_xpath(selector);
+      nodes[key] += ', ' + selector; //convert_css_selector_to_xpath(selector);
     } else if (xpath[key]) {
       console.log(xpath[key]);
       nodes[key] = xpath[key];

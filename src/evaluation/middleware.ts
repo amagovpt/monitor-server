@@ -36,7 +36,7 @@ function completeMissingReportElements(report: any): void {
   const a = CSSselect('a', _dom);
   report.data.elems['a'] = a.length;
 
-  const hx = CSSselect('h1, h2, h3, h4, h5, h6', _dom);
+  const hx = CSSselect('h1, h2, h3, h4, h5, h6, [aria-level], [role="heading"]', _dom);
   report.data.elems['hx'] = hx.length;
 
   const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
@@ -50,6 +50,7 @@ function completeMissingReportElements(report: any): void {
   const table = CSSselect('table', _dom);
   report.data.elems['tableData'] = table.length;
   report.data.elems['tableLayout'] = table.length;
+  report.data.elems['tableComplex'] = table.length;
 
   const tabletable = CSSselect('table table', _dom);
   report.data.elems['tableNested'] = tabletable.length;
@@ -59,6 +60,8 @@ function completeMissingReportElements(report: any): void {
 
   const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
   report.data.elems['ehandler'] = ehandler.length;
+
+  report.data.elems['w3cValidator'] = 'true';
 }
 
 function generateScore(report: any): string {
@@ -155,7 +158,7 @@ function generateScore(report: any): string {
   //return (SS / PP).toFixed(1);
 }
 
-function calculateTrueFalse(v) {
+function calculateTrueFalse(v: any): any {
   const score = v['score'];
   const ret = {s: score, p: 0};
   for (const w in v['dis']) {
@@ -167,7 +170,7 @@ function calculateTrueFalse(v) {
   return ret;
 }
 
-function calculateDecr(v, report) {
+function calculateDecr(v: any, report: any): any {
   const test = report.data.elems[v['test']];
   const limit = v['top'];
   const steps = v['steps'];
@@ -186,7 +189,7 @@ function calculateDecr(v, report) {
   return ret;
 }
 
-function calculateProp(v, report) {
+function calculateProp(v: any, report: any): any {
   const elem = report.data.elems[v['elem']];
   const test = report.data.elems[v['test']];
   const score = v['score'];
