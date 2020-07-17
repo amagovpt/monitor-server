@@ -161,6 +161,7 @@ let TagService = class TagService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, userId]);
         return pages;
     }
@@ -193,6 +194,7 @@ let TagService = class TagService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
         return pages;
     }
@@ -399,7 +401,7 @@ let TagService = class TagService {
         }
         return !hasError;
     }
-    async removeUserTag(userId, tagsId) {
+    async removeUserTag(tagsId) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -407,6 +409,7 @@ let TagService = class TagService {
         try {
             for (const id of tagsId || []) {
                 const relations = await queryRunner.manager.query(`SELECT * FROM TagWebsite WHERE TagId = ? AND WebsiteId <> -1`, [id]);
+                console.log(relations);
                 if (relations.length > 0) {
                     const websitesId = relations.map(tw => tw.WebsiteId);
                     await queryRunner.manager.delete(website_entity_1.Website, { WebsiteId: typeorm_2.In(websitesId) });

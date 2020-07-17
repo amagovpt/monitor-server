@@ -21,7 +21,7 @@ export declare class TagService {
     createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
     update(tagId: number, name: string, observatory: number, defaultWebsites: number[], websites: number[]): Promise<any>;
     delete(tagId: number): Promise<any>;
-    removeUserTag(userId: number, tagsId: number[]): Promise<any>;
+    removeUserTag(tagsId: number[]): Promise<any>;
     findAllUserTagWebsites(tag: string, user: string): Promise<any>;
     verifyUpdateWebsiteAdmin(websiteId: number): Promise<any>;
     domainExistsInAdmin(websiteId: number): Promise<any>;

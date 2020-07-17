@@ -13,6 +13,7 @@ export declare class CrawlerController {
     deleteCrawlUserPage(req: any): Promise<any>;
     crawlStudiesUserPage(req: any): Promise<any>;
     checkStudiesCrawlUserPage(req: any): Promise<any>;
+    getCrawlStudiesUserTagWebsites(tagName: string, req: any): Promise<any>;
     getCrawlStudiesUserPageResults(req: any): Promise<any>;
     deleteCrawlStudiesUserPage(req: any): Promise<any>;
     deleteCrawl(req: any): Promise<any>;

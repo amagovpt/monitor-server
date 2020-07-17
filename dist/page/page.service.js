@@ -172,6 +172,7 @@ let PageService = class PageService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
         return pages;
     }
@@ -217,14 +218,14 @@ let PageService = class PageService {
       `, [userId, pageId]);
         return pages.length > 0;
     }
-    async addPageToEvaluate(url, showTo = '10', userId = null) {
+    async addPageToEvaluate(url, showTo = '10', userId = null, studyUserId = null) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
             const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
-            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date()]);
+            await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]);
             await queryRunner.commitTransaction();
         }
         catch (err) {
@@ -371,7 +372,7 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const uri of uris || []) {
-                const pageExists = await queryRunner.manager.findOne(page_entity_1.Page, { Uri: uri }, { select: ['PageId'] });
+                const pageExists = await queryRunner.manager.findOne(page_entity_1.Page, { Uri: uri }, { select: ['PageId', 'Uri', 'Creation_Date'] });
                 if (pageExists) {
                     const domainPage = await queryRunner.manager.query(`SELECT 
               dp.* 
@@ -391,7 +392,7 @@ let PageService = class PageService {
               d.WebsiteId = w.WebsiteId AND
               dp.DomainId = d.DomainId AND
               dp.PageId = ?`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, pageExists.PageId]);
-                    if (domainPage) {
+                    if (domainPage.length === 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
               SELECT 
                 d.DomainId, 
@@ -410,6 +411,7 @@ let PageService = class PageService {
                 w.UserId = ? AND
                 d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
                     }
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [pageExists.PageId, userId, pageExists.Uri, '00', pageExists.Creation_Date, userId]);
                 }
                 else {
                     const newPage = new page_entity_1.Page();
@@ -453,7 +455,7 @@ let PageService = class PageService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
                     }
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date, userId]);
                 }
             }
             await queryRunner.commitTransaction();

@@ -18,7 +18,9 @@ export async function evaluate(params: any): Promise<any> {
         'QW-ACT-R16', 
         'QW-ACT-R17', 
         'QW-ACT-R18', 
-        'QW-ACT-R19'
+        'QW-ACT-R19',
+        'QW-ACT-R37',
+        'QW-ACT-R47'
       ]
     },
     'html-techniques': {
@@ -42,17 +44,16 @@ export async function evaluate(params: any): Promise<any> {
         'QW-HTML-T35',
         'QW-HTML-T37',
         'QW-HTML-T38',
-        'QW-HTML-T40', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
+        'QW-HTML-T40',
         'QW-HTML-T41',
         'QW-HTML-T42',
-        'QW-HTML-T43', //TODO: needs fix - error on https://lodash.com/docs/4.17.15
+        'QW-HTML-T43',
       ]
     },
     'css-techniques': {
       techniques: [
         'QW-CSS-T1',
         'QW-CSS-T2',
-        'QW-CSS-T3',
         'QW-CSS-T5',
         'QW-CSS-T6',
         'QW-CSS-T7'
@@ -63,11 +64,10 @@ export async function evaluate(params: any): Promise<any> {
         'QW-BP1',
         'QW-BP2',
         'QW-BP3',
-        //'QW-BP4',
         'QW-BP5',
         'QW-BP6',
         'QW-BP7',
-        'QW-BP8', //TODO: needs fix - error on https://rtp.pt
+        'QW-BP8',
         'QW-BP9',
         'QW-BP10',
         'QW-BP11',

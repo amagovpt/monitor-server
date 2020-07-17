@@ -169,6 +169,7 @@ export class TagService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, userId]);
 
     return pages;
@@ -203,6 +204,7 @@ export class TagService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId);`, [tag.toLowerCase(), userId, website.toLowerCase(), userId]);
 
     return pages;
@@ -442,7 +444,7 @@ export class TagService {
     return !hasError;
   }
 
-  async removeUserTag(userId: number, tagsId: number[]): Promise<any> {
+  async removeUserTag(tagsId: number[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -452,11 +454,13 @@ export class TagService {
     try {
       for (const id of tagsId || []) {
         const relations = await queryRunner.manager.query(`SELECT * FROM TagWebsite WHERE TagId = ? AND WebsiteId <> -1`, [id]);
+        console.log(relations);
         if (relations.length > 0) {
           const websitesId = relations.map(tw => tw.WebsiteId);
           await queryRunner.manager.delete(Website, { WebsiteId: In(websitesId) });
         }
       }
+      
       await queryRunner.manager.delete(Tag, { TagId: In(tagsId) });
 
       await queryRunner.commitTransaction();

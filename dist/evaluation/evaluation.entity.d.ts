@@ -12,4 +12,5 @@ export declare class Evaluation {
     AAA: number;
     Evaluation_Date: any;
     Show_To: string;
+    StudyUserId: number;
 }

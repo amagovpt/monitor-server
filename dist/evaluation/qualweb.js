@@ -39,7 +39,9 @@ async function evaluate(params) {
                 'QW-ACT-R16',
                 'QW-ACT-R17',
                 'QW-ACT-R18',
-                'QW-ACT-R19'
+                'QW-ACT-R19',
+                'QW-ACT-R37',
+                'QW-ACT-R47'
             ]
         },
         'html-techniques': {
@@ -73,7 +75,6 @@ async function evaluate(params) {
             techniques: [
                 'QW-CSS-T1',
                 'QW-CSS-T2',
-                'QW-CSS-T3',
                 'QW-CSS-T5',
                 'QW-CSS-T6',
                 'QW-CSS-T7'

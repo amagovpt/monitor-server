@@ -108,11 +108,17 @@ export class CrawlerController {
   }
 
   @UseGuards(AuthGuard('jwt-study'))
+  @Get('tag/:tagName')
+  async getCrawlStudiesUserTagWebsites(@Param('tagName') tagName: string, @Request() req: any): Promise<any> {
+    const userId = req.user.userId;
+    return success(await this.crawlerService.getUserTagWebsitesCrawlResults(userId, decodeURIComponent(tagName)));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
   @Post('crawlStudiesUserResults')
   async getCrawlStudiesUserPageResults(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const domainId = req.body.domain;
 
     return success(await this.crawlerService.getUserCrawlResults(userId, domainId));
   }
@@ -121,8 +127,7 @@ export class CrawlerController {
   @Post('crawlStudiesUserDelete')
   async deleteCrawlStudiesUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const domainId = req.body.domain;
 
     return success(await this.crawlerService.deleteUserCrawler(userId, domainId));
   }

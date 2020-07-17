@@ -33,10 +33,7 @@ function completeMissingReportElements(report: any): void {
   const inpImg = CSSselect('a', _dom);
   report.data.elems['inpImg'] = inpImg.length;
 
-  const a = CSSselect('a', _dom);
-  report.data.elems['a'] = a.length;
-
-  const hx = CSSselect('h1, h2, h3, h4, h5, h6, [aria-level], [role="heading"]', _dom);
+  const hx = CSSselect('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
   report.data.elems['hx'] = hx.length;
 
   const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
@@ -61,7 +58,7 @@ function completeMissingReportElements(report: any): void {
   const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
   report.data.elems['ehandler'] = ehandler.length;
 
-  report.data.elems['w3cValidator'] = 'true';
+  //report.data.elems['w3cValidator'] = 'true';
 }
 
 function generateScore(report: any): string {
@@ -150,6 +147,8 @@ function generateScore(report: any): string {
       const ss = temp['s'] * pp;
       rel += ss;
       pon += pp;
+
+      report.data.tot.results[test] = value['score'] + '@' + ss;
     }
     
   }

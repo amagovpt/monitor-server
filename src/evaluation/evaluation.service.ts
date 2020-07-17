@@ -31,7 +31,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
-    if (process.env.ID === '0') {
+    if (process.env.ID === undefined || process.env.ID === '0') {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
 
@@ -73,7 +73,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   async instance4EvaluateUserPageList(): Promise<void> {
-    if (process.env.ID === '3') {
+    if (process.env.ID === undefined || process.env.ID === '3') {
       if (!this.isEvaluatingUserInstance4) {
         this.isEvaluatingUserInstance4 = true;
 
@@ -190,7 +190,7 @@ export class EvaluationService {
 
         try {
           if (!error && evaluation) {
-            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To, pte.StudyUserId);
 
             await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
           } else {
@@ -269,7 +269,7 @@ export class EvaluationService {
     }
   }
 
-  async savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string): Promise<any> {
+  async savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string, studyUserId: number | null = null): Promise<any> {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
     newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
@@ -286,6 +286,7 @@ export class EvaluationService {
     newEvaluation.AAA = conform[2];
     newEvaluation.Evaluation_Date = evaluation.data.date;
     newEvaluation.Show_To = showTo;
+    newEvaluation.StudyUserId = studyUserId;
 
     await queryRunner.manager.save(newEvaluation);
   }
@@ -356,9 +357,10 @@ export class EvaluationService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         LOWER(p.Uri) = ? AND 
-        e.PageId = p.PageId
+        e.PageId = p.PageId AND
+        e.StudyUserId = ?
       ORDER BY e.Evaluation_Date DESC 
-      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase()]))[0];
+      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase(), userId]))[0];
 
     if (evaluation) {
       const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());

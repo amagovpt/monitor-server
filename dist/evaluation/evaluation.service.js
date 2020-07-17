@@ -31,7 +31,7 @@ let EvaluationService = class EvaluationService {
         middleware_1.initEvaluator();
     }
     async instance1EvaluatePageList() {
-        if (process.env.ID === '0') {
+        if (process.env.ID === undefined || process.env.ID === '0') {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -61,7 +61,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance4EvaluateUserPageList() {
-        if (process.env.ID === '3') {
+        if (process.env.ID === undefined || process.env.ID === '3') {
             if (!this.isEvaluatingUserInstance4) {
                 this.isEvaluatingUserInstance4 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -113,7 +113,7 @@ let EvaluationService = class EvaluationService {
                 await queryRunner.startTransaction();
                 try {
                     if (!error && evaluation) {
-                        this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To);
+                        this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To, pte.StudyUserId);
                         await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
                     }
                     else {
@@ -179,7 +179,7 @@ let EvaluationService = class EvaluationService {
             throw new common_1.InternalServerErrorException();
         }
     }
-    async savePageEvaluation(queryRunner, pageId, evaluation, showTo) {
+    async savePageEvaluation(queryRunner, pageId, evaluation, showTo, studyUserId = null) {
         const newEvaluation = new evaluation_entity_1.Evaluation();
         newEvaluation.PageId = pageId;
         newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
@@ -194,6 +194,7 @@ let EvaluationService = class EvaluationService {
         newEvaluation.AAA = conform[2];
         newEvaluation.Evaluation_Date = evaluation.data.date;
         newEvaluation.Show_To = showTo;
+        newEvaluation.StudyUserId = studyUserId;
         await queryRunner.manager.save(newEvaluation);
     }
     async findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url) {
@@ -258,9 +259,10 @@ let EvaluationService = class EvaluationService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         LOWER(p.Uri) = ? AND 
-        e.PageId = p.PageId
+        e.PageId = p.PageId AND
+        e.StudyUserId = ?
       ORDER BY e.Evaluation_Date DESC 
-      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase()]))[0];
+      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase(), userId]))[0];
         if (evaluation) {
             const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
             return {

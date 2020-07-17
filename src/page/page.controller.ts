@@ -105,7 +105,7 @@ export class PageController {
     const isUserPage = await this.pageService.isPageFromStudyMonitorUser(userId, tag, website, page.PageId);
     
     if (isUserPage) {
-      return success(await this.pageService.addPageToEvaluate(url, '00', userId));
+      return success(await this.pageService.addPageToEvaluate(url, '00', userId, userId));
     } else {
       throw new UnauthorizedException();
     }

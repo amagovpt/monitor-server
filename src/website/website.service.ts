@@ -401,7 +401,7 @@ export class WebsiteService {
     try {
       for (const page of pages || []) {
         try {
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', new Date()]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', new Date(), userId]);
         } catch (_) {
           
         }
@@ -428,7 +428,7 @@ export class WebsiteService {
           w.Name,
           d.Url,
           COUNT(distinct p.PageId) as Pages,
-          AVG(distinct e.Score) as Score
+          AVG(e.Score) as Score
         FROM
           Tag as t,
           TagWebsite as tw,
@@ -436,7 +436,7 @@ export class WebsiteService {
           Domain as d
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId
-          LEFT OUTER JOIN Evaluation as e ON e.Evaluation_Date IN (
+          LEFT OUTER JOIN Evaluation as e ON e.StudyUserId = ? AND e.Evaluation_Date IN (
             SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId
           )
         WHERE
@@ -446,7 +446,7 @@ export class WebsiteService {
           w.WebsiteId = tw.WebsiteId AND
           w.UserId = ? AND
           d.WebsiteId = w.WebsiteId
-        GROUP BY w.WebsiteId, d.Url`, [tagName.toLowerCase(), userId, userId]);
+        GROUP BY w.WebsiteId, d.Url`, [userId, tagName.toLowerCase(), userId, userId]);
     } else {
       throw new InternalServerErrorException();
     }
@@ -598,6 +598,7 @@ export class WebsiteService {
         const page = await queryRunner.manager.findOne(Page, { where: { Uri: url } });
         if (page) {
           await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
+          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', page.Creation_Date, userId]);
         } else {
           //const evaluation = await this.evaluationService.evaluateUrl(url);
 

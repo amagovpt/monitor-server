@@ -19,6 +19,7 @@ export declare class CrawlerService {
     isCrawlSubDomainDone(subDomain: string): Promise<any>;
     isUserCrawlerDone(userId: number, domainId: number): Promise<boolean>;
     getUserCrawlResults(userId: number, domainId: number): Promise<boolean>;
+    getUserTagWebsitesCrawlResults(userId: number, tagName: string): Promise<any>;
     deleteUserCrawler(userId: number, domainId: number): Promise<boolean>;
     crawlDomain(userId: number, subDomain: string, domain: string, domainId: number, maxDepth: number, maxPages: number): Promise<any>;
     getCrawlResultsCrawlDomainID(crawlDomainID: number): Promise<any>;

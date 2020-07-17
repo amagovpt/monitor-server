@@ -15,7 +15,7 @@ export declare class PageService {
     findPageFromUrl(url: string): Promise<any>;
     isPageFromStudyMonitorUser(userId: number, tag: string, website: string, pageId: number): Promise<any>;
     isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any>;
-    addPageToEvaluate(url: string, showTo?: string, userId?: number | null): Promise<boolean>;
+    addPageToEvaluate(url: string, showTo?: string, userId?: number | null, studyUserId?: number | null): Promise<boolean>;
     addPages(domainId: number, uris: string[], observatory: string[]): Promise<boolean>;
     createMyMonitorUserWebsitePages(userId: number, website: string, domain: string, uris: string[]): Promise<any>;
     removeMyMonitorUserWebsitePages(userId: number, website: string, pagesIds: number[]): Promise<any>;

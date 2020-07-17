@@ -93,8 +93,8 @@ export class TagController {
   @Post('user/remove')
   async removeStudyMonitorUserTag(@Request() req: any): Promise<any> {
     const tagsId = JSON.parse(req.body.tagsId);
-
-    const removeSuccess = await this.tagService.removeUserTag(req.user.userId, tagsId);
+    
+    const removeSuccess = await this.tagService.removeUserTag(tagsId);
 
     if (!removeSuccess) {
       throw new InternalServerErrorException();

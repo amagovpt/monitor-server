@@ -80,16 +80,18 @@ let CrawlerController = class CrawlerController {
         const domainId = await this.crawlerService.getDomainId(userId, domain);
         return response_1.success(await this.crawlerService.isUserCrawlerDone(userId, domainId));
     }
+    async getCrawlStudiesUserTagWebsites(tagName, req) {
+        const userId = req.user.userId;
+        return response_1.success(await this.crawlerService.getUserTagWebsitesCrawlResults(userId, decodeURIComponent(tagName)));
+    }
     async getCrawlStudiesUserPageResults(req) {
         const userId = req.user.userId;
-        const domain = req.body.domain;
-        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        const domainId = req.body.domain;
         return response_1.success(await this.crawlerService.getUserCrawlResults(userId, domainId));
     }
     async deleteCrawlStudiesUserPage(req) {
         const userId = req.user.userId;
-        const domain = req.body.domain;
-        const domainId = await this.crawlerService.getDomainId(userId, domain);
+        const domainId = req.body.domain;
         return response_1.success(await this.crawlerService.deleteUserCrawler(userId, domainId));
     }
     async deleteCrawl(req) {
@@ -186,6 +188,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CrawlerController.prototype, "checkStudiesCrawlUserPage", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
+    common_1.Get('tag/:tagName'),
+    __param(0, common_1.Param('tagName')), __param(1, common_1.Request()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CrawlerController.prototype, "getCrawlStudiesUserTagWebsites", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
     common_1.Post('crawlStudiesUserResults'),

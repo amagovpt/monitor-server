@@ -83,4 +83,10 @@ export class Evaluation {
     nullable: false
   })
   Show_To: string;
+
+  @Column({
+    type: 'int',
+    nullable: true
+  })
+  StudyUserId: number;
 }

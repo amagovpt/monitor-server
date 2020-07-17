@@ -107,6 +107,13 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], Evaluation.prototype, "Show_To", void 0);
+__decorate([
+    typeorm_1.Column({
+        type: 'int',
+        nullable: true
+    }),
+    __metadata("design:type", Number)
+], Evaluation.prototype, "StudyUserId", void 0);
 Evaluation = __decorate([
     typeorm_1.Entity('Evaluation')
 ], Evaluation);

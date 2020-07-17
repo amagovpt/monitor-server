@@ -24,7 +24,7 @@ export class CrawlerService {
   ) {
     this.isCrawling = false;
 
-    if (process.env.ID === '0' || process.env.ID === '1') {
+    if (process.env.ID === undefined || process.env.ID === '0' || process.env.ID === '1') {
       puppeteer.launch().then(browser => {
         this.browser = browser;
       });
@@ -33,7 +33,7 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawl(): Promise<void> {
-    if (process.env.ID === '0') {
+    if (process.env.ID === undefined || process.env.ID === '0') {
       if (!this.isCrawling) {
         this.isCrawling = true;
 
@@ -73,7 +73,7 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawlUser(): Promise<void> {
-    if (process.env.ID === '1') {
+    if (process.env.ID === undefined || process.env.ID === '1') {
       if (!this.isCrawling) {
         this.isCrawling = true;
 
@@ -298,6 +298,34 @@ export class CrawlerService {
     `, [userId, domainId]);
 
     return pages;
+  }
+
+  async getUserTagWebsitesCrawlResults(userId: number, tagName: string): Promise<any> {
+    const manager = getManager();
+
+    const websites = await manager.query(`
+      SELECT
+        w.Name,
+        cd.Done,
+        d.DomainId,
+        d.Url
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        CrawlDomain as cd
+      WHERE
+        t.Name = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        d.WebsiteId = w.WebsiteId AND
+        cd.DomainId = d.DomainId AND
+        cd.UserId = ?
+    `, [tagName, userId, userId]);
+
+    return websites;
   }
 
   async deleteUserCrawler(userId: number, domainId: number): Promise<boolean> {

@@ -32,14 +32,14 @@ let CrawlerService = class CrawlerService {
         this.newCrawler = newCrawler;
         this.connection = connection;
         this.isCrawling = false;
-        if (process.env.ID === '0' || process.env.ID === '1') {
+        if (process.env.ID === undefined || process.env.ID === '0' || process.env.ID === '1') {
             puppeteer_1.default.launch().then(browser => {
                 this.browser = browser;
             });
         }
     }
     async nestCrawl() {
-        if (process.env.ID === '0') {
+        if (process.env.ID === undefined || process.env.ID === '0') {
             if (!this.isCrawling) {
                 this.isCrawling = true;
                 const queryRunner = this.connection.createQueryRunner();
@@ -71,7 +71,7 @@ let CrawlerService = class CrawlerService {
         }
     }
     async nestCrawlUser() {
-        if (process.env.ID === '1') {
+        if (process.env.ID === undefined || process.env.ID === '1') {
             if (!this.isCrawling) {
                 this.isCrawling = true;
                 const queryRunner = this.connection.createQueryRunner();
@@ -263,6 +263,31 @@ let CrawlerService = class CrawlerService {
         cp.CrawlDomainId = cd.CrawlDomainId
     `, [userId, domainId]);
         return pages;
+    }
+    async getUserTagWebsitesCrawlResults(userId, tagName) {
+        const manager = typeorm_2.getManager();
+        const websites = await manager.query(`
+      SELECT
+        w.Name,
+        cd.Done,
+        d.DomainId,
+        d.Url
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        CrawlDomain as cd
+      WHERE
+        t.Name = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        d.WebsiteId = w.WebsiteId AND
+        cd.DomainId = d.DomainId AND
+        cd.UserId = ?
+    `, [tagName, userId, userId]);
+        return websites;
     }
     async deleteUserCrawler(userId, domainId) {
         try {

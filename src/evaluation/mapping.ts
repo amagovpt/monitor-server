@@ -10,7 +10,9 @@ const act_mapping = {
   'QW-ACT-R9': QW_ACT_R9,
   'QW-ACT-R16': QW_ACT_R16,
   'QW-ACT-R17': QW_ACT_R17,
-  'QW-ACT-R19': QW_ACT_R19
+  'QW-ACT-R19': QW_ACT_R19,
+  'QW-ACT-R37': QW_ACT_R37,
+  'QW-ACT-R47': QW_ACT_R47
 };
 
 const html_mapping = {
@@ -42,7 +44,6 @@ const html_mapping = {
 const css_mapping = {
   'QW-CSS-T1': QW_CSS_T1,
   'QW-CSS-T2': QW_CSS_T2,
-  'QW-CSS-T3': QW_CSS_T3,
   'QW-CSS-T5': QW_CSS_T5,
   'QW-CSS-T6': QW_CSS_T6,
   'QW-CSS-T7': QW_CSS_T7
@@ -191,7 +192,22 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     addToElements(elements, 'iframeTitleNo', rule.metadata.failed);
     addToResults(results, 'iframe_01');
     addToNodes(nodes, 'iframeTitleNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
-    addToElements(elements, 'iframe_01', (rule.results.filter((r: any) => r.verdict !== 'inapplicable')).length);
+  }
+}
+
+function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === 'failed') {
+    addToElements(elements, 'colorContrast', rule.metadata.failed);
+    addToResults(results, 'color_02');
+    addToNodes(nodes, 'colorContrast', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+  }
+}
+
+function QW_ACT_R47(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === 'failed') {
+    addToElements(elements, 'lineHeightNo', rule.metadata.failed);
+    addToResults(results, 'css_01');
+    addToNodes(nodes, 'lineHeightNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -293,10 +309,12 @@ function QW_HTML_T19(elements: any, results: any, nodes: any, technique: any): v
 
 function QW_HTML_T20(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'w3cValidator', 'true');
     addToElements(elements, 'w3cValidatorErrors', technique.metadata.failed);
     addToResults(results, 'w3c_validator_01b');
     addToNodes(nodes, 'w3cValidatorErrors', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   } else if (technique.metadata.outcome === 'passed') {
+    addToElements(elements, 'w3cValidator', 'true');
     addToElements(elements, 'w3cValidatorErrors', technique.metadata.passed);
     addToResults(results, 'w3c_validator_01a');
     addToNodes(nodes, 'w3cValidatorErrors', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
@@ -425,7 +443,7 @@ function QW_CSS_T1(elements: any, results: any, nodes: any, technique: any): voi
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'fontAbsVal', technique.metadata.failed);
     addToResults(results, 'font_02');
-    addToNodes(nodes, 'fontAbsVal', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
+    addToNodes(nodes, 'fontAbsVal', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -433,15 +451,7 @@ function QW_CSS_T2(elements: any, results: any, nodes: any, technique: any): voi
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'justifiedCss', technique.metadata.failed);
     addToResults(results, 'justif_txt_02');
-    addToNodes(nodes, 'justifiedCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
-  }
-}
-
-function QW_CSS_T3(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'lineHeightNo', technique.metadata.failed);
-    addToResults(results, 'css_01');
-    addToNodes(nodes, 'lineHeightNo', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
+    addToNodes(nodes, 'justifiedCss', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -449,7 +459,7 @@ function QW_CSS_T5(elements: any, results: any, nodes: any, technique: any): voi
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'valueAbsCss', technique.metadata.failed);
     addToResults(results, 'values_02a');
-    addToNodes(nodes, 'valueAbsCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
+    addToNodes(nodes, 'valueAbsCss', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
   if (technique.metadata.passed > 0) {
     addToElements(elements, 'valueRelCss', technique.metadata.passed);
@@ -470,7 +480,7 @@ function QW_CSS_T7(elements: any, results: any, nodes: any, technique: any): voi
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'colorFgBgNo', technique.metadata.failed);
     addToResults(results, 'color_01');
-    addToNodes(nodes, 'colorFgBgNo', [JSON.stringify(technique.results.filter(r => r.verdict === 'failed'))]);
+    addToNodes(nodes, 'colorFgBgNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -522,7 +532,7 @@ function QW_BP6(elements: any, results: any, nodes: any, technique: any): void {
  if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'titleLong', technique.metadata.failed);
     addToResults(results, 'title_04');
-    addToNodes(nodes, 'titleLong', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'titleLong', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 }
 
@@ -556,7 +566,7 @@ function QW_BP10(elements: any, results: any, nodes: any, technique: any): void 
     addToResults(results, 'layout_01b');
     addToNodes(nodes, 'layoutElem', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   } else if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'layoutElem', technique.metadata.passed);
+    addToElements(elements, 'layoutElem', 0);
     addToResults(results, 'layout_01a');
     addToNodes(nodes, 'layoutElem', undefined);
   }
@@ -608,6 +618,9 @@ function QW_BP16(elements: any, results: any, nodes: any, technique: any): void 
     addToElements(elements, 'a', 0);
     addToResults(results, 'a_04');
     addToNodes(nodes, 'a', []);
+  } else if (technique.metadata.outcome === 'passed') {
+    addToElements(elements, 'a', technique.results.length);
+    addToNodes(nodes, 'a', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
   }
 }
 
