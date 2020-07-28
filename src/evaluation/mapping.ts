@@ -28,7 +28,6 @@ const html_mapping = {
   'QW-HTML-T20': QW_HTML_T20,
   'QW-HTML-T25': QW_HTML_T25,
   'QW-HTML-T28': QW_HTML_T28,
-  'QW-HTML-T29': QW_HTML_T29,
   'QW-HTML-T30': QW_HTML_T30,
   'QW-HTML-T32': QW_HTML_T32,
   'QW-HTML-T34': QW_HTML_T34,
@@ -177,8 +176,7 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(nodes, 'imgAltNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }
 
-  //TODO: Revisitar regra
-  const imgEmptyAlt = rule.results.filter((r: any) => r.resultCode === 'RC6');
+  const imgEmptyAlt = rule.results.filter((r: any) => r.resultCode === 'RC1');
   
   if (imgEmptyAlt.length > 0) {
     addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
@@ -248,14 +246,18 @@ function QW_HTML_T3(elements: any, results: any, nodes: any, technique: any): vo
 }
 
 function QW_HTML_T6(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'ehandBoth', technique.metadata.passed);
+  const passed = technique.results.filter((r: any) => r.verdict === 'passed');
+  if (passed.length > 0) {
+    addToElements(elements, 'ehandBoth', passed.length);
     addToResults(results, 'ehandler_03');
-    addToNodes(nodes, 'ehandBoth', technique.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
-  } else if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'ehandBothNo', technique.metadata.failed);
+    addToNodes(nodes, 'ehandBoth', passed.map((r: any) => r.pointer));
+  } 
+  
+  const failed = technique.results.filter((r: any) => r.verdict === 'failed');
+  if (failed.length > 0) {
+    addToElements(elements, 'ehandBothNo', failed.length);
     addToResults(results, 'ehandler_02');
-    addToNodes(nodes, 'ehandBothNo', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'ehandBothNo', failed.map((r: any) => r.pointer));
   }
 }
 
@@ -335,14 +337,6 @@ function QW_HTML_T28(elements: any, results: any, nodes: any, technique: any): v
     addToElements(elements, 'liNoList', technique.metadata.failed);
     addToResults(results, 'list_01');
     addToNodes(nodes, 'liNoList', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
-  }
-}
-
-function QW_HTML_T29(elements: any, results: any, nodes: any, technique: any): void {
-  if (technique.metadata.outcome === 'warning') {
-    addToElements(elements, 'ehandMouse', technique.metadata.warning);
-    addToResults(results, 'ehandler_01');
-    addToNodes(nodes, 'ehandMouse', technique.results.filter((r: any) => r.verdict === 'warning').map((r: any) => r.pointer));
   }
 }
 
@@ -643,7 +637,6 @@ function addToNodes(nodes: any, key: string, selectors: string[]): void {
     } else if (selector !== undefined) {
       nodes[key] += ', ' + selector; //convert_css_selector_to_xpath(selector);
     } else if (xpath[key]) {
-      console.log(xpath[key]);
       nodes[key] = xpath[key];
     }
   }

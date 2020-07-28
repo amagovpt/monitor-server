@@ -733,18 +733,6 @@ exports.default = {
         'dis': '15152',
         'result': 'failed'
     },
-    'ehandler_01': {
-        'type': 'true',
-        'elem': 'ehandler',
-        'test': 'ehandMouse',
-        'score': 1,
-        'level': 'A',
-        'trust': '1',
-        'ref': 'F54',
-        'scs': '2.1.1',
-        'dis': '53512',
-        'result': 'warning'
-    },
     'ehandler_03': {
         'type': 'true',
         'elem': 'ehandler',

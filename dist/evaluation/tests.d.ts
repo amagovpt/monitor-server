@@ -731,18 +731,6 @@ declare const _default: {
         dis: string;
         result: string;
     };
-    ehandler_01: {
-        type: string;
-        elem: string;
-        test: string;
-        score: number;
-        level: string;
-        trust: string;
-        ref: string;
-        scs: string;
-        dis: string;
-        result: string;
-    };
     ehandler_03: {
         type: string;
         elem: string;

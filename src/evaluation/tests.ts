@@ -731,7 +731,7 @@ export default {
     'dis': '15152',
     'result': 'failed'
   },
-  'ehandler_01': {
+  /*'ehandler_01': {
     'type': 'true',
     'elem': 'ehandler',
     'test': 'ehandMouse',
@@ -742,7 +742,7 @@ export default {
     'scs': '2.1.1',
     'dis': '53512',
     'result': 'warning'
-  },
+  },*/
   'ehandler_03': {
     'type': 'true',
     'elem': 'ehandler',
