@@ -44,14 +44,18 @@ function completeMissingReportElements(report) {
     const parser = new htmlparser.Parser(handler);
     parser.write(report.pagecode.replace(/(\r\n|\n|\r|\t)/gm, ''));
     parser.end();
-    const img = css_select_1.default('img', _dom);
-    report.data.elems['img'] = img.length;
+    if (report.data.elems['img'] === undefined) {
+        const img = css_select_1.default('img', _dom);
+        report.data.elems['img'] = img.length;
+    }
     const area = css_select_1.default('area', _dom);
     report.data.elems['area'] = area.length;
     const inpImg = css_select_1.default('a', _dom);
     report.data.elems['inpImg'] = inpImg.length;
-    const hx = css_select_1.default('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
-    report.data.elems['hx'] = hx.length;
+    if (report.data.elems['hx'] === undefined) {
+        const hx = css_select_1.default('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
+        report.data.elems['hx'] = hx.length;
+    }
     const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
     const label = css_select_1.default('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
     report.data.elems['label'] = label.length;

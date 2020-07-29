@@ -73,31 +73,31 @@ function QW_ACT_R1(elements, results, nodes, rule) {
         if (noTitle.length !== 0) {
             addToElements(elements, 'titleNo', noTitle.length);
             addToResults(results, 'title_02');
-            addToNodes(nodes, 'titleNo', noTitle.map((r) => r.pointer));
+            addToNodes(nodes, 'titleNo', null);
         }
         const titleEmpty = rule.results.filter((r) => r.resultCode === 'RC2');
         if (titleEmpty.length !== 0) {
             addToElements(elements, 'titleNull', titleEmpty.length);
             addToResults(results, 'title_03');
-            addToNodes(nodes, 'titleNull', titleEmpty.map((r) => r.pointer));
+            addToNodes(nodes, 'titleNull', titleEmpty.map((r) => r.elements[0].pointer));
         }
     }
     else if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'titleOk', rule.metadata.passed);
         addToResults(results, 'title_06');
-        addToNodes(nodes, 'titleOk', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
+        addToNodes(nodes, 'titleOk', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.elements[0].pointer));
     }
 }
 function QW_ACT_R2(elements, results, nodes, rule) {
     if (rule.metadata.outcome === 'failed') {
         addToElements(elements, 'langNo', rule.metadata.failed);
         addToResults(results, 'lang_03');
-        addToNodes(nodes, 'langNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
+        addToNodes(nodes, 'langNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.elements[0].pointer));
     }
     else if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'lang', rule.metadata.passed);
         addToResults(results, 'lang_01');
-        addToNodes(nodes, 'lang', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
+        addToNodes(nodes, 'lang', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.elements[0].pointer));
     }
 }
 function QW_ACT_R3(elements, results, nodes, rule) {
@@ -164,18 +164,18 @@ function QW_ACT_R17(elements, results, nodes, rule) {
     if (rule.metadata.outcome === 'passed') {
         addToElements(elements, 'imgAltNo', rule.metadata.passed);
         addToResults(results, 'img_01a');
-        addToNodes(nodes, 'img', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
+        addToNodes(nodes, 'img', rule.results.filter((r) => r.verdict === 'passed').map((r) => r.elements[0].pointer));
     }
     else if (rule.metadata.outcome === 'failed') {
         addToElements(elements, 'imgAltNo', rule.metadata.failed);
         addToResults(results, 'img_01b');
-        addToNodes(nodes, 'imgAltNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
+        addToNodes(nodes, 'imgAltNo', rule.results.filter((r) => r.verdict === 'failed').map((r) => r.elements[0].pointer));
     }
     const imgEmptyAlt = rule.results.filter((r) => r.resultCode === 'RC1');
     if (imgEmptyAlt.length > 0) {
         addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
         addToResults(results, 'img_02');
-        addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r) => r.pointer));
+        addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r) => r.elements[0].pointer));
     }
 }
 function QW_ACT_R19(elements, results, nodes, rule) {
@@ -583,7 +583,7 @@ function addToResults(results, key) {
 function addToNodes(nodes, key, selectors) {
     for (const selector of selectors || []) {
         if (selector !== undefined && !nodes[key]) {
-            nodes[key] = selectors;
+            nodes[key] = selector;
         }
         else if (selector !== undefined) {
             nodes[key] += ', ' + selector;

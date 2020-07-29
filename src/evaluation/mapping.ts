@@ -72,19 +72,19 @@ function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
     if (noTitle.length !== 0) {
       addToElements(elements, 'titleNo', noTitle.length);
       addToResults(results, 'title_02');
-      addToNodes(nodes, 'titleNo', noTitle.map((r: any) => r.pointer));
+      addToNodes(nodes, 'titleNo', null);
     }
 
     const titleEmpty = rule.results.filter((r: any) => r.resultCode === 'RC2');
     if (titleEmpty.length !== 0) {
       addToElements(elements, 'titleNull', titleEmpty.length);
       addToResults(results, 'title_03');
-      addToNodes(nodes, 'titleNull', titleEmpty.map((r: any) => r.pointer));
+      addToNodes(nodes, 'titleNull', titleEmpty.map((r: any) => r.elements[0].pointer));
     }
   } else if (rule.metadata.outcome === 'passed') {
     addToElements(elements, 'titleOk', rule.metadata.passed);
     addToResults(results, 'title_06');
-    addToNodes(nodes, 'titleOk', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));  
+    addToNodes(nodes, 'titleOk', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.elements[0].pointer));  
   }
 }
 
@@ -92,11 +92,11 @@ function QW_ACT_R2(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === 'failed') {
     addToElements(elements, 'langNo', rule.metadata.failed);
     addToResults(results, 'lang_03');
-    addToNodes(nodes, 'langNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'langNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.elements[0].pointer));
   } else if (rule.metadata.outcome === 'passed') {
     addToElements(elements, 'lang', rule.metadata.passed);
     addToResults(results, 'lang_01');
-    addToNodes(nodes, 'lang', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'lang', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.elements[0].pointer));
   }
 }
 
@@ -169,11 +169,11 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === 'passed') {
     addToElements(elements, 'imgAltNo', rule.metadata.passed);
     addToResults(results, 'img_01a');
-    addToNodes(nodes, 'img', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'img', rule.results.filter((r: any) => r.verdict === 'passed').map((r: any) => r.elements[0].pointer));
   } else if (rule.metadata.outcome === 'failed') { 
     addToElements(elements, 'imgAltNo', rule.metadata.failed);
     addToResults(results, 'img_01b');
-    addToNodes(nodes, 'imgAltNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
+    addToNodes(nodes, 'imgAltNo', rule.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.elements[0].pointer));
   }
 
   const imgEmptyAlt = rule.results.filter((r: any) => r.resultCode === 'RC1');
@@ -181,7 +181,7 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
   if (imgEmptyAlt.length > 0) {
     addToElements(elements, 'imgAltNull', imgEmptyAlt.length);
     addToResults(results, 'img_02');
-    addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r: any) => r.pointer));
+    addToNodes(nodes, 'imgAltNull', imgEmptyAlt.map((r: any) => r.elements[0].pointer));
   }
 }
 
@@ -633,7 +633,7 @@ function addToResults(results: any, key: string): void {
 function addToNodes(nodes: any, key: string, selectors: string[]): void {
   for (const selector of selectors || []) {
     if (selector !== undefined && !nodes[key]) {
-      nodes[key] = selectors; //convert_css_selector_to_xpath(selector);
+      nodes[key] = selector; //convert_css_selector_to_xpath(selector);
     } else if (selector !== undefined) {
       nodes[key] += ', ' + selector; //convert_css_selector_to_xpath(selector);
     } else if (xpath[key]) {

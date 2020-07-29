@@ -24,8 +24,10 @@ function completeMissingReportElements(report: any): void {
   parser.write(report.pagecode.replace(/(\r\n|\n|\r|\t)/gm, ''));
   parser.end();
 
-  const img = CSSselect('img', _dom);
-  report.data.elems['img'] = img.length;
+  if (report.data.elems['img'] === undefined) {
+    const img = CSSselect('img', _dom);
+    report.data.elems['img'] = img.length;
+  }
 
   const area = CSSselect('area', _dom);
   report.data.elems['area'] = area.length;
@@ -33,8 +35,10 @@ function completeMissingReportElements(report: any): void {
   const inpImg = CSSselect('a', _dom);
   report.data.elems['inpImg'] = inpImg.length;
 
-  const hx = CSSselect('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
-  report.data.elems['hx'] = hx.length;
+  if (report.data.elems['hx'] === undefined) {
+    const hx = CSSselect('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
+    report.data.elems['hx'] = hx.length;
+  }
 
   const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
 
@@ -57,8 +61,6 @@ function completeMissingReportElements(report: any): void {
 
   const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
   report.data.elems['ehandler'] = ehandler.length;
-
-  //report.data.elems['w3cValidator'] = 'true';
 }
 
 function generateScore(report: any): string {
@@ -66,9 +68,6 @@ function generateScore(report: any): string {
   let rel = 0;
   let pon = 0;
   
-  //let SS = 0;
-  //let PP = 0;
-  //for (const test in tests || {}) {
   for (const test in report.data.tot.results) {  
     const value = tests[test];
 
@@ -103,37 +102,6 @@ function generateScore(report: any): string {
     }
 
     if (calc) {
-      /*const C = parseFloat(tests[test]['trust']);
-
-      const E = report['data'].elems[tests[test]['elem']];
-      const S = report['data'].elems[tests[test]['test']];
-
-      let R = 0;
-      let N = 0;
-      for (const w of value['dis']) {
-        if (w > 1) {
-          if (tests[test]['type'] === 'prop') {
-            R += +(w * C).toFixed(2);
-            const op = tests[test]['score'] * (1 - (S / E));
-            N = op < 1 ? 1 : op;
-          } else if (tests[test]['type'] === 'decr') {
-            const T = tests[test]['top'];
-            const F = tests[test]['steps'];
-    
-            const errors = S > T ? (S - T) / F : 0;
-            
-            R += +(w * C).toFixed(2);
-            const op = (tests[test]['score'] - errors);
-            N = op < 1 ? 1 : op;
-          } else if (tests[test]['type'] === 'true' || tests[test]['type'] === 'fals') {
-            R += +(w * C).toFixed(2);
-            N = tests[test]['score'];
-          }
-        }
-      }
-      
-      PP += +(R / 5).toFixed(2);
-      SS += +(N * +(R / 5).toFixed(2)).toFixed(1);*/
       let temp = null;
       if (tests[test]['type'] === 'prop') {
         temp = calculateProp(value, report);
@@ -154,7 +122,6 @@ function generateScore(report: any): string {
   }
   
   return (rel / pon).toFixed(1);
-  //return (SS / PP).toFixed(1);
 }
 
 function calculateTrueFalse(v: any): any {
