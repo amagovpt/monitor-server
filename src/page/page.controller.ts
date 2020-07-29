@@ -13,7 +13,7 @@ export class PageController {
   async reEvaluatePage(@Request() req: any): Promise<any> {
     const page = decodeURIComponent(req.body.page);
 
-    return success(await this.pageService.addPageToEvaluate(page));
+    return success(await this.pageService.addPageToEvaluate(page,'10', -1));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
@@ -73,7 +73,7 @@ export class PageController {
     const page = await this.pageService.findPageFromUrl(url);
 
     if (page) {
-      return success(await this.pageService.addPageToEvaluate(url, '10'));
+      return success(await this.pageService.addPageToEvaluate(url, '10', -1));
     } else {
       throw new UnauthorizedException();
     }

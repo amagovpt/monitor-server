@@ -23,7 +23,7 @@ let PageController = class PageController {
     }
     async reEvaluatePage(req) {
         const page = decodeURIComponent(req.body.page);
-        return response_1.success(await this.pageService.addPageToEvaluate(page));
+        return response_1.success(await this.pageService.addPageToEvaluate(page, '10', -1));
     }
     async getNumberOfPagesWaitingForEvaluation() {
         return response_1.success(await this.pageService.findAllInEvaluationList());
@@ -58,7 +58,7 @@ let PageController = class PageController {
         const url = decodeURIComponent(req.body.url);
         const page = await this.pageService.findPageFromUrl(url);
         if (page) {
-            return response_1.success(await this.pageService.addPageToEvaluate(url, '10'));
+            return response_1.success(await this.pageService.addPageToEvaluate(url, '10', -1));
         }
         else {
             throw new common_1.UnauthorizedException();

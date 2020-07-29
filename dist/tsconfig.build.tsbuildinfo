@@ -3337,7 +3337,7 @@
         "affectsGlobalScope": false
       },
       "../src/page/page.service.ts": {
-        "version": "385a13974faccaa6ecbb4e8f6ec2b71f3c8f3eaadb33c38858cce105094a3fa2",
+        "version": "57116dbbadde64d9716a32656d369f7c409ad3186e6826f3dffcd424ed26090e",
         "signature": "ceb8fc83a9dbf952396c799b4e0eeb4c450ffedafc6917edad663e1d36d4cd42",
         "affectsGlobalScope": false
       },
@@ -3347,7 +3347,7 @@
         "affectsGlobalScope": false
       },
       "../src/page/page.controller.ts": {
-        "version": "49a013a298ca9d72a2f0e754e31dad791a5070273a91704bf2930009902b15f4",
+        "version": "0eb821d3cda0fb4e62a191ddaaeb1302d24e3b109dc0610e45179582e93ddfd5",
         "signature": "8f7767b65f642242015c201dc048ae0830e5224ac070d5927a8ceedb82304e37",
         "affectsGlobalScope": false
       },

@@ -236,7 +236,11 @@ export class PageService {
     try {
       const page = await queryRunner.manager.findOne(Page, { where: { Uri: url }});
 
-      await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]);
+      const evalList = await queryRunner.manager.query('SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = ? LIMIT 1', [page.PageId, userId]);
+
+      if (evalList.length === 0) {
+        await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]);
+      }
 
       await queryRunner.commitTransaction();
     } catch (err) {
