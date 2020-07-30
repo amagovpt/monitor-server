@@ -3012,8 +3012,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/cheerio/index.d.ts": {
-        "version": "fefdd124f6b0e9d0a8a2770c1bc83f00b1be3a4db1ee0009e36e8bfb40ee2a7f",
-        "signature": "fefdd124f6b0e9d0a8a2770c1bc83f00b1be3a4db1ee0009e36e8bfb40ee2a7f",
+        "version": "83a9088f489e1f7aa43b5950e09f20fe52456fa6a9e4329a91ad215751c72893",
+        "signature": "83a9088f489e1f7aa43b5950e09f20fe52456fa6a9e4329a91ad215751c72893",
         "affectsGlobalScope": true
       },
       "../node_modules/scrape-it/lib/index.d.ts": {
@@ -3081,7 +3081,7 @@
         "signature": "5bb941c51374ba7d9aed3d1e0a0dbf7f035251c593d57ec08a5ba621183a3ba4",
         "affectsGlobalScope": false
       },
-      "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts": {
+      "../node_modules/@types/jsonwebtoken/index.d.ts": {
         "version": "f67c920eba6ab8e4558cb9ab661d900188f101c5657e19b1e15829a1d491d46e",
         "signature": "f67c920eba6ab8e4558cb9ab661d900188f101c5657e19b1e15829a1d491d46e",
         "affectsGlobalScope": false
@@ -3172,13 +3172,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/qs/index.d.ts": {
-        "version": "b9cd23278040e3d4ea73660829a5c0d25cc303e493f79668e605f69edaf6d7b7",
-        "signature": "b9cd23278040e3d4ea73660829a5c0d25cc303e493f79668e605f69edaf6d7b7",
+        "version": "adec64722d7da7581f6137c69426fc6e3859609e3c2ceeffb311f0be9a5ba4ae",
+        "signature": "adec64722d7da7581f6137c69426fc6e3859609e3c2ceeffb311f0be9a5ba4ae",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/express-serve-static-core/index.d.ts": {
-        "version": "dad5b9b9b31988fc9b01e45e2f33358b8583238a1d85b828979d8f911d076899",
-        "signature": "dad5b9b9b31988fc9b01e45e2f33358b8583238a1d85b828979d8f911d076899",
+        "version": "343113a79319b75b3b735323d4c8667faed0a1fbe4ba696ecbd89eb3518ab244",
+        "signature": "343113a79319b75b3b735323d4c8667faed0a1fbe4ba696ecbd89eb3518ab244",
         "affectsGlobalScope": true
       },
       "../node_modules/@types/mime/index.d.ts": {
@@ -3187,8 +3187,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/serve-static/index.d.ts": {
-        "version": "5b56da2c458a9522dbfec8ee94287abe037f52fc9dea766d87bd9aaf100cf14f",
-        "signature": "5b56da2c458a9522dbfec8ee94287abe037f52fc9dea766d87bd9aaf100cf14f",
+        "version": "adde1c915ab3b61a2821c72f226546c6c119a061a2ff4d6f90b3d61c005ae1f8",
+        "signature": "adde1c915ab3b61a2821c72f226546c6c119a061a2ff4d6f90b3d61c005ae1f8",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/connect/index.d.ts": {
@@ -3207,8 +3207,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/passport/index.d.ts": {
-        "version": "72d8d36357d5df427b52623e24f7dddf1a59758af57a2f257ff06041c0e7a3b4",
-        "signature": "72d8d36357d5df427b52623e24f7dddf1a59758af57a2f257ff06041c0e7a3b4",
+        "version": "f640cdd17b26d4ecaf98f17d90e012b25a29676e30149ef26f02572159cb325a",
+        "signature": "f640cdd17b26d4ecaf98f17d90e012b25a29676e30149ef26f02572159cb325a",
         "affectsGlobalScope": true
       },
       "../node_modules/@nestjs/passport/dist/passport/passport.serializer.d.ts": {
@@ -3254,11 +3254,6 @@
       "../src/auth/local.strategy.ts": {
         "version": "43dfe9fda460acdefbbfb6eb49b1fe2a946cb7c0913815ea0ba4710903ee2b49",
         "signature": "5a838e5f933fc4a4711194878e036b8f86a190dae1f7fdb00fb471d24e591f58",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/jsonwebtoken/index.d.ts": {
-        "version": "ed2e832899b97594aebebb6f4e29124156d85edad0c4764d3b8a3e5ad1db7eb5",
-        "signature": "ed2e832899b97594aebebb6f4e29124156d85edad0c4764d3b8a3e5ad1db7eb5",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/passport-jwt/index.d.ts": {
@@ -3452,7 +3447,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "bd87fa6fad315d563d60fa14a3a8b5842d95f1518159a6a9ac91df96dbf6a331",
+        "version": "d2e394464d854ae96e4cb4499766acb0abfb8a9203df6cdf207cf3d17f0b01ae",
         "signature": "aeb617b40253dae050a4ade007c4a13be53033b5bcc2b6c30a38f10ef1aa2408",
         "affectsGlobalScope": false
       },
@@ -3477,7 +3472,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/middleware.ts": {
-        "version": "0fe8a83c50058100af168ec3995d3808968c9cb464dbaf54b43453a6c9ce72e1",
+        "version": "85268c9fd2b9a35d1543e1d89b04af2cb2d23864ccb0fdb8f87565b9d8725669",
         "signature": "3ba36369478a18472ee6c06ba9fe80d6444ddda53ffc037f63cb1e372b5e6bc6",
         "affectsGlobalScope": false
       },
@@ -3797,8 +3792,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/babel__traverse/index.d.ts": {
-        "version": "cc0e8c69a59c7e4e15bd28e1eebe9a660c47c202e298cb20a93285368051193f",
-        "signature": "cc0e8c69a59c7e4e15bd28e1eebe9a660c47c202e298cb20a93285368051193f",
+        "version": "704d8cb257ede7d0e88a353b712bb8324885ccc860cb5fdf8bbd435da810c1e6",
+        "signature": "704d8cb257ede7d0e88a353b712bb8324885ccc860cb5fdf8bbd435da810c1e6",
         "affectsGlobalScope": false
       },
       "../node_modules/@babel/parser/typings/babel-parser.d.ts": {
@@ -3932,8 +3927,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/prettier/index.d.ts": {
-        "version": "9f648f662bddda1b68b01992edd275c214838124a43c8d9210e4a61b974ff82d",
-        "signature": "9f648f662bddda1b68b01992edd275c214838124a43c8d9210e4a61b974ff82d",
+        "version": "4dda712df262b9a427ff5f5d2b9618ed19cb03603639c2cdea832e71b9ad3a4c",
+        "signature": "4dda712df262b9a427ff5f5d2b9618ed19cb03603639c2cdea832e71b9ad3a4c",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/source-list-map/index.d.ts": {
@@ -3967,8 +3962,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/uglify-js/index.d.ts": {
-        "version": "65940ce496aeee89da612bab18a9ecabef9077ffe7593a3e84ac75d9219df991",
-        "signature": "65940ce496aeee89da612bab18a9ecabef9077ffe7593a3e84ac75d9219df991",
+        "version": "dbef1822091af2c0ee24d2be8222502dc1160473ea0b4709ba5f3856cec93537",
+        "signature": "dbef1822091af2c0ee24d2be8222502dc1160473ea0b4709ba5f3856cec93537",
         "affectsGlobalScope": false
       },
       "../node_modules/anymatch/index.d.ts": {
@@ -3982,8 +3977,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/webpack-sources/index.d.ts": {
-        "version": "8636764b1f9f29c1290bff39be2e55940d6b7f7a071f33f967b72d5eff27b0c6",
-        "signature": "8636764b1f9f29c1290bff39be2e55940d6b7f7a071f33f967b72d5eff27b0c6",
+        "version": "7602c4f661609b5595f558ff7292e00d85ee854d253ad1a2912e8c65d09ace19",
+        "signature": "7602c4f661609b5595f558ff7292e00d85ee854d253ad1a2912e8c65d09ace19",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/webpack/index.d.ts": {
@@ -5948,8 +5943,8 @@
       ],
       "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts": [
         "../node_modules/@nestjs/common/interfaces/index.d.ts",
-        "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/process.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -5971,8 +5966,8 @@
       ],
       "../node_modules/@nestjs/jwt/dist/jwt.service.d.ts": [
         "../node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.d.ts",
-        "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@types/graceful-fs/index.d.ts",
+        "../node_modules/@types/jsonwebtoken/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
         "../node_modules/@types/node/process.d.ts",
         "../node_modules/@types/node/ts3.2/fs.d.ts",
@@ -5989,16 +5984,6 @@
         "../node_modules/@types/node/ts3.2/fs.d.ts",
         "../node_modules/@types/node/ts3.2/process.d.ts",
         "../node_modules/@types/node/ts3.2/util.d.ts",
-        "../node_modules/@types/node/util.d.ts"
-      ],
-      "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts": [
-        "../node_modules/@types/graceful-fs/index.d.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/process.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/process.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts",
-        "../node_modules/@types/node/ts3.7/index.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
       "../node_modules/@nestjs/passport/dist/abstract.strategy.d.ts": [
@@ -15102,16 +15087,6 @@
         "../node_modules/@types/node/ts3.2/util.d.ts",
         "../node_modules/@types/node/util.d.ts"
       ],
-      "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts": [
-        "../node_modules/@types/graceful-fs/index.d.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/process.d.ts",
-        "../node_modules/@types/node/ts3.2/fs.d.ts",
-        "../node_modules/@types/node/ts3.2/process.d.ts",
-        "../node_modules/@types/node/ts3.2/util.d.ts",
-        "../node_modules/@types/node/ts3.7/index.d.ts",
-        "../node_modules/@types/node/util.d.ts"
-      ],
       "../node_modules/@nestjs/passport/dist/abstract.strategy.d.ts": [
         "../node_modules/@types/graceful-fs/index.d.ts",
         "../node_modules/@types/node/fs.d.ts",
@@ -21718,7 +21693,6 @@
       "../node_modules/@nestjs/jwt/dist/jwt.module.d.ts",
       "../node_modules/@nestjs/jwt/dist/jwt.service.d.ts",
       "../node_modules/@nestjs/jwt/index.d.ts",
-      "../node_modules/@nestjs/jwt/node_modules/@types/jsonwebtoken/index.d.ts",
       "../node_modules/@nestjs/passport/dist/abstract.strategy.d.ts",
       "../node_modules/@nestjs/passport/dist/auth.guard.d.ts",
       "../node_modules/@nestjs/passport/dist/index.d.ts",

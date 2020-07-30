@@ -210,12 +210,13 @@ function calculateConform(results) {
     return `${errors.A}@${errors.AA}@${errors.AAA}`;
 }
 function parseEvaluation(evaluation) {
+    var _a, _b;
     const { elements, results, nodes } = mapping_1.getElementsMapping(evaluation);
     const report = {};
     report.pagecode = evaluation.system.page.dom.processed.html.plain;
     report['data'] = {};
     report['data'].title = evaluation.system.page.dom.processed.title;
-    report['data'].rawUrl = evaluation.system.url.completeUrl;
+    report['data'].rawUrl = ((_b = (_a = evaluation === null || evaluation === void 0 ? void 0 : evaluation.system) === null || _a === void 0 ? void 0 : _a.url) === null || _b === void 0 ? void 0 : _b.completeUrl) || '';
     report['data'].elems = lodash_clone_1.default(elements);
     report['data'].nodes = lodash_clone_1.default(nodes);
     report['data'].date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');

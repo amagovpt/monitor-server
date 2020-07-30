@@ -228,7 +228,7 @@ function parseEvaluation(evaluation: any): any {
   report.pagecode = evaluation.system.page.dom.processed.html.plain;
   report['data'] = {};
   report['data'].title = evaluation.system.page.dom.processed.title;
-  report['data'].rawUrl = evaluation.system.url.completeUrl;
+  report['data'].rawUrl = evaluation?.system?.url?.completeUrl || '';
   report['data'].elems = clone(elements);
   report['data'].nodes = clone(nodes);
   report['data'].date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
