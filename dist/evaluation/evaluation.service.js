@@ -492,7 +492,7 @@ let EvaluationService = class EvaluationService {
     }
     async findDomainEvaluations(domain, sample) {
         const manager = typeorm_1.getManager();
-        const evaluations = await manager.query(`SELECT e.*, p.Uri
+        const evaluations = await manager.query(`SELECT distinct e.*, p.Uri
       FROM
         Domain as d,
         DomainPage as dp,
@@ -504,7 +504,7 @@ let EvaluationService = class EvaluationService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE ? AND
         e.PageId = p.PageId AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '1_')
       `, [domain, sample ? '1__' : '1_1']);
         const reports = new Array();
         for (const evaluation of evaluations || []) {
