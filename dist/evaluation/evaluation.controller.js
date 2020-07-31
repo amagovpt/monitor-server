@@ -54,6 +54,9 @@ let EvaluationController = class EvaluationController {
     async tryAgainPageEvaluation(req) {
         return response_1.success(await this.evaluationService.tryAgainEvaluation(req.body.evaluationListId));
     }
+    async getDomainPageEvaluations(req, domain, sample) {
+        return response_1.success(await this.evaluationService.findDomainEvaluations(decodeURIComponent(domain), sample));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
@@ -119,6 +122,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EvaluationController.prototype, "tryAgainPageEvaluation", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('domain/:domain/evaluations/:sample'),
+    __param(0, common_1.Request()), __param(1, common_1.Param('domain')), __param(2, common_1.Param('sample')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Boolean]),
+    __metadata("design:returntype", Promise)
+], EvaluationController.prototype, "getDomainPageEvaluations", null);
 EvaluationController = __decorate([
     common_1.Controller('evaluation'),
     __metadata("design:paramtypes", [evaluation_service_1.EvaluationService])

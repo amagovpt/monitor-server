@@ -92,10 +92,12 @@ let EntityService = class EntityService {
     }
     async findAllWebsites(entity) {
         const manager = typeorm_2.getManager();
-        const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, COUNT(t.TagId) as Observatory 
       FROM 
         Website as w
-        LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId AND t.Show_in_Observatorio = 1,
         Entity as e
       WHERE
         e.EntityId = w.EntityId AND

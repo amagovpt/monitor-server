@@ -78,6 +78,7 @@ export class WebsiteService {
       GROUP BY w.WebsiteId, d.DomainId`);
     return websites;
   }
+  
   async findInfo(websiteId: number): Promise<any> {
     const websites = await this.websiteRepository.query(`SELECT w.*, u.Username as User, e.Long_Name as Entity, d.Url as Domain
       FROM 
@@ -437,7 +438,7 @@ export class WebsiteService {
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId
           LEFT OUTER JOIN Evaluation as e ON e.StudyUserId = ? AND e.Evaluation_Date IN (
-            SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId
+            SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = e.StudyUserId
           )
         WHERE
           LOWER(t.Name) = ? AND

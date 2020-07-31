@@ -307,9 +307,9 @@ export class EvaluationService {
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        e.PageId = p.PageId AND 
-        e.Show_To LIKE '_1' AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+        p.Show_In LIKE '_1_' AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '_1')
       `, [website, userId]);
 
     const reports = new Array<any>();
@@ -400,8 +400,7 @@ export class EvaluationService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
-        e.StudyUserId = w.UserId AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId)
       `, [tag.toLowerCase(), userId, website.toLowerCase()]);
 
     const reports = new Array<any>();
@@ -610,5 +609,46 @@ export class EvaluationService {
     }
 
     return !hasError;
+  }
+
+  async findDomainEvaluations(domain: string, sample: boolean): Promise<any> {
+    const manager = getManager();
+
+    const evaluations = await manager.query(`SELECT e.*, p.Uri
+      FROM
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        d.Url = ? AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE ? AND
+        e.PageId = p.PageId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+      `, [domain, sample ? '1__' : '1_1']);
+
+
+    const reports = new Array<any>();
+
+    for (const evaluation of evaluations || []) {
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      reports.push({
+        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        data: {
+          title: evaluation.Title,
+          score: evaluation.Score,
+          rawUrl: evaluation.Uri,
+          tot: tot,
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+          elems: tot.elems,
+          date: evaluation.Evaluation_Date
+        }
+      });
+    }
+
+    return reports;
   }
 }

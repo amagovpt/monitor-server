@@ -66,4 +66,10 @@ export class EvaluationController {
   async tryAgainPageEvaluation(@Request() req: any): Promise<any> {
     return success(await this.evaluationService.tryAgainEvaluation(req.body.evaluationListId));
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('domain/:domain/evaluations/:sample')
+  async getDomainPageEvaluations(@Request() req: any, @Param('domain') domain: string, @Param('sample') sample: boolean): Promise<any> {
+    return success(await this.evaluationService.findDomainEvaluations(decodeURIComponent(domain), sample));
+  }
 }

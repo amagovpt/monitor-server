@@ -10,4 +10,5 @@ export declare class EvaluationController {
     getPageEvaluation(url: string, evaluationId: number): Promise<any>;
     getUserPageEvaluation(type: string, url: string): Promise<any>;
     tryAgainPageEvaluation(req: any): Promise<any>;
+    getDomainPageEvaluations(req: any, domain: string, sample: boolean): Promise<any>;
 }

@@ -29,4 +29,5 @@ export declare class EvaluationService {
     findEvaluationById(url: string, id: number): Promise<any>;
     findUserPageEvaluation(url: string, type: string): Promise<any>;
     tryAgainEvaluation(evaluationListId: number): Promise<boolean>;
+    findDomainEvaluations(domain: string, sample: boolean): Promise<any>;
 }
