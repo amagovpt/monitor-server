@@ -11,11 +11,25 @@ export class EvaluationController {
   ) { }
 
   @UseGuards(AuthGuard('jwt-monitor'))
+  @Get('myMonitor/website/evaluations/:website')
+  async getMyMonitorWebsitePageEvaluations(@Request() req: any, @Param('website') website: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(await this.evaluationService.findMyMonitorUserWebsitePageEvaluations(userId, website));
+  }
+
+  @UseGuards(AuthGuard('jwt-monitor'))
   @Get('myMonitor/:website/:url')
   async getMyMonitorWebsitePageEvaluation(@Request() req: any, @Param('website') website: string, @Param('url') url: string): Promise<any> {
     const userId = req.user.userId;
     url = decodeURIComponent(url);
     return success(await this.evaluationService.findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url));
+  }
+
+  @UseGuards(AuthGuard('jwt-study'))
+  @Get('studyMonitor/tag/:tag/website/evaluations/:website')
+  async getStudyMonitorTagWebsitePageEvaluations(@Request() req: any, @Param('tag') tag: string, @Param('website') website: string): Promise<any> {
+    const userId = req.user.userId;
+    return success(await this.evaluationService.findStudyMonitorUserTagWebsitePageEvaluations(userId, tag, website));
   }
 
   @UseGuards(AuthGuard('jwt-study'))

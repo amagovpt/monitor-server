@@ -21,7 +21,9 @@ export declare class EvaluationService {
     createOne(evaluation: Evaluation): Promise<any>;
     evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any>;
     savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string, studyUserId?: number | null): Promise<any>;
+    findMyMonitorUserWebsitePageEvaluations(userId: number, website: string): Promise<any>;
     findMyMonitorUserWebsitePageNewestEvaluation(userId: number, website: string, url: string): Promise<any>;
+    findStudyMonitorUserTagWebsitePageEvaluations(userId: number, tag: string, website: string): Promise<any>;
     findStudyMonitorUserTagWebsitePageNewestEvaluation(userId: number, tag: string, website: string, url: string): Promise<any>;
     findAllEvaluationsFromPage(type: string, page: string): Promise<any>;
     findEvaluationById(url: string, id: number): Promise<any>;

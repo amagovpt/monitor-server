@@ -197,6 +197,44 @@ let EvaluationService = class EvaluationService {
         newEvaluation.StudyUserId = studyUserId;
         await queryRunner.manager.save(newEvaluation);
     }
+    async findMyMonitorUserWebsitePageEvaluations(userId, website) {
+        const manager = typeorm_1.getManager();
+        const evaluations = await manager.query(`SELECT e.*, p.Uri 
+      FROM
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        w.Name = ? AND
+        w.UserId = ? AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND 
+        e.Show_To LIKE '_1' AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+      `, [website, userId]);
+        const reports = new Array();
+        for (const evaluation of evaluations || []) {
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            reports.push({
+                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                data: {
+                    title: evaluation.Title,
+                    score: evaluation.Score,
+                    rawUrl: evaluation.Uri,
+                    tot: tot,
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+                    elems: tot.elems,
+                    date: evaluation.Evaluation_Date
+                }
+            });
+        }
+        return reports;
+    }
     async findMyMonitorUserWebsitePageNewestEvaluation(userId, website, url) {
         const manager = typeorm_1.getManager();
         const evaluation = (await manager.query(`SELECT e.* 
@@ -236,6 +274,50 @@ let EvaluationService = class EvaluationService {
         else {
             throw new common_1.InternalServerErrorException();
         }
+    }
+    async findStudyMonitorUserTagWebsitePageEvaluations(userId, tag, website) {
+        const manager = typeorm_1.getManager();
+        const evaluations = await manager.query(`SELECT e.*, p.Uri
+      FROM
+        Tag as t,
+        TagWebsite as tw,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Evaluation as e
+      WHERE
+        LOWER(t.Name) = ? AND
+        t.UserId = ? AND
+        tw.TagId = t.TagId AND
+        w.WebsiteId = tw.WebsiteId AND
+        LOWER(w.Name) = ? AND
+        w.UserId = t.UserId AND
+        d.WebsiteId = w.WebsiteId AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        e.PageId = p.PageId AND
+        e.StudyUserId = w.UserId AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)
+      `, [tag.toLowerCase(), userId, website.toLowerCase()]);
+        const reports = new Array();
+        for (const evaluation of evaluations || []) {
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            reports.push({
+                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                data: {
+                    title: evaluation.Title,
+                    score: evaluation.Score,
+                    rawUrl: evaluation.Uri,
+                    tot: tot,
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
+                    elems: tot.elems,
+                    date: evaluation.Evaluation_Date
+                }
+            });
+        }
+        return reports;
     }
     async findStudyMonitorUserTagWebsitePageNewestEvaluation(userId, tag, website, url) {
         const manager = typeorm_1.getManager();
