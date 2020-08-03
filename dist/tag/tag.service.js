@@ -139,6 +139,7 @@ let TagService = class TagService {
         p.Uri,
         e.Score,
         e.Tot,
+        e.Errors,
         e.A,
         e.AA,
         e.AAA,
@@ -169,6 +170,7 @@ let TagService = class TagService {
         const pages = await manager.query(`SELECT 
         distinct p.*,
         e.Score,
+        e.Errors,
         e.Tot,
         e.A,
         e.AA,
