@@ -105,6 +105,41 @@ let EntityService = class EntityService {
       GROUP BY w.WebsiteId`, [entity.toLowerCase()]);
         return websites;
     }
+    async findAllWebsitePages(entity) {
+        const manager = typeorm_2.getManager();
+        const websites = await manager.query(`
+      SELECT 
+        w.WebsiteId,
+        p.*,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.Evaluation_Date
+      FROM 
+        Entity as en,
+        Website as w,
+        Domain as d,
+        DomainPage as dp,
+        Page as p
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+          SELECT Evaluation_Date FROM Evaluation 
+          WHERE PageId = p.PageId AND Show_To LIKE "1_"
+          ORDER BY Evaluation_Date DESC LIMIT 1
+        )
+      WHERE
+        LOWER(en.Long_Name) = ? AND
+        w.EntityId = en.EntityId AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1 AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.Show_In LIKE "1__"
+      GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`, [entity.toLowerCase()]);
+        return websites;
+    }
     async createOne(entity, websites) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();

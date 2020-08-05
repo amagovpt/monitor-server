@@ -74,6 +74,9 @@ let EntityController = class EntityController {
     async getListOfEntityWebsites(entity) {
         return response_1.success(await this.entityService.findAllWebsites(entity));
     }
+    async getListOfEntityWebsitePages(entity) {
+        return response_1.success(await this.entityService.findAllWebsitePages(entity));
+    }
 };
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
@@ -146,6 +149,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EntityController.prototype, "getListOfEntityWebsites", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get('websites/pages/:entity'),
+    __param(0, common_1.Param('entity')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EntityController.prototype, "getListOfEntityWebsitePages", null);
 EntityController = __decorate([
     common_1.Controller('entity'),
     __metadata("design:paramtypes", [entity_service_1.EntityService])

@@ -10,6 +10,7 @@ export declare class EntityService {
     findByShortName(shortName: string): Promise<any>;
     findByLongName(longName: string): Promise<any>;
     findAllWebsites(entity: string): Promise<any>;
+    findAllWebsitePages(entity: string): Promise<any>;
     createOne(entity: EntityTable, websites: string[]): Promise<boolean>;
     update(entityId: number, shortName: string, longName: string, websites: number[], defaultWebsites: number[]): Promise<any>;
     delete(entityId: number): Promise<any>;

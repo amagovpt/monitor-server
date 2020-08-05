@@ -96,4 +96,10 @@ export class EntityController {
   async getListOfEntityWebsites(@Param('entity') entity: string): Promise<any> {
     return success(await this.entityService.findAllWebsites(entity));
   }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('websites/pages/:entity')
+  async getListOfEntityWebsitePages(@Param('entity') entity: string): Promise<any> {
+    return success(await this.entityService.findAllWebsitePages(entity));
+  }
 }

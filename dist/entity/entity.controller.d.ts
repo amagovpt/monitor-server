@@ -11,4 +11,5 @@ export declare class EntityController {
     checkIfShortNameExists(shortName: string): Promise<any>;
     checkIfLongNameExists(longName: string): Promise<any>;
     getListOfEntityWebsites(entity: string): Promise<any>;
+    getListOfEntityWebsitePages(entity: string): Promise<any>;
 }

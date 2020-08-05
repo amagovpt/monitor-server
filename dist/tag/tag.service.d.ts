@@ -17,6 +17,7 @@ export declare class TagService {
     findStudyMonitorUserTagWebsitesPagesData(userId: number, tag: string, website: string): Promise<any>;
     getUserId(username: string): Promise<any>;
     findAllUserWebsitePages(tag: string, website: string, user: string): Promise<any>;
+    findAllWebsitePages(tag: string): Promise<any>;
     createOne(tag: Tag, websites: number[]): Promise<boolean>;
     createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
     update(tagId: number, name: string, observatory: number, defaultWebsites: number[], websites: number[]): Promise<any>;

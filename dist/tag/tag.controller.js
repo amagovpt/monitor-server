@@ -111,6 +111,9 @@ let TagController = class TagController {
     async getUserWebsitePages(tag, website, user) {
         return response_1.success(await this.tagService.findAllUserWebsitePages(tag, website, user));
     }
+    async getListOfTagWebsitePages(tag) {
+        return response_1.success(await this.tagService.findAllWebsitePages(tag));
+    }
     async getTagInfo(tagId) {
         return response_1.success(await this.tagService.findInfo(tagId));
     }
@@ -228,6 +231,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], TagController.prototype, "getUserWebsitePages", null);
+__decorate([
+    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
+    common_1.Get(':tag/websites/pages'),
+    __param(0, common_1.Param('tag')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TagController.prototype, "getListOfTagWebsitePages", null);
 __decorate([
     common_1.UseGuards(passport_1.AuthGuard('jwt')),
     common_1.Get('info/:tagId'),

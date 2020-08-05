@@ -394,7 +394,7 @@ function QW_HTML_T38(elements: any, results: any, nodes: any, technique: any): v
     addToResults(results, 'a_01a');
     addToNodes(nodes, 'aSkipFirst', technique.results.filter((r: any) => r.verdict === 'warning').map((r: any) => r.pointer));
   } else if (technique.metadata.outcome === 'failed') {
-    addToElements(elements, 'aSkipFirst', 0);
+    addToElements(elements, 'aSkipFirst', undefined);
     addToResults(results, 'a_01b');
     addToNodes(nodes, 'aSkipFirst', technique.results.filter((r: any) => r.verdict === 'failed').map((r: any) => r.pointer));
   }

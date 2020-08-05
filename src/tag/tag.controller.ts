@@ -156,6 +156,12 @@ export class TagController {
     return success(await this.tagService.findAllUserWebsitePages(tag, website, user));
   }
 
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get(':tag/websites/pages')
+  async getListOfTagWebsitePages(@Param('tag') tag: string): Promise<any> {
+    return success(await this.tagService.findAllWebsitePages(tag));
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('info/:tagId')
   async getTagInfo(@Param('tagId') tagId: number): Promise<any> {

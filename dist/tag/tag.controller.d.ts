@@ -14,6 +14,7 @@ export declare class TagController {
     getUserTagWebsites(tag: string, user: string): Promise<any>;
     getTagWebsites(tag: string, user: string): Promise<any>;
     getUserWebsitePages(tag: string, website: string, user: string): Promise<any>;
+    getListOfTagWebsitePages(tag: string): Promise<any>;
     getTagInfo(tagId: number): Promise<any>;
     getAllOfficialTags(): Promise<any>;
     getNumberOfStudyMonitorUsers(): Promise<any>;
