@@ -71,6 +71,7 @@ function completeMissingReportElements(report) {
     report.data.elems['iframe'] = iframe.length;
     const ehandler = css_select_1.default('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
     report.data.elems['ehandler'] = ehandler.length;
+    report.data.tot.elems = lodash_clone_1.default(report.data.elems);
 }
 function generateScore(report) {
     let rel = 0;

@@ -61,6 +61,8 @@ function completeMissingReportElements(report: any): void {
 
   const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
   report.data.elems['ehandler'] = ehandler.length;
+
+  report.data.tot.elems = clone(report.data.elems);
 }
 
 function generateScore(report: any): string {
