@@ -34,6 +34,7 @@ const html_mapping = {
     'QW-HTML-T28': QW_HTML_T28,
     'QW-HTML-T30': QW_HTML_T30,
     'QW-HTML-T32': QW_HTML_T32,
+    'QW-HTML-T33': QW_HTML_T33,
     'QW-HTML-T34': QW_HTML_T34,
     'QW-HTML-T35': QW_HTML_T35,
     'QW-HTML-T37': QW_HTML_T37,
@@ -53,7 +54,6 @@ const css_mapping = {
 const bp_mapping = {
     'QW-BP1': QW_BP1,
     'QW-BP2': QW_BP2,
-    'QW-BP3': QW_BP3,
     'QW-BP4': QW_BP4,
     'QW-BP5': QW_BP5,
     'QW-BP6': QW_BP6,
@@ -336,6 +336,14 @@ function QW_HTML_T32(elements, results, nodes, technique) {
         addToNodes(nodes, 'formSubmitNo', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
     }
 }
+function QW_HTML_T33(elements, results, nodes, technique) {
+    const titleMatchResults = technique.results.filter((r) => r.resultCode === 'RC2');
+    if (titleMatchResults.length > 0) {
+        addToElements(elements, 'aTitleMatch', titleMatchResults.length);
+        addToResults(results, 'a_05');
+        addToNodes(nodes, 'aTitleMatch', titleMatchResults.map((r) => r.pointer));
+    }
+}
 function QW_HTML_T34(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'aImgAltNo', technique.metadata.failed);
@@ -462,13 +470,6 @@ function QW_BP2(elements, results, nodes, technique) {
         addToNodes(nodes, 'imgAltLong', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
     }
 }
-function QW_BP3(elements, results, nodes, technique) {
-    if (technique.metadata.outcome === 'failed') {
-        addToElements(elements, 'aTitleMatch', technique.metadata.failed);
-        addToResults(results, 'a_05');
-        addToNodes(nodes, 'aTitleMatch', technique.results.filter((r) => r.verdict === 'failed').map((r) => r.pointer));
-    }
-}
 function QW_BP4(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'aGroupNo', technique.metadata.failed);
@@ -561,11 +562,11 @@ function QW_BP15(elements, results, nodes, technique) {
 function QW_BP16(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'a', undefined);
-        addToResults(results, 'a_04');
         addToNodes(nodes, 'a', []);
     }
     else if (technique.metadata.outcome === 'passed') {
         addToElements(elements, 'a', technique.results.length);
+        addToResults(results, 'a_04');
         addToNodes(nodes, 'a', technique.results.filter((r) => r.verdict === 'passed').map((r) => r.pointer));
     }
 }
