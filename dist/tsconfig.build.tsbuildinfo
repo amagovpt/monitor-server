@@ -3467,7 +3467,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/mapping.ts": {
-        "version": "5eac109eac186cb9f52b473d7eb5a9075d2db2be21f55905309be030a91b31aa",
+        "version": "fc041dc826aea2547b0cd6ea86a7b1d84d72cc6df0261d4de5eabfa3cab212b8",
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b",
         "affectsGlobalScope": false
       },
