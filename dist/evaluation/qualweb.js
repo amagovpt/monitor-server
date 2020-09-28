@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = exports.init = void 0;
 const core = __importStar(require("@qualweb/core"));
 async function init() {
-    await core.start();
+    await core.start({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 exports.init = init;
 async function evaluate(params) {

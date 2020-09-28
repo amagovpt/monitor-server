@@ -558,11 +558,11 @@ function QW_BP15(elements, results, nodes, technique) {
 function QW_BP16(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'a', undefined);
-        addToResults(results, 'a_04');
         addToNodes(nodes, 'a', []);
     }
     else if (technique.metadata.outcome === 'passed') {
         addToElements(elements, 'a', technique.results.length);
+        addToResults(results, 'a_04');
         addToNodes(nodes, 'a', technique.results.filter((r) => r.verdict === 'passed'));
     }
 }
