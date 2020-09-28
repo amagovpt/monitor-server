@@ -3371,13 +3371,8 @@
         "signature": "180f43538aaa000558461fd8438c937a91a98ea0ac5be41d3cc0ff6ccc51ce4e",
         "affectsGlobalScope": false
       },
-      "../src/evaluation/xpath.ts": {
-        "version": "c25e05296b36be5b72aedaf22bf29afef19c2fc70cb384df918c1e17054a51ee",
-        "signature": "f97a5effdc362ddf2677767fc2c5da561f830ddc1899cda866ae9b0fd70093e4",
-        "affectsGlobalScope": false
-      },
       "../src/evaluation/mapping.ts": {
-        "version": "fc041dc826aea2547b0cd6ea86a7b1d84d72cc6df0261d4de5eabfa3cab212b8",
+        "version": "8c20ba491111d254d872b4b0f6a94f875f570ee5bb7c761f5bf1e27f7ec99435",
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b",
         "affectsGlobalScope": false
       },
@@ -3744,6 +3739,11 @@
       "../src/main.ts": {
         "version": "db92750eb6b93cebe53e21657bd6230f0ef1765500339ed1d9ec348fcc82c31b",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "affectsGlobalScope": false
+      },
+      "../src/evaluation/xpath.ts": {
+        "version": "c25e05296b36be5b72aedaf22bf29afef19c2fc70cb384df918c1e17054a51ee",
+        "signature": "f97a5effdc362ddf2677767fc2c5da561f830ddc1899cda866ae9b0fd70093e4",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/anymatch/index.d.ts": {
@@ -6811,9 +6811,6 @@
         "../node_modules/typeorm/index.d.ts",
         "../src/evaluation/evaluation.entity.ts",
         "../src/evaluation/middleware.ts"
-      ],
-      "../src/evaluation/mapping.ts": [
-        "../src/evaluation/xpath.ts"
       ],
       "../src/evaluation/middleware.ts": [
         "../node_modules/css-select/index.d.ts",
