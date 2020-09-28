@@ -1,14 +1,12 @@
 import { Connection, Repository } from 'typeorm';
-import { NestCrawlerService } from 'nest-crawler';
 import { CrawlDomain, CrawlPage } from './crawler.entity';
 export declare class CrawlerService {
     private readonly crawlDomainRepository;
     private readonly crawlPageRepository;
-    private readonly newCrawler;
     private readonly connection;
     private isCrawling;
     private browser;
-    constructor(crawlDomainRepository: Repository<CrawlDomain>, crawlPageRepository: Repository<CrawlPage>, newCrawler: NestCrawlerService, connection: Connection);
+    constructor(crawlDomainRepository: Repository<CrawlDomain>, crawlPageRepository: Repository<CrawlPage>, connection: Connection);
     nestCrawl(): Promise<void>;
     nestCrawlUser(): Promise<void>;
     private crawl;

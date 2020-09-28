@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { NestCrawlerModule } from 'nest-crawler';
+//import { NestCrawlerModule } from 'nest-crawler';
 import { join } from 'path';
 
 import { AuthModule } from './auth/auth.module';
@@ -53,7 +53,7 @@ const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString())
     AmpModule,
     StampModule,
     CrawlerModule,
-    NestCrawlerModule
+    //NestCrawlerModule
   ],
   controllers: [AppController],
   providers: [AppService],

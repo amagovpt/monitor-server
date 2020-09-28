@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { NestCrawlerService } from 'nest-crawler';
+//import { NestCrawlerService } from 'nest-crawler';
 import { CrawlDomain, CrawlPage } from './crawler.entity';
 import { readFileSync, writeFileSync } from 'fs';
 import Crawler from 'simplecrawler';
@@ -19,7 +19,7 @@ export class CrawlerService {
     private readonly crawlDomainRepository: Repository<CrawlDomain>,
     @InjectRepository(CrawlPage)
     private readonly crawlPageRepository: Repository<CrawlPage>,
-    private readonly newCrawler: NestCrawlerService,
+    //private readonly newCrawler: NestCrawlerService,
     private readonly connection: Connection
   ) {
     this.isCrawling = false;

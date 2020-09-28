@@ -20,16 +20,14 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const schedule_1 = require("@nestjs/schedule");
-const nest_crawler_1 = require("nest-crawler");
 const crawler_entity_1 = require("./crawler.entity");
 const fs_1 = require("fs");
 const simplecrawler_1 = __importDefault(require("simplecrawler"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
 let CrawlerService = class CrawlerService {
-    constructor(crawlDomainRepository, crawlPageRepository, newCrawler, connection) {
+    constructor(crawlDomainRepository, crawlPageRepository, connection) {
         this.crawlDomainRepository = crawlDomainRepository;
         this.crawlPageRepository = crawlPageRepository;
-        this.newCrawler = newCrawler;
         this.connection = connection;
         this.isCrawling = false;
         if (process.env.ID === undefined || process.env.ID === '0' || process.env.ID === '1') {
@@ -378,7 +376,6 @@ CrawlerService = __decorate([
     __param(1, typeorm_1.InjectRepository(crawler_entity_1.CrawlPage)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        nest_crawler_1.NestCrawlerService,
         typeorm_2.Connection])
 ], CrawlerService);
 exports.CrawlerService = CrawlerService;
