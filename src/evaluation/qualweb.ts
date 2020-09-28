@@ -1,7 +1,7 @@
 import * as core from '@qualweb/core';
 
 export async function init(): Promise<void> {
-  await core.start();
+  await core.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
 }
 
 export async function evaluate(params: any): Promise<any> {
