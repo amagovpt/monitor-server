@@ -78,10 +78,10 @@ function generateScore(report) {
     let pon = 0;
     for (const test in report.data.tot.results) {
         const value = tests_1.default[test];
+        if (value.result === 'warning') {
+            continue;
+        }
         if (report.data.elems.frame) {
-            if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
-                continue;
-            }
         }
         let calc = false;
         switch (value['type']) {

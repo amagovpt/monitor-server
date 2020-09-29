@@ -61,7 +61,7 @@ const bp_mapping = {
     'QW-BP13': QW_BP13,
     'QW-BP14': QW_BP14,
     'QW-BP15': QW_BP15,
-    'QW-BP16': QW_BP16
+    'QW-BP17': QW_BP17
 };
 function QW_ACT_R1(elements, results, nodes, rule) {
     if (rule.metadata.outcome === 'failed') {
@@ -555,15 +555,15 @@ function QW_BP15(elements, results, nodes, technique) {
         addToNodes(nodes, 'valueAbsHtml', technique.results.filter((r) => r.verdict === 'failed'));
     }
 }
-function QW_BP16(elements, results, nodes, technique) {
+function QW_BP17(elements, results, nodes, technique) {
     if (technique.metadata.outcome === 'failed') {
         addToElements(elements, 'a', undefined);
+        addToResults(results, 'a_04');
         addToNodes(nodes, 'a', []);
     }
-    else if (technique.metadata.outcome === 'passed') {
+    else {
         addToElements(elements, 'a', technique.results.length);
-        addToResults(results, 'a_04');
-        addToNodes(nodes, 'a', technique.results.filter((r) => r.verdict === 'passed'));
+        addToNodes(nodes, 'a', technique.results);
     }
 }
 function addToElements(elements, key, value) {

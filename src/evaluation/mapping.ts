@@ -61,7 +61,7 @@ const bp_mapping = {
   'QW-BP13': QW_BP13,
   'QW-BP14': QW_BP14,
   'QW-BP15': QW_BP15,
-  'QW-BP16': QW_BP16
+  'QW-BP17': QW_BP17
 };
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
@@ -607,14 +607,14 @@ function QW_BP15(elements: any, results: any, nodes: any, technique: any): void 
   }
 }
 
-function QW_BP16(elements: any, results: any, nodes: any, technique: any): void {
+function QW_BP17(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'a', undefined);
-    addToNodes(nodes, 'a', []);
-  } else if (technique.metadata.outcome === 'passed') {
-    addToElements(elements, 'a', technique.results.length);
     addToResults(results, 'a_04');
-    addToNodes(nodes, 'a', technique.results.filter((r: any) => r.verdict === 'passed'));
+    addToNodes(nodes, 'a', []);
+  } else {
+    addToElements(elements, 'a', technique.results.length);
+    addToNodes(nodes, 'a', technique.results);
   }
 }
 
