@@ -3616,9 +3616,14 @@
         "signature": "bcd6fd79c82f52bcfee80974e62657403a1ffd1338563f9d4448f67f57ff922d",
         "affectsGlobalScope": false
       },
+      "../node_modules/ip-range-check/index.d.ts": {
+        "version": "3a2dddaae0717fda084a90a12568cc4bf4cece98d9cfb194697ce4e724f46baa",
+        "signature": "3a2dddaae0717fda084a90a12568cc4bf4cece98d9cfb194697ce4e724f46baa",
+        "affectsGlobalScope": true
+      },
       "../src/amp/amp.controller.ts": {
-        "version": "8f6aeb95dee820b903aa65a6b0b2d837523529750a632b8b1afdfdf6e3ccfb42",
-        "signature": "11fb7ded0e2f2f918bb093970dafac686aeeacac02f3a332e9b1a7d3444d956e",
+        "version": "be89343df81a110f60a09534e0fc2b05abcb6d0bc84c64bd93b117d8df97531e",
+        "signature": "39130b39dc096edbbbf1f9a8362a2e1040a072198b535ccae2767ea6d9e842e6",
         "affectsGlobalScope": false
       },
       "../src/amp/amp.module.ts": {
@@ -6738,6 +6743,9 @@
       ],
       "../src/amp/amp.controller.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
+        "../node_modules/@types/node/dns.d.ts",
+        "../node_modules/@types/node/fs.d.ts",
+        "../node_modules/ip-range-check/index.d.ts",
         "../src/evaluation/evaluation.service.ts",
         "../src/lib/response.ts"
       ],

@@ -39,6 +39,7 @@
     "fs-extra": "^9.0.1",
     "helmet": "^4.1.1",
     "htmlparser2": "^4.1.0",
+    "ip-range-check": "^0.2.0",
     "lodash.clone": "^4.5.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",

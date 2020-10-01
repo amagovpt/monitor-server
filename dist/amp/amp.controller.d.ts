@@ -4,4 +4,6 @@ export declare class AmpController {
     constructor(evaluationService: EvaluationService);
     evaluateUrl(url: string): Promise<any>;
     evaluateHtml(req: any): Promise<any>;
+    private checkIfValidUrl;
+    private fixUrl;
 }
