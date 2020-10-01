@@ -113,7 +113,7 @@ let CrawlerService = class CrawlerService {
             for (const link of links || []) {
                 if (link.hasAttribute('href')) {
                     const href = link.getAttribute('href');
-                    if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || (!href.startsWith('http') && !href.startsWith('#')))) {
+                    if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || href.startsWith('./') || (!href.startsWith('http') && !href.startsWith('#')))) {
                         let valid = true;
                         for (const not of notHtml || []) {
                             if (href.endsWith(not)) {
@@ -134,6 +134,9 @@ let CrawlerService = class CrawlerService {
                                 let correctUrl = '';
                                 if (href.startsWith(url)) {
                                     correctUrl = href;
+                                }
+                                else if (href.startsWith('./')) {
+                                    correctUrl = url + href.slice(1);
                                 }
                                 else if (!href.startsWith('/')) {
                                     correctUrl = url + '/' + href;
