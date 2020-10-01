@@ -31,7 +31,7 @@ let EvaluationService = class EvaluationService {
         middleware_1.initEvaluator();
     }
     async instance1EvaluatePageList() {
-        if (process.env.ID === undefined || process.env.ID === '0') {
+        if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '0') {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
@@ -61,7 +61,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance4EvaluateUserPageList() {
-        if (process.env.ID === undefined || process.env.ID === '3') {
+        if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '3') {
             if (!this.isEvaluatingUserInstance4) {
                 this.isEvaluatingUserInstance4 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);

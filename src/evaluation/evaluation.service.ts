@@ -31,7 +31,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === '0') {
+    if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '0') {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
 
@@ -73,7 +73,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   async instance4EvaluateUserPageList(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === '3') {
+    if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '3') {
       if (!this.isEvaluatingUserInstance4) {
         this.isEvaluatingUserInstance4 = true;
 
