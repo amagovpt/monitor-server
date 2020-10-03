@@ -1,5 +1,5 @@
 module.exports = {
-  apps : [{
+  apps : [/*{
     name: 'monitor-server',
     script: './dist/main.js',
     instances  : -2,
@@ -15,12 +15,12 @@ module.exports = {
       PORT: 3000,
       NODE_ENV: 'production',
     }
-  },
+  },*/
   {
     name: 'monitor-server',
     namespace: 'amp',
     script: './dist/main.js',
-    instances  : 2,
+    instances  : 'max',
     exec_mode  : 'cluster',
     increment_var : 'ID2',
     env: {
