@@ -1,7 +1,9 @@
-import * as core from '@qualweb/core';
+import { QualWeb } from '@qualweb/core';
+
+const qualweb = new QualWeb();
 
 export async function init(): Promise<void> {
-  await core.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+  await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
 }
 
 export async function evaluate(params: any): Promise<any> {
@@ -74,7 +76,7 @@ export async function evaluate(params: any): Promise<any> {
         'QW-BP13',
         'QW-BP14',
         'QW-BP15',
-        'QW-BP17'
+        'QW-BP16'
       ]
     }
   };
@@ -85,10 +87,10 @@ export async function evaluate(params: any): Promise<any> {
     options['html'] = params.html;
   }
   
-  let report = await core.evaluate(options);
+  let report = await qualweb.evaluate(options);
   
   if (params.url) {
-    report = Object.values(report)[0];
+    report = report[params.url];
   } else if (params.html) {
     report = report['customHtml'];
   }

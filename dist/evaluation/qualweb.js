@@ -1,28 +1,10 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = exports.init = void 0;
-const core = __importStar(require("@qualweb/core"));
+const core_1 = require("@qualweb/core");
+const qualweb = new core_1.QualWeb();
 async function init() {
-    await core.start({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    await qualweb.start({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 exports.init = init;
 async function evaluate(params) {
@@ -95,7 +77,7 @@ async function evaluate(params) {
                 'QW-BP13',
                 'QW-BP14',
                 'QW-BP15',
-                'QW-BP17'
+                'QW-BP16'
             ]
         }
     };
@@ -105,9 +87,9 @@ async function evaluate(params) {
     else if (params.html) {
         options['html'] = params.html;
     }
-    let report = await core.evaluate(options);
+    let report = await qualweb.evaluate(options);
     if (params.url) {
-        report = Object.values(report)[0];
+        report = report[params.url];
     }
     else if (params.html) {
         report = report['customHtml'];
