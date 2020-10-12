@@ -87,12 +87,13 @@ async function evaluate(params) {
     else if (params.html) {
         options['html'] = params.html;
     }
-    let report = await qualweb.evaluate(options);
+    const reports = await qualweb.evaluate(options);
+    let report;
     if (params.url) {
-        report = report[params.url];
+        report = reports[params.url];
     }
     else if (params.html) {
-        report = report['customHtml'];
+        report = reports['customHtml'];
     }
     return report;
 }

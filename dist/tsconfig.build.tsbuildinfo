@@ -2797,8 +2797,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/crypto.d.ts": {
-        "version": "dab288a3d92e6a3323566256ba56987b78b100341866fa3cc245c9cd2fd55706",
-        "signature": "dab288a3d92e6a3323566256ba56987b78b100341866fa3cc245c9cd2fd55706",
+        "version": "c5ecc351d5eaa36dc682b4c398b57a9d37c108857b71a09464a06e0185831ac2",
+        "signature": "c5ecc351d5eaa36dc682b4c398b57a9d37c108857b71a09464a06e0185831ac2",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/dgram.d.ts": {
@@ -2832,8 +2832,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/http.d.ts": {
-        "version": "bbc5e63e6789b5dca3ed78bbeaaca9f6a67bad86e235726f35fdc7831c0fa553",
-        "signature": "bbc5e63e6789b5dca3ed78bbeaaca9f6a67bad86e235726f35fdc7831c0fa553",
+        "version": "08fb2b0e1ef13a2df43f6d8e97019c36dfbc0475cf4d274c6838e2c9223fe39d",
+        "signature": "08fb2b0e1ef13a2df43f6d8e97019c36dfbc0475cf4d274c6838e2c9223fe39d",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/http2.d.ts": {
@@ -2882,8 +2882,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/punycode.d.ts": {
-        "version": "30ec6f9c683b988c3cfaa0c4690692049c4e7ed7dc6f6e94f56194c06b86f5e1",
-        "signature": "30ec6f9c683b988c3cfaa0c4690692049c4e7ed7dc6f6e94f56194c06b86f5e1",
+        "version": "4a9008d79750801375605e6cfefa4e04643f20f2aaa58404c6aae1c894e9b049",
+        "signature": "4a9008d79750801375605e6cfefa4e04643f20f2aaa58404c6aae1c894e9b049",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/querystring.d.ts": {
@@ -2952,13 +2952,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/worker_threads.d.ts": {
-        "version": "e8482f41c6e001657302dcb3a1ba30359a0983574caee9405ef863cb9eac3b95",
-        "signature": "e8482f41c6e001657302dcb3a1ba30359a0983574caee9405ef863cb9eac3b95",
+        "version": "24638ed25631a94a9b0d7b580b146329f82e158e8d1e90171a73d87bebf79255",
+        "signature": "24638ed25631a94a9b0d7b580b146329f82e158e8d1e90171a73d87bebf79255",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/zlib.d.ts": {
-        "version": "f409183966a1dd93d3a9cd1d54fbeb85c73101e87cd5b19467c5e37b252f3fd8",
-        "signature": "f409183966a1dd93d3a9cd1d54fbeb85c73101e87cd5b19467c5e37b252f3fd8",
+        "version": "638f49a0db5d30977533a8cfabf3e10ab30724360424698e8d5fd41ca272e070",
+        "signature": "638f49a0db5d30977533a8cfabf3e10ab30724360424698e8d5fd41ca272e070",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/ts3.4/base.d.ts": {
@@ -2972,8 +2972,8 @@
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/wasi.d.ts": {
-        "version": "0b3fef11ea6208c4cb3715c9aa108766ce98fc726bfba68cc23b25ce944ce9c0",
-        "signature": "0b3fef11ea6208c4cb3715c9aa108766ce98fc726bfba68cc23b25ce944ce9c0",
+        "version": "4e0a4d84b15692ea8669fe4f3d05a4f204567906b1347da7a58b75f45bae48d3",
+        "signature": "4e0a4d84b15692ea8669fe4f3d05a4f204567906b1347da7a58b75f45bae48d3",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/ts3.6/base.d.ts": {
@@ -2982,8 +2982,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/assert.d.ts": {
-        "version": "08d15b727da0c4f0870d98159311b5d4de1f0293dbb9f1261b6752962d2aa239",
-        "signature": "08d15b727da0c4f0870d98159311b5d4de1f0293dbb9f1261b6752962d2aa239",
+        "version": "d0c575d48d6dad75648017ff18762eb97f9398cc9486541b3070e79ce12719e6",
+        "signature": "d0c575d48d6dad75648017ff18762eb97f9398cc9486541b3070e79ce12719e6",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/base.d.ts": {
@@ -3361,13 +3361,118 @@
         "signature": "80a65fb9accc71da572f36d828bde067c79e314179b7b433c5b2ca1a916774ce",
         "affectsGlobalScope": false
       },
+      "../node_modules/@qualweb/types/wappalyzer.d.ts": {
+        "version": "4ff8322f1f3c0b394a290cd65b42eabeed85a8d399c75c1e0db3a567c751ab93",
+        "signature": "4ff8322f1f3c0b394a290cd65b42eabeed85a8d399c75c1e0db3a567c751ab93",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/act-rules.d.ts": {
+        "version": "62de9a460ab9a85c5034c640bca3bbdbd1d959e509aa04da0d13865e06d24988",
+        "signature": "62de9a460ab9a85c5034c640bca3bbdbd1d959e509aa04da0d13865e06d24988",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/wcag-techniques.d.ts": {
+        "version": "2065ccfac587e35f32e2350c320c624d8f49d99fc1b4c87b1148113129981121",
+        "signature": "2065ccfac587e35f32e2350c320c624d8f49d99fc1b4c87b1148113129981121",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/html-techniques.d.ts": {
+        "version": "a8f0d0a61c9cde4a0cceca2fddfb300d188295af92ce2b9cede037bb23d7e7e6",
+        "signature": "a8f0d0a61c9cde4a0cceca2fddfb300d188295af92ce2b9cede037bb23d7e7e6",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/html-validator.d.ts": {
+        "version": "317a40b0b1e08798187c7c3890c568d25cae368f8cfd7fd211c4a4fe6163510d",
+        "signature": "317a40b0b1e08798187c7c3890c568d25cae368f8cfd7fd211c4a4fe6163510d",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/css/index.d.ts": {
+        "version": "6df90db41e44e8209643eabbdaa8709c8ba2923d9495f1fd01e68a58d6c3a80b",
+        "signature": "6df90db41e44e8209643eabbdaa8709c8ba2923d9495f1fd01e68a58d6c3a80b",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/css-techniques.d.ts": {
+        "version": "c59d0d49cfc38701334c63e2db547bb8f2abf94bf8d5697ead52de8c1a1d6969",
+        "signature": "c59d0d49cfc38701334c63e2db547bb8f2abf94bf8d5697ead52de8c1a1d6969",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/best-practices.d.ts": {
+        "version": "5afa4c0fd7cb48d60ec582d7503442bfb44cfe0830f04856f9f4cc5d53811c38",
+        "signature": "5afa4c0fd7cb48d60ec582d7503442bfb44cfe0830f04856f9f4cc5d53811c38",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/earl-reporter.d.ts": {
+        "version": "ddfd9e6bb4f2474b7663769faae878f9a7cf146548e55f75ac46f5c3488943a7",
+        "signature": "ddfd9e6bb4f2474b7663769faae878f9a7cf146548e55f75ac46f5c3488943a7",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/crawler.d.ts": {
+        "version": "501e3d88fedf1d842efda3866a0a8a3c0423a09933fb777fbc3b92b55fd0ff93",
+        "signature": "501e3d88fedf1d842efda3866a0a8a3c0423a09933fb777fbc3b92b55fd0ff93",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/puppeteer/Errors.d.ts": {
+        "version": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
+        "signature": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts": {
+        "version": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
+        "signature": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/puppeteer/index.d.ts": {
+        "version": "c65b3f931726d33c700346b1c6aad062afee60691b450cf1d2ca208fc92c11c9",
+        "signature": "c65b3f931726d33c700346b1c6aad062afee60691b450cf1d2ca208fc92c11c9",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/util.d.ts": {
+        "version": "461ddaa7ce879d6f7268c66cd14c0090e3c33974bb0a0c6073a88c3dac2a8bce",
+        "signature": "461ddaa7ce879d6f7268c66cd14c0090e3c33974bb0a0c6073a88c3dac2a8bce",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/core.d.ts": {
+        "version": "66d0de58bd7cb0dde7e411fab3c1f1eee2927feaa3a2be254dbc145c141ec5a1",
+        "signature": "66d0de58bd7cb0dde7e411fab3c1f1eee2927feaa3a2be254dbc145c141ec5a1",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/qwElement.d.ts": {
+        "version": "8ed5b7a3e2a357f21ed05cae3d2e4d7ecd67f651aec2017c7ebdd377667e5482",
+        "signature": "8ed5b7a3e2a357f21ed05cae3d2e4d7ecd67f651aec2017c7ebdd377667e5482",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/qwPage.d.ts": {
+        "version": "c97e6bb815261264d9d6b54548cb974f6a16ff39a2383b7f903d25ea6aa81691",
+        "signature": "c97e6bb815261264d9d6b54548cb974f6a16ff39a2383b7f903d25ea6aa81691",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/dom.d.ts": {
+        "version": "395fee2d3f9a5e86ea68d8898b8cbe3140d9b4540f63894073b8aebad519919f",
+        "signature": "395fee2d3f9a5e86ea68d8898b8cbe3140d9b4540f63894073b8aebad519919f",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/evaluation.d.ts": {
+        "version": "0cdcf8735cf1d1f1eea1e6291020c7d996300bd1858801d1b242f19bed750f5d",
+        "signature": "0cdcf8735cf1d1f1eea1e6291020c7d996300bd1858801d1b242f19bed750f5d",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/types/index.d.ts": {
+        "version": "da2907a2858f938b73909f77ec2c3dcfa837883d45f7a891e6e9d85be1f8c0be",
+        "signature": "da2907a2858f938b73909f77ec2c3dcfa837883d45f7a891e6e9d85be1f8c0be",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@qualweb/core/dist/index.d.ts": {
+        "version": "d5c8c6758563c61c7019368cf38330c271b6f3f028374dfbfe064645d7e78580",
+        "signature": "d5c8c6758563c61c7019368cf38330c271b6f3f028374dfbfe064645d7e78580",
+        "affectsGlobalScope": false
+      },
       "../src/evaluation/qualweb.ts": {
-        "version": "37615adca89ad1b28a9b5b5881ac1fa6aea2246a5361f269e7c9b2cc563247ac",
+        "version": "81f7da234ca079e805a34f07b82d3f0a5b34153fcda398d3e01ee23fdf7c8cca",
         "signature": "aeb617b40253dae050a4ade007c4a13be53033b5bcc2b6c30a38f10ef1aa2408",
         "affectsGlobalScope": false
       },
       "../src/evaluation/tests.ts": {
-        "version": "66a7a9a8813a030477032e84495d6f8b45af09fa4af02c82354922519cdf6b2d",
+        "version": "274a66581bf29c7fd234374603e9c2aaca1afabcfb12f85a622854f8c286e12b",
         "signature": "8026fb32f6232733cf9b798fcec19ea3cd5abcd1a62a4f4dfa1e6076ca740bed",
         "affectsGlobalScope": false
       },
@@ -3377,12 +3482,12 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/mapping.ts": {
-        "version": "7bf9d5977551df0a971b2af65f30b65c59861dd6b3b5c40cd52a5d7fd569cbb7",
+        "version": "77d8642771af0d021ac62066ede294b37fcd6b415b0a8c5588b3b96f178cb52e",
         "signature": "5f6fb7bc8eb06c1d7dd15287cf65cb96f09b4abbd4dbe6d31e3382ebb610be9b",
         "affectsGlobalScope": false
       },
       "../src/evaluation/middleware.ts": {
-        "version": "2487dbbfd5a88ed867aa64c0d9d29ab95abc59df320f5fc2a9e8d27db0424652",
+        "version": "644c80c49fb05ead6fe72eaeed855710885b5e0aa3c7bc6b4d4c6cc30d5ee3c9",
         "signature": "3ba36369478a18472ee6c06ba9fe80d6444ddda53ffc037f63cb1e372b5e6bc6",
         "affectsGlobalScope": false
       },
@@ -3651,21 +3756,6 @@
         "signature": "0b13fc9fda05042bfd3363e04964fd4a11c4badef59b14cdedcdf432b48a1579",
         "affectsGlobalScope": false
       },
-      "../node_modules/@types/puppeteer/Errors.d.ts": {
-        "version": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
-        "signature": "24074eb89fe21d5d7d8a5ed86e6c56939cf32d533f68bae213b0cdac74e03d3b",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts": {
-        "version": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
-        "signature": "c9c23a4476436315c1a675f807128457b5aeadc8d3d75340e1f4b93af73551ce",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/puppeteer/index.d.ts": {
-        "version": "c65b3f931726d33c700346b1c6aad062afee60691b450cf1d2ca208fc92c11c9",
-        "signature": "c65b3f931726d33c700346b1c6aad062afee60691b450cf1d2ca208fc92c11c9",
-        "affectsGlobalScope": false
-      },
       "../src/crawler/crawler.service.ts": {
         "version": "2f8fa8633d5772d709b90ad9e70f154146dddda8883c96505971fb1b1b198056",
         "signature": "57e5c6a507a24d818c8af2853b266d0e933262e95613e88060d0e3fd84d0d547",
@@ -3755,266 +3845,6 @@
         "version": "c25e05296b36be5b72aedaf22bf29afef19c2fc70cb384df918c1e17054a51ee",
         "signature": "f97a5effdc362ddf2677767fc2c5da561f830ddc1899cda866ae9b0fd70093e4",
         "affectsGlobalScope": false
-      },
-      "../node_modules/@types/anymatch/index.d.ts": {
-        "version": "48b52264fa193879a074197839dbb4796fa07e86350ff888e5361e06aa46df76",
-        "signature": "48b52264fa193879a074197839dbb4796fa07e86350ff888e5361e06aa46df76",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@babel/types/lib/index.d.ts": {
-        "version": "f4d27b39be5d82eb94f12c54a15e61f65decb27fb289353d11ef238de49bf5c2",
-        "signature": "f4d27b39be5d82eb94f12c54a15e61f65decb27fb289353d11ef238de49bf5c2",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/babel__generator/index.d.ts": {
-        "version": "b25c5f2970d06c729f464c0aeaa64b1a5b5f1355aa93554bb5f9c199b8624b1e",
-        "signature": "b25c5f2970d06c729f464c0aeaa64b1a5b5f1355aa93554bb5f9c199b8624b1e",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/babel__traverse/index.d.ts": {
-        "version": "ef91066d2057cca50511e3af2d4aa54e07913a15f9cee1748f256139318eb413",
-        "signature": "ef91066d2057cca50511e3af2d4aa54e07913a15f9cee1748f256139318eb413",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@babel/parser/typings/babel-parser.d.ts": {
-        "version": "04467c3822f065aee977f9e1225b86b9ac0e976cb42b0c8da0b893a3290920e1",
-        "signature": "04467c3822f065aee977f9e1225b86b9ac0e976cb42b0c8da0b893a3290920e1",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/babel__template/index.d.ts": {
-        "version": "3e0a34f7207431d967dc32d593d1cda0c23975e9484bc8895b39d96ffca4a0d8",
-        "signature": "3e0a34f7207431d967dc32d593d1cda0c23975e9484bc8895b39d96ffca4a0d8",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/babel__core/index.d.ts": {
-        "version": "7df3163944694feeac63067632a8dc2e2dea1350119ec8b43df277af69198369",
-        "signature": "7df3163944694feeac63067632a8dc2e2dea1350119ec8b43df277af69198369",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/cookiejar/index.d.ts": {
-        "version": "16b7fb094ffaa5d270f934e7406e8baee2f8245cfabf6dcc20f693389f005f56",
-        "signature": "16b7fb094ffaa5d270f934e7406e8baee2f8245cfabf6dcc20f693389f005f56",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/css/index.d.ts": {
-        "version": "6df90db41e44e8209643eabbdaa8709c8ba2923d9495f1fd01e68a58d6c3a80b",
-        "signature": "6df90db41e44e8209643eabbdaa8709c8ba2923d9495f1fd01e68a58d6c3a80b",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/domhandler/index.d.ts": {
-        "version": "4eadfafced69b33d46142f2938718040687683ef4c0dbb6c7ae081a1d0394ebc",
-        "signature": "4eadfafced69b33d46142f2938718040687683ef4c0dbb6c7ae081a1d0394ebc",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/eslint-visitor-keys/index.d.ts": {
-        "version": "725d9be2fd48440256f4deb00649adffdbc5ecd282b09e89d4e200663792c34c",
-        "signature": "725d9be2fd48440256f4deb00649adffdbc5ecd282b09e89d4e200663792c34c",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/graceful-fs/index.d.ts": {
-        "version": "2c7dca525f4e2e5f2b357dacb58ab6c8777995e6d505ef652bcbbf9789ac558f",
-        "signature": "2c7dca525f4e2e5f2b357dacb58ab6c8777995e6d505ef652bcbbf9789ac558f",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/istanbul-lib-coverage/index.d.ts": {
-        "version": "de18acda71730bac52f4b256ce7511bb56cc21f6f114c59c46782eff2f632857",
-        "signature": "de18acda71730bac52f4b256ce7511bb56cc21f6f114c59c46782eff2f632857",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/istanbul-lib-report/index.d.ts": {
-        "version": "7eb06594824ada538b1d8b48c3925a83e7db792f47a081a62cf3e5c4e23cf0ee",
-        "signature": "7eb06594824ada538b1d8b48c3925a83e7db792f47a081a62cf3e5c4e23cf0ee",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/istanbul-reports/index.d.ts": {
-        "version": "029769d13d9917e3284cb2356ed28a6576e8b07ae6a06ee1e672518adf21a102",
-        "signature": "029769d13d9917e3284cb2356ed28a6576e8b07ae6a06ee1e672518adf21a102",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/jest-diff/build/cleanupSemantic.d.ts": {
-        "version": "e222104af6cb9415238ad358488b74d76eceeff238c1268ec6e85655b05341da",
-        "signature": "e222104af6cb9415238ad358488b74d76eceeff238c1268ec6e85655b05341da",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/jest-diff/build/types.d.ts": {
-        "version": "69da61a7b5093dac77fa3bec8be95dcf9a74c95a0e9161edb98bb24e30e439d2",
-        "signature": "69da61a7b5093dac77fa3bec8be95dcf9a74c95a0e9161edb98bb24e30e439d2",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/jest-diff/build/diffLines.d.ts": {
-        "version": "eba230221317c985ab1953ccc3edc517f248b37db4fef7875cb2c8d08aff7be7",
-        "signature": "eba230221317c985ab1953ccc3edc517f248b37db4fef7875cb2c8d08aff7be7",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/jest-diff/build/printDiffs.d.ts": {
-        "version": "b83e796810e475da3564c6515bc0ae9577070596a33d89299b7d99f94ecfd921",
-        "signature": "b83e796810e475da3564c6515bc0ae9577070596a33d89299b7d99f94ecfd921",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/jest-diff/build/index.d.ts": {
-        "version": "b4439890c168d646357928431100daac5cbdee1d345a34e6bf6eca9f3abe22bc",
-        "signature": "b4439890c168d646357928431100daac5cbdee1d345a34e6bf6eca9f3abe22bc",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/pretty-format/build/types.d.ts": {
-        "version": "5d72971a459517c44c1379dab9ed248e87a61ba0a1e0f25c9d67e1e640cd9a09",
-        "signature": "5d72971a459517c44c1379dab9ed248e87a61ba0a1e0f25c9d67e1e640cd9a09",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/pretty-format/build/index.d.ts": {
-        "version": "02d734976af36f4273d930bea88b3e62adf6b078cf120c1c63d49aa8d8427c5c",
-        "signature": "02d734976af36f4273d930bea88b3e62adf6b078cf120c1c63d49aa8d8427c5c",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/jest/index.d.ts": {
-        "version": "f2b73fbe0e4e473289046067e91303cd1b0994206edc6d38b80aa45692afa6b8",
-        "signature": "f2b73fbe0e4e473289046067e91303cd1b0994206edc6d38b80aa45692afa6b8",
-        "affectsGlobalScope": true
-      },
-      "../node_modules/@types/json-schema/index.d.ts": {
-        "version": "b2be568d8ce95fcb26eebd04c035d94825655fdf689bf67d799f5ff8cbbb1024",
-        "signature": "b2be568d8ce95fcb26eebd04c035d94825655fdf689bf67d799f5ff8cbbb1024",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/json5/index.d.ts": {
-        "version": "96d14f21b7652903852eef49379d04dbda28c16ed36468f8c9fa08f7c14c9538",
-        "signature": "96d14f21b7652903852eef49379d04dbda28c16ed36468f8c9fa08f7c14c9538",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/parse-json/index.d.ts": {
-        "version": "2b8264b2fefd7367e0f20e2c04eed5d3038831fe00f5efbc110ff0131aab899b",
-        "signature": "2b8264b2fefd7367e0f20e2c04eed5d3038831fe00f5efbc110ff0131aab899b",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/prettier/index.d.ts": {
-        "version": "38433e50f876a09a45b665837a2954003ae14606270a157491f2bb52edf10382",
-        "signature": "38433e50f876a09a45b665837a2954003ae14606270a157491f2bb52edf10382",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/source-list-map/index.d.ts": {
-        "version": "67fc055eb86a0632e2e072838f889ffe1754083cb13c8c80a06a7d895d877aae",
-        "signature": "67fc055eb86a0632e2e072838f889ffe1754083cb13c8c80a06a7d895d877aae",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/stack-utils/index.d.ts": {
-        "version": "c6c4fea9acc55d5e38ff2b70d57ab0b5cdbd08f8bc5d7a226e322cea128c5b57",
-        "signature": "c6c4fea9acc55d5e38ff2b70d57ab0b5cdbd08f8bc5d7a226e322cea128c5b57",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/superagent/index.d.ts": {
-        "version": "022bb15c2fb40bb465a4511476b1796b9977e2bab463ffd8b2b3d1d1a56b00d1",
-        "signature": "022bb15c2fb40bb465a4511476b1796b9977e2bab463ffd8b2b3d1d1a56b00d1",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/supertest/index.d.ts": {
-        "version": "e6540dcaa31aadbd070bea91d31c387c3e03baf78ea56420e706ae77660ae45a",
-        "signature": "e6540dcaa31aadbd070bea91d31c387c3e03baf78ea56420e706ae77660ae45a",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/tapable/index.d.ts": {
-        "version": "d558a0fe921ebcc88d3212c2c42108abf9f0d694d67ebdeba37d7728c044f579",
-        "signature": "d558a0fe921ebcc88d3212c2c42108abf9f0d694d67ebdeba37d7728c044f579",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/source-map/source-map.d.ts": {
-        "version": "2887592574fcdfd087647c539dcb0fbe5af2521270dad4a37f9d17c16190d579",
-        "signature": "2887592574fcdfd087647c539dcb0fbe5af2521270dad4a37f9d17c16190d579",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/uglify-js/index.d.ts": {
-        "version": "530d0618491a50ab5aedbb42374af28560c319c1997d238a0c8053ca8d00685d",
-        "signature": "530d0618491a50ab5aedbb42374af28560c319c1997d238a0c8053ca8d00685d",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/anymatch/index.d.ts": {
-        "version": "4fb0b7d532aa6fb850b6cd2f1ee4f00802d877b5c66a51903bc1fb0624126349",
-        "signature": "4fb0b7d532aa6fb850b6cd2f1ee4f00802d877b5c66a51903bc1fb0624126349",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts": {
-        "version": "b90c59ac4682368a01c83881b814738eb151de8a58f52eb7edadea2bcffb11b9",
-        "signature": "b90c59ac4682368a01c83881b814738eb151de8a58f52eb7edadea2bcffb11b9",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/Source.d.ts": {
-        "version": "8560a87b2e9f8e2c3808c8f6172c9b7eb6c9b08cb9f937db71c285ecf292c81d",
-        "signature": "8560a87b2e9f8e2c3808c8f6172c9b7eb6c9b08cb9f937db71c285ecf292c81d",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts": {
-        "version": "ffe3931ff864f28d80ae2f33bd11123ad3d7bad9896b910a1e61504cc093e1f5",
-        "signature": "ffe3931ff864f28d80ae2f33bd11123ad3d7bad9896b910a1e61504cc093e1f5",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts": {
-        "version": "083c1bd82f8dc3a1ed6fc9e8eaddf141f7c05df418eca386598821e045253af9",
-        "signature": "083c1bd82f8dc3a1ed6fc9e8eaddf141f7c05df418eca386598821e045253af9",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts": {
-        "version": "274ebe605bd7f71ce161f9f5328febc7d547a2929f803f04b44ec4a7d8729517",
-        "signature": "274ebe605bd7f71ce161f9f5328febc7d547a2929f803f04b44ec4a7d8729517",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts": {
-        "version": "6ca0207e70d985a24396583f55836b10dc181063ab6069733561bfde404d1bad",
-        "signature": "6ca0207e70d985a24396583f55836b10dc181063ab6069733561bfde404d1bad",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/RawSource.d.ts": {
-        "version": "5908142efeaab38ffdf43927ee0af681ae77e0d7672b956dfb8b6c705dbfe106",
-        "signature": "5908142efeaab38ffdf43927ee0af681ae77e0d7672b956dfb8b6c705dbfe106",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts": {
-        "version": "f772b188b943549b5c5eb803133314b8aa7689eced80eed0b70e2f30ca07ab9c",
-        "signature": "f772b188b943549b5c5eb803133314b8aa7689eced80eed0b70e2f30ca07ab9c",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts": {
-        "version": "0026b816ef05cfbf290e8585820eef0f13250438669107dfc44482bac007b14f",
-        "signature": "0026b816ef05cfbf290e8585820eef0f13250438669107dfc44482bac007b14f",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts": {
-        "version": "8ef5aad624890acfe0fa48230edce255f00934016d16acb8de0edac0ea5b21bb",
-        "signature": "8ef5aad624890acfe0fa48230edce255f00934016d16acb8de0edac0ea5b21bb",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/index.d.ts": {
-        "version": "608f7279e195a33959d62ac32f42ca201a225a4c820a872f9af8562120b2865a",
-        "signature": "608f7279e195a33959d62ac32f42ca201a225a4c820a872f9af8562120b2865a",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts": {
-        "version": "d84398556ba4595ee6be554671da142cfe964cbdebb2f0c517a10f76f2b016c0",
-        "signature": "d84398556ba4595ee6be554671da142cfe964cbdebb2f0c517a10f76f2b016c0",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack-sources/index.d.ts": {
-        "version": "004efa076dda36645bc670b0daaafb83a2d10ef60b6c6ed1cb39168d7e7fbfa8",
-        "signature": "004efa076dda36645bc670b0daaafb83a2d10ef60b6c6ed1cb39168d7e7fbfa8",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/webpack/index.d.ts": {
-        "version": "3f1bfa5b1d3e8d4ea1f64c13e0060453a52282f7fce02a536856de40dab3f7e1",
-        "signature": "3f1bfa5b1d3e8d4ea1f64c13e0060453a52282f7fce02a536856de40dab3f7e1",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/yargs-parser/index.d.ts": {
-        "version": "fdfbe321c556c39a2ecf791d537b999591d0849e971dd938d88f460fea0186f6",
-        "signature": "fdfbe321c556c39a2ecf791d537b999591d0849e971dd938d88f460fea0186f6",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/yargs/index.d.ts": {
-        "version": "f0ed104b5564e9fda6de99e1f489207e7aad5bdf3f7c679aa327756d1f0a90a5",
-        "signature": "f0ed104b5564e9fda6de99e1f489207e7aad5bdf3f7c679aa327756d1f0a90a5",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/yauzl/index.d.ts": {
-        "version": "3845d3b64286c12c60d39fc90ac1cc5e47cbc951530658d2567d578b2faa1f26",
-        "signature": "3845d3b64286c12c60d39fc90ac1cc5e47cbc951530658d2567d578b2faa1f26",
-        "affectsGlobalScope": false
       }
     },
     "options": {
@@ -4030,12 +3860,15 @@
       "outDir": "./",
       "baseUrl": "..",
       "incremental": true,
+      "typeRoots": [
+        "../../node_modules/@qualweb/types"
+      ],
+      "types": [
+        "./node_modules/@qualweb/types"
+      ],
       "configFilePath": "../tsconfig.build.json"
     },
     "referencedMap": {
-      "../node_modules/@babel/parser/typings/babel-parser.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
-      ],
       "../node_modules/@nestjs/common/cache/cache.module.d.ts": [
         "../node_modules/@nestjs/common/cache/interfaces/cache-module.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/index.d.ts"
@@ -4868,22 +4701,86 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts": [
         "../node_modules/rxjs/index.d.ts"
       ],
-      "../node_modules/@types/babel__core/index.d.ts": [
-        "../node_modules/@babel/parser/typings/babel-parser.d.ts",
-        "../node_modules/@babel/types/lib/index.d.ts",
-        "../node_modules/@types/babel__generator/index.d.ts",
-        "../node_modules/@types/babel__template/index.d.ts",
-        "../node_modules/@types/babel__traverse/index.d.ts"
+      "../node_modules/@qualweb/core/dist/index.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/index.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
       ],
-      "../node_modules/@types/babel__generator/index.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/act-rules.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts"
       ],
-      "../node_modules/@types/babel__template/index.d.ts": [
-        "../node_modules/@babel/parser/typings/babel-parser.d.ts",
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/best-practices.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts"
       ],
-      "../node_modules/@types/babel__traverse/index.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/core.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@qualweb/types/wappalyzer.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts",
+        "../node_modules/domhandler/lib/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/css-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@types/css/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/dom.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/html-validator.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/earl-reporter.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts"
+      ],
+      "../node_modules/@qualweb/types/evaluation.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/html-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts"
+      ],
+      "../node_modules/@qualweb/types/index.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/crawler.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/dom.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/evaluation.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-validator.d.ts",
+        "../node_modules/@qualweb/types/qwElement.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts",
+        "../node_modules/@qualweb/types/wappalyzer.d.ts",
+        "../node_modules/@qualweb/types/wcag-techniques.d.ts"
+      ],
+      "../node_modules/@qualweb/types/qwPage.d.ts": [
+        "../node_modules/@qualweb/types/qwElement.d.ts"
+      ],
+      "../node_modules/@qualweb/types/util.d.ts": [
+        "../node_modules/@qualweb/types/qwElement.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts",
+        "../node_modules/domhandler/lib/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/wcag-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts"
       ],
       "../node_modules/@types/body-parser/index.d.ts": [
         "../node_modules/@types/connect/index.d.ts",
@@ -4912,21 +4809,6 @@
         "../node_modules/@types/express-serve-static-core/index.d.ts",
         "../node_modules/@types/qs/index.d.ts",
         "../node_modules/@types/serve-static/index.d.ts"
-      ],
-      "../node_modules/@types/graceful-fs/index.d.ts": [
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/index.d.ts"
-      ],
-      "../node_modules/@types/istanbul-lib-report/index.d.ts": [
-        "../node_modules/@types/istanbul-lib-coverage/index.d.ts"
-      ],
-      "../node_modules/@types/istanbul-reports/index.d.ts": [
-        "../node_modules/@types/istanbul-lib-coverage/index.d.ts",
-        "../node_modules/@types/istanbul-lib-report/index.d.ts"
-      ],
-      "../node_modules/@types/jest/index.d.ts": [
-        "../node_modules/jest-diff/build/index.d.ts",
-        "../node_modules/pretty-format/build/index.d.ts"
       ],
       "../node_modules/@types/jsonwebtoken/index.d.ts": [
         "../node_modules/@types/node/index.d.ts"
@@ -5090,6 +4972,7 @@
       ],
       "../node_modules/@types/node/worker_threads.d.ts": [
         "../node_modules/@types/node/events.d.ts",
+        "../node_modules/@types/node/fs/promises.d.ts",
         "../node_modules/@types/node/stream.d.ts",
         "../node_modules/@types/node/url.d.ts",
         "../node_modules/@types/node/vm.d.ts"
@@ -5132,109 +5015,6 @@
         "../node_modules/@types/node/http.d.ts",
         "../node_modules/@types/node/https.d.ts",
         "../node_modules/@types/node/index.d.ts"
-      ],
-      "../node_modules/@types/superagent/index.d.ts": [
-        "../node_modules/@types/cookiejar/index.d.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/http.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/node/stream.d.ts"
-      ],
-      "../node_modules/@types/supertest/index.d.ts": [
-        "../node_modules/@types/superagent/index.d.ts"
-      ],
-      "../node_modules/@types/uglify-js/index.d.ts": [
-        "../node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/index.d.ts": [
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/RawSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts": [
-        "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts": [
-        "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/RawSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/Source.d.ts": [
-        "../node_modules/@types/node/crypto.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/index.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/RawSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack/index.d.ts": [
-        "../node_modules/@types/node/crypto.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/tapable/index.d.ts",
-        "../node_modules/@types/uglify-js/index.d.ts",
-        "../node_modules/@types/webpack-sources/index.d.ts",
-        "../node_modules/anymatch/index.d.ts",
-        "../node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/yargs/index.d.ts": [
-        "../node_modules/@types/yargs-parser/index.d.ts"
-      ],
-      "../node_modules/@types/yauzl/index.d.ts": [
-        "../node_modules/@types/node/events.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/node/stream.d.ts"
       ],
       "../node_modules/dom-serializer/lib/index.d.ts": [
         "../node_modules/domhandler/lib/index.d.ts"
@@ -5356,23 +5136,6 @@
         "../node_modules/htmlparser2/lib/Parser.d.ts",
         "../node_modules/htmlparser2/lib/Tokenizer.d.ts",
         "../node_modules/htmlparser2/lib/WritableStream.d.ts"
-      ],
-      "../node_modules/jest-diff/build/diffLines.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/jest-diff/build/index.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/diffLines.d.ts",
-        "../node_modules/jest-diff/build/printDiffs.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/jest-diff/build/printDiffs.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/pretty-format/build/index.d.ts": [
-        "../node_modules/pretty-format/build/types.d.ts"
       ],
       "../node_modules/rxjs/index.d.ts": [
         "../node_modules/rxjs/internal/AsyncSubject.d.ts",
@@ -6949,6 +6712,9 @@
         "../src/evaluation/testsColors.ts",
         "../src/lib/security.ts"
       ],
+      "../src/evaluation/qualweb.ts": [
+        "../node_modules/@qualweb/types/core.d.ts"
+      ],
       "../src/lib/security.ts": [
         "../node_modules/@types/node/crypto.d.ts"
       ],
@@ -7109,9 +6875,6 @@
       ]
     },
     "exportedModulesMap": {
-      "../node_modules/@babel/parser/typings/babel-parser.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
-      ],
       "../node_modules/@nestjs/common/cache/cache.module.d.ts": [
         "../node_modules/@nestjs/common/cache/interfaces/cache-module.interface.d.ts",
         "../node_modules/@nestjs/common/interfaces/index.d.ts"
@@ -7944,22 +7707,86 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts": [
         "../node_modules/rxjs/index.d.ts"
       ],
-      "../node_modules/@types/babel__core/index.d.ts": [
-        "../node_modules/@babel/parser/typings/babel-parser.d.ts",
-        "../node_modules/@babel/types/lib/index.d.ts",
-        "../node_modules/@types/babel__generator/index.d.ts",
-        "../node_modules/@types/babel__template/index.d.ts",
-        "../node_modules/@types/babel__traverse/index.d.ts"
+      "../node_modules/@qualweb/core/dist/index.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/index.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
       ],
-      "../node_modules/@types/babel__generator/index.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/act-rules.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts"
       ],
-      "../node_modules/@types/babel__template/index.d.ts": [
-        "../node_modules/@babel/parser/typings/babel-parser.d.ts",
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/best-practices.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts"
       ],
-      "../node_modules/@types/babel__traverse/index.d.ts": [
-        "../node_modules/@babel/types/lib/index.d.ts"
+      "../node_modules/@qualweb/types/core.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@qualweb/types/wappalyzer.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts",
+        "../node_modules/domhandler/lib/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/css-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@types/css/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/dom.d.ts": [
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/html-validator.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/earl-reporter.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts"
+      ],
+      "../node_modules/@qualweb/types/evaluation.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/html-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts"
+      ],
+      "../node_modules/@qualweb/types/index.d.ts": [
+        "../node_modules/@qualweb/types/act-rules.d.ts",
+        "../node_modules/@qualweb/types/best-practices.d.ts",
+        "../node_modules/@qualweb/types/core.d.ts",
+        "../node_modules/@qualweb/types/crawler.d.ts",
+        "../node_modules/@qualweb/types/css-techniques.d.ts",
+        "../node_modules/@qualweb/types/dom.d.ts",
+        "../node_modules/@qualweb/types/earl-reporter.d.ts",
+        "../node_modules/@qualweb/types/evaluation.d.ts",
+        "../node_modules/@qualweb/types/html-techniques.d.ts",
+        "../node_modules/@qualweb/types/html-validator.d.ts",
+        "../node_modules/@qualweb/types/qwElement.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@qualweb/types/util.d.ts",
+        "../node_modules/@qualweb/types/wappalyzer.d.ts",
+        "../node_modules/@qualweb/types/wcag-techniques.d.ts"
+      ],
+      "../node_modules/@qualweb/types/qwPage.d.ts": [
+        "../node_modules/@qualweb/types/qwElement.d.ts"
+      ],
+      "../node_modules/@qualweb/types/util.d.ts": [
+        "../node_modules/@qualweb/types/qwElement.d.ts",
+        "../node_modules/@qualweb/types/qwPage.d.ts",
+        "../node_modules/@types/puppeteer/index.d.ts",
+        "../node_modules/domhandler/lib/index.d.ts"
+      ],
+      "../node_modules/@qualweb/types/wcag-techniques.d.ts": [
+        "../node_modules/@qualweb/types/qwPage.d.ts"
       ],
       "../node_modules/@types/body-parser/index.d.ts": [
         "../node_modules/@types/connect/index.d.ts",
@@ -7988,21 +7815,6 @@
         "../node_modules/@types/express-serve-static-core/index.d.ts",
         "../node_modules/@types/qs/index.d.ts",
         "../node_modules/@types/serve-static/index.d.ts"
-      ],
-      "../node_modules/@types/graceful-fs/index.d.ts": [
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/index.d.ts"
-      ],
-      "../node_modules/@types/istanbul-lib-report/index.d.ts": [
-        "../node_modules/@types/istanbul-lib-coverage/index.d.ts"
-      ],
-      "../node_modules/@types/istanbul-reports/index.d.ts": [
-        "../node_modules/@types/istanbul-lib-coverage/index.d.ts",
-        "../node_modules/@types/istanbul-lib-report/index.d.ts"
-      ],
-      "../node_modules/@types/jest/index.d.ts": [
-        "../node_modules/jest-diff/build/index.d.ts",
-        "../node_modules/pretty-format/build/index.d.ts"
       ],
       "../node_modules/@types/jsonwebtoken/index.d.ts": [
         "../node_modules/@types/node/index.d.ts"
@@ -8166,6 +7978,7 @@
       ],
       "../node_modules/@types/node/worker_threads.d.ts": [
         "../node_modules/@types/node/events.d.ts",
+        "../node_modules/@types/node/fs/promises.d.ts",
         "../node_modules/@types/node/stream.d.ts",
         "../node_modules/@types/node/url.d.ts",
         "../node_modules/@types/node/vm.d.ts"
@@ -8208,109 +8021,6 @@
         "../node_modules/@types/node/http.d.ts",
         "../node_modules/@types/node/https.d.ts",
         "../node_modules/@types/node/index.d.ts"
-      ],
-      "../node_modules/@types/superagent/index.d.ts": [
-        "../node_modules/@types/cookiejar/index.d.ts",
-        "../node_modules/@types/node/fs.d.ts",
-        "../node_modules/@types/node/http.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/node/stream.d.ts"
-      ],
-      "../node_modules/@types/supertest/index.d.ts": [
-        "../node_modules/@types/superagent/index.d.ts"
-      ],
-      "../node_modules/@types/uglify-js/index.d.ts": [
-        "../node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/index.d.ts": [
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/RawSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts": [
-        "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts": [
-        "../node_modules/@types/source-list-map/index.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/RawSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/Source.d.ts": [
-        "../node_modules/@types/node/crypto.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/index.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack-sources/lib/index.d.ts": [
-        "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/RawSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts",
-        "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-        "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts",
-        "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/webpack/index.d.ts": [
-        "../node_modules/@types/node/crypto.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/tapable/index.d.ts",
-        "../node_modules/@types/uglify-js/index.d.ts",
-        "../node_modules/@types/webpack-sources/index.d.ts",
-        "../node_modules/anymatch/index.d.ts",
-        "../node_modules/source-map/source-map.d.ts"
-      ],
-      "../node_modules/@types/yargs/index.d.ts": [
-        "../node_modules/@types/yargs-parser/index.d.ts"
-      ],
-      "../node_modules/@types/yauzl/index.d.ts": [
-        "../node_modules/@types/node/events.d.ts",
-        "../node_modules/@types/node/index.d.ts",
-        "../node_modules/@types/node/stream.d.ts"
       ],
       "../node_modules/dom-serializer/lib/index.d.ts": [
         "../node_modules/domhandler/lib/index.d.ts"
@@ -8432,23 +8142,6 @@
         "../node_modules/htmlparser2/lib/Parser.d.ts",
         "../node_modules/htmlparser2/lib/Tokenizer.d.ts",
         "../node_modules/htmlparser2/lib/WritableStream.d.ts"
-      ],
-      "../node_modules/jest-diff/build/diffLines.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/jest-diff/build/index.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/diffLines.d.ts",
-        "../node_modules/jest-diff/build/printDiffs.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/jest-diff/build/printDiffs.d.ts": [
-        "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-        "../node_modules/jest-diff/build/types.d.ts"
-      ],
-      "../node_modules/pretty-format/build/index.d.ts": [
-        "../node_modules/pretty-format/build/types.d.ts"
       ],
       "../node_modules/rxjs/index.d.ts": [
         "../node_modules/rxjs/internal/AsyncSubject.d.ts",
@@ -9911,8 +9604,6 @@
       ]
     },
     "semanticDiagnosticsPerFile": [
-      "../node_modules/@babel/parser/typings/babel-parser.d.ts",
-      "../node_modules/@babel/types/lib/index.d.ts",
       "../node_modules/@nestjs/common/cache/cache.constants.d.ts",
       "../node_modules/@nestjs/common/cache/cache.module.d.ts",
       "../node_modules/@nestjs/common/cache/decorators/cache-key.decorator.d.ts",
@@ -10151,27 +9842,29 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts",
       "../node_modules/@nestjs/websockets/interfaces/web-socket-server.interface.d.ts",
       "../node_modules/@nestjs/websockets/interfaces/ws-response.interface.d.ts",
-      "../node_modules/@types/anymatch/index.d.ts",
-      "../node_modules/@types/babel__core/index.d.ts",
-      "../node_modules/@types/babel__generator/index.d.ts",
-      "../node_modules/@types/babel__template/index.d.ts",
-      "../node_modules/@types/babel__traverse/index.d.ts",
+      "../node_modules/@qualweb/core/dist/index.d.ts",
+      "../node_modules/@qualweb/types/act-rules.d.ts",
+      "../node_modules/@qualweb/types/best-practices.d.ts",
+      "../node_modules/@qualweb/types/core.d.ts",
+      "../node_modules/@qualweb/types/crawler.d.ts",
+      "../node_modules/@qualweb/types/css-techniques.d.ts",
+      "../node_modules/@qualweb/types/dom.d.ts",
+      "../node_modules/@qualweb/types/earl-reporter.d.ts",
+      "../node_modules/@qualweb/types/evaluation.d.ts",
+      "../node_modules/@qualweb/types/html-techniques.d.ts",
+      "../node_modules/@qualweb/types/html-validator.d.ts",
+      "../node_modules/@qualweb/types/index.d.ts",
+      "../node_modules/@qualweb/types/qwElement.d.ts",
+      "../node_modules/@qualweb/types/qwPage.d.ts",
+      "../node_modules/@qualweb/types/util.d.ts",
+      "../node_modules/@qualweb/types/wappalyzer.d.ts",
+      "../node_modules/@qualweb/types/wcag-techniques.d.ts",
       "../node_modules/@types/body-parser/index.d.ts",
       "../node_modules/@types/connect/index.d.ts",
-      "../node_modules/@types/cookiejar/index.d.ts",
       "../node_modules/@types/css/index.d.ts",
-      "../node_modules/@types/domhandler/index.d.ts",
       "../node_modules/@types/engine.io/index.d.ts",
-      "../node_modules/@types/eslint-visitor-keys/index.d.ts",
       "../node_modules/@types/express-serve-static-core/index.d.ts",
       "../node_modules/@types/express/index.d.ts",
-      "../node_modules/@types/graceful-fs/index.d.ts",
-      "../node_modules/@types/istanbul-lib-coverage/index.d.ts",
-      "../node_modules/@types/istanbul-lib-report/index.d.ts",
-      "../node_modules/@types/istanbul-reports/index.d.ts",
-      "../node_modules/@types/jest/index.d.ts",
-      "../node_modules/@types/json-schema/index.d.ts",
-      "../node_modules/@types/json5/index.d.ts",
       "../node_modules/@types/jsonwebtoken/index.d.ts",
       "../node_modules/@types/mime/index.d.ts",
       "../node_modules/@types/node/assert.d.ts",
@@ -10221,12 +9914,10 @@
       "../node_modules/@types/node/wasi.d.ts",
       "../node_modules/@types/node/worker_threads.d.ts",
       "../node_modules/@types/node/zlib.d.ts",
-      "../node_modules/@types/parse-json/index.d.ts",
       "../node_modules/@types/passport-jwt/index.d.ts",
       "../node_modules/@types/passport-local/index.d.ts",
       "../node_modules/@types/passport-strategy/index.d.ts",
       "../node_modules/@types/passport/index.d.ts",
-      "../node_modules/@types/prettier/index.d.ts",
       "../node_modules/@types/puppeteer/DeviceDescriptors.d.ts",
       "../node_modules/@types/puppeteer/Errors.d.ts",
       "../node_modules/@types/puppeteer/index.d.ts",
@@ -10234,31 +9925,7 @@
       "../node_modules/@types/range-parser/index.d.ts",
       "../node_modules/@types/serve-static/index.d.ts",
       "../node_modules/@types/socket.io/index.d.ts",
-      "../node_modules/@types/source-list-map/index.d.ts",
       "../node_modules/@types/sqlstring/index.d.ts",
-      "../node_modules/@types/stack-utils/index.d.ts",
-      "../node_modules/@types/superagent/index.d.ts",
-      "../node_modules/@types/supertest/index.d.ts",
-      "../node_modules/@types/tapable/index.d.ts",
-      "../node_modules/@types/uglify-js/index.d.ts",
-      "../node_modules/@types/webpack-sources/index.d.ts",
-      "../node_modules/@types/webpack-sources/lib/CachedSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/CompatSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/ConcatSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/OriginalSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/PrefixSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/RawSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/ReplaceSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/SizeOnlySource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/Source.d.ts",
-      "../node_modules/@types/webpack-sources/lib/SourceMapSource.d.ts",
-      "../node_modules/@types/webpack-sources/lib/index.d.ts",
-      "../node_modules/@types/webpack-sources/node_modules/source-map/source-map.d.ts",
-      "../node_modules/@types/webpack/index.d.ts",
-      "../node_modules/@types/yargs-parser/index.d.ts",
-      "../node_modules/@types/yargs/index.d.ts",
-      "../node_modules/@types/yauzl/index.d.ts",
-      "../node_modules/anymatch/index.d.ts",
       "../node_modules/axios/index.d.ts",
       "../node_modules/css-select/index.d.ts",
       "../node_modules/dom-serializer/lib/index.d.ts",
@@ -10293,13 +9960,6 @@
       "../node_modules/htmlparser2/lib/WritableStream.d.ts",
       "../node_modules/htmlparser2/lib/index.d.ts",
       "../node_modules/ip-range-check/index.d.ts",
-      "../node_modules/jest-diff/build/cleanupSemantic.d.ts",
-      "../node_modules/jest-diff/build/diffLines.d.ts",
-      "../node_modules/jest-diff/build/index.d.ts",
-      "../node_modules/jest-diff/build/printDiffs.d.ts",
-      "../node_modules/jest-diff/build/types.d.ts",
-      "../node_modules/pretty-format/build/index.d.ts",
-      "../node_modules/pretty-format/build/types.d.ts",
       "../node_modules/reflect-metadata/index.d.ts",
       "../node_modules/rxjs/index.d.ts",
       "../node_modules/rxjs/internal/AsyncSubject.d.ts",
@@ -10365,7 +10025,6 @@
       "../node_modules/rxjs/internal/util/isObservable.d.ts",
       "../node_modules/rxjs/internal/util/noop.d.ts",
       "../node_modules/rxjs/internal/util/pipe.d.ts",
-      "../node_modules/source-map/source-map.d.ts",
       "../node_modules/typeorm/cache/QueryResultCache.d.ts",
       "../node_modules/typeorm/cache/QueryResultCacheOptions.d.ts",
       "../node_modules/typeorm/common/DeepPartial.d.ts",

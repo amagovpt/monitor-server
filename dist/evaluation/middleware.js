@@ -52,19 +52,21 @@ function completeMissingReportElements(report) {
     report.data.elems['area'] = area.length;
     const inpImg = css_select_1.default('a', _dom);
     report.data.elems['inpImg'] = inpImg.length;
-    if (report.data.elems['hx'] === undefined) {
-        const hx = css_select_1.default('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
-        report.data.elems['hx'] = hx.length;
-    }
     const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
     const label = css_select_1.default('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
     report.data.elems['label'] = label.length;
     const form = css_select_1.default('form', _dom);
     report.data.elems['form'] = form.length;
     const table = css_select_1.default('table', _dom);
-    report.data.elems['tableData'] = table.length;
-    report.data.elems['tableLayout'] = table.length;
-    report.data.elems['tableComplex'] = table.length;
+    if (report.data.elems['tableData'] === undefined) {
+        report.data.elems['tableData'] = table.length;
+    }
+    if (report.data.elems['tableLayout'] === undefined) {
+        report.data.elems['tableLayout'] = table.length;
+    }
+    if (report.data.elems['tableComplex'] === undefined) {
+        report.data.elems['tableComplex'] = table.length;
+    }
     const tabletable = css_select_1.default('table table', _dom);
     report.data.elems['tableNested'] = tabletable.length;
     const iframe = css_select_1.default('iframe', _dom);
@@ -80,8 +82,6 @@ function generateScore(report) {
         const value = tests_1.default[test];
         if (value.result === 'warning') {
             continue;
-        }
-        if (report.data.elems.frame) {
         }
         let calc = false;
         switch (value['type']) {

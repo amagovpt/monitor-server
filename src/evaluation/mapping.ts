@@ -591,7 +591,7 @@ function QW_BP14(elements: any, results: any, nodes: any, technique: any): void 
 }
 
 function QW_BP15(elements: any, results: any, nodes: any, technique: any): void {
-  const passedResults = technique.results.filter((r: any) => r.verdict === 'passed');
+  /*const passedResults = technique.results.filter((r: any) => r.verdict === 'passed');
   const failedResults = technique.results.filter((r: any) => r.verdict === 'failed');
 
   if (passedResults.length > 0) {
@@ -602,6 +602,16 @@ function QW_BP15(elements: any, results: any, nodes: any, technique: any): void 
   
   if (failedResults.length > 0) {
     addToElements(elements, 'valueAbsHtml', failedResults.length);
+    addToResults(results, 'values_01a');
+    addToNodes(nodes, 'valueAbsHtml', technique.results.filter((r: any) => r.verdict === 'failed'));
+  }*/
+  
+  if (technique.metadata.outcome === 'passed') {
+    addToElements(elements, 'valueRelHtml', technique.metadata.passed);
+    addToResults(results, 'values_01b');
+    addToNodes(nodes, 'valueRelHtml', technique.results.filter((r: any) => r.verdict === 'passed'));
+  } else if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'valueAbsHtml', technique.metadata.failed);
     addToResults(results, 'values_01a');
     addToNodes(nodes, 'valueAbsHtml', technique.results.filter((r: any) => r.verdict === 'failed'));
   }

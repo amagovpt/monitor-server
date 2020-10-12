@@ -35,10 +35,10 @@ function completeMissingReportElements(report: any): void {
   const inpImg = CSSselect('a', _dom);
   report.data.elems['inpImg'] = inpImg.length;
 
-  if (report.data.elems['hx'] === undefined) {
+  /*if (report.data.elems['hx'] === undefined) {
     const hx = CSSselect('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
     report.data.elems['hx'] = hx.length;
-  }
+  }*/
 
   const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
 
@@ -49,9 +49,15 @@ function completeMissingReportElements(report: any): void {
   report.data.elems['form'] = form.length;
 
   const table = CSSselect('table', _dom);
-  report.data.elems['tableData'] = table.length;
-  report.data.elems['tableLayout'] = table.length;
-  report.data.elems['tableComplex'] = table.length;
+  if (report.data.elems['tableData'] === undefined) {
+    report.data.elems['tableData'] = table.length;
+  }
+  if (report.data.elems['tableLayout'] === undefined) {
+    report.data.elems['tableLayout'] = table.length;
+  }
+  if (report.data.elems['tableComplex'] === undefined) {
+    report.data.elems['tableComplex'] = table.length;
+  }
 
   const tabletable = CSSselect('table table', _dom);
   report.data.elems['tableNested'] = tabletable.length;
@@ -77,11 +83,11 @@ function generateScore(report: any): string {
       continue;
     }
 
-    if (report.data.elems.frame) {
-      //if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
-      //  continue;
-      //}
-    }
+    /*if (report.data.elems.frame) {
+      if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
+        continue;
+      }
+    }*/
     
     let calc = false;
     switch (value['type']) {

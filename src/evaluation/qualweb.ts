@@ -1,4 +1,4 @@
-import { QualWeb } from '@qualweb/core';
+import { QualWeb, EvaluationReport } from '@qualweb/core';
 
 const qualweb = new QualWeb();
 
@@ -87,12 +87,14 @@ export async function evaluate(params: any): Promise<any> {
     options['html'] = params.html;
   }
   
-  let report = await qualweb.evaluate(options);
+  const reports = await qualweb.evaluate(options);
   
+  let report: EvaluationReport;
+
   if (params.url) {
-    report = report[params.url];
+    report = reports[params.url];
   } else if (params.html) {
-    report = report['customHtml'];
+    report = reports['customHtml'];
   }
   
   return report;

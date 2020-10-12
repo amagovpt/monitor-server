@@ -11,7 +11,9 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "typeRoots": ["../node_modules/@qualweb/types"],
+    "types": ["./node_modules/@qualweb/types"], 
   },
   "exclude": ["node_modules", "dist"]
 }
