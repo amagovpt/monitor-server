@@ -3452,8 +3452,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@qualweb/types/core.d.ts": {
-        "version": "66d0de58bd7cb0dde7e411fab3c1f1eee2927feaa3a2be254dbc145c141ec5a1",
-        "signature": "66d0de58bd7cb0dde7e411fab3c1f1eee2927feaa3a2be254dbc145c141ec5a1",
+        "version": "226991654abf91a6fa33e48056feaa744a5e5c25e67a848eba1e60114bd8dc4e",
+        "signature": "226991654abf91a6fa33e48056feaa744a5e5c25e67a848eba1e60114bd8dc4e",
         "affectsGlobalScope": false
       },
       "../node_modules/@qualweb/types/qwElement.d.ts": {
