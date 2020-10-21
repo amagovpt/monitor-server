@@ -35,7 +35,7 @@ export class EvaluationService {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance1 = false;
@@ -49,7 +49,7 @@ export class EvaluationService {
       if (!this.isEvaluatingInstance2) {
         this.isEvaluatingInstance2 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance2 = false;
@@ -63,7 +63,7 @@ export class EvaluationService {
       if (!this.isEvaluatingInstance3) {
         this.isEvaluatingInstance3 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance3 = false;
@@ -77,7 +77,7 @@ export class EvaluationService {
       if (!this.isEvaluatingUserInstance4) {
         this.isEvaluatingUserInstance4 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingUserInstance4 = false;
@@ -91,7 +91,7 @@ export class EvaluationService {
       if (!this.isEvaluatingUserInstance5) {
         this.isEvaluatingUserInstance5 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingUserInstance5 = false;
@@ -105,7 +105,7 @@ export class EvaluationService {
       if (!this.isEvaluatingUserInstance6) {
         this.isEvaluatingUserInstance6 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingUserInstance6 = false;

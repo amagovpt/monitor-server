@@ -1,5 +1,5 @@
 import * as htmlparser from 'htmlparser2';
-import CSSselect from 'css-select';
+import * as CSSselect from 'css-select';
 import clone from 'lodash.clone';
 import * as qualweb from './qualweb';
 
@@ -25,14 +25,14 @@ function completeMissingReportElements(report: any): void {
   parser.end();
 
   if (report.data.elems['img'] === undefined) {
-    const img = CSSselect('img', _dom);
+    const img = CSSselect.selectAll('img', _dom);
     report.data.elems['img'] = img.length;
   }
 
-  const area = CSSselect('area', _dom);
+  const area = CSSselect.selectAll('area', _dom);
   report.data.elems['area'] = area.length;
 
-  const inpImg = CSSselect('a', _dom);
+  const inpImg = CSSselect.selectAll('a', _dom);
   report.data.elems['inpImg'] = inpImg.length;
 
   /*if (report.data.elems['hx'] === undefined) {
@@ -42,13 +42,13 @@ function completeMissingReportElements(report: any): void {
 
   const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
 
-  const label = CSSselect('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
+  const label = CSSselect.selectAll('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
   report.data.elems['label'] = label.length;
 
-  const form = CSSselect('form', _dom);
+  const form = CSSselect.selectAll('form', _dom);
   report.data.elems['form'] = form.length;
 
-  const table = CSSselect('table', _dom);
+  const table = CSSselect.selectAll('table', _dom);
   if (report.data.elems['tableData'] === undefined) {
     report.data.elems['tableData'] = table.length;
   }
@@ -59,13 +59,13 @@ function completeMissingReportElements(report: any): void {
     report.data.elems['tableComplex'] = table.length;
   }
 
-  const tabletable = CSSselect('table table', _dom);
+  const tabletable = CSSselect.selectAll('table table', _dom);
   report.data.elems['tableNested'] = tabletable.length;
 
-  const iframe = CSSselect('iframe', _dom);
+  const iframe = CSSselect.selectAll('iframe', _dom);
   report.data.elems['iframe'] = iframe.length;
 
-  const ehandler = CSSselect('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
+  const ehandler = CSSselect.selectAll('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
   report.data.elems['ehandler'] = ehandler.length;
 
   report.data.tot.elems = clone(report.data.elems);

@@ -24,7 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.executeHtmlEvaluation = exports.executeUrlEvaluation = exports.initEvaluator = void 0;
 const htmlparser = __importStar(require("htmlparser2"));
-const css_select_1 = __importDefault(require("css-select"));
+const CSSselect = __importStar(require("css-select"));
 const lodash_clone_1 = __importDefault(require("lodash.clone"));
 const qualweb = __importStar(require("./qualweb"));
 const tests_1 = __importDefault(require("./tests"));
@@ -45,19 +45,19 @@ function completeMissingReportElements(report) {
     parser.write(report.pagecode.replace(/(\r\n|\n|\r|\t)/gm, ''));
     parser.end();
     if (report.data.elems['img'] === undefined) {
-        const img = css_select_1.default('img', _dom);
+        const img = CSSselect.selectAll('img', _dom);
         report.data.elems['img'] = img.length;
     }
-    const area = css_select_1.default('area', _dom);
+    const area = CSSselect.selectAll('area', _dom);
     report.data.elems['area'] = area.length;
-    const inpImg = css_select_1.default('a', _dom);
+    const inpImg = CSSselect.selectAll('a', _dom);
     report.data.elems['inpImg'] = inpImg.length;
     const roles = ['checkbox', 'combobox', 'listbox', 'menuitemcheckbox', 'menuitemradio', 'radio', 'searchbox', 'slider', 'spinbutton', 'switch', 'textbox'];
-    const label = css_select_1.default('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
+    const label = CSSselect.selectAll('input, select, textarea, ' + roles.map(r => `[role="${r}"]`).join(', '), _dom);
     report.data.elems['label'] = label.length;
-    const form = css_select_1.default('form', _dom);
+    const form = CSSselect.selectAll('form', _dom);
     report.data.elems['form'] = form.length;
-    const table = css_select_1.default('table', _dom);
+    const table = CSSselect.selectAll('table', _dom);
     if (report.data.elems['tableData'] === undefined) {
         report.data.elems['tableData'] = table.length;
     }
@@ -67,11 +67,11 @@ function completeMissingReportElements(report) {
     if (report.data.elems['tableComplex'] === undefined) {
         report.data.elems['tableComplex'] = table.length;
     }
-    const tabletable = css_select_1.default('table table', _dom);
+    const tabletable = CSSselect.selectAll('table table', _dom);
     report.data.elems['tableNested'] = tabletable.length;
-    const iframe = css_select_1.default('iframe', _dom);
+    const iframe = CSSselect.selectAll('iframe', _dom);
     report.data.elems['iframe'] = iframe.length;
-    const ehandler = css_select_1.default('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
+    const ehandler = CSSselect.selectAll('*[onmousedown], *[onmouseup], *[onclick], *[onmouseover], *[onmouseout]', _dom);
     report.data.elems['ehandler'] = ehandler.length;
     report.data.tot.elems = lodash_clone_1.default(report.data.elems);
 }
@@ -188,7 +188,7 @@ function getHtmlLang(html) {
     const parser = new htmlparser.Parser(handler);
     parser.write(html.replace(/(\r\n|\n|\r|\t)/gm, ''));
     parser.end();
-    const htmlElement = css_select_1.default.selectOne('html', _dom);
+    const htmlElement = CSSselect.selectOne('html', _dom);
     if (htmlElement && htmlElement.attribs && htmlElement.attribs.lang) {
         lang = htmlElement.attribs.lang;
     }

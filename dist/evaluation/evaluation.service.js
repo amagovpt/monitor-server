@@ -34,7 +34,7 @@ let EvaluationService = class EvaluationService {
         if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '0') {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance1 = false;
             }
@@ -44,7 +44,7 @@ let EvaluationService = class EvaluationService {
         if (process.env.ID === '1') {
             if (!this.isEvaluatingInstance2) {
                 this.isEvaluatingInstance2 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance2 = false;
             }
@@ -54,7 +54,7 @@ let EvaluationService = class EvaluationService {
         if (process.env.ID === '2') {
             if (!this.isEvaluatingInstance3) {
                 this.isEvaluatingInstance3 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance3 = false;
             }
@@ -64,7 +64,7 @@ let EvaluationService = class EvaluationService {
         if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '3') {
             if (!this.isEvaluatingUserInstance4) {
                 this.isEvaluatingUserInstance4 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingUserInstance4 = false;
             }
@@ -74,7 +74,7 @@ let EvaluationService = class EvaluationService {
         if (process.env.ID === '4') {
             if (!this.isEvaluatingUserInstance5) {
                 this.isEvaluatingUserInstance5 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingUserInstance5 = false;
             }
@@ -84,7 +84,7 @@ let EvaluationService = class EvaluationService {
         if (process.env.ID === '5') {
             if (!this.isEvaluatingUserInstance6) {
                 this.isEvaluatingUserInstance6 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingUserInstance6 = false;
             }
