@@ -2,9 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = exports.init = void 0;
 const core_1 = require("@qualweb/core");
-const qualweb = new core_1.QualWeb();
 async function init() {
-    await qualweb.start({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 exports.init = init;
 async function evaluate(params) {
@@ -87,7 +85,10 @@ async function evaluate(params) {
     else if (params.html) {
         options['html'] = params.html;
     }
+    const qualweb = new core_1.QualWeb();
+    await qualweb.start({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const reports = await qualweb.evaluate(options);
+    await qualweb.stop();
     let report;
     if (params.url) {
         report = reports[params.url];

@@ -1,9 +1,9 @@
 import { QualWeb, EvaluationReport } from '@qualweb/core';
 
-const qualweb = new QualWeb();
+//const qualweb = new QualWeb();
 
 export async function init(): Promise<void> {
-  await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+  //await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
 }
 
 export async function evaluate(params: any): Promise<any> {
@@ -86,8 +86,13 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     options['html'] = params.html;
   }
+
+  const qualweb = new QualWeb();
+  await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   
   const reports = await qualweb.evaluate(options);
+
+  await qualweb.stop();
   
   let report: EvaluationReport;
 

@@ -3467,7 +3467,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "81f7da234ca079e805a34f07b82d3f0a5b34153fcda398d3e01ee23fdf7c8cca",
+        "version": "670baae91b0ff8bb133c86f79ddf0d20e4d22f84e9986480a0ad5e269bfcb72d",
         "signature": "aeb617b40253dae050a4ade007c4a13be53033b5bcc2b6c30a38f10ef1aa2408",
         "affectsGlobalScope": false
       },
