@@ -3487,7 +3487,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "66441549c267b1dcdd5c51b3dc703172a7e9d51816f5389c717d45328de93a69",
+        "version": "46acf0b9968e285fcd2e8f3fc8ff9857dae19b63733964d3ac2a07fbc2a70b6b",
         "signature": "ed5a05aeed5ecad7d44d225c3fbd33c0b6799e6a521c459a6a37826b65fcc9a2",
         "affectsGlobalScope": false
       },
@@ -3512,7 +3512,7 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "14cd11e136b6f862199c16946cca6b5daa1c8edbb16d9f2221cb6a8ba87f5c2d",
+        "version": "eda6c1a050d621b700c4f2598614464f9815f684ccc9378c2be610df4cd797dd",
         "signature": "56f458c0203f4ff44a4eb1b8e28f6830333c4d15ef23da85253007eded5bd0fc",
         "affectsGlobalScope": false
       },

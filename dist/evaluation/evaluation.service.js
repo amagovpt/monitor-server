@@ -33,7 +33,7 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingUserInstance6 = false;
     }
     async instance1EvaluatePageList() {
-        console.log();
+        console.log(process.env.ID, process.env.NAMESPACE);
         if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
@@ -44,6 +44,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance2EvaluatePageListevaluatePageList() {
+        console.log(process.env.ID, process.env.NAMESPACE);
         if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance2) {
                 this.isEvaluatingInstance2 = true;
@@ -54,6 +55,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance3EvaluatePageListevaluatePageList() {
+        console.log(process.env.ID, process.env.NAMESPACE);
         if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance3) {
                 this.isEvaluatingInstance3 = true;
@@ -64,6 +66,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance4EvaluatePageListevaluatePageList() {
+        console.log(process.env.ID, process.env.NAMESPACE);
         if (process.env.ID === '3' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance4) {
                 this.isEvaluatingInstance4 = true;
@@ -74,6 +77,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance5EvaluatePageListevaluatePageList() {
+        console.log(process.env.ID, process.env.NAMESPACE);
         if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance5) {
                 this.isEvaluatingInstance5 = true;
@@ -84,6 +88,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance6EvaluatePageListevaluatePageList() {
+        console.log(process.env.ID, process.env.NAMESPACE);
         if (process.env.ID === '5' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance6) {
                 this.isEvaluatingInstance6 = true;

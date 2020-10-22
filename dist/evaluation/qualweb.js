@@ -78,7 +78,7 @@ async function evaluate(params) {
     };
     if (params.url) {
         if (!params.url.startsWith('http://') && !params.url.startsWith('https://')) {
-            params.url + 'http://' + params.url;
+            params.url = 'http://' + params.url;
         }
         options['url'] = params.url;
     }
