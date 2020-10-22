@@ -83,7 +83,7 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     options['html'] = params.html;
   }
-  console.log(params.url);
+  
   const qualweb = new QualWeb();
   await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   
@@ -98,6 +98,6 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     report = reports['customHtml'];
   }
-  console.log(report);
+  
   return report;
 }
