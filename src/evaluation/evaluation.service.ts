@@ -35,6 +35,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
+    console.log()
     if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
@@ -105,7 +106,7 @@ export class EvaluationService {
 
   @Cron('*/6 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
   async instance6EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+    if (process.env.ID === '5' && process.env.NAMESPACE === 'GLOBAL') {
       if (!this.isEvaluatingInstance6) {
         this.isEvaluatingInstance6 = true;
 

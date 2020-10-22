@@ -33,6 +33,7 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingUserInstance6 = false;
     }
     async instance1EvaluatePageList() {
+        console.log();
         if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
@@ -83,7 +84,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance6EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+        if (process.env.ID === '5' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance6) {
                 this.isEvaluatingInstance6 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600`);

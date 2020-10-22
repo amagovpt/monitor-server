@@ -3,7 +3,7 @@ module.exports = {
     name: 'monitor-server',
     namespace: 'global',
     script: './dist/main.js',
-    instances  : -2,
+    instances  : 6,
     exec_mode  : 'cluster',
     increment_var : 'ID',
     env: {
@@ -23,18 +23,18 @@ module.exports = {
     name: 'monitor-server',
     namespace: 'amp',
     script: './dist/main.js',
-    instances  : 'max',
+    instances  : 4,
     exec_mode  : 'cluster',
-    increment_var : 'ID',
+    increment_var : 'ID2',
     env: {
       NAMESPACE: 'AMP',
-      ID: 0,
+      ID2: 0,
       PORT: 3001,
       NODE_ENV: 'development',
     },
     env_production: {
       NAMESPACE: 'AMP',
-      ID: 0,
+      ID2: 0,
       PORT: 3001,
       NODE_ENV: 'production',
     }
