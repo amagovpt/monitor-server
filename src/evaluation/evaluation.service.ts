@@ -41,8 +41,8 @@ export class EvaluationService {
     }
   }
 
-  @Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
-  async instance2EvaluatePageListevaluatePageList(): Promise<void> {
+  //@Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
+  /*async instance2EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
       if (!this.isEvaluatingInstance2) {
         this.isEvaluatingInstance2 = true;
@@ -53,10 +53,10 @@ export class EvaluationService {
         this.isEvaluatingInstance2 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
-  async instance3EvaluatePageListevaluatePageList(): Promise<void> {
+  //@Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
+  /*async instance3EvaluatePageListevaluatePageList(): Promise<void> {
     if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
       if (!this.isEvaluatingInstance3) {
         this.isEvaluatingInstance3 = true;
@@ -67,7 +67,7 @@ export class EvaluationService {
         this.isEvaluatingInstance3 = false;
       }
     }
-  }
+  }*/
 
   //@Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   /*async instance4EvaluateUserPageList(): Promise<void> {
