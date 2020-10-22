@@ -25,68 +25,70 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingInstance1 = false;
         this.isEvaluatingInstance2 = false;
         this.isEvaluatingInstance3 = false;
+        this.isEvaluatingInstance4 = false;
+        this.isEvaluatingInstance5 = false;
+        this.isEvaluatingInstance6 = false;
         this.isEvaluatingUserInstance4 = false;
         this.isEvaluatingUserInstance5 = false;
         this.isEvaluatingUserInstance6 = false;
-        middleware_1.initEvaluator();
     }
     async instance1EvaluatePageList() {
-        if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '0') {
+        if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
             if (!this.isEvaluatingInstance1) {
                 this.isEvaluatingInstance1 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance1 = false;
             }
         }
     }
     async instance2EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '1') {
+        if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance2) {
                 this.isEvaluatingInstance2 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 200`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance2 = false;
             }
         }
     }
     async instance3EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '2') {
+        if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
             if (!this.isEvaluatingInstance3) {
                 this.isEvaluatingInstance3 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300`);
                 await this.evaluateInBackground(pages);
                 this.isEvaluatingInstance3 = false;
             }
         }
     }
-    async instance4EvaluateUserPageList() {
-        if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '3') {
-            if (!this.isEvaluatingUserInstance4) {
-                this.isEvaluatingUserInstance4 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+    async instance4EvaluatePageListevaluatePageList() {
+        if (process.env.ID === '3' && process.env.NAMESPACE === 'GLOBAL') {
+            if (!this.isEvaluatingInstance4) {
+                this.isEvaluatingInstance4 = true;
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400`);
                 await this.evaluateInBackground(pages);
-                this.isEvaluatingUserInstance4 = false;
+                this.isEvaluatingInstance4 = false;
             }
         }
     }
-    async instance5EvaluateUserPageListevaluatePageList() {
-        if (process.env.ID === '4') {
-            if (!this.isEvaluatingUserInstance5) {
-                this.isEvaluatingUserInstance5 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+    async instance5EvaluatePageListevaluatePageList() {
+        if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+            if (!this.isEvaluatingInstance5) {
+                this.isEvaluatingInstance5 = true;
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500`);
                 await this.evaluateInBackground(pages);
-                this.isEvaluatingUserInstance5 = false;
+                this.isEvaluatingInstance5 = false;
             }
         }
     }
-    async instance6EvaluateUserPageListevaluatePageList() {
-        if (process.env.ID === '5') {
-            if (!this.isEvaluatingUserInstance6) {
-                this.isEvaluatingUserInstance6 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+    async instance6EvaluatePageListevaluatePageList() {
+        if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+            if (!this.isEvaluatingInstance6) {
+                this.isEvaluatingInstance6 = true;
+                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600`);
                 await this.evaluateInBackground(pages);
-                this.isEvaluatingUserInstance6 = false;
+                this.isEvaluatingInstance6 = false;
             }
         }
     }
@@ -545,23 +547,23 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance3EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron(schedule_1.CronExpression.EVERY_MINUTE),
+    schedule_1.Cron('*/4 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance4EvaluateUserPageList", null);
+], EvaluationService.prototype, "instance4EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/2 * * * *'),
+    schedule_1.Cron('*/5 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance5EvaluateUserPageListevaluatePageList", null);
+], EvaluationService.prototype, "instance5EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/3 * * * *'),
+    schedule_1.Cron('*/6 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance6EvaluateUserPageListevaluatePageList", null);
+], EvaluationService.prototype, "instance6EvaluatePageListevaluatePageList", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [typeorm_1.Connection])

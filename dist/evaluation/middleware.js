@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.executeHtmlEvaluation = exports.executeUrlEvaluation = exports.initEvaluator = void 0;
+exports.executeHtmlEvaluation = exports.executeUrlEvaluation = void 0;
 const htmlparser = __importStar(require("htmlparser2"));
 const CSSselect = __importStar(require("css-select"));
 const lodash_clone_1 = __importDefault(require("lodash.clone"));
@@ -243,10 +243,6 @@ function parseEvaluation(evaluation) {
     report['data'].tot.info.score = lodash_clone_1.default(report['data'].score);
     return report;
 }
-async function initEvaluator() {
-    await qualweb.init();
-}
-exports.initEvaluator = initEvaluator;
 async function executeUrlEvaluation(url) {
     const evaluation = await qualweb.evaluate({ url });
     return parseEvaluation(evaluation);

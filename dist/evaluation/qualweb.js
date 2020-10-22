@@ -1,10 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.evaluate = exports.init = void 0;
+exports.evaluate = void 0;
 const core_1 = require("@qualweb/core");
-async function init() {
-}
-exports.init = init;
 async function evaluate(params) {
     const options = {
         'act-rules': {
@@ -80,6 +77,9 @@ async function evaluate(params) {
         }
     };
     if (params.url) {
+        if (!params.url.startsWith('http://') && !params.url.startsWith('https://')) {
+            params.url + 'http://' + params.url;
+        }
         options['url'] = params.url;
     }
     else if (params.html) {

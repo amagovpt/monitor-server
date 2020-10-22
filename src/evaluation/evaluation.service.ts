@@ -3,7 +3,7 @@ import { Connection, getManager } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import clone from 'lodash.clone';
 import { Evaluation } from './evaluation.entity';
-import { initEvaluator, executeUrlEvaluation, executeHtmlEvaluation } from './middleware';
+import { executeUrlEvaluation, executeHtmlEvaluation } from './middleware';
 
 @Injectable()
 export class EvaluationService {
@@ -11,6 +11,9 @@ export class EvaluationService {
   private isEvaluatingInstance1: boolean;
   private isEvaluatingInstance2: boolean;
   private isEvaluatingInstance3: boolean;
+  private isEvaluatingInstance4: boolean;
+  private isEvaluatingInstance5: boolean;
+  private isEvaluatingInstance6: boolean;
 
   private isEvaluatingUserInstance4: boolean;
   private isEvaluatingUserInstance5: boolean;
@@ -22,20 +25,21 @@ export class EvaluationService {
     this.isEvaluatingInstance1 = false;
     this.isEvaluatingInstance2 = false;
     this.isEvaluatingInstance3 = false;
+    this.isEvaluatingInstance4 = false;
+    this.isEvaluatingInstance5 = false;
+    this.isEvaluatingInstance6 = false;
     this.isEvaluatingUserInstance4 = false;
     this.isEvaluatingUserInstance5 = false;
     this.isEvaluatingUserInstance6 = false;
-
-    initEvaluator();
   }
 
   @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
-    if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '0') {
+    if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
       if (!this.isEvaluatingInstance1) {
         this.isEvaluatingInstance1 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance1 = false;
@@ -45,11 +49,11 @@ export class EvaluationService {
 
   @Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
   async instance2EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '1') {
+    if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
       if (!this.isEvaluatingInstance2) {
         this.isEvaluatingInstance2 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 200`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance2 = false;
@@ -59,11 +63,11 @@ export class EvaluationService {
 
   @Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
   async instance3EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '2') {
+    if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
       if (!this.isEvaluatingInstance3) {
         this.isEvaluatingInstance3 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300`);
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance3 = false;
@@ -71,8 +75,50 @@ export class EvaluationService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
-  async instance4EvaluateUserPageList(): Promise<void> {
+  @Cron('*/4 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
+  async instance4EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === '3' && process.env.NAMESPACE === 'GLOBAL') {
+      if (!this.isEvaluatingInstance4) {
+        this.isEvaluatingInstance4 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingInstance4 = false;
+      }
+    }
+  }
+
+  @Cron('*/5 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
+  async instance5EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+      if (!this.isEvaluatingInstance5) {
+        this.isEvaluatingInstance5 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingInstance5 = false;
+      }
+    }
+  }
+
+  @Cron('*/6 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
+  async instance6EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+      if (!this.isEvaluatingInstance6) {
+        this.isEvaluatingInstance6 = true;
+
+        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600`);
+        await this.evaluateInBackground(pages);
+
+        this.isEvaluatingInstance6 = false;
+      }
+    }
+  }
+
+  //@Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
+  /*async instance4EvaluateUserPageList(): Promise<void> {
     if ((process.env.ID === undefined && process.env.ID2 === undefined) || process.env.ID === '3') {
       if (!this.isEvaluatingUserInstance4) {
         this.isEvaluatingUserInstance4 = true;
@@ -83,10 +129,10 @@ export class EvaluationService {
         this.isEvaluatingUserInstance4 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/2 * * * *') // Called every 2 minutes - USERS EVALUATIONS
-  async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
+  //@Cron('*/2 * * * *') // Called every 2 minutes - USERS EVALUATIONS
+  /*async instance5EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.ID === '4') {
       if (!this.isEvaluatingUserInstance5) {
         this.isEvaluatingUserInstance5 = true;
@@ -97,10 +143,10 @@ export class EvaluationService {
         this.isEvaluatingUserInstance5 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/3 * * * *') // Called every 3 minutes - USERS EVALUATIONS
-  async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
+  //@Cron('*/3 * * * *') // Called every 3 minutes - USERS EVALUATIONS
+  /*async instance6EvaluateUserPageListevaluatePageList(): Promise<void> {
     if (process.env.ID === '5') {
       if (!this.isEvaluatingUserInstance6) {
         this.isEvaluatingUserInstance6 = true;
@@ -111,7 +157,7 @@ export class EvaluationService {
         this.isEvaluatingUserInstance6 = false;
       }
     }
-  }
+  }*/
 
   /*@Cron('0 0 * * 0') // Called every minute
   async evaluateOldPages(): Promise<void> {

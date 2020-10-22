@@ -1,11 +1,5 @@
 import { QualWeb, EvaluationReport } from '@qualweb/core';
 
-//const qualweb = new QualWeb();
-
-export async function init(): Promise<void> {
-  //await qualweb.start({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-}
-
 export async function evaluate(params: any): Promise<any> {
   const options = {
     'act-rules': {
@@ -82,6 +76,9 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url) {
+    if (!params.url.startsWith('http://') && !params.url.startsWith('https://')) {
+      params.url + 'http://' + params.url;
+    }
     options['url'] = params.url;
   } else if (params.html) {
     options['html'] = params.html;

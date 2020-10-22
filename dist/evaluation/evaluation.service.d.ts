@@ -5,6 +5,9 @@ export declare class EvaluationService {
     private isEvaluatingInstance1;
     private isEvaluatingInstance2;
     private isEvaluatingInstance3;
+    private isEvaluatingInstance4;
+    private isEvaluatingInstance5;
+    private isEvaluatingInstance6;
     private isEvaluatingUserInstance4;
     private isEvaluatingUserInstance5;
     private isEvaluatingUserInstance6;
@@ -12,9 +15,9 @@ export declare class EvaluationService {
     instance1EvaluatePageList(): Promise<void>;
     instance2EvaluatePageListevaluatePageList(): Promise<void>;
     instance3EvaluatePageListevaluatePageList(): Promise<void>;
-    instance4EvaluateUserPageList(): Promise<void>;
-    instance5EvaluateUserPageListevaluatePageList(): Promise<void>;
-    instance6EvaluateUserPageListevaluatePageList(): Promise<void>;
+    instance4EvaluatePageListevaluatePageList(): Promise<void>;
+    instance5EvaluatePageListevaluatePageList(): Promise<void>;
+    instance6EvaluatePageListevaluatePageList(): Promise<void>;
     private evaluateInBackground;
     evaluateUrl(url: string): Promise<any>;
     evaluateHtml(html: string): Promise<any>;
