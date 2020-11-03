@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, getManager } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-//import { NestCrawlerService } from 'nest-crawler';
 import { CrawlDomain, CrawlPage } from './crawler.entity';
 import { readFileSync, writeFileSync } from 'fs';
 import Crawler from 'simplecrawler';
@@ -12,26 +11,16 @@ import puppeteer from 'puppeteer';
 export class CrawlerService {
 
   private isCrawling: boolean;
-  private browser: puppeteer.Browser;
 
   constructor(
     @InjectRepository(CrawlDomain)
     private readonly crawlDomainRepository: Repository<CrawlDomain>,
-    @InjectRepository(CrawlPage)
-    private readonly crawlPageRepository: Repository<CrawlPage>,
-    //private readonly newCrawler: NestCrawlerService,
     private readonly connection: Connection
   ) {
     this.isCrawling = false;
-
-    if (process.env.ID === undefined || process.env.ID === '0' || process.env.ID === '1') {
-      puppeteer.launch().then(browser => {
-        this.browser = browser;
-      });
-    }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  /*@Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawl(): Promise<void> {
     if (process.env.ID === undefined || process.env.ID === '0') {
       if (!this.isCrawling) {
@@ -69,11 +58,11 @@ export class CrawlerService {
         this.isCrawling = false;
       }
     }
-  }
+  }*/
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawlUser(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === '1') {
+    if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
       if (!this.isCrawling) {
         this.isCrawling = true;
 
@@ -99,6 +88,7 @@ export class CrawlerService {
               await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
             } catch (e) {
               await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+              console.error('Failed -> ', domain[0].DomainUri, e);
             }
           }
           await queryRunner.commitTransaction();
@@ -117,7 +107,8 @@ export class CrawlerService {
   }
 
   private async crawl(url: string): Promise<string[]> {
-    const page = await this.browser.newPage();
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
     
     await page.goto(url, {
       timeout: 0,
@@ -180,7 +171,8 @@ export class CrawlerService {
     }, url);
 
     await page.close();
-
+    await browser.close();
+    
     const unique = urls.filter((v, i, self) => {
       return self.indexOf(v) === i;
     });
