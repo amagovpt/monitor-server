@@ -86,16 +86,20 @@ export class CrawlerService {
           const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId != -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
           
           if (domain.length > 0) {
-            const urls = await this.crawl(domain[0].DomainUri);
+            try {
+              const urls = await this.crawl(domain[0].DomainUri);
 
-            for (const url of urls || []) {
-              const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = url;
-              newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-              await queryRunner.manager.save(newCrawlPage);
+              for (const url of urls || []) {
+                const newCrawlPage = new CrawlPage();
+                newCrawlPage.Uri = url;
+                newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+                await queryRunner.manager.save(newCrawlPage);
+              }
+
+              await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+            } catch (e) {
+              await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
             }
-
-            await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
           }
           await queryRunner.commitTransaction();
         } catch (err) {
