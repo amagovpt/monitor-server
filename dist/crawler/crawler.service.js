@@ -30,30 +30,24 @@ let CrawlerService = class CrawlerService {
         this.connection = connection;
         this.isCrawling = false;
     }
-    async nestCrawlUser() {
-        if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
+    async nestCrawl() {
+        if (process.env.ID === undefined || process.env.ID === "0") {
             if (!this.isCrawling) {
                 this.isCrawling = true;
                 const queryRunner = this.connection.createQueryRunner();
                 try {
                     await queryRunner.connect();
                     await queryRunner.startTransaction();
-                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId != -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
                     if (domain.length > 0) {
-                        try {
-                            const urls = await this.crawl(domain[0].DomainUri);
-                            for (const url of urls || []) {
-                                const newCrawlPage = new crawler_entity_1.CrawlPage();
-                                newCrawlPage.Uri = url;
-                                newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-                                await queryRunner.manager.save(newCrawlPage);
-                            }
-                            await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
+                        const urls = await this.crawl(domain[0].DomainUri);
+                        for (const url of urls || []) {
+                            const newCrawlPage = new crawler_entity_1.CrawlPage();
+                            newCrawlPage.Uri = url;
+                            newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+                            await queryRunner.manager.save(newCrawlPage);
                         }
-                        catch (e) {
-                            await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
-                            console.error(e);
-                        }
+                        await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
                     }
                     await queryRunner.commitTransaction();
                 }
@@ -73,26 +67,34 @@ let CrawlerService = class CrawlerService {
         const page = await browser.newPage();
         await page.goto(url, {
             timeout: 0,
-            waitUntil: ['networkidle2', 'domcontentloaded']
+            waitUntil: ["networkidle2", "domcontentloaded"],
         });
         const urls = await page.evaluate((url) => {
-            const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt'.split('|');
-            const links = document.querySelectorAll('body a');
+            const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split("|");
+            const links = document.querySelectorAll("body a");
             const urls = new Array();
             for (const link of links || []) {
-                if (link.hasAttribute('href')) {
-                    const href = link.getAttribute('href');
-                    if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || href.startsWith('./') || (!href.startsWith('http') && !href.startsWith('#')))) {
+                if (link.hasAttribute("href")) {
+                    const href = link.getAttribute("href");
+                    if (href &&
+                        href.trim() &&
+                        (href.startsWith(url) ||
+                            href.startsWith("/") ||
+                            href.startsWith("./") ||
+                            (!href.startsWith("http") && !href.startsWith("#")))) {
                         let valid = true;
                         for (const not of notHtml || []) {
                             if (href.endsWith(not)) {
                                 valid = false;
                                 break;
                             }
-                            const parts = href.split('/');
+                            const parts = href.split("/");
                             if (parts.length > 0) {
                                 const lastPart = parts[parts.length - 1];
-                                if (lastPart.startsWith('#') || lastPart.startsWith('javascript:') || lastPart.startsWith('tel:') || lastPart.startsWith('mailto:')) {
+                                if (lastPart.startsWith("#") ||
+                                    lastPart.startsWith("javascript:") ||
+                                    lastPart.startsWith("tel:") ||
+                                    lastPart.startsWith("mailto:")) {
                                     valid = false;
                                     break;
                                 }
@@ -100,26 +102,25 @@ let CrawlerService = class CrawlerService {
                         }
                         if (valid) {
                             try {
-                                let correctUrl = '';
+                                let correctUrl = "";
                                 if (href.startsWith(url)) {
                                     correctUrl = href;
                                 }
-                                else if (href.startsWith('./')) {
+                                else if (href.startsWith("./")) {
                                     correctUrl = url + href.slice(1);
                                 }
-                                else if (!href.startsWith('/')) {
-                                    correctUrl = url + '/' + href;
+                                else if (!href.startsWith("/")) {
+                                    correctUrl = url + "/" + href;
                                 }
                                 else {
                                     correctUrl = url + href;
                                 }
                                 const parsedUrl = new URL(correctUrl);
-                                if (parsedUrl.hash.trim() === '') {
+                                if (parsedUrl.hash.trim() === "") {
                                     urls.push(correctUrl);
                                 }
                             }
-                            catch (err) {
-                            }
+                            catch (err) { }
                         }
                     }
                 }
@@ -131,7 +132,7 @@ let CrawlerService = class CrawlerService {
         const unique = urls.filter((v, i, self) => {
             return self.indexOf(v) === i;
         });
-        const normalizedUrls = unique.map(u => {
+        const normalizedUrls = unique.map((u) => {
             if (u.startsWith(url)) {
                 return u;
             }
@@ -148,19 +149,21 @@ let CrawlerService = class CrawlerService {
             let urlList = [];
             let pageNumber = 0;
             let emit = false;
-            crawler.on('fetchcomplete', async (r, q) => {
-                let contentType = r['stateData']['contentType'];
-                if ((contentType.includes('text/html') || contentType.includes('image/svg+xml')) && (pageNumber <= max_pages || max_pages === 0)) {
-                    urlList.push(r['url']);
+            crawler.on("fetchcomplete", async (r, q) => {
+                let contentType = r["stateData"]["contentType"];
+                if ((contentType.includes("text/html") ||
+                    contentType.includes("image/svg+xml")) &&
+                    (pageNumber <= max_pages || max_pages === 0)) {
+                    urlList.push(r["url"]);
                     urlList = urlList.filter((url, index, self) => self.indexOf(url) === index);
                     pageNumber = urlList.length;
                 }
                 if (pageNumber >= max_pages && max_pages !== 0 && !emit) {
                     emit = true;
-                    crawler.emit('complete');
+                    crawler.emit("complete");
                 }
             });
-            crawler.on('complete', async function () {
+            crawler.on("complete", async function () {
                 crawler.stop();
                 await queryRunner.connect();
                 await queryRunner.startTransaction();
@@ -199,20 +202,24 @@ let CrawlerService = class CrawlerService {
         return this.crawlDomainRepository.find({ where: { UserId: -1 } });
     }
     getConfig() {
-        const content = fs_1.readFileSync(__dirname + '/../../public/crawlerConfig.json');
+        const content = fs_1.readFileSync(__dirname + "/../../public/crawlerConfig.json");
         const config = JSON.parse(content.toString());
         return config;
     }
     setConfig(maxDepth, maxPages) {
-        fs_1.writeFileSync(__dirname + '/../../public/crawlerConfig.json', JSON.stringify({ maxDepth, maxPages }, null, 2));
+        fs_1.writeFileSync(__dirname + "/../../public/crawlerConfig.json", JSON.stringify({ maxDepth, maxPages }, null, 2));
         return true;
     }
     async isCrawlSubDomainDone(subDomain) {
-        const page = await this.crawlDomainRepository.findOne({ where: { UserId: -1, SubDomainUri: subDomain } });
-        return page ? page.Done === 1 ? 2 : 1 : 0;
+        const page = await this.crawlDomainRepository.findOne({
+            where: { UserId: -1, SubDomainUri: subDomain },
+        });
+        return page ? (page.Done === 1 ? 2 : 1) : 0;
     }
     async isUserCrawlerDone(userId, domainId) {
-        const page = await this.crawlDomainRepository.findOne({ where: { UserId: userId, DomainId: domainId } });
+        const page = await this.crawlDomainRepository.findOne({
+            where: { UserId: userId, DomainId: domainId },
+        });
         if (page) {
             return page.Done === 1;
         }
@@ -262,7 +269,10 @@ let CrawlerService = class CrawlerService {
     }
     async deleteUserCrawler(userId, domainId) {
         try {
-            await this.crawlDomainRepository.delete({ UserId: userId, DomainId: domainId });
+            await this.crawlDomainRepository.delete({
+                UserId: userId,
+                DomainId: domainId,
+            });
             return true;
         }
         catch (err) {
@@ -336,7 +346,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], CrawlerService.prototype, "nestCrawlUser", null);
+], CrawlerService.prototype, "nestCrawl", null);
 CrawlerService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(crawler_entity_1.CrawlDomain)),

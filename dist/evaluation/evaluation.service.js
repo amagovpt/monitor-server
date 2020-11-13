@@ -33,27 +33,55 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingUserInstance6 = false;
     }
     async instance1EvaluatePageList() {
-        if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
-            if (!this.isEvaluatingInstance1) {
-                this.isEvaluatingInstance1 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`);
+        if (!this.isEvaluatingInstance1) {
+            this.isEvaluatingInstance1 = true;
+            const queryRunner = this.connection.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            try {
+                const pages = await queryRunner.manager.query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                if (pages.length > 0) {
+                    await queryRunner.manager.query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map((p) => p.EvaluationListId)]);
+                }
+                await queryRunner.commitTransaction();
+                console.log(pages);
                 await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance1 = false;
             }
+            catch (err) {
+                await queryRunner.rollbackTransaction();
+            }
+            finally {
+                await queryRunner.release();
+            }
+            this.isEvaluatingInstance1 = false;
         }
     }
     async instance2EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
-            if (!this.isEvaluatingInstance2) {
-                this.isEvaluatingInstance2 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 200, 100`);
+        if (!this.isEvaluatingInstance2) {
+            this.isEvaluatingInstance2 = true;
+            const queryRunner = this.connection.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            try {
+                const pages = await queryRunner.manager.query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+                if (pages.length > 0) {
+                    await queryRunner.manager.query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map((p) => p.EvaluationListId)]);
+                }
+                await queryRunner.commitTransaction();
+                console.log(pages);
                 await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance2 = false;
             }
+            catch (err) {
+                await queryRunner.rollbackTransaction();
+            }
+            finally {
+                await queryRunner.release();
+            }
+            this.isEvaluatingInstance2 = false;
         }
     }
     async instance3EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
+        if (process.env.ID === "2" && process.env.NAMESPACE === "GLOBAL") {
             if (!this.isEvaluatingInstance3) {
                 this.isEvaluatingInstance3 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300, 300`);
@@ -63,7 +91,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance4EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '3' && process.env.NAMESPACE === 'GLOBAL') {
+        if (process.env.ID === "3" && process.env.NAMESPACE === "GLOBAL") {
             if (!this.isEvaluatingInstance4) {
                 this.isEvaluatingInstance4 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400, 600`);
@@ -73,7 +101,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance5EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+        if (process.env.ID === "4" && process.env.NAMESPACE === "GLOBAL") {
             if (!this.isEvaluatingInstance5) {
                 this.isEvaluatingInstance5 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500, 1000`);
@@ -83,7 +111,7 @@ let EvaluationService = class EvaluationService {
         }
     }
     async instance6EvaluatePageListevaluatePageList() {
-        if (process.env.ID === '5' && process.env.NAMESPACE === 'GLOBAL') {
+        if (process.env.ID === "5" && process.env.NAMESPACE === "GLOBAL") {
             if (!this.isEvaluatingInstance6) {
                 this.isEvaluatingInstance6 = true;
                 const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600, 1500`);
@@ -94,13 +122,6 @@ let EvaluationService = class EvaluationService {
     }
     async evaluateInBackground(pages) {
         if (pages.length > 0) {
-            try {
-                await typeorm_1.getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId)]);
-            }
-            catch (err) {
-                console.log(err);
-                throw err;
-            }
             for (const pte of pages || []) {
                 let error = null;
                 let evaluation;
@@ -161,13 +182,13 @@ let EvaluationService = class EvaluationService {
         const evaluation = await this.evaluateUrl(url);
         const newEvaluation = new evaluation_entity_1.Evaluation();
         newEvaluation.PageId = pageId;
-        newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+        newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
         newEvaluation.Score = evaluation.data.score;
-        newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
-        newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
-        newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
-        newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
-        const conform = evaluation.data.conform.split('@');
+        newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString("base64");
+        newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString("base64");
+        newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString("base64");
+        newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString("base64");
+        const conform = evaluation.data.conform.split("@");
         newEvaluation.A = conform[0];
         newEvaluation.AA = conform[1];
         newEvaluation.AAA = conform[2];
@@ -184,13 +205,13 @@ let EvaluationService = class EvaluationService {
     async savePageEvaluation(queryRunner, pageId, evaluation, showTo, studyUserId = null) {
         const newEvaluation = new evaluation_entity_1.Evaluation();
         newEvaluation.PageId = pageId;
-        newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+        newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
         newEvaluation.Score = evaluation.data.score;
-        newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
-        newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
-        newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
-        newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
-        const conform = evaluation.data.conform.split('@');
+        newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString("base64");
+        newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString("base64");
+        newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString("base64");
+        newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString("base64");
+        const conform = evaluation.data.conform.split("@");
         newEvaluation.A = conform[0];
         newEvaluation.AA = conform[1];
         newEvaluation.AAA = conform[2];
@@ -220,19 +241,19 @@ let EvaluationService = class EvaluationService {
       `, [website, userId]);
         const reports = new Array();
         for (const evaluation of evaluations || []) {
-            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
             reports.push({
-                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
                 data: {
                     title: evaluation.Title,
                     score: evaluation.Score,
                     rawUrl: evaluation.Uri,
                     tot: tot,
-                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                     conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                     elems: tot.elems,
-                    date: evaluation.Evaluation_Date
-                }
+                    date: evaluation.Evaluation_Date,
+                },
             });
         }
         return reports;
@@ -258,19 +279,19 @@ let EvaluationService = class EvaluationService {
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`, [website, userId, url]))[0];
         if (evaluation) {
-            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
             return {
-                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
                 data: {
                     title: evaluation.Title,
                     score: evaluation.Score,
                     rawUrl: url,
                     tot: tot,
-                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                     conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                     elems: tot.elems,
-                    date: evaluation.Evaluation_Date
-                }
+                    date: evaluation.Evaluation_Date,
+                },
             };
         }
         else {
@@ -303,19 +324,19 @@ let EvaluationService = class EvaluationService {
       `, [tag.toLowerCase(), userId, website.toLowerCase()]);
         const reports = new Array();
         for (const evaluation of evaluations || []) {
-            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
             reports.push({
-                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
                 data: {
                     title: evaluation.Title,
                     score: evaluation.Score,
                     rawUrl: evaluation.Uri,
                     tot: tot,
-                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                     conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                     elems: tot.elems,
-                    date: evaluation.Evaluation_Date
-                }
+                    date: evaluation.Evaluation_Date,
+                },
             });
         }
         return reports;
@@ -345,21 +366,28 @@ let EvaluationService = class EvaluationService {
         e.PageId = p.PageId AND
         e.StudyUserId = ?
       ORDER BY e.Evaluation_Date DESC 
-      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase(), userId]))[0];
+      LIMIT 1`, [
+            tag.toLowerCase(),
+            userId,
+            website.toLowerCase(),
+            userId,
+            url.toLowerCase(),
+            userId,
+        ]))[0];
         if (evaluation) {
-            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
             return {
-                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
                 data: {
                     title: evaluation.Title,
                     score: evaluation.Score,
                     rawUrl: url,
                     tot: tot,
-                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                     conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                     elems: tot.elems,
-                    date: evaluation.Evaluation_Date
-                }
+                    date: evaluation.Evaluation_Date,
+                },
             };
         }
         else {
@@ -368,8 +396,8 @@ let EvaluationService = class EvaluationService {
     }
     async findAllEvaluationsFromPage(type, page) {
         const manager = typeorm_1.getManager();
-        let query = '';
-        if (type === 'admin') {
+        let query = "";
+        if (type === "admin") {
             query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           User as u,
@@ -390,7 +418,7 @@ let EvaluationService = class EvaluationService {
           (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
         ORDER BY e.Evaluation_Date DESC`;
         }
-        else if (type === 'monitor') {
+        else if (type === "monitor") {
             query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           User as u,
@@ -411,7 +439,7 @@ let EvaluationService = class EvaluationService {
           LOWER(u.Type) = "monitor"
         ORDER BY e.Evaluation_Date DESC`;
         }
-        else if (type === 'studies') {
+        else if (type === "studies") {
             query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           Page as p,
@@ -430,28 +458,30 @@ let EvaluationService = class EvaluationService {
     }
     async findEvaluationById(url, id) {
         const manager = typeorm_1.getManager();
-        const evaluation = await manager.findOne(evaluation_entity_1.Evaluation, { where: { EvaluationId: id } });
-        const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+        const evaluation = await manager.findOne(evaluation_entity_1.Evaluation, {
+            where: { EvaluationId: id },
+        });
+        const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
         return {
-            pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+            pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
             data: {
                 title: evaluation.Title,
                 score: evaluation.Score,
                 rawUrl: url,
                 tot: tot,
-                nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                 conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                 elems: tot.elems,
-                date: evaluation.Evaluation_Date
-            }
+                date: evaluation.Evaluation_Date,
+            },
         };
     }
     async findUserPageEvaluation(url, type) {
         let query = null;
-        if (type === 'monitor') {
+        if (type === "monitor") {
             query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date DESC LIMIT 1`;
         }
-        else if (type === 'studies') {
+        else if (type === "studies") {
             query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId ORDER BY e.Evaluation_Date DESC LIMIT 1`;
         }
         else {
@@ -459,19 +489,19 @@ let EvaluationService = class EvaluationService {
         }
         const manager = typeorm_1.getManager();
         const evaluation = (await manager.query(query, [url]))[0];
-        const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+        const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
         return {
-            pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+            pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
             data: {
                 title: evaluation.Title,
                 score: evaluation.Score,
                 rawUrl: url,
                 tot: tot,
-                nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                 conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                 elems: tot.elems,
-                date: evaluation.Evaluation_Date
-            }
+                date: evaluation.Evaluation_Date,
+            },
         };
     }
     async tryAgainEvaluation(evaluationListId) {
@@ -507,22 +537,22 @@ let EvaluationService = class EvaluationService {
         p.Show_In LIKE ? AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '1_')
-      `, [domain, sample ? '1__' : '1_1']);
+      `, [domain, sample ? "1__" : "1_1"]);
         const reports = new Array();
         for (const evaluation of evaluations || []) {
-            const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+            const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
             reports.push({
-                pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+                pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
                 data: {
                     title: evaluation.Title,
                     score: evaluation.Score,
                     rawUrl: evaluation.Uri,
                     tot: tot,
-                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+                    nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
                     conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
                     elems: tot.elems,
-                    date: evaluation.Evaluation_Date
-                }
+                    date: evaluation.Evaluation_Date,
+                },
             });
         }
         return reports;
@@ -535,31 +565,31 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance1EvaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/2 * * * *'),
+    schedule_1.Cron("*/1 * * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance2EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/3 * * * *'),
+    schedule_1.Cron("*/3 * * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance3EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/4 * * * *'),
+    schedule_1.Cron("*/4 * * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance4EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/5 * * * *'),
+    schedule_1.Cron("*/5 * * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instance5EvaluatePageListevaluatePageList", null);
 __decorate([
-    schedule_1.Cron('*/6 * * * *'),
+    schedule_1.Cron("*/6 * * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

@@ -1,13 +1,12 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Connection, getManager } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import clone from 'lodash.clone';
-import { Evaluation } from './evaluation.entity';
-import { executeUrlEvaluation, executeHtmlEvaluation } from './middleware';
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Connection, getManager } from "typeorm";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import clone from "lodash.clone";
+import { Evaluation } from "./evaluation.entity";
+import { executeUrlEvaluation, executeHtmlEvaluation } from "./middleware";
 
 @Injectable()
 export class EvaluationService {
-
   private isEvaluatingInstance1: boolean;
   private isEvaluatingInstance2: boolean;
   private isEvaluatingInstance3: boolean;
@@ -19,9 +18,7 @@ export class EvaluationService {
   private isEvaluatingUserInstance5: boolean;
   private isEvaluatingUserInstance6: boolean;
 
-  constructor(
-    private readonly connection: Connection
-  ) {
+  constructor(private readonly connection: Connection) {
     this.isEvaluatingInstance1 = false;
     this.isEvaluatingInstance2 = false;
     this.isEvaluatingInstance3 = false;
@@ -33,89 +30,104 @@ export class EvaluationService {
     this.isEvaluatingUserInstance6 = false;
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // Called every minute - ADMIN EVALUATIONS
+  @Cron(CronExpression.EVERY_5_SECONDS) // Called every minute - ADMIN EVALUATIONS
   async instance1EvaluatePageList(): Promise<void> {
-    if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
-      if (!this.isEvaluatingInstance1) {
-        this.isEvaluatingInstance1 = true;
+    /*if (
+      (process.env.ID === undefined && process.env.NAMESPACE === undefined) ||
+      (process.env.ID === "0" && process.env.NAMESPACE === "GLOBAL")
+    ) {*/
+    if (!this.isEvaluatingInstance1) {
+      this.isEvaluatingInstance1 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`);
-        await this.evaluateInBackground(pages);
+      const pages = await getManager().query(
+        `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`
+      );
+      await this.evaluateInBackground(pages);
 
-        this.isEvaluatingInstance1 = false;
-      }
+      this.isEvaluatingInstance1 = false;
     }
+    //}
   }
 
-  @Cron('*/2 * * * *') // Called every 2 minutes - ADMIN EVALUATIONS
-  async instance2EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '1' && process.env.NAMESPACE === 'GLOBAL') {
+  //@Cron("*/2 * * * *") // Called every 2 minutes - ADMIN EVALUATIONS
+  /*async instance2EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === "1" && process.env.NAMESPACE === "GLOBAL") {
       if (!this.isEvaluatingInstance2) {
         this.isEvaluatingInstance2 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 200, 100`);
+        const pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 200, 100`
+        );
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance2 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/3 * * * *') // Called every 3 minutes - ADMIN EVALUATIONS
-  async instance3EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '2' && process.env.NAMESPACE === 'GLOBAL') {
+  //@Cron("*/3 * * * *") // Called every 3 minutes - ADMIN EVALUATIONS
+  /*async instance3EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === "2" && process.env.NAMESPACE === "GLOBAL") {
       if (!this.isEvaluatingInstance3) {
         this.isEvaluatingInstance3 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300, 300`);
+        const pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300, 300`
+        );
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance3 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/4 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
-  async instance4EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '3' && process.env.NAMESPACE === 'GLOBAL') {
+  //@Cron("*/4 * * * *") // Called every 4 minutes - ADMIN EVALUATIONS
+  /*async instance4EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === "3" && process.env.NAMESPACE === "GLOBAL") {
       if (!this.isEvaluatingInstance4) {
         this.isEvaluatingInstance4 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400, 600`);
+        const pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400, 600`
+        );
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance4 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/5 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
-  async instance5EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '4' && process.env.NAMESPACE === 'GLOBAL') {
+  //@Cron("*/5 * * * *") // Called every 4 minutes - ADMIN EVALUATIONS
+  /*async instance5EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === "4" && process.env.NAMESPACE === "GLOBAL") {
       if (!this.isEvaluatingInstance5) {
         this.isEvaluatingInstance5 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500, 1000`);
+        const pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500, 1000`
+        );
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance5 = false;
       }
     }
-  }
+  }*/
 
-  @Cron('*/6 * * * *') // Called every 4 minutes - ADMIN EVALUATIONS
-  async instance6EvaluatePageListevaluatePageList(): Promise<void> {
-    if (process.env.ID === '5' && process.env.NAMESPACE === 'GLOBAL') {
+  //@Cron("*/6 * * * *") // Called every 4 minutes - ADMIN EVALUATIONS
+  /*async instance6EvaluatePageListevaluatePageList(): Promise<void> {
+    if (process.env.ID === "5" && process.env.NAMESPACE === "GLOBAL") {
       if (!this.isEvaluatingInstance6) {
         this.isEvaluatingInstance6 = true;
 
-        const pages = await getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600, 1500`);
+        const pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600, 1500`
+        );
         await this.evaluateInBackground(pages);
 
         this.isEvaluatingInstance6 = false;
       }
     }
-  }
+  }*/
 
   //@Cron(CronExpression.EVERY_MINUTE) // Called every minute - USERS EVALUATIONS
   /*async instance4EvaluateUserPageList(): Promise<void> {
@@ -212,7 +224,10 @@ export class EvaluationService {
   private async evaluateInBackground(pages: any[]): Promise<void> {
     if (pages.length > 0) {
       try {
-        await getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map(p => p.EvaluationListId)]);
+        await getManager().query(
+          `UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`,
+          [pages.map((p) => p.EvaluationListId)]
+        );
       } catch (err) {
         console.log(err);
         throw err;
@@ -231,16 +246,28 @@ export class EvaluationService {
         const queryRunner = this.connection.createQueryRunner();
 
         await queryRunner.connect();
-        
+
         await queryRunner.startTransaction();
 
         try {
           if (!error && evaluation) {
-            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, pte.Show_To, pte.StudyUserId);
+            this.savePageEvaluation(
+              queryRunner,
+              pte.PageId,
+              evaluation,
+              pte.Show_To,
+              pte.StudyUserId
+            );
 
-            await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
+            await queryRunner.manager.query(
+              `DELETE FROM Evaluation_List WHERE EvaluationListId = ?`,
+              [pte.EvaluationListId]
+            );
           } else {
-            await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
+            await queryRunner.manager.query(
+              `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+              [error.toString(), pte.EvaluationListId]
+            );
           }
 
           await queryRunner.commitTransaction();
@@ -286,20 +313,32 @@ export class EvaluationService {
     return !hasError;
   }
 
-  async evaluatePageAndSave(pageId: number, url: string, showTo: string): Promise<any> {
+  async evaluatePageAndSave(
+    pageId: number,
+    url: string,
+    showTo: string
+  ): Promise<any> {
     const evaluation = await this.evaluateUrl(url);
 
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
     newEvaluation.Score = evaluation.data.score;
-    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
-    newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
-    newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
-    newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
-    
-    const conform = evaluation.data.conform.split('@');
-    
+    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
+      "base64"
+    );
+    newEvaluation.Tot = Buffer.from(
+      JSON.stringify(evaluation.data.tot)
+    ).toString("base64");
+    newEvaluation.Nodes = Buffer.from(
+      JSON.stringify(evaluation.data.nodes)
+    ).toString("base64");
+    newEvaluation.Errors = Buffer.from(
+      JSON.stringify(evaluation.data.elems)
+    ).toString("base64");
+
+    const conform = evaluation.data.conform.split("@");
+
     newEvaluation.A = conform[0];
     newEvaluation.AA = conform[1];
     newEvaluation.AAA = conform[2];
@@ -315,18 +354,32 @@ export class EvaluationService {
     }
   }
 
-  async savePageEvaluation(queryRunner: any, pageId: number, evaluation: any, showTo: string, studyUserId: number | null = null): Promise<any> {
+  async savePageEvaluation(
+    queryRunner: any,
+    pageId: number,
+    evaluation: any,
+    showTo: string,
+    studyUserId: number | null = null
+  ): Promise<any> {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, '');
+    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
     newEvaluation.Score = evaluation.data.score;
-    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString('base64');
-    newEvaluation.Tot = Buffer.from(JSON.stringify(evaluation.data.tot)).toString('base64');
-    newEvaluation.Nodes = Buffer.from(JSON.stringify(evaluation.data.nodes)).toString('base64');
-    newEvaluation.Errors = Buffer.from(JSON.stringify(evaluation.data.elems)).toString('base64');
-    
-    const conform = evaluation.data.conform.split('@');
-    
+    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
+      "base64"
+    );
+    newEvaluation.Tot = Buffer.from(
+      JSON.stringify(evaluation.data.tot)
+    ).toString("base64");
+    newEvaluation.Nodes = Buffer.from(
+      JSON.stringify(evaluation.data.nodes)
+    ).toString("base64");
+    newEvaluation.Errors = Buffer.from(
+      JSON.stringify(evaluation.data.elems)
+    ).toString("base64");
+
+    const conform = evaluation.data.conform.split("@");
+
     newEvaluation.A = conform[0];
     newEvaluation.AA = conform[1];
     newEvaluation.AAA = conform[2];
@@ -337,10 +390,14 @@ export class EvaluationService {
     await queryRunner.manager.save(newEvaluation);
   }
 
-  async findMyMonitorUserWebsitePageEvaluations(userId: number, website: string): Promise<any> {
+  async findMyMonitorUserWebsitePageEvaluations(
+    userId: number,
+    website: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const evaluations = await manager.query(`SELECT e.*, p.Uri 
+    const evaluations = await manager.query(
+      `SELECT e.*, p.Uri 
       FROM
         Website as w,
         Domain as d,
@@ -356,35 +413,42 @@ export class EvaluationService {
         p.Show_In LIKE '_1_' AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '_1')
-      `, [website, userId]);
+      `,
+      [website, userId]
+    );
 
     const reports = new Array<any>();
 
     for (const evaluation of evaluations || []) {
-      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       reports.push({
-        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
           rawUrl: evaluation.Uri,
           tot: tot,
-          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
           conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
           elems: tot.elems,
-          date: evaluation.Evaluation_Date
-        }
+          date: evaluation.Evaluation_Date,
+        },
       });
     }
 
     return reports;
   }
 
-  async findMyMonitorUserWebsitePageNewestEvaluation(userId: number, website: string, url: string): Promise<any> {
-    
+  async findMyMonitorUserWebsitePageNewestEvaluation(
+    userId: number,
+    website: string,
+    url: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const evaluation = (await manager.query(`SELECT e.* 
+    const evaluation = (
+      await manager.query(
+        `SELECT e.* 
       FROM
         Website as w,
         Domain as d,
@@ -401,32 +465,40 @@ export class EvaluationService {
         e.PageId = p.PageId AND 
         e.Show_To LIKE '_1'
       ORDER BY e.Evaluation_Date DESC 
-      LIMIT 1`, [website, userId, url]))[0];
+      LIMIT 1`,
+        [website, userId, url]
+      )
+    )[0];
 
     if (evaluation) {
-      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       return {
-        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
           rawUrl: url,
           tot: tot,
-          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
           conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
           elems: tot.elems,
-          date: evaluation.Evaluation_Date
-        }
+          date: evaluation.Evaluation_Date,
+        },
       };
     } else {
       throw new InternalServerErrorException();
     }
   }
 
-  async findStudyMonitorUserTagWebsitePageEvaluations(userId: number, tag: string, website: string): Promise<any> {
+  async findStudyMonitorUserTagWebsitePageEvaluations(
+    userId: number,
+    tag: string,
+    website: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const evaluations = await manager.query(`SELECT e.*, p.Uri
+    const evaluations = await manager.query(
+      `SELECT e.*, p.Uri
       FROM
         Tag as t,
         TagWebsite as tw,
@@ -447,34 +519,43 @@ export class EvaluationService {
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId)
-      `, [tag.toLowerCase(), userId, website.toLowerCase()]);
+      `,
+      [tag.toLowerCase(), userId, website.toLowerCase()]
+    );
 
     const reports = new Array<any>();
 
     for (const evaluation of evaluations || []) {
-      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       reports.push({
-        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
           rawUrl: evaluation.Uri,
           tot: tot,
-          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
           conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
           elems: tot.elems,
-          date: evaluation.Evaluation_Date
-        }
+          date: evaluation.Evaluation_Date,
+        },
       });
     }
 
     return reports;
   }
 
-  async findStudyMonitorUserTagWebsitePageNewestEvaluation(userId: number, tag: string, website: string, url: string): Promise<any> {
+  async findStudyMonitorUserTagWebsitePageNewestEvaluation(
+    userId: number,
+    tag: string,
+    website: string,
+    url: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const evaluation = (await manager.query(`SELECT e.* 
+    const evaluation = (
+      await manager.query(
+        `SELECT e.* 
       FROM
         Tag as t,
         TagWebsite as tw,
@@ -497,22 +578,32 @@ export class EvaluationService {
         e.PageId = p.PageId AND
         e.StudyUserId = ?
       ORDER BY e.Evaluation_Date DESC 
-      LIMIT 1`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, url.toLowerCase(), userId]))[0];
+      LIMIT 1`,
+        [
+          tag.toLowerCase(),
+          userId,
+          website.toLowerCase(),
+          userId,
+          url.toLowerCase(),
+          userId,
+        ]
+      )
+    )[0];
 
     if (evaluation) {
-      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       return {
-        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
           rawUrl: url,
           tot: tot,
-          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
           conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
           elems: tot.elems,
-          date: evaluation.Evaluation_Date
-        }
+          date: evaluation.Evaluation_Date,
+        },
       };
     } else {
       throw new InternalServerErrorException();
@@ -521,9 +612,9 @@ export class EvaluationService {
 
   async findAllEvaluationsFromPage(type: string, page: string): Promise<any> {
     const manager = getManager();
-    let query = '';
+    let query = "";
 
-    if (type === 'admin') {
+    if (type === "admin") {
       query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           User as u,
@@ -543,7 +634,7 @@ export class EvaluationService {
           w.Deleted = "0" AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
         ORDER BY e.Evaluation_Date DESC`;
-    } else if (type === 'monitor') {
+    } else if (type === "monitor") {
       query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           User as u,
@@ -563,7 +654,7 @@ export class EvaluationService {
           u.UserId = w.UserId AND 
           LOWER(u.Type) = "monitor"
         ORDER BY e.Evaluation_Date DESC`;
-    } else if (type === 'studies') {
+    } else if (type === "studies") {
       query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
         FROM
           Page as p,
@@ -584,30 +675,32 @@ export class EvaluationService {
   async findEvaluationById(url: string, id: number): Promise<any> {
     const manager = getManager();
 
-    const evaluation = await manager.findOne(Evaluation, { where: { EvaluationId: id } });
+    const evaluation = await manager.findOne(Evaluation, {
+      where: { EvaluationId: id },
+    });
 
-    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
 
     return {
-      pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+      pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
       data: {
         title: evaluation.Title,
         score: evaluation.Score,
         rawUrl: url,
         tot: tot,
-        nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+        nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
         conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
         elems: tot.elems,
-        date: evaluation.Evaluation_Date
-      }
+        date: evaluation.Evaluation_Date,
+      },
     };
   }
 
   async findUserPageEvaluation(url: string, type: string): Promise<any> {
     let query = null;
-    if (type === 'monitor') {
+    if (type === "monitor") {
       query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId AND e.Show_To LIKE "_1" ORDER BY e.Evaluation_Date DESC LIMIT 1`;
-    } else if (type === 'studies') {
+    } else if (type === "studies") {
       query = `SELECT e.* FROM Page as p, Evaluation as e WHERE p.Uri LIKE ? AND e.PageId = p.PageId ORDER BY e.Evaluation_Date DESC LIMIT 1`;
     } else {
       throw new InternalServerErrorException();
@@ -615,22 +708,22 @@ export class EvaluationService {
 
     const manager = getManager();
 
-    const evaluation = (await manager.query(query, [url]))[0]
+    const evaluation = (await manager.query(query, [url]))[0];
 
-    const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+    const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
 
     return {
-      pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+      pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
       data: {
         title: evaluation.Title,
         score: evaluation.Score,
         rawUrl: url,
         tot: tot,
-        nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+        nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
         conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
         elems: tot.elems,
-        date: evaluation.Evaluation_Date
-      }
+        date: evaluation.Evaluation_Date,
+      },
     };
   }
 
@@ -642,7 +735,10 @@ export class EvaluationService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`, [evaluationListId]);
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+        [evaluationListId]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -660,7 +756,8 @@ export class EvaluationService {
   async findDomainEvaluations(domain: string, sample: boolean): Promise<any> {
     const manager = getManager();
 
-    const evaluations = await manager.query(`SELECT distinct e.*, p.Uri
+    const evaluations = await manager.query(
+      `SELECT distinct e.*, p.Uri
       FROM
         Domain as d,
         DomainPage as dp,
@@ -673,25 +770,26 @@ export class EvaluationService {
         p.Show_In LIKE ? AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '1_')
-      `, [domain, sample ? '1__' : '1_1']);
-
+      `,
+      [domain, sample ? "1__" : "1_1"]
+    );
 
     const reports = new Array<any>();
 
     for (const evaluation of evaluations || []) {
-      const tot = JSON.parse(Buffer.from(evaluation.Tot, 'base64').toString());
+      const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       reports.push({
-        pagecode: Buffer.from(evaluation.Pagecode, 'base64').toString(),
+        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
           rawUrl: evaluation.Uri,
           tot: tot,
-          nodes: JSON.parse(Buffer.from(evaluation.Nodes, 'base64').toString()),
+          nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
           conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
           elems: tot.elems,
-          date: evaluation.Evaluation_Date
-        }
+          date: evaluation.Evaluation_Date,
+        },
       });
     }
 

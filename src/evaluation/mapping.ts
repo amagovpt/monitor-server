@@ -13,7 +13,7 @@ const act_mapping = {
   'QW-ACT-R47': QW_ACT_R47
 };
 
-const html_mapping = {
+/*const html_mapping = {
   'QW-HTML-T1': QW_HTML_T1,
   'QW-HTML-T2': QW_HTML_T2,
   'QW-HTML-T3': QW_HTML_T3,
@@ -45,6 +45,35 @@ const css_mapping = {
   'QW-CSS-T5': QW_CSS_T5,
   'QW-CSS-T6': QW_CSS_T6,
   'QW-CSS-T7': QW_CSS_T7
+};*/
+
+const wcag_mapping = {
+  'QW-WCAG-T1': QW_HTML_T1,
+  'QW-WCAG-T2': QW_HTML_T2,
+  'QW-WCAG-T3': QW_HTML_T3,
+  'QW-WCAG-T6': QW_HTML_T6,
+  'QW-WCAG-T7': QW_HTML_T7,
+  'QW-WCAG-T8': QW_HTML_T8,
+  'QW-WCAG-T9': QW_HTML_T9,
+  'QW-WCAG-T14': QW_HTML_T17,
+  'QW-WCAG-T15': QW_HTML_T19,
+  'QW-WCAG-T16': QW_HTML_T20,
+  'QW-WCAG-T17': QW_HTML_T25,
+  'QW-WCAG-T32': QW_HTML_T28,
+  'QW-WCAG-T18': QW_HTML_T30,
+  'QW-WCAG-T19': QW_HTML_T32,
+  'QW-WCAG-T20': QW_HTML_T33,
+  'QW-WCAG-T21': QW_HTML_T34,
+  'QW-WCAG-T22': QW_HTML_T35,
+  'QW-WCAG-T23': QW_HTML_T38,
+  'QW-WCAG-T24': QW_HTML_T40,
+  'QW-WCAG-T25': QW_HTML_T41,
+  'QW-WCAG-T26': QW_HTML_T42,
+  'QW-WCAG-T27': QW_HTML_T43,
+  'QW-WCAG-T28': QW_CSS_T1,
+  'QW-WCAG-T29': QW_CSS_T2,
+  'QW-WCAG-T30': QW_CSS_T6,
+  'QW-WCAG-T31': QW_CSS_T7,
 };
 
 const bp_mapping = {
@@ -61,7 +90,8 @@ const bp_mapping = {
   'QW-BP13': QW_BP13,
   'QW-BP14': QW_BP14,
   'QW-BP15': QW_BP15,
-  'QW-BP17': QW_BP17
+  'QW-BP17': QW_BP17,
+  'QW-BP18': QW_BP18
 };
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
@@ -384,7 +414,7 @@ function QW_HTML_T35(elements: any, results: any, nodes: any, technique: any): v
   }
 }
 
-function QW_HTML_T37(elements: any, results: any, nodes: any, technique: any): void {
+/*function QW_HTML_T37(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'warning') {
     addToElements(elements, 'aSkip', technique.metadata.warning);
     addToResults(results, 'a_02b');
@@ -394,7 +424,7 @@ function QW_HTML_T37(elements: any, results: any, nodes: any, technique: any): v
     addToResults(results, 'a_02a');
     addToNodes(nodes, 'aSkip', technique.results.filter((r: any) => r.verdict === 'failed'));
   }
-}
+}*/
 
 function QW_HTML_T38(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'warning') {
@@ -457,7 +487,7 @@ function QW_CSS_T2(elements: any, results: any, nodes: any, technique: any): voi
   }
 }
 
-function QW_CSS_T5(elements: any, results: any, nodes: any, technique: any): void {
+/*function QW_CSS_T5(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'failed') {
     addToElements(elements, 'valueAbsCss', technique.metadata.failed);
     addToResults(results, 'values_02a');
@@ -468,7 +498,7 @@ function QW_CSS_T5(elements: any, results: any, nodes: any, technique: any): voi
     addToResults(results, 'values_02b');
     addToNodes(nodes, 'valueRelCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'passed'))]);
   }
-}
+}*/
 
 function QW_CSS_T6(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'failed') {
@@ -626,6 +656,29 @@ function QW_BP17(elements: any, results: any, nodes: any, technique: any): void 
     addToElements(elements, 'a', technique.results.length);
     addToNodes(nodes, 'a', technique.results);
   }
+
+  if (technique.metadata.outcome === 'warning') {
+    addToElements(elements, 'aSkip', technique.metadata.warning);
+    addToResults(results, 'a_02b');
+    addToNodes(nodes, 'aSkip', technique.results.filter((r: any) => r.verdict === 'warning'));
+  } else if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'aSkip', undefined);
+    addToResults(results, 'a_02a');
+    addToNodes(nodes, 'aSkip', technique.results.filter((r: any) => r.verdict === 'failed'));
+  }
+}
+
+function QW_BP18(elements: any, results: any, nodes: any, technique: any) {
+  if (technique.metadata.outcome === 'failed') {
+    addToElements(elements, 'valueAbsCss', technique.metadata.failed);
+    addToResults(results, 'values_02a');
+    addToNodes(nodes, 'valueAbsCss', technique.results.filter((r: any) => r.verdict === 'failed'));
+  }
+  if (technique.metadata.passed > 0) {
+    addToElements(elements, 'valueRelCss', technique.metadata.passed);
+    addToResults(results, 'values_02b');
+    addToNodes(nodes, 'valueRelCss', [JSON.stringify(technique.results.filter(r => r.verdict === 'passed'))]);
+  }
 }
 
 function addToElements(elements: any, key: string, value: string | number): void {
@@ -662,7 +715,13 @@ export function getElementsMapping(evaluation: any): any {
     }
   }
 
-  for (const technique of Object.keys(evaluation.modules['html-techniques'].assertions) || []) {
+  for (const technique of Object.keys(evaluation.modules['wcag-techniques'].assertions) || []) {
+    if (wcag_mapping[technique] !== undefined) {
+      wcag_mapping[technique](elements, results, nodes, evaluation.modules['wcag-techniques'].assertions[technique]);
+    }
+  }
+
+  /*for (const technique of Object.keys(evaluation.modules['html-techniques'].assertions) || []) {
     if (html_mapping[technique] !== undefined) {
       html_mapping[technique](elements, results, nodes, evaluation.modules['html-techniques'].assertions[technique]);
     }
@@ -672,7 +731,7 @@ export function getElementsMapping(evaluation: any): any {
     if (css_mapping[technique] !== undefined) {
       css_mapping[technique](elements, results, nodes, evaluation.modules['css-techniques'].assertions[technique]);
     }
-  }
+  }*/
   
   for (const technique of Object.keys(evaluation.modules['best-practices'].assertions) || []) {
     if (bp_mapping[technique] !== undefined) {

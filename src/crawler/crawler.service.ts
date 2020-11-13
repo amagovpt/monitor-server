@@ -1,15 +1,14 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { CrawlDomain, CrawlPage } from './crawler.entity';
-import { readFileSync, writeFileSync } from 'fs';
-import Crawler from 'simplecrawler';
-import puppeteer from 'puppeteer';
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager } from "typeorm";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { CrawlDomain, CrawlPage } from "./crawler.entity";
+import { readFileSync, writeFileSync } from "fs";
+import Crawler from "simplecrawler";
+import puppeteer from "puppeteer";
 
 @Injectable()
 export class CrawlerService {
-
   private isCrawling: boolean;
 
   constructor(
@@ -20,9 +19,9 @@ export class CrawlerService {
     this.isCrawling = false;
   }
 
-  /*@Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async nestCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === '0') {
+    if (process.env.ID === undefined || process.env.ID === "0") {
       if (!this.isCrawling) {
         this.isCrawling = true;
 
@@ -32,7 +31,9 @@ export class CrawlerService {
           await queryRunner.connect();
           await queryRunner.startTransaction();
 
-          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
+          const domain = await queryRunner.manager.query(
+            `SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
+          );
           if (domain.length > 0) {
             const urls = await this.crawl(domain[0].DomainUri);
 
@@ -43,53 +44,10 @@ export class CrawlerService {
               await queryRunner.manager.save(newCrawlPage);
             }
 
-            await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
-          }
-          await queryRunner.commitTransaction();
-        } catch (err) {
-          // since we have errors lets rollback the changes we made
-          await queryRunner.rollbackTransaction();
-          console.error(err);
-        } finally {
-          // you need to release a queryRunner which was manually instantiated
-          await queryRunner.release();
-        }
-
-        this.isCrawling = false;
-      }
-    }
-  }*/
-
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  async nestCrawlUser(): Promise<void> {
-    if ((process.env.ID === undefined && process.env.NAMESPACE === undefined) || (process.env.ID === '0' && process.env.NAMESPACE === 'GLOBAL')) {
-      if (!this.isCrawling) {
-        this.isCrawling = true;
-
-        const queryRunner = this.connection.createQueryRunner();
-
-        try {
-          await queryRunner.connect();
-          await queryRunner.startTransaction();
-
-          const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId != -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
-          
-          if (domain.length > 0) {
-            try {
-              const urls = await this.crawl(domain[0].DomainUri);
-
-              for (const url of urls || []) {
-                const newCrawlPage = new CrawlPage();
-                newCrawlPage.Uri = url;
-                newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-                await queryRunner.manager.save(newCrawlPage);
-              }
-
-              await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
-            } catch (e) {
-              await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
-              console.error('Failed -> ', domain[0].DomainUri, e);
-            }
+            await queryRunner.manager.query(
+              `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
+              [domain[0].CrawlDomainId]
+            );
           }
           await queryRunner.commitTransaction();
         } catch (err) {
@@ -107,36 +65,50 @@ export class CrawlerService {
   }
 
   private async crawl(url: string): Promise<string[]> {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     const page = await browser.newPage();
-    
+
     await page.goto(url, {
       timeout: 0,
-      waitUntil: ['networkidle2', 'domcontentloaded']
+      waitUntil: ["networkidle2", "domcontentloaded"],
     });
 
     const urls = await page.evaluate((url) => {
-      const notHtml = 'css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt'.split('|');
+      const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split(
+        "|"
+      );
 
-      const links = document.querySelectorAll('body a');
+      const links = document.querySelectorAll("body a");
 
       const urls = new Array();
 
       for (const link of links || []) {
-        if (link.hasAttribute('href')) {
-          const href = link.getAttribute('href');
+        if (link.hasAttribute("href")) {
+          const href = link.getAttribute("href");
 
-          if (href && href.trim() && (href.startsWith(url) || href.startsWith('/') || href.startsWith('./') || (!href.startsWith('http') && !href.startsWith('#')))) {
+          if (
+            href &&
+            href.trim() &&
+            (href.startsWith(url) ||
+              href.startsWith("/") ||
+              href.startsWith("./") ||
+              (!href.startsWith("http") && !href.startsWith("#")))
+          ) {
             let valid = true;
             for (const not of notHtml || []) {
               if (href.endsWith(not)) {
                 valid = false;
                 break;
               }
-              const parts = href.split('/');
+              const parts = href.split("/");
               if (parts.length > 0) {
                 const lastPart = parts[parts.length - 1];
-                if (lastPart.startsWith('#') || lastPart.startsWith('javascript:') || lastPart.startsWith('tel:') || lastPart.startsWith('mailto:')) {
+                if (
+                  lastPart.startsWith("#") ||
+                  lastPart.startsWith("javascript:") ||
+                  lastPart.startsWith("tel:") ||
+                  lastPart.startsWith("mailto:")
+                ) {
                   valid = false;
                   break;
                 }
@@ -145,23 +117,21 @@ export class CrawlerService {
 
             if (valid) {
               try {
-                let correctUrl = '';
+                let correctUrl = "";
                 if (href.startsWith(url)) {
                   correctUrl = href;
-                } else if (href.startsWith('./')) {
+                } else if (href.startsWith("./")) {
                   correctUrl = url + href.slice(1);
-                } else if (!href.startsWith('/')) {
-                  correctUrl = url + '/' + href;
+                } else if (!href.startsWith("/")) {
+                  correctUrl = url + "/" + href;
                 } else {
                   correctUrl = url + href;
                 }
                 const parsedUrl = new URL(correctUrl);
-                if (parsedUrl.hash.trim() === '') {
+                if (parsedUrl.hash.trim() === "") {
                   urls.push(correctUrl);
                 }
-              } catch (err) {
-
-              }
+              } catch (err) {}
             }
           }
         }
@@ -172,12 +142,12 @@ export class CrawlerService {
 
     await page.close();
     await browser.close();
-    
+
     const unique = urls.filter((v, i, self) => {
       return self.indexOf(v) === i;
     });
 
-    const normalizedUrls = unique.map(u => {
+    const normalizedUrls = unique.map((u) => {
       if (u.startsWith(url)) {
         return u;
       } else {
@@ -188,43 +158,57 @@ export class CrawlerService {
     return normalizedUrls;
   }
 
-  private crawler(domain: string, max_depth: number, max_pages: number, crawl_domain_id: number): Promise<any> {
+  private crawler(
+    domain: string,
+    max_depth: number,
+    max_pages: number,
+    crawl_domain_id: number
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
     return new Promise(async (resolve, reject) => {
       const crawler = Crawler(domain);
       let urlList = [];
       let pageNumber = 0;
       let emit = false;
-  
-      crawler.on('fetchcomplete', async (r, q) => {
-        let contentType = r['stateData']['contentType'];
-        if ((contentType.includes('text/html') || contentType.includes('image/svg+xml')) && (pageNumber <= max_pages || max_pages === 0)) {
-          urlList.push(r['url']);
-          urlList = urlList.filter((url: string, index: number, self: any) => self.indexOf(url) === index);
+
+      crawler.on("fetchcomplete", async (r, q) => {
+        let contentType = r["stateData"]["contentType"];
+        if (
+          (contentType.includes("text/html") ||
+            contentType.includes("image/svg+xml")) &&
+          (pageNumber <= max_pages || max_pages === 0)
+        ) {
+          urlList.push(r["url"]);
+          urlList = urlList.filter(
+            (url: string, index: number, self: any) =>
+              self.indexOf(url) === index
+          );
           pageNumber = urlList.length;
         }
-  
+
         if (pageNumber >= max_pages && max_pages !== 0 && !emit) {
           emit = true;
-          crawler.emit('complete');
+          crawler.emit("complete");
         }
       });
-  
-      crawler.on('complete', async function () {
+
+      crawler.on("complete", async function () {
         crawler.stop();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         let hasError = false;
         try {
-          
           for (const page of urlList || []) {
             const newCrawlPage = new CrawlPage();
             newCrawlPage.Uri = page;
             newCrawlPage.CrawlDomainId = crawl_domain_id;
             await queryRunner.manager.save(newCrawlPage);
           }
-          await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [crawl_domain_id]);
+          await queryRunner.manager.query(
+            `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
+            [crawl_domain_id]
+          );
 
           await queryRunner.commitTransaction();
         } catch (err) {
@@ -250,28 +234,37 @@ export class CrawlerService {
   }
 
   findAll(): Promise<any> {
-    return this.crawlDomainRepository.find({ where: { UserId: -1 }});
+    return this.crawlDomainRepository.find({ where: { UserId: -1 } });
   }
-  
+
   getConfig(): any {
-    const content = readFileSync(__dirname + '/../../public/crawlerConfig.json');
+    const content = readFileSync(
+      __dirname + "/../../public/crawlerConfig.json"
+    );
     const config = JSON.parse(content.toString());
     return config;
   }
 
   setConfig(maxDepth: number, maxPages: number): any {
-    writeFileSync(__dirname + '/../../public/crawlerConfig.json', JSON.stringify({ maxDepth, maxPages }, null, 2));
+    writeFileSync(
+      __dirname + "/../../public/crawlerConfig.json",
+      JSON.stringify({ maxDepth, maxPages }, null, 2)
+    );
     return true;
   }
 
   async isCrawlSubDomainDone(subDomain: string): Promise<any> {
-    const page = await this.crawlDomainRepository.findOne({ where: { UserId: -1, SubDomainUri: subDomain }});
+    const page = await this.crawlDomainRepository.findOne({
+      where: { UserId: -1, SubDomainUri: subDomain },
+    });
 
-    return page ? page.Done === 1 ? 2 : 1 : 0;
+    return page ? (page.Done === 1 ? 2 : 1) : 0;
   }
 
   async isUserCrawlerDone(userId: number, domainId: number): Promise<boolean> {
-    const page = await this.crawlDomainRepository.findOne({ where: { UserId: userId, DomainId: domainId }});
+    const page = await this.crawlDomainRepository.findOne({
+      where: { UserId: userId, DomainId: domainId },
+    });
 
     if (page) {
       return page.Done === 1;
@@ -280,10 +273,14 @@ export class CrawlerService {
     }
   }
 
-  async getUserCrawlResults(userId: number, domainId: number): Promise<boolean> {
+  async getUserCrawlResults(
+    userId: number,
+    domainId: number
+  ): Promise<boolean> {
     const manager = getManager();
 
-    const pages = await manager.query(`
+    const pages = await manager.query(
+      `
       SELECT
         cp.*
       FROM
@@ -293,15 +290,21 @@ export class CrawlerService {
         cd.UserId = ? AND
         cd.DomainId = ? AND
         cp.CrawlDomainId = cd.CrawlDomainId
-    `, [userId, domainId]);
+    `,
+      [userId, domainId]
+    );
 
     return pages;
   }
 
-  async getUserTagWebsitesCrawlResults(userId: number, tagName: string): Promise<any> {
+  async getUserTagWebsitesCrawlResults(
+    userId: number,
+    tagName: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const websites = await manager.query(`
+    const websites = await manager.query(
+      `
       SELECT
         w.Name,
         cd.Done,
@@ -321,14 +324,19 @@ export class CrawlerService {
         d.WebsiteId = w.WebsiteId AND
         cd.DomainId = d.DomainId AND
         cd.UserId = ?
-    `, [tagName, userId, userId]);
+    `,
+      [tagName, userId, userId]
+    );
 
     return websites;
   }
 
   async deleteUserCrawler(userId: number, domainId: number): Promise<boolean> {
     try {
-      await this.crawlDomainRepository.delete({ UserId: userId, DomainId: domainId });
+      await this.crawlDomainRepository.delete({
+        UserId: userId,
+        DomainId: domainId,
+      });
       return true;
     } catch (err) {
       console.error(err);
@@ -336,7 +344,14 @@ export class CrawlerService {
     }
   }
 
-  async crawlDomain(userId: number, subDomain: string, domain: string, domainId: number, maxDepth: number, maxPages: number): Promise<any> {
+  async crawlDomain(
+    userId: number,
+    subDomain: string,
+    domain: string,
+    domainId: number,
+    maxDepth: number,
+    maxPages: number
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -373,11 +388,14 @@ export class CrawlerService {
 
   async getCrawlResultsCrawlDomainID(crawlDomainID: number): Promise<any> {
     const manager = getManager();
-    
-    const pages = await manager.query(`SELECT cp.Uri,cp.CrawlId,cd.Creation_Date
+
+    const pages = await manager.query(
+      `SELECT cp.Uri,cp.CrawlId,cd.Creation_Date
       FROM CrawlPage as cp,
       CrawlDomain as cd
-      WHERE cd.CrawlDomainId = ? AND cd.UserId = -1 AND cp.CrawlDomainId = cd.CrawlDomainId`, [crawlDomainID]);
+      WHERE cd.CrawlDomainId = ? AND cd.UserId = -1 AND cp.CrawlDomainId = cd.CrawlDomainId`,
+      [crawlDomainID]
+    );
 
     return pages;
   }
@@ -394,7 +412,8 @@ export class CrawlerService {
 
   async getDomainId(userId: number, domain: string): Promise<number> {
     const manager = getManager();
-    const _domain = await manager.query(`
+    const _domain = await manager.query(
+      `
       SELECT d.DomainId
       FROM
         Domain as d,
@@ -404,7 +423,9 @@ export class CrawlerService {
         d.WebsiteId = w.WebsiteId AND
         w.UserId = ?
       LIMIT 1
-    `, [domain, userId]);
+    `,
+      [domain, userId]
+    );
 
     return _domain[0].DomainId;
   }

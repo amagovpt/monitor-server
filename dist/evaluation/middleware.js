@@ -170,10 +170,6 @@ function calculateProp(v, report) {
     }
     return lodash_clone_1.default(ret);
 }
-function calculateCssRules(evaluation) {
-    const cssReport = evaluation.modules['css-techniques'];
-    return Object.keys(cssReport.assertions).length;
-}
 function getHtmlLang(html) {
     let lang = '';
     let _dom = {};
@@ -228,7 +224,6 @@ function parseEvaluation(evaluation) {
     report['data'].tot.info.date = lodash_clone_1.default(report['data'].date);
     report['data'].tot.info.htmlTags = evaluation.system.page.dom.processed.elementCount;
     report['data'].tot.info.size = encodeURI(report.pagecode).split(/%..|./).length - 1;
-    report['data'].tot.info.cssRules = calculateCssRules(evaluation);
     report['data'].tot.info.encoding = 'utf-8';
     report['data'].tot.info.lang = getHtmlLang(evaluation.system.page.dom.processed.html.plain);
     report['data'].tot.info.content = 'text/html';

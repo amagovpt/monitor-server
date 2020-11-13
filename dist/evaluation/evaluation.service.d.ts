@@ -1,5 +1,5 @@
-import { Connection } from 'typeorm';
-import { Evaluation } from './evaluation.entity';
+import { Connection } from "typeorm";
+import { Evaluation } from "./evaluation.entity";
 export declare class EvaluationService {
     private readonly connection;
     private isEvaluatingInstance1;

@@ -183,10 +183,10 @@ function calculateProp(v: any, report: any): any {
   return clone(ret);
 }
 
-function calculateCssRules(evaluation: any): number {
+/*function calculateCssRules(evaluation: any): number {
   const cssReport = evaluation.modules['css-techniques'];
   return Object.keys(cssReport.assertions).length;
-}
+}*/
 
 function getHtmlLang(html: string): string {
   let lang = '';
@@ -251,7 +251,7 @@ function parseEvaluation(evaluation: any): any {
   report['data'].tot.info.date = clone(report['data'].date);
   report['data'].tot.info.htmlTags = evaluation.system.page.dom.processed.elementCount; //count_html_tags(evaluation.postProcessingHTML);
   report['data'].tot.info.size = encodeURI(report.pagecode).split(/%..|./).length - 1;
-  report['data'].tot.info.cssRules = calculateCssRules(evaluation);
+  //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
   report['data'].tot.info.encoding = 'utf-8';
   report['data'].tot.info.lang = getHtmlLang(evaluation.system.page.dom.processed.html.plain);
   report['data'].tot.info.content = 'text/html';
