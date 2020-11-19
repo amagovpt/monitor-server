@@ -17,7 +17,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every minute - ADMIN EVALUATIONS
   async instanceEvaluateAdminPageList(): Promise<void> {
-    if (!this.isEvaluatingAdminInstance) {
+    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingAdminInstance) {
       this.isEvaluatingAdminInstance = true;
 
       const skip =

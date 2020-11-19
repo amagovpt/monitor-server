@@ -26,7 +26,7 @@ let EvaluationService = class EvaluationService {
         this.isEvaluatingUserInstance = false;
     }
     async instanceEvaluateAdminPageList() {
-        if (!this.isEvaluatingAdminInstance) {
+        if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingAdminInstance) {
             this.isEvaluatingAdminInstance = true;
             const skip = process.env.ID === undefined ? 0 : parseInt(process.env.ID) * 10;
             const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`);
