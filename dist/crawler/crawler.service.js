@@ -19,7 +19,6 @@ exports.CrawlerService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const schedule_1 = require("@nestjs/schedule");
 const crawler_entity_1 = require("./crawler.entity");
 const fs_1 = require("fs");
 const simplecrawler_1 = __importDefault(require("simplecrawler"));
@@ -30,103 +29,76 @@ let CrawlerService = class CrawlerService {
         this.connection = connection;
         this.isCrawling = false;
     }
-    async nestCrawl() {
-        if (process.env.ID === undefined || process.env.ID === "0") {
-            if (!this.isCrawling) {
-                this.isCrawling = true;
-                const queryRunner = this.connection.createQueryRunner();
-                try {
-                    await queryRunner.connect();
-                    await queryRunner.startTransaction();
-                    const domain = await queryRunner.manager.query(`SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`);
-                    if (domain.length > 0) {
-                        const urls = await this.crawl(domain[0].DomainUri);
-                        for (const url of urls || []) {
-                            const newCrawlPage = new crawler_entity_1.CrawlPage();
-                            newCrawlPage.Uri = url;
-                            newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-                            await queryRunner.manager.save(newCrawlPage);
-                        }
-                        await queryRunner.manager.query(`UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`, [domain[0].CrawlDomainId]);
-                    }
-                    await queryRunner.commitTransaction();
-                }
-                catch (err) {
-                    await queryRunner.rollbackTransaction();
-                    console.error(err);
-                }
-                finally {
-                    await queryRunner.release();
-                }
-                this.isCrawling = false;
-            }
-        }
-    }
     async crawl(url) {
-        const browser = await puppeteer_1.default.launch();
+        const browser = await puppeteer_1.default.launch({ args: ["--no-sandbox"] });
         const page = await browser.newPage();
-        await page.goto(url, {
-            timeout: 0,
-            waitUntil: ["networkidle2", "domcontentloaded"],
-        });
-        const urls = await page.evaluate((url) => {
-            const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split("|");
-            const links = document.querySelectorAll("body a");
-            const urls = new Array();
-            for (const link of links || []) {
-                if (link.hasAttribute("href")) {
-                    const href = link.getAttribute("href");
-                    if (href &&
-                        href.trim() &&
-                        (href.startsWith(url) ||
-                            href.startsWith("/") ||
-                            href.startsWith("./") ||
-                            (!href.startsWith("http") && !href.startsWith("#")))) {
-                        let valid = true;
-                        for (const not of notHtml || []) {
-                            if (href.endsWith(not)) {
-                                valid = false;
-                                break;
-                            }
-                            const parts = href.split("/");
-                            if (parts.length > 0) {
-                                const lastPart = parts[parts.length - 1];
-                                if (lastPart.startsWith("#") ||
-                                    lastPart.startsWith("javascript:") ||
-                                    lastPart.startsWith("tel:") ||
-                                    lastPart.startsWith("mailto:")) {
+        let urls = new Array();
+        try {
+            await page.goto(url, {
+                timeout: 0,
+                waitUntil: ["networkidle2", "domcontentloaded"],
+            });
+            urls = await page.evaluate((url) => {
+                const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split("|");
+                const links = document.querySelectorAll("body a");
+                const urls = new Array();
+                for (const link of links || []) {
+                    if (link.hasAttribute("href")) {
+                        const href = link.getAttribute("href");
+                        if (href &&
+                            href.trim() &&
+                            (href.startsWith(url) ||
+                                href.startsWith("/") ||
+                                href.startsWith("./") ||
+                                (!href.startsWith("http") && !href.startsWith("#")))) {
+                            let valid = true;
+                            for (const not of notHtml || []) {
+                                if (href.endsWith(not)) {
                                     valid = false;
                                     break;
                                 }
-                            }
-                        }
-                        if (valid) {
-                            try {
-                                let correctUrl = "";
-                                if (href.startsWith(url)) {
-                                    correctUrl = href;
-                                }
-                                else if (href.startsWith("./")) {
-                                    correctUrl = url + href.slice(1);
-                                }
-                                else if (!href.startsWith("/")) {
-                                    correctUrl = url + "/" + href;
-                                }
-                                else {
-                                    correctUrl = url + href;
-                                }
-                                const parsedUrl = new URL(correctUrl);
-                                if (parsedUrl.hash.trim() === "") {
-                                    urls.push(correctUrl);
+                                const parts = href.split("/");
+                                if (parts.length > 0) {
+                                    const lastPart = parts[parts.length - 1];
+                                    if (lastPart.startsWith("#") ||
+                                        lastPart.startsWith("javascript:") ||
+                                        lastPart.startsWith("tel:") ||
+                                        lastPart.startsWith("mailto:")) {
+                                        valid = false;
+                                        break;
+                                    }
                                 }
                             }
-                            catch (err) { }
+                            if (valid) {
+                                try {
+                                    let correctUrl = "";
+                                    if (href.startsWith(url)) {
+                                        correctUrl = href;
+                                    }
+                                    else if (href.startsWith("./")) {
+                                        correctUrl = url + href.slice(1);
+                                    }
+                                    else if (!href.startsWith("/")) {
+                                        correctUrl = url + "/" + href;
+                                    }
+                                    else {
+                                        correctUrl = url + href;
+                                    }
+                                    const parsedUrl = new URL(correctUrl);
+                                    if (parsedUrl.hash.trim() === "") {
+                                        urls.push(correctUrl);
+                                    }
+                                }
+                                catch (err) { }
+                            }
                         }
                     }
                 }
-            }
-            return urls;
-        }, url);
+                return urls;
+            }, url);
+        }
+        catch (err) {
+        }
         await page.close();
         await browser.close();
         const unique = urls.filter((v, i, self) => {
@@ -341,12 +313,6 @@ let CrawlerService = class CrawlerService {
         return _domain[0].DomainId;
     }
 };
-__decorate([
-    schedule_1.Cron(schedule_1.CronExpression.EVERY_30_SECONDS),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], CrawlerService.prototype, "nestCrawl", null);
 CrawlerService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(crawler_entity_1.CrawlDomain)),

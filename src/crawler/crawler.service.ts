@@ -19,7 +19,7 @@ export class CrawlerService {
     this.isCrawling = false;
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  /*@Cron(CronExpression.EVERY_5_SECONDS)
   async nestCrawl(): Promise<void> {
     if (process.env.ID === undefined || process.env.ID === "0") {
       if (!this.isCrawling) {
@@ -62,83 +62,89 @@ export class CrawlerService {
         this.isCrawling = false;
       }
     }
-  }
+  }*/
 
   private async crawl(url: string): Promise<string[]> {
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     const page = await browser.newPage();
 
-    await page.goto(url, {
-      timeout: 0,
-      waitUntil: ["networkidle2", "domcontentloaded"],
-    });
+    let urls = new Array<string>();
 
-    const urls = await page.evaluate((url) => {
-      const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split(
-        "|"
-      );
+    try {
+      await page.goto(url, {
+        timeout: 0,
+        waitUntil: ["networkidle2", "domcontentloaded"],
+      });
 
-      const links = document.querySelectorAll("body a");
+      urls = await page.evaluate((url) => {
+        const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split(
+          "|"
+        );
 
-      const urls = new Array();
+        const links = document.querySelectorAll("body a");
 
-      for (const link of links || []) {
-        if (link.hasAttribute("href")) {
-          const href = link.getAttribute("href");
+        const urls = new Array();
 
-          if (
-            href &&
-            href.trim() &&
-            (href.startsWith(url) ||
-              href.startsWith("/") ||
-              href.startsWith("./") ||
-              (!href.startsWith("http") && !href.startsWith("#")))
-          ) {
-            let valid = true;
-            for (const not of notHtml || []) {
-              if (href.endsWith(not)) {
-                valid = false;
-                break;
-              }
-              const parts = href.split("/");
-              if (parts.length > 0) {
-                const lastPart = parts[parts.length - 1];
-                if (
-                  lastPart.startsWith("#") ||
-                  lastPart.startsWith("javascript:") ||
-                  lastPart.startsWith("tel:") ||
-                  lastPart.startsWith("mailto:")
-                ) {
+        for (const link of links || []) {
+          if (link.hasAttribute("href")) {
+            const href = link.getAttribute("href");
+
+            if (
+              href &&
+              href.trim() &&
+              (href.startsWith(url) ||
+                href.startsWith("/") ||
+                href.startsWith("./") ||
+                (!href.startsWith("http") && !href.startsWith("#")))
+            ) {
+              let valid = true;
+              for (const not of notHtml || []) {
+                if (href.endsWith(not)) {
                   valid = false;
                   break;
                 }
+                const parts = href.split("/");
+                if (parts.length > 0) {
+                  const lastPart = parts[parts.length - 1];
+                  if (
+                    lastPart.startsWith("#") ||
+                    lastPart.startsWith("javascript:") ||
+                    lastPart.startsWith("tel:") ||
+                    lastPart.startsWith("mailto:")
+                  ) {
+                    valid = false;
+                    break;
+                  }
+                }
               }
-            }
 
-            if (valid) {
-              try {
-                let correctUrl = "";
-                if (href.startsWith(url)) {
-                  correctUrl = href;
-                } else if (href.startsWith("./")) {
-                  correctUrl = url + href.slice(1);
-                } else if (!href.startsWith("/")) {
-                  correctUrl = url + "/" + href;
-                } else {
-                  correctUrl = url + href;
-                }
-                const parsedUrl = new URL(correctUrl);
-                if (parsedUrl.hash.trim() === "") {
-                  urls.push(correctUrl);
-                }
-              } catch (err) {}
+              if (valid) {
+                try {
+                  let correctUrl = "";
+                  if (href.startsWith(url)) {
+                    correctUrl = href;
+                  } else if (href.startsWith("./")) {
+                    correctUrl = url + href.slice(1);
+                  } else if (!href.startsWith("/")) {
+                    correctUrl = url + "/" + href;
+                  } else {
+                    correctUrl = url + href;
+                  }
+                  const parsedUrl = new URL(correctUrl);
+                  if (parsedUrl.hash.trim() === "") {
+                    urls.push(correctUrl);
+                  }
+                } catch (err) {}
+              }
             }
           }
         }
-      }
 
-      return urls;
-    }, url);
+        return urls;
+      }, url);
+    } catch (err) {
+      //console.error("err", typeof err);
+    }
 
     await page.close();
     await browser.close();

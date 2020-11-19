@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = void 0;
 const core_1 = require("@qualweb/core");
+const invalid_url_error_1 = require("../lib/invalid-url.error");
 async function evaluate(params) {
     const options = {
         "act-rules": {
@@ -85,6 +86,9 @@ async function evaluate(params) {
     await qualweb.start({ args: ["--no-sandbox"] });
     const reports = await qualweb.evaluate(options);
     await qualweb.stop();
+    if (Object.keys(reports).length === 0 && params.url) {
+        throw new invalid_url_error_1.InvalidUrl(params.url);
+    }
     let report;
     if (params.url) {
         report = reports[params.url];

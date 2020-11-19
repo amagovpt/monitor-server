@@ -5,7 +5,6 @@ export declare class CrawlerService {
     private readonly connection;
     private isCrawling;
     constructor(crawlDomainRepository: Repository<CrawlDomain>, connection: Connection);
-    nestCrawl(): Promise<void>;
     private crawl;
     private crawler;
     findAll(): Promise<any>;

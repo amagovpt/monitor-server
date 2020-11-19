@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-url.error.js","sourceRoot":"","sources":["../../src/lib/invalid-url.error.ts"],"names":[],"mappings":";;;AAAA,MAAa,UAAW,SAAQ,KAAK;IAGnC,YAAY,GAAW,EAAE,OAAgB;QACvC,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,GAAG,GAAG,GAAG,CAAC;IACjB,CAAC;IAEM,MAAM;QACX,OAAO,IAAI,CAAC,GAAG,CAAC;IAClB,CAAC;CACF;AAXD,gCAWC"}

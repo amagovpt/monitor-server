@@ -22,106 +22,27 @@ const middleware_1 = require("./middleware");
 let EvaluationService = class EvaluationService {
     constructor(connection) {
         this.connection = connection;
-        this.isEvaluatingInstance1 = false;
-        this.isEvaluatingInstance2 = false;
-        this.isEvaluatingInstance3 = false;
-        this.isEvaluatingInstance4 = false;
-        this.isEvaluatingInstance5 = false;
-        this.isEvaluatingInstance6 = false;
-        this.isEvaluatingUserInstance4 = false;
-        this.isEvaluatingUserInstance5 = false;
-        this.isEvaluatingUserInstance6 = false;
+        this.isEvaluatingAdminInstance = false;
+        this.isEvaluatingUserInstance = false;
     }
-    async instance1EvaluatePageList() {
-        if (!this.isEvaluatingInstance1) {
-            this.isEvaluatingInstance1 = true;
-            const queryRunner = this.connection.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            try {
-                const pages = await queryRunner.manager.query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
-                if (pages.length > 0) {
-                    await queryRunner.manager.query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map((p) => p.EvaluationListId)]);
-                }
-                await queryRunner.commitTransaction();
-                console.log(pages);
-                await this.evaluateInBackground(pages);
-            }
-            catch (err) {
-                await queryRunner.rollbackTransaction();
-            }
-            finally {
-                await queryRunner.release();
-            }
-            this.isEvaluatingInstance1 = false;
-        }
-    }
-    async instance2EvaluatePageListevaluatePageList() {
-        if (!this.isEvaluatingInstance2) {
-            this.isEvaluatingInstance2 = true;
-            const queryRunner = this.connection.createQueryRunner();
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            try {
-                const pages = await queryRunner.manager.query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`);
-                if (pages.length > 0) {
-                    await queryRunner.manager.query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map((p) => p.EvaluationListId)]);
-                }
-                await queryRunner.commitTransaction();
-                console.log(pages);
-                await this.evaluateInBackground(pages);
-            }
-            catch (err) {
-                await queryRunner.rollbackTransaction();
-            }
-            finally {
-                await queryRunner.release();
-            }
-            this.isEvaluatingInstance2 = false;
-        }
-    }
-    async instance3EvaluatePageListevaluatePageList() {
-        if (process.env.ID === "2" && process.env.NAMESPACE === "GLOBAL") {
-            if (!this.isEvaluatingInstance3) {
-                this.isEvaluatingInstance3 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 300, 300`);
-                await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance3 = false;
-            }
-        }
-    }
-    async instance4EvaluatePageListevaluatePageList() {
-        if (process.env.ID === "3" && process.env.NAMESPACE === "GLOBAL") {
-            if (!this.isEvaluatingInstance4) {
-                this.isEvaluatingInstance4 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 400, 600`);
-                await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance4 = false;
-            }
-        }
-    }
-    async instance5EvaluatePageListevaluatePageList() {
-        if (process.env.ID === "4" && process.env.NAMESPACE === "GLOBAL") {
-            if (!this.isEvaluatingInstance5) {
-                this.isEvaluatingInstance5 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 500, 1000`);
-                await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance5 = false;
-            }
-        }
-    }
-    async instance6EvaluatePageListevaluatePageList() {
-        if (process.env.ID === "5" && process.env.NAMESPACE === "GLOBAL") {
-            if (!this.isEvaluatingInstance6) {
-                this.isEvaluatingInstance6 = true;
-                const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 600, 1500`);
-                await this.evaluateInBackground(pages);
-                this.isEvaluatingInstance6 = false;
-            }
+    async instanceEvaluateAdminPageList() {
+        if (!this.isEvaluatingAdminInstance) {
+            this.isEvaluatingAdminInstance = true;
+            const skip = process.env.ID === undefined ? 0 : parseInt(process.env.ID) * 10;
+            const pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`);
+            await this.evaluateInBackground(pages);
+            this.isEvaluatingAdminInstance = false;
         }
     }
     async evaluateInBackground(pages) {
         if (pages.length > 0) {
+            try {
+                await typeorm_1.getManager().query(`UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`, [pages.map((p) => p.EvaluationListId)]);
+            }
+            catch (err) {
+                console.error(err);
+                throw err;
+            }
             for (const pte of pages || []) {
                 let error = null;
                 let evaluation;
@@ -146,7 +67,7 @@ let EvaluationService = class EvaluationService {
                 }
                 catch (err) {
                     await queryRunner.rollbackTransaction();
-                    console.log(err);
+                    console.error(err);
                 }
                 finally {
                     await queryRunner.release();
@@ -559,41 +480,11 @@ let EvaluationService = class EvaluationService {
     }
 };
 __decorate([
-    schedule_1.Cron(schedule_1.CronExpression.EVERY_MINUTE),
+    schedule_1.Cron(schedule_1.CronExpression.EVERY_5_SECONDS),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance1EvaluatePageList", null);
-__decorate([
-    schedule_1.Cron("*/1 * * * *"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance2EvaluatePageListevaluatePageList", null);
-__decorate([
-    schedule_1.Cron("*/3 * * * *"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance3EvaluatePageListevaluatePageList", null);
-__decorate([
-    schedule_1.Cron("*/4 * * * *"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance4EvaluatePageListevaluatePageList", null);
-__decorate([
-    schedule_1.Cron("*/5 * * * *"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance5EvaluatePageListevaluatePageList", null);
-__decorate([
-    schedule_1.Cron("*/6 * * * *"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EvaluationService.prototype, "instance6EvaluatePageListevaluatePageList", null);
+], EvaluationService.prototype, "instanceEvaluateAdminPageList", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [typeorm_1.Connection])

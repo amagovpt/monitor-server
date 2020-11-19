@@ -1,4 +1,5 @@
 import { QualWeb, EvaluationReport } from "@qualweb/core";
+import { InvalidUrl } from "../lib/invalid-url.error";
 
 export async function evaluate(params: any): Promise<any> {
   const options = {
@@ -126,6 +127,10 @@ export async function evaluate(params: any): Promise<any> {
   const reports = await qualweb.evaluate(options);
 
   await qualweb.stop();
+
+  if (Object.keys(reports).length === 0 && params.url) {
+    throw new InvalidUrl(params.url);
+  }
 
   let report: EvaluationReport;
 
