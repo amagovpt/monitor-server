@@ -82,6 +82,7 @@ async function evaluate(params) {
     else if (params.html) {
         options["html"] = params.html;
     }
+    options["validator"] = "http://10.50.37.36/validate/";
     const qualweb = new core_1.QualWeb();
     await qualweb.start({ args: ["--no-sandbox"] });
     const reports = await qualweb.evaluate(options);

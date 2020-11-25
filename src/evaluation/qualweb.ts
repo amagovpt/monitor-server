@@ -119,7 +119,7 @@ export async function evaluate(params: any): Promise<any> {
     options["html"] = params.html;
   }
 
-  //options['validator'] = 'http://10.50.37.36/validate/';
+  options["validator"] = "http://10.50.37.36/validate/";
 
   const qualweb = new QualWeb();
   await qualweb.start({ args: ["--no-sandbox"] });
