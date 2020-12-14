@@ -31,7 +31,6 @@ export async function evaluate(params: any): Promise<any> {
         "QW-WCAG-T9",
         "QW-WCAG-T14",
         "QW-WCAG-T15",
-        "QW-WCAG-T16",
         "QW-WCAG-T17",
         "QW-WCAG-T32",
         "QW-WCAG-T18",
@@ -115,11 +114,12 @@ export async function evaluate(params: any): Promise<any> {
       params.url = "http://" + params.url;
     }
     options["url"] = params.url;
+    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
   } else if (params.html) {
     options["html"] = params.html;
   }
 
-  options["validator"] = "http://10.50.37.36/validate/";
+  options["validator"] = "http://194.117.20.202/validate/";
 
   const qualweb = new QualWeb();
   await qualweb.start({ args: ["--no-sandbox"] });
