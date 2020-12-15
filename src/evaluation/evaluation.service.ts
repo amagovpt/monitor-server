@@ -20,12 +20,19 @@ export class EvaluationService {
     if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingAdminInstance) {
       this.isEvaluatingAdminInstance = true;
 
-      const skip =
-        process.env.ID === undefined ? 0 : parseInt(process.env.ID) * 10;
+      let pages = [];
+      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+        pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`
+        );
+      } else {
+        const skip = parseInt(process.env.ID) * 10;
+        pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`
+        );
+      }
 
-      const pages = await getManager().query(
-        `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`
-      );
+      console.log(pages);
       await this.evaluateInBackground(pages);
 
       this.isEvaluatingAdminInstance = false;
@@ -141,7 +148,7 @@ export class EvaluationService {
           } else {
             await queryRunner.manager.query(
               `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-              [error.toString(), pte.EvaluationListId]
+              [error?.toString(), pte.EvaluationListId]
             );
           }
 

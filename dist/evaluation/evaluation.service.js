@@ -61,7 +61,7 @@ let EvaluationService = class EvaluationService {
                         await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
                     }
                     else {
-                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [error.toString(), pte.EvaluationListId]);
+                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [error === null || error === void 0 ? void 0 : error.toString(), pte.EvaluationListId]);
                     }
                     await queryRunner.commitTransaction();
                 }
