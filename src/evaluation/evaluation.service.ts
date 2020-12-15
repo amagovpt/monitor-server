@@ -32,7 +32,6 @@ export class EvaluationService {
         );
       }
 
-      console.log(pages);
       await this.evaluateInBackground(pages);
 
       this.isEvaluatingAdminInstance = false;
