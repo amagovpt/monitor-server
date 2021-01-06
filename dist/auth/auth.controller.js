@@ -22,12 +22,15 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async login(req) {
-        const token = await this.authService.login(req.user);
+        const token = this.authService.login(req.user);
         if (req.user.Type !== req.body.type) {
             throw new common_1.UnauthorizedException();
         }
         else {
-            const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const date = new Date()
+                .toISOString()
+                .replace(/T/, " ")
+                .replace(/\..+/, "");
             const updatedLogin = await this.authService.updateUserLastLogin(req.user.UserId, date);
             if (!updatedLogin) {
                 throw new common_1.InternalServerErrorException();
@@ -36,28 +39,28 @@ let AuthController = class AuthController {
         }
     }
     async logout(req) {
-        const token = req.headers.authorization.split(' ')[1];
+        const token = req.headers.authorization.split(" ")[1];
         return response_1.success(await this.authService.logout(token));
     }
 };
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('local')),
-    common_1.Post('login'),
+    common_1.UseGuards(passport_1.AuthGuard("local")),
+    common_1.Post("login"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt')),
-    common_1.Post('logout'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt")),
+    common_1.Post("logout"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 AuthController = __decorate([
-    common_1.Controller('auth'),
+    common_1.Controller("auth"),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
 ], AuthController);
 exports.AuthController = AuthController;

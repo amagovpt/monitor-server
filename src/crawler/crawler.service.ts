@@ -19,7 +19,7 @@ export class CrawlerService {
     this.isCrawling = false;
   }
 
-  /*@Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async nestCrawl(): Promise<void> {
     if (process.env.ID === undefined || process.env.ID === "0") {
       if (!this.isCrawling) {
@@ -62,7 +62,7 @@ export class CrawlerService {
         this.isCrawling = false;
       }
     }
-  }*/
+  }
 
   private async crawl(url: string): Promise<string[]> {
     const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
