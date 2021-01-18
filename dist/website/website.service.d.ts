@@ -1,8 +1,8 @@
-import { Connection, Repository } from 'typeorm';
-import { Website } from './website.entity';
-import { Domain } from '../domain/domain.entity';
-import { Tag } from '../tag/tag.entity';
-import { EvaluationService } from '../evaluation/evaluation.service';
+import { Connection, Repository } from "typeorm";
+import { Website } from "./website.entity";
+import { Domain } from "../domain/domain.entity";
+import { Tag } from "../tag/tag.entity";
+import { EvaluationService } from "../evaluation/evaluation.service";
 export declare class WebsiteService {
     private readonly websiteRepository;
     private readonly tagRepository;
@@ -37,7 +37,7 @@ export declare class WebsiteService {
     findNumberOfObservatory(): Promise<number>;
     findCurrentDomain(websiteId: number): Promise<any>;
     createOne(website: Website, domain: string, tags: string[]): Promise<boolean>;
-    update(websiteId: number, name: string, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any>;
+    update(websiteId: number, name: string, declaration: number | null, stamp: number | null, entityId: number, userId: number, oldUserId: number, transfer: boolean, defaultTags: number[], tags: number[]): Promise<any>;
     updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any>;
     delete(websiteId: number): Promise<any>;
     import(websiteId: number, websiteName: string): Promise<any>;

@@ -26,8 +26,8 @@ let PageService = class PageService {
         this.connection = connection;
     }
     async findUserType(username) {
-        if (username === 'admin') {
-            return 'nimda';
+        if (username === "admin") {
+            return "nimda";
         }
         const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
         if (user) {
@@ -39,7 +39,7 @@ let PageService = class PageService {
     }
     async findAllInEvaluationList() {
         const manager = typeorm_2.getManager();
-        const result = await manager.query('SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId IS NULL AND Error IS NULL');
+        const result = await manager.query("SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId IS NULL AND Error IS NULL");
         return result[0].Total;
     }
     async findAll() {
@@ -77,6 +77,8 @@ let PageService = class PageService {
         d.Url,
         w.WebsiteId,
         w.Name as Website_Name,
+        w.Declaration as Website_Declaration,
+        w.Stamp as Website_Stamp,
         w.Creation_Date as Website_Creation_Date,
         en.Long_Name as Entity_Name,
         t.TagId,
@@ -109,7 +111,9 @@ let PageService = class PageService {
     `);
     }
     async findAllFromMyMonitorUserWebsite(userId, websiteName) {
-        const website = await this.websiteRepository.findOne({ where: { UserId: userId, Name: websiteName } });
+        const website = await this.websiteRepository.findOne({
+            where: { UserId: userId, Name: websiteName },
+        });
         if (!website) {
             throw new common_1.InternalServerErrorException();
         }
@@ -217,14 +221,16 @@ let PageService = class PageService {
       `, [userId, pageId]);
         return pages.length > 0;
     }
-    async addPageToEvaluate(url, showTo = '10', userId = null, studyUserId = null) {
+    async addPageToEvaluate(url, showTo = "10", userId = null, studyUserId = null) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
-            const evalList = await queryRunner.manager.query('SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = ? LIMIT 1', [page.PageId, userId]);
+            const page = await queryRunner.manager.findOne(page_entity_1.Page, {
+                where: { Uri: url },
+            });
+            const evalList = await queryRunner.manager.query("SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = ? LIMIT 1", [page.PageId, userId]);
             if (evalList.length === 0) {
                 await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]);
             }
@@ -247,20 +253,23 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const uri of uris || []) {
-                const page = await this.pageRepository.findOne({ select: ['PageId', 'Show_In'], where: { Uri: uri } });
+                const page = await this.pageRepository.findOne({
+                    select: ["PageId", "Show_In"],
+                    where: { Uri: uri },
+                });
                 if (page) {
-                    let newShowIn = '100';
+                    let newShowIn = "100";
                     if (observatory.indexOf(uri) > -1) {
-                        if (page.Show_In[1] === '1') {
-                            newShowIn = '111';
+                        if (page.Show_In[1] === "1") {
+                            newShowIn = "111";
                         }
                         else {
-                            newShowIn = '101';
+                            newShowIn = "101";
                         }
                     }
                     else {
-                        if (page.Show_In[1] === '1') {
-                            newShowIn = '110';
+                        if (page.Show_In[1] === "1") {
+                            newShowIn = "110";
                         }
                     }
                     await queryRunner.manager.update(page_entity_1.Page, { PageId: page.PageId }, { Show_In: newShowIn });
@@ -268,10 +277,10 @@ let PageService = class PageService {
                 else {
                     let showIn = null;
                     if (observatory.indexOf(uri) > -1) {
-                        showIn = '101';
+                        showIn = "101";
                     }
                     else {
-                        showIn = '100';
+                        showIn = "100";
                     }
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = uri;
@@ -279,7 +288,7 @@ let PageService = class PageService {
                     newPage.Creation_Date = new Date();
                     const insertPage = await queryRunner.manager.save(newPage);
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainId, insertPage.PageId]);
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, -1, uri, '10', newPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, -1, uri, "10", newPage.Creation_Date]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -301,16 +310,18 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const uri of uris || []) {
-                const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: decodeURIComponent(uri) } });
+                const page = await queryRunner.manager.findOne(page_entity_1.Page, {
+                    where: { Uri: decodeURIComponent(uri) },
+                });
                 if (page) {
-                    const showIn = page.Show_In[0] + '1' + page.Show_In[2];
+                    const showIn = page.Show_In[0] + "1" + page.Show_In[2];
                     await queryRunner.manager.update(page_entity_1.Page, { PageId: page.PageId }, { Show_In: showIn });
-                    await queryRunner.manager.update(evaluation_entity_1.Evaluation, { PageId: page.PageId, Show_To: typeorm_2.Like('1_') }, { Show_To: '11' });
+                    await queryRunner.manager.update(evaluation_entity_1.Evaluation, { PageId: page.PageId, Show_To: typeorm_2.Like("1_") }, { Show_To: "11" });
                 }
                 else {
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = uri;
-                    newPage.Show_In = '010';
+                    newPage.Show_In = "010";
                     newPage.Creation_Date = new Date();
                     const insertPage = await queryRunner.manager.save(newPage);
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
@@ -326,7 +337,13 @@ let PageService = class PageService {
               d.WebsiteId = w.WebsiteId AND
               d.Url = ? AND
               d.Active = 1`, [insertPage.PageId, website, userId, domain]);
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '01', insertPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [
+                        insertPage.PageId,
+                        userId,
+                        insertPage.Uri,
+                        "01",
+                        insertPage.Creation_Date,
+                    ]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -348,11 +365,14 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const pageId of pagesIds || []) {
-                const page = await this.pageRepository.findOne({ select: ['Show_In'], where: { PageId: pageId } });
+                const page = await this.pageRepository.findOne({
+                    select: ["Show_In"],
+                    where: { PageId: pageId },
+                });
                 if (page) {
-                    const showIn = page.Show_In[0] + '0' + page.Show_In[2];
+                    const showIn = page.Show_In[0] + "0" + page.Show_In[2];
                     await queryRunner.manager.update(page_entity_1.Page, { PageId: pageId }, { Show_In: showIn });
-                    await queryRunner.manager.update(evaluation_entity_1.Evaluation, { PageId: pageId, Show_To: typeorm_2.Like('11') }, { Show_To: '10' });
+                    await queryRunner.manager.update(evaluation_entity_1.Evaluation, { PageId: pageId, Show_To: typeorm_2.Like("11") }, { Show_To: "10" });
                 }
             }
             await queryRunner.commitTransaction();
@@ -374,7 +394,7 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const uri of uris || []) {
-                const pageExists = await queryRunner.manager.findOne(page_entity_1.Page, { Uri: uri }, { select: ['PageId', 'Uri', 'Creation_Date'] });
+                const pageExists = await queryRunner.manager.findOne(page_entity_1.Page, { Uri: uri }, { select: ["PageId", "Uri", "Creation_Date"] });
                 if (pageExists) {
                     const domainPage = await queryRunner.manager.query(`SELECT 
               dp.* 
@@ -393,7 +413,13 @@ let PageService = class PageService {
               w.UserId = ? AND
               d.WebsiteId = w.WebsiteId AND
               dp.DomainId = d.DomainId AND
-              dp.PageId = ?`, [tag.toLowerCase(), userId, website.toLowerCase(), userId, pageExists.PageId]);
+              dp.PageId = ?`, [
+                        tag.toLowerCase(),
+                        userId,
+                        website.toLowerCase(),
+                        userId,
+                        pageExists.PageId,
+                    ]);
                     if (domainPage.length === 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
               SELECT 
@@ -411,14 +437,27 @@ let PageService = class PageService {
                 w.WebsiteId = tw.WebsiteId AND
                 LOWER(w.Name) = ? AND
                 w.UserId = ? AND
-                d.WebsiteId = w.WebsiteId`, [pageExists.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+                d.WebsiteId = w.WebsiteId`, [
+                            pageExists.PageId,
+                            tag.toLowerCase(),
+                            userId,
+                            website.toLowerCase(),
+                            userId,
+                        ]);
                     }
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [pageExists.PageId, userId, pageExists.Uri, '00', pageExists.Creation_Date, userId]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [
+                        pageExists.PageId,
+                        userId,
+                        pageExists.Uri,
+                        "00",
+                        pageExists.Creation_Date,
+                        userId,
+                    ]);
                 }
                 else {
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = uri;
-                    newPage.Show_In = '000';
+                    newPage.Show_In = "000";
                     newPage.Creation_Date = new Date();
                     const insertPage = await queryRunner.manager.save(newPage);
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) 
@@ -437,7 +476,13 @@ let PageService = class PageService {
               w.WebsiteId = tw.WebsiteId AND
               LOWER(w.Name) = ? AND
               w.UserId = ? AND
-              d.WebsiteId = w.WebsiteId`, [insertPage.PageId, tag.toLowerCase(), userId, website.toLowerCase(), userId]);
+              d.WebsiteId = w.WebsiteId`, [
+                        insertPage.PageId,
+                        tag.toLowerCase(),
+                        userId,
+                        website.toLowerCase(),
+                        userId,
+                    ]);
                     const existingDomain = await queryRunner.manager.query(`SELECT distinct d.DomainId, d.Url 
             FROM
               User as u,
@@ -457,7 +502,14 @@ let PageService = class PageService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, insertPage.PageId]);
                     }
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date, userId]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [
+                        insertPage.PageId,
+                        userId,
+                        insertPage.Uri,
+                        "00",
+                        insertPage.Creation_Date,
+                        userId,
+                    ]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -511,24 +563,26 @@ let PageService = class PageService {
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { PageId: pageId } });
+            const page = await queryRunner.manager.findOne(page_entity_1.Page, {
+                where: { PageId: pageId },
+            });
             if (page) {
-                const both = new RegExp('[0-1][1][1]');
-                const none = new RegExp('[0-1][0][0]');
+                const both = new RegExp("[0-1][1][1]");
+                const none = new RegExp("[0-1][0][0]");
                 let show = null;
                 if (both.test(page.Show_In)) {
                     show = page.Show_In[0] + "10";
                 }
-                else if (page.Show_In[1] === '1' && checked) {
+                else if (page.Show_In[1] === "1" && checked) {
                     show = page.Show_In[0] + "11";
                 }
-                else if (page.Show_In[1] === '1' && !checked) {
+                else if (page.Show_In[1] === "1" && !checked) {
                     show = page.Show_In[0] + "00";
                 }
-                else if (page.Show_In[2] === '1' && checked) {
+                else if (page.Show_In[2] === "1" && checked) {
                     show = page.Show_In[0] + "11";
                 }
-                else if (page.Show_In[2] === '1' && !checked) {
+                else if (page.Show_In[2] === "1" && !checked) {
                     show = page.Show_In[0] + "00";
                 }
                 else if (none.test(page.Show_In)) {
@@ -555,12 +609,14 @@ let PageService = class PageService {
         let hasError = false;
         try {
             for (const id of pages || []) {
-                const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { PageId: id } });
+                const page = await queryRunner.manager.findOne(page_entity_1.Page, {
+                    where: { PageId: id },
+                });
                 if (page) {
                     const show_in = page.Show_In;
-                    let new_show_in = '000';
-                    if (show_in[1] === '1') {
-                        new_show_in = '010';
+                    let new_show_in = "000";
+                    if (show_in[1] === "1") {
+                        new_show_in = "010";
                     }
                     await queryRunner.manager.update(page_entity_1.Page, { PageId: id }, { Show_In: new_show_in });
                 }
@@ -588,7 +644,7 @@ let PageService = class PageService {
                 const show = "1" + page[0].Show_In[1] + page[0].Show_In[2];
                 await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [show, pageId]);
                 let query;
-                if (type === 'studies') {
+                if (type === "studies") {
                     query = `SELECT  e.EvaluationId, e.Show_To FROM Evaluation as e WHERE e.PageId = ? ORDER BY e.Evaluation_Date  DESC LIMIT 1`;
                 }
                 else {
@@ -640,8 +696,12 @@ let PageService = class PageService {
           t.Name = ? AND
           u.UserId = t.UserId AND
           u.Username = ?`, [pageId, website, tagName, username]);
-            const domDate = tag[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-            const webDate = tag[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const domDate = tag[0].Start_Date.toISOString()
+                .replace(/T/, " ")
+                .replace(/\..+/, "");
+            const webDate = tag[0].Creation_Date.toISOString()
+                .replace(/T/, " ")
+                .replace(/\..+/, "");
             const websiteName = tag[0].Name;
             const domainUrl = tag[0].Url;
             const domainP = await queryRunner.manager.query(`

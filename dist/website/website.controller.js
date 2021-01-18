@@ -51,6 +51,8 @@ let WebsiteController = class WebsiteController {
         const website = new website_entity_1.Website();
         website.Name = req.body.name;
         website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
+        website.Declaration = req.body.declaration;
+        website.Stamp = req.body.stamp;
         website.EntityId = parseInt(SqlString.escape(req.body.entityId)) || null;
         website.Creation_Date = new Date();
         const domain = decodeURIComponent(req.body.domain);
@@ -64,13 +66,15 @@ let WebsiteController = class WebsiteController {
     async updateWebsite(req) {
         const websiteId = req.body.websiteId;
         const name = req.body.name;
+        const declaration = req.body.declaration;
+        const stamp = req.body.stamp;
         const entityId = req.body.entityId;
         const userId = req.body.userId;
         const oldUserId = req.body.olderUserId;
         const transfer = !!req.body.transfer;
         const defaultTags = JSON.parse(req.body.defaultTags);
         const tags = JSON.parse(req.body.tags);
-        const updateSuccess = await this.websiteService.update(websiteId, name, entityId, userId, oldUserId, transfer, defaultTags, tags);
+        const updateSuccess = await this.websiteService.update(websiteId, name, declaration, stamp, entityId, userId, oldUserId, transfer, defaultTags, tags);
         if (!updateSuccess) {
             throw new common_1.InternalServerErrorException();
         }
@@ -107,14 +111,14 @@ let WebsiteController = class WebsiteController {
         const type = await this.websiteService.findUserType(user);
         let flags;
         switch (type) {
-            case 'nimda':
-                flags = '1__';
+            case "nimda":
+                flags = "1__";
                 break;
-            case 'monitor':
-                flags = '_1_';
+            case "monitor":
+                flags = "_1_";
                 break;
             default:
-                flags = '%';
+                flags = "%";
                 break;
         }
         return response_1.success(await this.websiteService.findAllDomains(user, type, website, flags));
@@ -141,7 +145,7 @@ let WebsiteController = class WebsiteController {
         return response_1.success(await this.websiteService.findNumberOfObservatory());
     }
     async checkIfWebsiteExists(name) {
-        return response_1.success(!!await this.websiteService.findByOfficialName(name));
+        return response_1.success(!!(await this.websiteService.findByOfficialName(name)));
     }
     async checkIfIsInObservatory(req) {
         return response_1.success(await this.websiteService.isInObservatory(req.user.userId, req.body.website));
@@ -173,11 +177,11 @@ let WebsiteController = class WebsiteController {
     }
     async checkIfStudyMonitorUserTagWebsiteNameExists(req, tag, website) {
         const userId = req.user.userId;
-        return response_1.success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByName(userId, tag, website));
+        return response_1.success(!!(await this.websiteService.findStudyMonitorUserTagWebsiteByName(userId, tag, website)));
     }
     async checkIfStudyMonitorUserTagWebsiteDomainExists(req, tag, domain) {
         const userId = req.user.userId;
-        return response_1.success(!!await this.websiteService.findStudyMonitorUserTagWebsiteByDomain(userId, tag, domain));
+        return response_1.success(!!(await this.websiteService.findStudyMonitorUserTagWebsiteByDomain(userId, tag, domain)));
     }
     async linkStudyMonitorUserTagWebsite(req) {
         const userId = req.user.userId;
@@ -213,240 +217,247 @@ let WebsiteController = class WebsiteController {
     }
 };
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('reEvaluate'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("reEvaluate"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "reEvaluateWebsitePages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('create'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("create"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "createWebsite", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('update'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("update"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "updateWebsite", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('pages/updateObservatory'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("pages/updateObservatory"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "updateWebsitePagesObservatory", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('delete'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("delete"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "deleteWebsite", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Post('import'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Post("import"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "importWebsiteFromMyMonitor", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('all'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("all"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllWebsites", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('info/:websiteId'),
-    __param(0, common_1.Param('websiteId')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("info/:websiteId"),
+    __param(0, common_1.Param("websiteId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsiteInfo", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('currentDomain/:websiteId'),
-    __param(0, common_1.Param('websiteId')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("currentDomain/:websiteId"),
+    __param(0, common_1.Param("websiteId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsiteCurrentDomain", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get(':website/user/:user/domains'),
-    __param(0, common_1.Param('website')), __param(1, common_1.Param('user')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get(":website/user/:user/domains"),
+    __param(0, common_1.Param("website")),
+    __param(1, common_1.Param("user")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllWebsiteDomains", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('pages/:websiteId'),
-    __param(0, common_1.Param('websiteId')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("pages/:websiteId"),
+    __param(0, common_1.Param("websiteId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllWebsitePages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('official'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("official"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getAllOfficialWebsites", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('withoutUser'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("withoutUser"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsitesWithoutUser", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('withoutEntity'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("withoutEntity"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getWebsitesWithoutEntity", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('studyMonitor/total'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("studyMonitor/total"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getNumberOfStudyMonitorUsers", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('myMonitor/total'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("myMonitor/total"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getNumberOfMyMonitorUsers", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('observatory/total'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("observatory/total"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getNumberOfObservatoryTags", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-admin')),
-    common_1.Get('exists/:name'),
-    __param(0, common_1.Param('name')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-admin")),
+    common_1.Get("exists/:name"),
+    __param(0, common_1.Param("name")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "checkIfWebsiteExists", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
-    common_1.Post('isInObservatory'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-monitor")),
+    common_1.Post("isInObservatory"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "checkIfIsInObservatory", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
-    common_1.Post('transferObservatoryPages'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-monitor")),
+    common_1.Post("transferObservatoryPages"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "transferObservatoryPages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
-    common_1.Get('myMonitor'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-monitor")),
+    common_1.Get("myMonitor"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getMyMonitorUserWebsites", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-monitor')),
-    common_1.Post('myMonitor/reEvaluate'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-monitor")),
+    common_1.Post("myMonitor/reEvaluate"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "reEvaluateMyMonitorUserWebsitePages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Post('studyMonitor/reEvaluate'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Post("studyMonitor/reEvaluate"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "reEvaluateStudyMonitorUserTagWebsitePages", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Get('studyMonitor/tag/:tag'),
-    __param(0, common_1.Request()), __param(1, common_1.Param('tag')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Get("studyMonitor/tag/:tag"),
+    __param(0, common_1.Request()),
+    __param(1, common_1.Param("tag")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getStudyMonitorUserTagWebsites", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Get('studyMonitor/otherTags/:tag'),
-    __param(0, common_1.Request()), __param(1, common_1.Param('tag')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Get("studyMonitor/otherTags/:tag"),
+    __param(0, common_1.Request()),
+    __param(1, common_1.Param("tag")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "getStudyMonitorUserOtherTagsWebsites", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Get('studyMonitor/tag/:tag/website/nameExists/:website'),
-    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('website')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Get("studyMonitor/tag/:tag/website/nameExists/:website"),
+    __param(0, common_1.Request()),
+    __param(1, common_1.Param("tag")),
+    __param(2, common_1.Param("website")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "checkIfStudyMonitorUserTagWebsiteNameExists", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Get('studyMonitor/tag/:tag/website/domainExists/:domain'),
-    __param(0, common_1.Request()), __param(1, common_1.Param('tag')), __param(2, common_1.Param('domain')),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Get("studyMonitor/tag/:tag/website/domainExists/:domain"),
+    __param(0, common_1.Request()),
+    __param(1, common_1.Param("tag")),
+    __param(2, common_1.Param("domain")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "checkIfStudyMonitorUserTagWebsiteDomainExists", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Post('studyMonitor/link'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Post("studyMonitor/link"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "linkStudyMonitorUserTagWebsite", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Post('studyMonitor/create'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Post("studyMonitor/create"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "createStudyMonitorUserTagWebsite", null);
 __decorate([
-    common_1.UseGuards(passport_1.AuthGuard('jwt-study')),
-    common_1.Post('studyMonitor/remove'),
+    common_1.UseGuards(passport_1.AuthGuard("jwt-study")),
+    common_1.Post("studyMonitor/remove"),
     __param(0, common_1.Request()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WebsiteController.prototype, "removeStudyMonitorUserTagWebsite", null);
 WebsiteController = __decorate([
-    common_1.Controller('website'),
+    common_1.Controller("website"),
     __metadata("design:paramtypes", [website_service_1.WebsiteService])
 ], WebsiteController);
 exports.WebsiteController = WebsiteController;

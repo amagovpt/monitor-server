@@ -19,7 +19,7 @@ async function evaluate(params) {
                 "QW-ACT-R18",
                 "QW-ACT-R19",
                 "QW-ACT-R37",
-                "QW-ACT-R47",
+                "QW-ACT-R68",
             ],
         },
         "wcag-techniques": {

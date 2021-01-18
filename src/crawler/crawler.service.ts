@@ -73,7 +73,7 @@ export class CrawlerService {
     try {
       await page.goto(url, {
         timeout: 0,
-        waitUntil: ["networkidle2", "domcontentloaded"],
+        waitUntil: "load",
       });
 
       urls = await page.evaluate((url) => {
@@ -149,19 +149,20 @@ export class CrawlerService {
     await page.close();
     await browser.close();
 
-    const unique = urls.filter((v, i, self) => {
-      return self.indexOf(v) === i;
-    });
-
-    const normalizedUrls = unique.map((u) => {
+    const normalizedUrls = urls.map((u) => {
+      if (u.endsWith("/")) {
+        u = u.substring(0, u.length - 1);
+      }
       if (u.startsWith(url)) {
-        return u;
+        return u.trim();
       } else {
-        return url + u;
+        return (url + u).trim();
       }
     });
 
-    return normalizedUrls;
+    const unique = [...new Set(normalizedUrls)];
+
+    return unique.sort();
   }
 
   private crawler(

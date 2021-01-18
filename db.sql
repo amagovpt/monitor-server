@@ -167,6 +167,8 @@ CREATE TABLE `Website` (
   `EntityId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `Name` varchar(255) NOT NULL,
+  `Declaration` int(3),
+  `Stamp` int(3),
   `Creation_Date` datetime NOT NULL,
   `Deleted` tinyint(1) NOT NULL DEFAULT '0',
   `Deleted_Date` datetime DEFAULT NULL,

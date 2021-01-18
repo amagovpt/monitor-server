@@ -1,6 +1,6 @@
-import { Connection, Repository } from 'typeorm';
-import { Website } from '../website/website.entity';
-import { Page } from './page.entity';
+import { Connection, Repository } from "typeorm";
+import { Website } from "../website/website.entity";
+import { Page } from "./page.entity";
 export declare class PageService {
     private readonly websiteRepository;
     private readonly pageRepository;

@@ -40,7 +40,7 @@ let WebsiteService = class WebsiteService {
       WHERE
         dp.DomainId = ? AND
         p.PageId = dp.PageId AND
-        p.Show_In LIKE ?`, [domainId, option === 'all' ? '1__' : '1_1']);
+        p.Show_In LIKE ?`, [domainId, option === "all" ? "1__" : "1_1"]);
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -48,10 +48,9 @@ let WebsiteService = class WebsiteService {
         try {
             for (const page of pages || []) {
                 try {
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, "10", new Date()]);
                 }
-                catch (_) {
-                }
+                catch (_) { }
             }
             await queryRunner.commitTransaction();
         }
@@ -101,8 +100,8 @@ let WebsiteService = class WebsiteService {
         }
     }
     async findUserType(username) {
-        if (username === 'admin') {
-            return 'nimda';
+        if (username === "admin") {
+            return "nimda";
         }
         const user = await typeorm_2.getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
         if (user) {
@@ -114,7 +113,7 @@ let WebsiteService = class WebsiteService {
     }
     async findAllDomains(user, type, website, flags) {
         const manager = typeorm_2.getManager();
-        if (type === 'nimda') {
+        if (type === "nimda") {
             const domains = await manager.query(`SELECT
           d.*,
           COUNT(distinct p.PageId) as Pages,
@@ -184,7 +183,9 @@ let WebsiteService = class WebsiteService {
         return websites;
     }
     async findByOfficialName(name) {
-        return this.websiteRepository.findOne({ where: { Name: name, UserId: typeorm_2.IsNull(), Deleted: 0 } });
+        return this.websiteRepository.findOne({
+            where: { Name: name, UserId: typeorm_2.IsNull(), Deleted: 0 },
+        });
     }
     async findAllWithoutUser() {
         const manager = typeorm_2.getManager();
@@ -273,8 +274,8 @@ let WebsiteService = class WebsiteService {
           ORDER BY Evaluation_Date DESC LIMIT 1
         `, [page.PageId]);
                 if (evaluation.length > 0) {
-                    await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [page.Show_In[0] + '1' + page.Show_In[2], page.PageId]);
-                    await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [evaluation[0].Show_To[0] + '1', evaluation[0].EvaluationId]);
+                    await queryRunner.manager.query(`UPDATE Page SET Show_In = ? WHERE PageId = ?`, [page.Show_In[0] + "1" + page.Show_In[2], page.PageId]);
+                    await queryRunner.manager.query(`UPDATE Evaluation SET Show_To = ? WHERE EvaluationId = ?`, [evaluation[0].Show_To[0] + "1", evaluation[0].EvaluationId]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -290,7 +291,9 @@ let WebsiteService = class WebsiteService {
         return !error;
     }
     async reEvaluateMyMonitorWebsite(userId, websiteName) {
-        const website = await this.websiteRepository.findOne({ where: { UserId: userId, Name: websiteName } });
+        const website = await this.websiteRepository.findOne({
+            where: { UserId: userId, Name: websiteName },
+        });
         if (!website) {
             throw new common_1.InternalServerErrorException();
         }
@@ -316,10 +319,9 @@ let WebsiteService = class WebsiteService {
         try {
             for (const page of pages || []) {
                 try {
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '01', new Date()]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, "01", new Date()]);
                 }
-                catch (_) {
-                }
+                catch (_) { }
             }
             await queryRunner.commitTransaction();
         }
@@ -365,10 +367,9 @@ let WebsiteService = class WebsiteService {
         try {
             for (const page of pages || []) {
                 try {
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', new Date(), userId]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, "00", new Date(), userId]);
                 }
-                catch (_) {
-                }
+                catch (_) { }
             }
             await queryRunner.commitTransaction();
         }
@@ -383,7 +384,9 @@ let WebsiteService = class WebsiteService {
         return !error;
     }
     async findAllFromStudyMonitorUserTag(userId, tagName) {
-        const tag = await this.tagRepository.findOne({ where: { UserId: userId, Name: tagName } });
+        const tag = await this.tagRepository.findOne({
+            where: { UserId: userId, Name: tagName },
+        });
         if (tag) {
             return await this.websiteRepository.query(`SELECT 
           w.WebsiteId,
@@ -461,7 +464,17 @@ let WebsiteService = class WebsiteService {
             w2.WebsiteId = tw2.WebsiteId AND
             w2.UserId = ? AND
             d2.WebsiteId = w2.WebsiteId
-        )`, [tagName.toLowerCase(), userId, userId, tagName.toLowerCase(), userId, userId, tagName.toLowerCase(), userId, userId]);
+        )`, [
+            tagName.toLowerCase(),
+            userId,
+            userId,
+            tagName.toLowerCase(),
+            userId,
+            userId,
+            tagName.toLowerCase(),
+            userId,
+            userId,
+        ]);
         return websites;
     }
     async findStudyMonitorUserTagWebsiteByName(userId, tag, websiteName) {
@@ -539,15 +552,17 @@ let WebsiteService = class WebsiteService {
             newDomain.Active = 1;
             const insertDomain = await queryRunner.manager.save(newDomain);
             for (const url of pages || []) {
-                const page = await queryRunner.manager.findOne(page_entity_1.Page, { where: { Uri: url } });
+                const page = await queryRunner.manager.findOne(page_entity_1.Page, {
+                    where: { Uri: url },
+                });
                 if (page) {
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, '00', page.Creation_Date, userId]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`, [page.PageId, userId, page.Uri, "00", page.Creation_Date, userId]);
                 }
                 else {
                     const newPage = new page_entity_1.Page();
                     newPage.Uri = url;
-                    newPage.Show_In = '000';
+                    newPage.Show_In = "000";
                     newPage.Creation_Date = newWebsite.Creation_Date;
                     const insertPage = await queryRunner.manager.save(newPage);
                     await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, insertPage.PageId]);
@@ -570,7 +585,13 @@ let WebsiteService = class WebsiteService {
                     if (existingDomain.length > 0) {
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [existingDomain[0].DomainId, newPage.PageId]);
                     }
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [insertPage.PageId, userId, insertPage.Uri, '00', insertPage.Creation_Date]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [
+                        insertPage.PageId,
+                        userId,
+                        insertPage.Uri,
+                        "00",
+                        insertPage.Creation_Date,
+                    ]);
                 }
             }
             await queryRunner.commitTransaction();
@@ -636,7 +657,9 @@ let WebsiteService = class WebsiteService {
       WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`))[0].Websites;
     }
     async findCurrentDomain(websiteId) {
-        const domain = await this.domainRepository.findOne({ where: { WebsiteId: websiteId } });
+        const domain = await this.domainRepository.findOne({
+            where: { WebsiteId: websiteId },
+        });
         if (domain) {
             return domain.Url;
         }
@@ -645,7 +668,7 @@ let WebsiteService = class WebsiteService {
         }
     }
     async createOne(website, domain, tags) {
-        if (domain.endsWith('/')) {
+        if (domain.endsWith("/")) {
             domain = domain.substring(0, domain.length - 1);
         }
         const queryRunner = this.connection.createQueryRunner();
@@ -670,10 +693,10 @@ let WebsiteService = class WebsiteService {
                 websiteId = websites[0].WebsiteId;
                 const values = { Name: website.Name, Deleted: 0 };
                 if (website.EntityId !== null) {
-                    values['EntityId'] = website.EntityId;
+                    values["EntityId"] = website.EntityId;
                 }
                 if (website.UserId !== null) {
-                    values['UserId'] = website.UserId;
+                    values["UserId"] = website.UserId;
                 }
                 await queryRunner.manager.update(website_entity_1.Website, { WebsiteId: websiteId }, values);
                 if (websites[0].Active === 0) {
@@ -706,13 +729,19 @@ let WebsiteService = class WebsiteService {
         }
         return !hasError;
     }
-    async update(websiteId, name, entityId, userId, oldUserId, transfer, defaultTags, tags) {
+    async update(websiteId, name, declaration, stamp, entityId, userId, oldUserId, transfer, defaultTags, tags) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            await queryRunner.manager.update(website_entity_1.Website, { WebsiteId: websiteId }, { Name: name, EntityId: entityId, UserId: userId });
+            await queryRunner.manager.update(website_entity_1.Website, { WebsiteId: websiteId }, {
+                Name: name,
+                EntityId: entityId,
+                UserId: userId,
+                Declaration: declaration,
+                Stamp: stamp,
+            });
             if (oldUserId === null && userId !== null) {
                 if (transfer) {
                     await queryRunner.manager.query(`
@@ -732,7 +761,8 @@ let WebsiteService = class WebsiteService {
               e.PageId = p.PageId`, [websiteId]);
                 }
             }
-            else if ((oldUserId !== null && userId !== null && oldUserId !== userId) || oldUserId !== null && userId === null) {
+            else if ((oldUserId !== null && userId !== null && oldUserId !== userId) ||
+                (oldUserId !== null && userId === null)) {
                 if (!transfer || (oldUserId && !userId)) {
                     await queryRunner.manager.query(`
             UPDATE
@@ -812,10 +842,10 @@ let WebsiteService = class WebsiteService {
             for (const page of pages || []) {
                 let show = null;
                 if (!pagesId.includes(page.PageId)) {
-                    show = page.Show_In[0] + page.Show_In[2] + '0';
+                    show = page.Show_In[0] + page.Show_In[2] + "0";
                 }
                 else {
-                    show = page.Show_In[0] + page.Show_In[2] + '1';
+                    show = page.Show_In[0] + page.Show_In[2] + "1";
                 }
                 await queryRunner.manager.update(page_entity_1.Page, { PageId: page.PageId }, { Show_In: show });
             }
@@ -880,8 +910,12 @@ let WebsiteService = class WebsiteService {
           w.WebsiteId = ? AND
           d.WebsiteId = w.WebsiteId AND 
           d.Active = "1"`, [websiteId]);
-            const domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-            const webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const domDate = webDomain[0].Start_Date.toISOString()
+                .replace(/T/, " ")
+                .replace(/\..+/, "");
+            const webDate = webDomain[0].Creation_Date.toISOString()
+                .replace(/T/, " ")
+                .replace(/\..+/, "");
             const pages = await queryRunner.manager.query(`SELECT p.*
         FROM 
           Page as p, 
@@ -908,7 +942,7 @@ let WebsiteService = class WebsiteService {
             if (webDomain.length > 0) {
                 if (domainP) {
                     for (const page of pages || []) {
-                        if (page.Show_In[0] === '0') {
+                        if (page.Show_In[0] === "0") {
                             await this.importPage(queryRunner, page.PageId);
                             try {
                                 await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainP.DomainId, page.PageId]);
@@ -929,7 +963,7 @@ let WebsiteService = class WebsiteService {
                     returnWebsiteId = insertWebsite.WebsiteId;
                     const domain = await queryRunner.manager.query(`INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`, [insertWebsite.websiteId, domainUrl, domDate]);
                     for (const page of pages || []) {
-                        if (page.Show_In[0] === '0') {
+                        if (page.Show_In[0] === "0") {
                             await this.importPage(queryRunner, page.PageId);
                             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`, [domain.DomainId, page.PageId]);
                         }

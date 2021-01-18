@@ -1,4 +1,4 @@
-import { WebsiteService } from './website.service';
+import { WebsiteService } from "./website.service";
 export declare class WebsiteController {
     private readonly websiteService;
     constructor(websiteService: WebsiteService);

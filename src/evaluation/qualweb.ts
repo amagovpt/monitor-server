@@ -17,7 +17,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R18",
         "QW-ACT-R19",
         "QW-ACT-R37",
-        "QW-ACT-R47",
+        "QW-ACT-R68",
       ],
     },
     "wcag-techniques": {

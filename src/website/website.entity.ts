@@ -1,48 +1,65 @@
-import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany } from 'typeorm';
-import { Tag } from '../tag/tag.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinTable,
+  ManyToMany,
+} from "typeorm";
+import { Tag } from "../tag/tag.entity";
 
-@Entity('Website')
+@Entity("Website")
 export class Website {
-
   @PrimaryGeneratedColumn({
-    type: 'int'
+    type: "int",
   })
   WebsiteId: number;
 
   @Column({
-    type: 'int',
-    nullable: true
+    type: "int",
+    nullable: true,
   })
   EntityId: number;
 
   @Column({
-    type: 'int',
-    nullable: true
+    type: "int",
+    nullable: true,
   })
   UserId: number;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
-    nullable: false
+    nullable: false,
   })
   Name: string;
 
   @Column({
-    type: 'datetime',
-    nullable: false
+    type: "int",
+    nullable: true,
+  })
+  Declaration: number;
+
+  @Column({
+    type: "int",
+    nullable: true,
+  })
+  Stamp: number;
+
+  @Column({
+    type: "datetime",
+    nullable: false,
   })
   Creation_Date: any;
 
   @Column({
-    type: 'tinyint',
+    type: "tinyint",
     width: 1,
     nullable: false,
-    default: 0
+    default: 0,
   })
   Deleted: number;
 
-  @ManyToMany(type => Tag)
+  @ManyToMany((type) => Tag)
   @JoinTable()
   Tags: Tag[];
 }
