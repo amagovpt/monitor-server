@@ -18,7 +18,6 @@ async function evaluate(params) {
                 "QW-ACT-R17",
                 "QW-ACT-R18",
                 "QW-ACT-R19",
-                "QW-ACT-R37",
                 "QW-ACT-R68",
             ],
         },

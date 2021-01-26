@@ -16,7 +16,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R17",
         "QW-ACT-R18",
         "QW-ACT-R19",
-        "QW-ACT-R37",
+        //"QW-ACT-R37",
         "QW-ACT-R68",
       ],
     },
@@ -49,42 +49,6 @@ export async function evaluate(params: any): Promise<any> {
         "QW-WCAG-T31",
       ],
     },
-    /*'html-techniques': {
-      techniques: [
-        'QW-HTML-T1',
-        'QW-HTML-T2',
-        'QW-HTML-T3',
-        'QW-HTML-T6',
-        'QW-HTML-T7',
-        'QW-HTML-T8',
-        'QW-HTML-T9',
-        'QW-HTML-T17',
-        'QW-HTML-T19',
-        'QW-HTML-T20',
-        'QW-HTML-T25',
-        'QW-HTML-T28',
-        'QW-HTML-T29',
-        'QW-HTML-T30',
-        'QW-HTML-T32',
-        'QW-HTML-T34',
-        'QW-HTML-T35',
-        'QW-HTML-T37',
-        'QW-HTML-T38',
-        'QW-HTML-T40',
-        'QW-HTML-T41',
-        'QW-HTML-T42',
-        'QW-HTML-T43',
-      ]
-    },
-    'css-techniques': {
-      techniques: [
-        'QW-CSS-T1',
-        'QW-CSS-T2',
-        'QW-CSS-T5',
-        'QW-CSS-T6',
-        'QW-CSS-T7'
-      ]
-    },*/
     "best-practices": {
       bestPractices: [
         "QW-BP1",

@@ -35,11 +35,6 @@ function completeMissingReportElements(report: any): void {
   const inpImg = CSSselect.selectAll("a", _dom);
   report.data.elems["inpImg"] = inpImg.length;
 
-  /*if (report.data.elems['hx'] === undefined) {
-    const hx = CSSselect('h1, h2, h3, h4, h5, h6, [role="heading"]', _dom);
-    report.data.elems['hx'] = hx.length;
-  }*/
-
   const roles = [
     "checkbox",
     "combobox",
@@ -99,12 +94,6 @@ function generateScore(report: any): string {
     if (value.result === "warning") {
       continue;
     }
-
-    /*if (report.data.elems.frame) {
-      if (test in ['a_01b', 'a_02a', 'hx_01a', 'layout_01a', 'layout_02a']) {
-        continue;
-      }
-    }*/
 
     let calc = false;
     switch (value["type"]) {
@@ -207,11 +196,6 @@ function calculateProp(v: any, report: any): any {
   }
   return clone(ret);
 }
-
-/*function calculateCssRules(evaluation: any): number {
-  const cssReport = evaluation.modules['css-techniques'];
-  return Object.keys(cssReport.assertions).length;
-}*/
 
 function getHtmlLang(html: string): string {
   let lang = "";

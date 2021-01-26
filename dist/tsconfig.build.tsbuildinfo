@@ -2567,8 +2567,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/schedule/dist/scheduler.registry.d.ts": {
-        "version": "f3e7032600be820836b4ed393f8cb82fa9024e128bbf86816d3903dc2a28f93c",
-        "signature": "f3e7032600be820836b4ed393f8cb82fa9024e128bbf86816d3903dc2a28f93c",
+        "version": "ed69e37e2a05603674c6305dc7f56445f4ee822f84dcba5f35e6badb37d323b0",
+        "signature": "ed69e37e2a05603674c6305dc7f56445f4ee822f84dcba5f35e6badb37d323b0",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/schedule/dist/index.d.ts": {
@@ -2862,13 +2862,13 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/domain.d.ts": {
-        "version": "cde4d7f6274468180fa39847b183aec22626e8212ff885d535c53f4cd7c225fd",
-        "signature": "cde4d7f6274468180fa39847b183aec22626e8212ff885d535c53f4cd7c225fd",
+        "version": "2866a528b2708aa272ec3eaafd3c980abb23aec1ef831cfc5eb2186b98c37ce5",
+        "signature": "2866a528b2708aa272ec3eaafd3c980abb23aec1ef831cfc5eb2186b98c37ce5",
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/events.d.ts": {
-        "version": "365e8358843a23944be84b810b1f774ea0223adfccc085f30fd7f4c13dc8a09f",
-        "signature": "365e8358843a23944be84b810b1f774ea0223adfccc085f30fd7f4c13dc8a09f",
+        "version": "153d835dc32985120790e10102834b0a5bd979bb5e42bfbb33c0ff6260cf03ce",
+        "signature": "153d835dc32985120790e10102834b0a5bd979bb5e42bfbb33c0ff6260cf03ce",
         "affectsGlobalScope": true
       },
       "../node_modules/@types/node/fs.d.ts": {
@@ -2952,8 +2952,8 @@
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/stream.d.ts": {
-        "version": "272a46cc8f494677af587d17939e61e7db2b1925633e4da0c186ba17f6732521",
-        "signature": "272a46cc8f494677af587d17939e61e7db2b1925633e4da0c186ba17f6732521",
+        "version": "e7b5a3f40f19d9eea71890c70dfb37ac5dd82cbffe5f95bc8f23c536455732d0",
+        "signature": "e7b5a3f40f19d9eea71890c70dfb37ac5dd82cbffe5f95bc8f23c536455732d0",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/string_decoder.d.ts": {
@@ -3576,16 +3576,6 @@
         "signature": "5afa4c0fd7cb48d60ec582d7503442bfb44cfe0830f04856f9f4cc5d53811c38",
         "affectsGlobalScope": false
       },
-      "../node_modules/@qualweb/act-rules/dist/index.d.ts": {
-        "version": "7786737dfb215596ee052e8630f98e86d52bdf38a969f23f6eebdf30c7262c2d",
-        "signature": "7786737dfb215596ee052e8630f98e86d52bdf38a969f23f6eebdf30c7262c2d",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@qualweb/wcag-techniques/dist/index.d.ts": {
-        "version": "51121a3078f1edae2a8a9eeabd82bb7cc6aa2c3cc587133416e180826423a17d",
-        "signature": "51121a3078f1edae2a8a9eeabd82bb7cc6aa2c3cc587133416e180826423a17d",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@qualweb/best-practices/dist/index.d.ts": {
         "version": "f966921760b4f3d99723ca972625e3c79e51377ae82facef4ad3fddb4ebe2382",
         "signature": "f966921760b4f3d99723ca972625e3c79e51377ae82facef4ad3fddb4ebe2382",
@@ -3662,17 +3652,17 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/qualweb.ts": {
-        "version": "9964086148e66db4d46884cc20c1e8a713d9ba5de02c8adfc194dc052b335a3c",
+        "version": "0420b6c462bf9294b3a74e116126ede2f891f08b5d24869a687787fa4554d7cc",
         "signature": "ed5a05aeed5ecad7d44d225c3fbd33c0b6799e6a521c459a6a37826b65fcc9a2",
         "affectsGlobalScope": false
       },
       "../src/evaluation/tests.ts": {
-        "version": "274a66581bf29c7fd234374603e9c2aaca1afabcfb12f85a622854f8c286e12b",
+        "version": "855313568e2190cc3edc7f7b32ea6d342af2274ebaaf50093fae364782d0e4f7",
         "signature": "8026fb32f6232733cf9b798fcec19ea3cd5abcd1a62a4f4dfa1e6076ca740bed",
         "affectsGlobalScope": false
       },
       "../src/evaluation/testsColors.ts": {
-        "version": "5ecc5a3f774bbfe00268193f5c1aaee4b82ba745b80d77364b8baf50ff787277",
+        "version": "0ebf268c0ca884aa00be6e3713318ccc70ef8fb5c04910794684e39cc7a36423",
         "signature": "180f43538aaa000558461fd8438c937a91a98ea0ac5be41d3cc0ff6ccc51ce4e",
         "affectsGlobalScope": false
       },
@@ -3682,12 +3672,12 @@
         "affectsGlobalScope": false
       },
       "../src/evaluation/middleware.ts": {
-        "version": "ceaa9f13c246059e86e96fdf763da95c9ca5f916ee097e9ef209a3514e55fe60",
+        "version": "30cb224c9f4e028217c154da7689e7b1ae591624d44877642be041e13bd10496",
         "signature": "711d7a64f99019a5ef66ffd25ab4ef09896f2fa1293884cf1936dd295001a199",
         "affectsGlobalScope": false
       },
       "../src/evaluation/evaluation.service.ts": {
-        "version": "6a34adc14caeef3773871faab974f1a9aac345f91863fa5b5c39d1be17d7881c",
+        "version": "f48bb98e4705c1a7648a4b568e37584bce5ef20cbbca4294e6cda1a2e0bf2f76",
         "signature": "647ab4d98f31c02e8cfb11aebbdffc34f492ec100163cb1a25184e46bd48ada0",
         "affectsGlobalScope": false
       },
@@ -3977,63 +3967,68 @@
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/content-security-policy/index.d.ts": {
-        "version": "abb158da4fc693e6025a31e14bf141ecd1ff7c65e9fa83afaa33d60a3b6a54be",
-        "signature": "abb158da4fc693e6025a31e14bf141ecd1ff7c65e9fa83afaa33d60a3b6a54be",
+        "version": "2c84b2652f6de696843f8af0f2fd90df891c689ce8451e364ad522a1993d0d54",
+        "signature": "2c84b2652f6de696843f8af0f2fd90df891c689ce8451e364ad522a1993d0d54",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts": {
-        "version": "33666bd8eb4412994c97e4967a4415bedb4a814dd1276326077d98dba3bddff9",
-        "signature": "33666bd8eb4412994c97e4967a4415bedb4a814dd1276326077d98dba3bddff9",
+        "version": "f7681e9f78636bfbbaa5264c6ceec2a150629088daf5e0aed21f52256cb6302a",
+        "signature": "f7681e9f78636bfbbaa5264c6ceec2a150629088daf5e0aed21f52256cb6302a",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts": {
+        "version": "e8ea348603f8a57adf6f9fc058affbaddbb00978560e19c43fc9a386b92c8660",
+        "signature": "e8ea348603f8a57adf6f9fc058affbaddbb00978560e19c43fc9a386b92c8660",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts": {
-        "version": "68272f9c3f2e5c9b0cb8706bdef17bb458621ccff581c2386fa0c25601b1b1d2",
-        "signature": "68272f9c3f2e5c9b0cb8706bdef17bb458621ccff581c2386fa0c25601b1b1d2",
+        "version": "e2740d0840d62ade3f4b5a0e869bc8933c20883550f045151e8af21337db2950",
+        "signature": "e2740d0840d62ade3f4b5a0e869bc8933c20883550f045151e8af21337db2950",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/strict-transport-security/index.d.ts": {
-        "version": "d9451dbbe7a2bb173b3a2fd0e8fdfd4010c876146f60508cd570f5e91074b3d4",
-        "signature": "d9451dbbe7a2bb173b3a2fd0e8fdfd4010c876146f60508cd570f5e91074b3d4",
+        "version": "36f6aaf6d5b9448ecd1cf5266d2b4e11060d44904fa5b9d7d5234015ae480a3a",
+        "signature": "36f6aaf6d5b9448ecd1cf5266d2b4e11060d44904fa5b9d7d5234015ae480a3a",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-content-type-options/index.d.ts": {
-        "version": "c5363f57b49248f01ae435f10da41106dfdf02f232878ac36b45a5c22e734443",
-        "signature": "c5363f57b49248f01ae435f10da41106dfdf02f232878ac36b45a5c22e734443",
+        "version": "2d9a696fca926efe8fc9910690ebc46f04df1ebc890571af766dc7d60263b694",
+        "signature": "2d9a696fca926efe8fc9910690ebc46f04df1ebc890571af766dc7d60263b694",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-dns-prefetch-control/index.d.ts": {
-        "version": "51518ff599de52e83c256d735b7c05f104d7caf5f4f843bd6405d2db750fab38",
-        "signature": "51518ff599de52e83c256d735b7c05f104d7caf5f4f843bd6405d2db750fab38",
+        "version": "16e3d860aa42128df85e6018bcbaa7ec5aa2cc07f079c930ee0ca275b866f3f6",
+        "signature": "16e3d860aa42128df85e6018bcbaa7ec5aa2cc07f079c930ee0ca275b866f3f6",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-download-options/index.d.ts": {
-        "version": "f0ad119bef5328988fe4b94f192ab1d4ad7c459a84e4b491a8f2ddb600663e61",
-        "signature": "f0ad119bef5328988fe4b94f192ab1d4ad7c459a84e4b491a8f2ddb600663e61",
+        "version": "657f7b3f9c16827761c790b2106d7f757cdcb6004c562ac3435115d21490cffe",
+        "signature": "657f7b3f9c16827761c790b2106d7f757cdcb6004c562ac3435115d21490cffe",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-frame-options/index.d.ts": {
-        "version": "115229bbb625e66890bc14400c6a2b14edef8763a5031ad6991d0dbd30b8b5e5",
-        "signature": "115229bbb625e66890bc14400c6a2b14edef8763a5031ad6991d0dbd30b8b5e5",
+        "version": "83e37abb670cb3ea53dc7e935a4755781d6c1d6ffc1db993cc772dd8f5276d45",
+        "signature": "83e37abb670cb3ea53dc7e935a4755781d6c1d6ffc1db993cc772dd8f5276d45",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-permitted-cross-domain-policies/index.d.ts": {
-        "version": "3e484b783ba4129523fedcd853ffe83f2edd599cfac74d361a27bffc79c67a7c",
-        "signature": "3e484b783ba4129523fedcd853ffe83f2edd599cfac74d361a27bffc79c67a7c",
+        "version": "9eb9505b59308131f7d20775c6bfa64e55e9b8a5645e7b44e67016eacdee3017",
+        "signature": "9eb9505b59308131f7d20775c6bfa64e55e9b8a5645e7b44e67016eacdee3017",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-powered-by/index.d.ts": {
-        "version": "b1df984bc4791f0e3c906a57f4a5ed11bf147e65b592bf763b73f97ad5c6c09d",
-        "signature": "b1df984bc4791f0e3c906a57f4a5ed11bf147e65b592bf763b73f97ad5c6c09d",
+        "version": "7c4342f96e73450836264d607350af8c898672e940c96fcba3cb2ac9a3dcea7b",
+        "signature": "7c4342f96e73450836264d607350af8c898672e940c96fcba3cb2ac9a3dcea7b",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/middlewares/x-xss-protection/index.d.ts": {
-        "version": "af06994dbdf1a9e6c06bcca9aac313a88584880617d96d80a2d7b708c338dbb0",
-        "signature": "af06994dbdf1a9e6c06bcca9aac313a88584880617d96d80a2d7b708c338dbb0",
+        "version": "67de9e69a3b45a06f39da8b7e09873686aa759fe65f184bb79e5cbb4460390a4",
+        "signature": "67de9e69a3b45a06f39da8b7e09873686aa759fe65f184bb79e5cbb4460390a4",
         "affectsGlobalScope": false
       },
       "../node_modules/helmet/dist/index.d.ts": {
-        "version": "4359ebb51e20e2f4c26cd39978c1055a7e5cff0e30f16f2e1e671285f419e21f",
-        "signature": "4359ebb51e20e2f4c26cd39978c1055a7e5cff0e30f16f2e1e671285f419e21f",
+        "version": "8d5af6172de9f560d164da95ec7dd7238647230d43577aa6b487fc579e0debd7",
+        "signature": "8d5af6172de9f560d164da95ec7dd7238647230d43577aa6b487fc579e0debd7",
         "affectsGlobalScope": false
       },
       "../src/main.ts": {
@@ -4912,11 +4907,6 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts": [
         "../node_modules/rxjs/index.d.ts"
       ],
-      "../node_modules/@qualweb/act-rules/dist/index.d.ts": [
-        "../node_modules/@qualweb/types/act-rules.d.ts",
-        "../node_modules/@qualweb/types/index.d.ts",
-        "../node_modules/@qualweb/types/qwPage.d.ts"
-      ],
       "../node_modules/@qualweb/best-practices/dist/index.d.ts": [
         "../node_modules/@qualweb/types/best-practices.d.ts",
         "../node_modules/@qualweb/types/index.d.ts",
@@ -5005,11 +4995,6 @@
       ],
       "../node_modules/@qualweb/types/wcag-techniques.d.ts": [
         "../node_modules/@qualweb/types/qwPage.d.ts"
-      ],
-      "../node_modules/@qualweb/wcag-techniques/dist/index.d.ts": [
-        "../node_modules/@qualweb/types/index.d.ts",
-        "../node_modules/@qualweb/types/qwPage.d.ts",
-        "../node_modules/@qualweb/types/wcag-techniques.d.ts"
       ],
       "../node_modules/@types/body-parser/index.d.ts": [
         "../node_modules/@types/connect/index.d.ts",
@@ -5264,6 +5249,9 @@
       "../node_modules/@types/node/domain.d.ts": [
         "../node_modules/@types/node/events.d.ts"
       ],
+      "../node_modules/@types/node/events.d.ts": [
+        "../node_modules/@types/node/events.d.ts"
+      ],
       "../node_modules/@types/node/fs.d.ts": [
         "../node_modules/@types/node/events.d.ts",
         "../node_modules/@types/node/fs/promises.d.ts",
@@ -5507,6 +5495,7 @@
         "../node_modules/@types/node/index.d.ts",
         "../node_modules/helmet/dist/middlewares/content-security-policy/index.d.ts",
         "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts",
+        "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts",
         "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts",
         "../node_modules/helmet/dist/middlewares/strict-transport-security/index.d.ts",
         "../node_modules/helmet/dist/middlewares/x-content-type-options/index.d.ts",
@@ -5522,6 +5511,9 @@
         "../node_modules/@types/node/index.d.ts"
       ],
       "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts": [
+        "../node_modules/@types/node/http.d.ts"
+      ],
+      "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts": [
         "../node_modules/@types/node/http.d.ts"
       ],
       "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts": [
@@ -8205,11 +8197,6 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts": [
         "../node_modules/rxjs/index.d.ts"
       ],
-      "../node_modules/@qualweb/act-rules/dist/index.d.ts": [
-        "../node_modules/@qualweb/types/act-rules.d.ts",
-        "../node_modules/@qualweb/types/index.d.ts",
-        "../node_modules/@qualweb/types/qwPage.d.ts"
-      ],
       "../node_modules/@qualweb/best-practices/dist/index.d.ts": [
         "../node_modules/@qualweb/types/best-practices.d.ts",
         "../node_modules/@qualweb/types/index.d.ts",
@@ -8298,11 +8285,6 @@
       ],
       "../node_modules/@qualweb/types/wcag-techniques.d.ts": [
         "../node_modules/@qualweb/types/qwPage.d.ts"
-      ],
-      "../node_modules/@qualweb/wcag-techniques/dist/index.d.ts": [
-        "../node_modules/@qualweb/types/index.d.ts",
-        "../node_modules/@qualweb/types/qwPage.d.ts",
-        "../node_modules/@qualweb/types/wcag-techniques.d.ts"
       ],
       "../node_modules/@types/body-parser/index.d.ts": [
         "../node_modules/@types/connect/index.d.ts",
@@ -8557,6 +8539,9 @@
       "../node_modules/@types/node/domain.d.ts": [
         "../node_modules/@types/node/events.d.ts"
       ],
+      "../node_modules/@types/node/events.d.ts": [
+        "../node_modules/@types/node/events.d.ts"
+      ],
       "../node_modules/@types/node/fs.d.ts": [
         "../node_modules/@types/node/events.d.ts",
         "../node_modules/@types/node/fs/promises.d.ts",
@@ -8800,6 +8785,7 @@
         "../node_modules/@types/node/index.d.ts",
         "../node_modules/helmet/dist/middlewares/content-security-policy/index.d.ts",
         "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts",
+        "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts",
         "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts",
         "../node_modules/helmet/dist/middlewares/strict-transport-security/index.d.ts",
         "../node_modules/helmet/dist/middlewares/x-content-type-options/index.d.ts",
@@ -8815,6 +8801,9 @@
         "../node_modules/@types/node/index.d.ts"
       ],
       "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts": [
+        "../node_modules/@types/node/http.d.ts"
+      ],
+      "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts": [
         "../node_modules/@types/node/http.d.ts"
       ],
       "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts": [
@@ -10618,7 +10607,6 @@
       "../node_modules/@nestjs/websockets/interfaces/socket-events-host.interface.d.ts",
       "../node_modules/@nestjs/websockets/interfaces/web-socket-server.interface.d.ts",
       "../node_modules/@nestjs/websockets/interfaces/ws-response.interface.d.ts",
-      "../node_modules/@qualweb/act-rules/dist/index.d.ts",
       "../node_modules/@qualweb/best-practices/dist/index.d.ts",
       "../node_modules/@qualweb/core/dist/index.d.ts",
       "../node_modules/@qualweb/earl-reporter/dist/index.d.ts",
@@ -10639,7 +10627,6 @@
       "../node_modules/@qualweb/types/util.d.ts",
       "../node_modules/@qualweb/types/wappalyzer.d.ts",
       "../node_modules/@qualweb/types/wcag-techniques.d.ts",
-      "../node_modules/@qualweb/wcag-techniques/dist/index.d.ts",
       "../node_modules/@types/body-parser/index.d.ts",
       "../node_modules/@types/connect/index.d.ts",
       "../node_modules/@types/css/index.d.ts",
@@ -10745,6 +10732,7 @@
       "../node_modules/helmet/dist/index.d.ts",
       "../node_modules/helmet/dist/middlewares/content-security-policy/index.d.ts",
       "../node_modules/helmet/dist/middlewares/expect-ct/index.d.ts",
+      "../node_modules/helmet/dist/middlewares/origin-agent-cluster/index.d.ts",
       "../node_modules/helmet/dist/middlewares/referrer-policy/index.d.ts",
       "../node_modules/helmet/dist/middlewares/strict-transport-security/index.d.ts",
       "../node_modules/helmet/dist/middlewares/x-content-type-options/index.d.ts",
