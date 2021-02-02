@@ -40,6 +40,21 @@ let EvaluationService = class EvaluationService {
             this.isEvaluatingAdminInstance = false;
         }
     }
+    async instanceEvaluateUserPageList() {
+        if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingUserInstance) {
+            this.isEvaluatingUserInstance = true;
+            let pages = [];
+            if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+                pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`);
+            }
+            else {
+                const skip = parseInt(process.env.ID) * 10;
+                pages = await typeorm_1.getManager().query(`SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`);
+            }
+            await this.evaluateInBackground(pages);
+            this.isEvaluatingUserInstance = false;
+        }
+    }
     async evaluateInBackground(pages) {
         if (pages.length > 0) {
             try {
@@ -67,7 +82,8 @@ let EvaluationService = class EvaluationService {
                         await queryRunner.manager.query(`DELETE FROM Evaluation_List WHERE EvaluationListId = ?`, [pte.EvaluationListId]);
                     }
                     else {
-                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [error === null || error === void 0 ? void 0 : error.toString(), pte.EvaluationListId]);
+                        console.log(error);
+                        await queryRunner.manager.query(`UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`, [(error === null || error === void 0 ? void 0 : error.toString()) || error, pte.EvaluationListId]);
                     }
                     await queryRunner.commitTransaction();
                 }
@@ -491,6 +507,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], EvaluationService.prototype, "instanceEvaluateAdminPageList", null);
+__decorate([
+    schedule_1.Cron(schedule_1.CronExpression.EVERY_5_SECONDS),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EvaluationService.prototype, "instanceEvaluateUserPageList", null);
 EvaluationService = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [typeorm_1.Connection])

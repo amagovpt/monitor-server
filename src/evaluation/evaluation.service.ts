@@ -38,21 +38,30 @@ export class EvaluationService {
     }
   }
 
-  //@Cron(CronExpression.EVERY_5_SECONDS) // Called every minute - USERS EVALUATIONS
-  /*async instanceEvaluateUserPageList(): Promise<void> {
-    if (!this.isEvaluatingUserInstance) {
+  @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
+  async instanceEvaluateUserPageList(): Promise<void> {
+    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingUserInstance) {
       this.isEvaluatingUserInstance = true;
 
-      const pages = await getManager().query(
-        `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 1`
-      );
+      let pages = [];
+      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+        pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`
+        );
+      } else {
+        const skip = parseInt(process.env.ID) * 10;
+        pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`
+        );
+      }
+
       await this.evaluateInBackground(pages);
 
       this.isEvaluatingUserInstance = false;
     }
-  }*/
+  }
 
-  /*@Cron('0 0 * * 0') // Called every minute
+  /*@Cron('0 0 * * 0')
   async evaluateOldPages(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
 
@@ -120,7 +129,6 @@ export class EvaluationService {
         try {
           evaluation = clone(await this.evaluateUrl(pte.Url));
         } catch (e) {
-          //console.log(e);
           error = e.stack;
         }
 
@@ -145,9 +153,10 @@ export class EvaluationService {
               [pte.EvaluationListId]
             );
           } else {
+            console.log(error);
             await queryRunner.manager.query(
               `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-              [error?.toString(), pte.EvaluationListId]
+              [error?.toString() || error, pte.EvaluationListId]
             );
           }
 

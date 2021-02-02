@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = void 0;
 const core_1 = require("@qualweb/core");
-const invalid_url_error_1 = require("../lib/invalid-url.error");
 async function evaluate(params) {
     const options = {
         "act-rules": {
@@ -84,10 +83,22 @@ async function evaluate(params) {
     options["validator"] = "http://194.117.20.202/validate/";
     const qualweb = new core_1.QualWeb();
     await qualweb.start({ args: ["--no-sandbox"] });
-    const reports = await qualweb.evaluate(options);
-    await qualweb.stop();
+    let reports = null;
+    let error = null;
+    try {
+        reports = await timeExceeded(qualweb, options);
+    }
+    catch (err) {
+        error = err;
+    }
+    finally {
+        await qualweb.stop();
+    }
+    if (reports === null) {
+        throw new Error(error);
+    }
     if (Object.keys(reports).length === 0 && params.url) {
-        throw new invalid_url_error_1.InvalidUrl(params.url);
+        throw new Error("Invalid resource");
     }
     let report;
     if (params.url) {
@@ -99,4 +110,15 @@ async function evaluate(params) {
     return report;
 }
 exports.evaluate = evaluate;
+function timeExceeded(qualweb, options) {
+    return new Promise((resolve, reject) => {
+        const exceeded = setTimeout(() => {
+            reject("Time exceeded for evaluation");
+        }, 1000 * 60 * 2);
+        qualweb.evaluate(options).then((reports) => {
+            clearTimeout(exceeded);
+            resolve(reports);
+        });
+    });
+}
 //# sourceMappingURL=qualweb.js.map

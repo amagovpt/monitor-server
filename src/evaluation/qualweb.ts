@@ -1,5 +1,4 @@
 import { QualWeb, EvaluationReport } from "@qualweb/core";
-import { InvalidUrl } from "../lib/invalid-url.error";
 
 export async function evaluate(params: any): Promise<any> {
   const options = {
@@ -88,12 +87,23 @@ export async function evaluate(params: any): Promise<any> {
   const qualweb = new QualWeb();
   await qualweb.start({ args: ["--no-sandbox"] });
 
-  const reports = await qualweb.evaluate(options);
+  //const reports = await qualweb.evaluate(options);
+  let reports = null;
+  let error = null;
+  try {
+    reports = await timeExceeded(qualweb, options);
+  } catch (err) {
+    error = err;
+  } finally {
+    await qualweb.stop();
+  }
 
-  await qualweb.stop();
+  if (reports === null) {
+    throw new Error(error);
+  }
 
   if (Object.keys(reports).length === 0 && params.url) {
-    throw new InvalidUrl(params.url);
+    throw new Error("Invalid resource");
   }
 
   let report: EvaluationReport;
@@ -105,4 +115,17 @@ export async function evaluate(params: any): Promise<any> {
   }
 
   return report;
+}
+
+function timeExceeded(qualweb: QualWeb, options: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const exceeded = setTimeout(() => {
+      reject("Time exceeded for evaluation");
+    }, 1000 * 60 * 2);
+
+    qualweb.evaluate(options).then((reports) => {
+      clearTimeout(exceeded);
+      resolve(reports);
+    });
+  });
 }

@@ -259,11 +259,8 @@ function parseEvaluation(evaluation) {
     return report;
 }
 async function executeUrlEvaluation(url) {
-    try {
-        const evaluation = await qualweb.evaluate({ url });
-        return parseEvaluation(evaluation);
-    }
-    catch (err) { }
+    const evaluation = await qualweb.evaluate({ url });
+    return parseEvaluation(evaluation);
 }
 exports.executeUrlEvaluation = executeUrlEvaluation;
 async function executeHtmlEvaluation(html) {

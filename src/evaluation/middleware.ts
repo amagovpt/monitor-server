@@ -286,10 +286,8 @@ function parseEvaluation(evaluation: any): any {
 }
 
 export async function executeUrlEvaluation(url: string): Promise<any> {
-  try {
-    const evaluation = await qualweb.evaluate({ url });
-    return parseEvaluation(evaluation);
-  } catch (err) {}
+  const evaluation = await qualweb.evaluate({ url });
+  return parseEvaluation(evaluation);
 }
 
 export async function executeHtmlEvaluation(html: string): Promise<any> {

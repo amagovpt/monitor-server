@@ -6,6 +6,7 @@ export declare class EvaluationService {
     private isEvaluatingUserInstance;
     constructor(connection: Connection);
     instanceEvaluateAdminPageList(): Promise<void>;
+    instanceEvaluateUserPageList(): Promise<void>;
     private evaluateInBackground;
     evaluateUrl(url: string): Promise<any>;
     evaluateHtml(html: string): Promise<any>;
