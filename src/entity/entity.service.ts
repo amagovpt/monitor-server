@@ -1,12 +1,11 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
-import { EntityTable } from './entity.entity';
-import { Website } from '../website/website.entity';
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager } from "typeorm";
+import { EntityTable } from "./entity.entity";
+import { Website } from "../website/website.entity";
 
 @Injectable()
 export class EntityService {
-
   constructor(
     @InjectRepository(EntityTable)
     private readonly entityRepository: Repository<EntityTable>,
@@ -14,7 +13,8 @@ export class EntityService {
   ) {}
 
   async addPagesToEvaluate(entityId: number, option: string): Promise<boolean> {
-    const pages = await this.entityRepository.query(`
+    const pages = await this.entityRepository.query(
+      `
       SELECT
         p.PageId, 
         p.Uri
@@ -30,22 +30,25 @@ export class EntityService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
-    `, [entityId, option === 'all' ? '1__' : '1_1']);
+    `,
+      [entityId, option === "all" ? "1__" : "1_1"]
+    );
 
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
-    
+
     await queryRunner.startTransaction();
 
     let error = false;
     try {
       for (const page of pages || []) {
         try {
-          await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
-        } catch (_) {
-          
-        }
+          await queryRunner.manager.query(
+            `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
+            [page.PageId, -1, page.Uri, "10", new Date()]
+          );
+        } catch (_) {}
       }
 
       await queryRunner.commitTransaction();
@@ -72,10 +75,17 @@ export class EntityService {
   }
 
   async findInfo(entityId: number): Promise<any> {
-    const entity = await this.entityRepository.findOne({ where: { EntityId: entityId } });
+    const entity = await this.entityRepository.findOne({
+      where: { EntityId: entityId },
+    });
 
     if (entity) {
-      entity['websites'] = await this.entityRepository.query(`SELECT * FROM Website WHERE EntityId = ?`, [entityId]);
+      entity[
+        "websites"
+      ] = await this.entityRepository.query(
+        `SELECT * FROM Website WHERE EntityId = ?`,
+        [entityId]
+      );
       return entity;
     } else {
       throw new InternalServerErrorException();
@@ -93,9 +103,11 @@ export class EntityService {
   async findAllWebsites(entity: string): Promise<any> {
     const manager = getManager();
 
-    const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, COUNT(t.TagId) as Observatory 
+    const websites = await manager.query(
+      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, t.Show_in_Observatorio, COUNT(t.TagId) as Observatory 
       FROM 
         Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId AND t.Show_in_Observatorio = 1,
@@ -103,7 +115,9 @@ export class EntityService {
       WHERE
         e.EntityId = w.EntityId AND
         LOWER(e.Long_Name) = ?
-      GROUP BY w.WebsiteId`, [entity.toLowerCase()]);
+      GROUP BY w.WebsiteId`,
+      [entity.toLowerCase()]
+    );
 
     return websites;
   }
@@ -111,7 +125,8 @@ export class EntityService {
   async findAllWebsitePages(entity: string): Promise<any> {
     const manager = getManager();
 
-    const websites = await manager.query(`
+    const websites = await manager.query(
+      `
       SELECT 
         w.WebsiteId,
         p.*,
@@ -141,7 +156,9 @@ export class EntityService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE "1__"
-      GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`, [entity.toLowerCase()]);
+      GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+      [entity.toLowerCase()]
+    );
 
     return websites;
   }
@@ -157,7 +174,11 @@ export class EntityService {
       const insertEntity = await queryRunner.manager.save(entity);
 
       for (const websiteId of websites || []) {
-        await queryRunner.manager.update(Website, { WebsiteId: websiteId }, { EntityId: insertEntity.EntityId });
+        await queryRunner.manager.update(
+          Website,
+          { WebsiteId: websiteId },
+          { EntityId: insertEntity.EntityId }
+        );
       }
 
       await queryRunner.commitTransaction();
@@ -173,7 +194,13 @@ export class EntityService {
     return !hasError;
   }
 
-  async update(entityId: number, shortName: string, longName: string, websites: number[], defaultWebsites: number[]): Promise<any> {
+  async update(
+    entityId: number,
+    shortName: string,
+    longName: string,
+    websites: number[],
+    defaultWebsites: number[]
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -181,17 +208,27 @@ export class EntityService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(EntityTable, { EntityId: entityId }, { Short_Name: shortName, Long_Name: longName });
+      await queryRunner.manager.update(
+        EntityTable,
+        { EntityId: entityId },
+        { Short_Name: shortName, Long_Name: longName }
+      );
 
       for (const id of defaultWebsites || []) {
         if (!websites.includes(id)) {
-          await queryRunner.manager.query(`UPDATE Website SET EntityId = NULL WHERE WebsiteId = ?`, [id]);
+          await queryRunner.manager.query(
+            `UPDATE Website SET EntityId = NULL WHERE WebsiteId = ?`,
+            [id]
+          );
         }
       }
-  
+
       for (const id of websites || []) {
         if (!defaultWebsites.includes(id)) {
-          await queryRunner.manager.query(`UPDATE Website SET EntityId = ? WHERE WebsiteId = ?`, [entityId, id]);
+          await queryRunner.manager.query(
+            `UPDATE Website SET EntityId = ? WHERE WebsiteId = ?`,
+            [entityId, id]
+          );
         }
       }
 
@@ -216,9 +253,15 @@ export class EntityService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(Website, { EntityId: entityId }, { EntityId: null });
+      await queryRunner.manager.update(
+        Website,
+        { EntityId: entityId },
+        { EntityId: null }
+      );
 
-      await queryRunner.manager.delete(EntityTable, { where: { EntityId: entityId } });
+      await queryRunner.manager.delete(EntityTable, {
+        where: { EntityId: entityId },
+      });
 
       await queryRunner.commitTransaction();
     } catch (err) {

@@ -1,5 +1,5 @@
-import { Connection, Repository } from 'typeorm';
-import { Tag } from './tag.entity';
+import { Connection, Repository } from "typeorm";
+import { Tag } from "./tag.entity";
 export declare class TagService {
     private readonly tagRepository;
     private readonly connection;
@@ -19,6 +19,7 @@ export declare class TagService {
     findAllUserWebsitePages(tag: string, website: string, user: string): Promise<any>;
     findAllWebsitePages(tag: string): Promise<any>;
     createOne(tag: Tag, websites: number[]): Promise<boolean>;
+    createDirectory(tag: Tag, tags: number[], method: string): Promise<boolean>;
     createUserTag(tag: Tag, type: string, tagsId: number[]): Promise<any>;
     update(tagId: number, name: string, observatory: number, defaultWebsites: number[], websites: number[]): Promise<any>;
     delete(tagId: number): Promise<any>;

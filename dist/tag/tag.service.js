@@ -43,7 +43,7 @@ let TagService = class TagService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
-    `, [tagId, option === 'all' ? '1__' : '1_1']);
+    `, [tagId, option === "all" ? "1__" : "1_1"]);
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -51,10 +51,9 @@ let TagService = class TagService {
         try {
             for (const page of pages || []) {
                 try {
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, "10", new Date()]);
                 }
-                catch (_) {
-                }
+                catch (_) { }
             }
             await queryRunner.commitTransaction();
         }
@@ -72,7 +71,9 @@ let TagService = class TagService {
         return this.tagRepository.findOne({ where: { Name: tagName } });
     }
     findByOfficialTagName(tagName) {
-        return this.tagRepository.findOne({ where: { Name: tagName.toLowerCase(), UserId: typeorm_2.IsNull() } });
+        return this.tagRepository.findOne({
+            where: { Name: tagName.toLowerCase(), UserId: typeorm_2.IsNull() },
+        });
     }
     async findInfo(tagId) {
         const tags = await this.tagRepository.query(`SELECT t.*, u.Username FROM Tag as t LEFT OUTER JOIN User as u ON u.UserId = t.UserId WHERE TagId = ? LIMIT 1`, [tagId]);
@@ -199,13 +200,13 @@ let TagService = class TagService {
         return pages;
     }
     async getUserId(username) {
-        return (await typeorm_2.getManager().query('SELECT * FROM User WHERE Username = ? LIMIT 1', [username]))[0].UserId;
+        return (await typeorm_2.getManager().query("SELECT * FROM User WHERE Username = ? LIMIT 1", [username]))[0].UserId;
     }
     async findAllUserWebsitePages(tag, website, user) {
         const userId = await this.getUserId(user);
         const manager = typeorm_2.getManager();
         const websiteExists = await manager.query(`SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`, [userId, website.toLowerCase()]);
-        if (tag !== 'null') {
+        if (tag !== "null") {
             if (websiteExists) {
                 const pages = await manager.query(`SELECT 
             distinct p.*,
@@ -325,15 +326,62 @@ let TagService = class TagService {
         }
         return !hasError;
     }
+    async createDirectory(tag, tags, method) {
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        let hasError = false;
+        try {
+            const insertTag = await queryRunner.manager.save(tag);
+            let websites = new Array();
+            if (tags.length > 0) {
+                if (method === "cross") {
+                    websites = await queryRunner.manager.query(`SELECT WebsiteId
+              FROM 
+                TagWebsite
+              WHERE 
+                TagId IN (?)
+              GROUP BY
+	              WebsiteId
+              HAVING
+                COUNT(WebsiteId) = ?`, [tags, tags.length]);
+                }
+                else if (method === "join") {
+                    websites = await queryRunner.manager.query(`SELECT DISTINCT WebsiteId
+              FROM 
+                TagWebsite
+              WHERE 
+                TagId IN (?)`, [tags]);
+                }
+            }
+            else {
+                const tagId = tags[0];
+                websites = await queryRunner.manager.query(`SELECT WebsiteId FROM TagWebsite WHERE TagId = ?`, [tagId]);
+            }
+            for (const website of websites || []) {
+                await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.TagId, website.WebsiteId]);
+            }
+            await queryRunner.commitTransaction();
+        }
+        catch (err) {
+            console.log(err);
+            await queryRunner.rollbackTransaction();
+            hasError = true;
+        }
+        finally {
+            await queryRunner.release();
+        }
+        return !hasError;
+    }
     async createUserTag(tag, type, tagsId) {
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            if (type === 'official' || type === 'user') {
+            if (type === "official" || type === "user") {
                 const insertTag = await queryRunner.manager.save(tag);
-                if (type === 'official') {
+                if (type === "official") {
                     let websites = null;
                     if (tagsId.length > 1) {
                         websites = await queryRunner.manager.query(`SELECT w.Name, d.DomainId, d.Url, d.Start_Date
@@ -449,8 +497,10 @@ let TagService = class TagService {
                 const relations = await queryRunner.manager.query(`SELECT * FROM TagWebsite WHERE TagId = ? AND WebsiteId <> -1`, [id]);
                 console.log(relations);
                 if (relations.length > 0) {
-                    const websitesId = relations.map(tw => tw.WebsiteId);
-                    await queryRunner.manager.delete(website_entity_1.Website, { WebsiteId: typeorm_2.In(websitesId) });
+                    const websitesId = relations.map((tw) => tw.WebsiteId);
+                    await queryRunner.manager.delete(website_entity_1.Website, {
+                        WebsiteId: typeorm_2.In(websitesId),
+                    });
                 }
             }
             await queryRunner.manager.delete(tag_entity_1.Tag, { TagId: typeorm_2.In(tagsId) });
@@ -467,10 +517,11 @@ let TagService = class TagService {
     }
     async findAllUserTagWebsites(tag, user) {
         const manager = typeorm_2.getManager();
-        if (user === 'admin') {
-            const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        if (user === "admin") {
+            const websites = await manager.query(`SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, t.Show_in_Observatorio 
         FROM 
           Website as w
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
           Tag as t,
@@ -544,7 +595,10 @@ let TagService = class TagService {
         try {
             const websites = await queryRunner.manager.query(`SELECT tw.*, w.Name FROM TagWebsite as tw, Website as w WHERE tw.TagId = ? AND w.WebsiteId = tw.WebsiteId`, [tagId]);
             if (websites.length > 0) {
-                const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                const date = new Date()
+                    .toISOString()
+                    .replace(/T/, " ")
+                    .replace(/\..+/, "");
                 const insertTag = await queryRunner.manager.query(`INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
                     VALUES (?, "0", ?)`, [tagName, date]);
                 for (const website of websites || []) {
@@ -576,8 +630,12 @@ let TagService = class TagService {
         w.WebsiteId = ? AND
         d.WebsiteId = w.WebsiteId AND 
         d.Active = "1"`, [websiteId]);
-        const domDate = webDomain[0].Start_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-        const webDate = webDomain[0].Creation_Date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+        const domDate = webDomain[0].Start_Date.toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
+        const webDate = webDomain[0].Creation_Date.toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
         const pages = await queryRunner.manager.query(`SELECT p.*
       FROM 
         Page as p, 
@@ -604,7 +662,7 @@ let TagService = class TagService {
         if (webDomain.length > 0) {
             if (domainP) {
                 for (const page of pages || []) {
-                    if (page.Show_In[0] === '0') {
+                    if (page.Show_In[0] === "0") {
                         await this.importPage(queryRunner, page.PageId);
                         try {
                             await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [domainP.DomainId, page.PageId]);
@@ -625,7 +683,7 @@ let TagService = class TagService {
                 returnWebsiteId = insertWebsite.insertId;
                 const domain = await queryRunner.manager.query(`INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`, [insertWebsite.websiteId, domainUrl, domDate]);
                 for (const page of pages || []) {
-                    if (page.Show_In[0] === '0') {
+                    if (page.Show_In[0] === "0") {
                         await this.importPage(queryRunner, page.PageId);
                         await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`, [domain.DomainId, page.PageId]);
                     }

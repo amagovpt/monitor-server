@@ -1,5 +1,5 @@
-import { Connection, Repository } from 'typeorm';
-import { EntityTable } from './entity.entity';
+import { Connection, Repository } from "typeorm";
+import { EntityTable } from "./entity.entity";
 export declare class EntityService {
     private readonly entityRepository;
     private readonly connection;

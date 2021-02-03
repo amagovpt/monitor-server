@@ -39,7 +39,7 @@ let PageService = class PageService {
     }
     async findAllInEvaluationList() {
         const manager = typeorm_2.getManager();
-        const result = await manager.query("SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId IS NULL AND Error IS NULL");
+        const result = await manager.query("SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Error IS NULL");
         return result[0].Total;
     }
     async findAll() {

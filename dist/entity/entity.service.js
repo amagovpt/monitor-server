@@ -40,7 +40,7 @@ let EntityService = class EntityService {
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
-    `, [entityId, option === 'all' ? '1__' : '1_1']);
+    `, [entityId, option === "all" ? "1__" : "1_1"]);
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -48,10 +48,9 @@ let EntityService = class EntityService {
         try {
             for (const page of pages || []) {
                 try {
-                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, '10', new Date()]);
+                    await queryRunner.manager.query(`INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`, [page.PageId, -1, page.Uri, "10", new Date()]);
                 }
-                catch (_) {
-                }
+                catch (_) { }
             }
             await queryRunner.commitTransaction();
         }
@@ -75,9 +74,11 @@ let EntityService = class EntityService {
         return entities;
     }
     async findInfo(entityId) {
-        const entity = await this.entityRepository.findOne({ where: { EntityId: entityId } });
+        const entity = await this.entityRepository.findOne({
+            where: { EntityId: entityId },
+        });
         if (entity) {
-            entity['websites'] = await this.entityRepository.query(`SELECT * FROM Website WHERE EntityId = ?`, [entityId]);
+            entity["websites"] = await this.entityRepository.query(`SELECT * FROM Website WHERE EntityId = ?`, [entityId]);
             return entity;
         }
         else {
@@ -92,9 +93,10 @@ let EntityService = class EntityService {
     }
     async findAllWebsites(entity) {
         const manager = typeorm_2.getManager();
-        const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, COUNT(t.TagId) as Observatory 
+        const websites = await manager.query(`SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, t.Show_in_Observatorio, COUNT(t.TagId) as Observatory 
       FROM 
         Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId AND t.Show_in_Observatorio = 1,
@@ -196,7 +198,9 @@ let EntityService = class EntityService {
         let hasError = false;
         try {
             await queryRunner.manager.update(website_entity_1.Website, { EntityId: entityId }, { EntityId: null });
-            await queryRunner.manager.delete(entity_entity_1.EntityTable, { where: { EntityId: entityId } });
+            await queryRunner.manager.delete(entity_entity_1.EntityTable, {
+                where: { EntityId: entityId },
+            });
             await queryRunner.commitTransaction();
         }
         catch (err) {
