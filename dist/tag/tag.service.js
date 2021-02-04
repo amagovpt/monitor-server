@@ -475,10 +475,11 @@ let TagService = class TagService {
         await queryRunner.startTransaction();
         let hasError = false;
         try {
-            await queryRunner.manager.delete(tag_entity_1.Tag, { where: { TagId: tagId } });
+            await queryRunner.manager.delete(tag_entity_1.Tag, { TagId: tagId });
             await queryRunner.commitTransaction();
         }
         catch (err) {
+            console.log(err);
             await queryRunner.rollbackTransaction();
             hasError = true;
         }

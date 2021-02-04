@@ -198,9 +198,7 @@ let EntityService = class EntityService {
         let hasError = false;
         try {
             await queryRunner.manager.update(website_entity_1.Website, { EntityId: entityId }, { EntityId: null });
-            await queryRunner.manager.delete(entity_entity_1.EntityTable, {
-                where: { EntityId: entityId },
-            });
+            await queryRunner.manager.delete(entity_entity_1.EntityTable, { EntityId: entityId });
             await queryRunner.commitTransaction();
         }
         catch (err) {

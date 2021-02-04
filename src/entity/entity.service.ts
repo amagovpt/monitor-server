@@ -259,9 +259,7 @@ export class EntityService {
         { EntityId: null }
       );
 
-      await queryRunner.manager.delete(EntityTable, {
-        where: { EntityId: entityId },
-      });
+      await queryRunner.manager.delete(EntityTable, { EntityId: entityId });
 
       await queryRunner.commitTransaction();
     } catch (err) {

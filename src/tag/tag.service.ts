@@ -622,9 +622,10 @@ export class TagService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.delete(Tag, { where: { TagId: tagId } });
+      await queryRunner.manager.delete(Tag, { TagId: tagId });
       await queryRunner.commitTransaction();
     } catch (err) {
+      console.log(err);
       // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();
       hasError = true;
