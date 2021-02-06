@@ -23,7 +23,7 @@ export async function evaluate(params: any): Promise<any> {
       techniques: [
         "QW-WCAG-T1",
         "QW-WCAG-T2",
-        "QW-WCAG-T3",
+        //"QW-WCAG-T3",
         "QW-WCAG-T6",
         "QW-WCAG-T7",
         "QW-WCAG-T8",
@@ -31,7 +31,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-WCAG-T14",
         "QW-WCAG-T15",
         "QW-WCAG-T17",
-        "QW-WCAG-T32",
+        //"QW-WCAG-T32",
         "QW-WCAG-T18",
         "QW-WCAG-T19",
         "QW-WCAG-T20",
