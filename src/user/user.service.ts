@@ -1,15 +1,18 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager, In } from 'typeorm';
-import { User } from './user.entity';
-import { Tag } from '../tag/tag.entity';
-import { Website } from '../website/website.entity';
-import { Domain } from '../domain/domain.entity';
-import { comparePasswordHash, generatePasswordHash } from '../lib/security';
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
+import { User } from "./user.entity";
+import { Tag } from "../tag/tag.entity";
+import { Website } from "../website/website.entity";
+import { Domain } from "../domain/domain.entity";
+import { comparePasswordHash, generatePasswordHash } from "../lib/security";
 
 @Injectable()
 export class UserService {
-  
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -18,7 +21,11 @@ export class UserService {
     private readonly connection: Connection
   ) {}
 
-  async changePassword(userId: number, password: string, newPassword: string): Promise<any> {
+  async changePassword(
+    userId: number,
+    password: string,
+    newPassword: string
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -26,10 +33,16 @@ export class UserService {
 
     let hasError = false;
     try {
-      const user = await this.userRepository.findOne({ where: { UserId: userId } });
-      if (user && await comparePasswordHash(password, user.Password)) {
+      const user = await this.userRepository.findOne({
+        where: { UserId: userId },
+      });
+      if (user && (await comparePasswordHash(password, user.Password))) {
         const newPasswordHash = await generatePasswordHash(newPassword);
-        await queryRunner.manager.update(User, { UserId: userId }, { Password: newPasswordHash });
+        await queryRunner.manager.update(
+          User,
+          { UserId: userId },
+          { Password: newPasswordHash }
+        );
       } else {
         hasError = true;
       }
@@ -52,7 +65,16 @@ export class UserService {
     return true;
   }
 
-  async update(userId: number, password: string, names: string, emails: string, app: string, defaultWebsites: number[], websites: number[], transfer: boolean): Promise<any> {
+  async update(
+    userId: number,
+    password: string,
+    names: string,
+    emails: string,
+    app: string,
+    defaultWebsites: number[],
+    websites: number[],
+    transfer: boolean
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -60,16 +82,25 @@ export class UserService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(User, { UserId: userId }, { Names: names, Emails: emails });
+      await queryRunner.manager.update(
+        User,
+        { UserId: userId },
+        { Names: names, Emails: emails }
+      );
 
-      if (password && password !== 'null') {
-        await queryRunner.manager.update(User, { UserId: userId }, { Password: await generatePasswordHash(password) });
+      if (password && password !== "null") {
+        await queryRunner.manager.update(
+          User,
+          { UserId: userId },
+          { Password: await generatePasswordHash(password) }
+        );
       }
 
-      if (app === 'monitor') {
+      if (app === "monitor") {
         for (const id of defaultWebsites || []) {
           if (!websites.includes(id)) {
-            await queryRunner.manager.query(`
+            await queryRunner.manager.query(
+              `
               UPDATE
                 Domain as d, 
                 DomainPage as dp, 
@@ -83,9 +114,12 @@ export class UserService {
                 dp.DomainId = d.DomainId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "111" AND
-                e.PageId = p.PageId`, [id]);
-  
-            await queryRunner.manager.query(`
+                e.PageId = p.PageId`,
+              [id]
+            );
+
+            await queryRunner.manager.query(
+              `
               UPDATE 
                 Domain as d, 
                 DomainPage as dp, 
@@ -99,9 +133,12 @@ export class UserService {
                 dp.DomainId = d.DomainId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "110" AND
-                e.PageId = p.PageId`, [id]);
-  
-            await queryRunner.manager.query(`
+                e.PageId = p.PageId`,
+              [id]
+            );
+
+            await queryRunner.manager.query(
+              `
               UPDATE 
                 Domain as d, 
                 DomainPage as dp, 
@@ -115,24 +152,37 @@ export class UserService {
                 dp.DomainId = d.DomainId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "010" AND
-                e.PageId = p.PageId`, [id]);
+                e.PageId = p.PageId`,
+              [id]
+            );
 
-            await queryRunner.manager.update(Website, { WebsiteId: id }, { UserId: null });
+            await queryRunner.manager.update(
+              Website,
+              { WebsiteId: id },
+              { UserId: null }
+            );
           }
         }
-  
+
         for (const id of websites || []) {
           if (!defaultWebsites.includes(id)) {
-            await queryRunner.manager.update(Website, { WebsiteId: id }, { UserId: userId });
-  
+            await queryRunner.manager.update(
+              Website,
+              { WebsiteId: id },
+              { UserId: userId }
+            );
+
             if (transfer) {
-              await queryRunner.manager.query(`UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
+              await queryRunner.manager.query(
+                `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
                 WHERE
                   d.WebsiteId = ? AND
                   dp.DomainId = d.DomainId AND
                   p.PageId = dp.PageId AND
                   p.Show_In = "101" AND
-                  e.PageId = e.PageId`, [id]);
+                  e.PageId = e.PageId`,
+                [id]
+              );
             }
           }
         }
@@ -160,8 +210,9 @@ export class UserService {
 
     let hasError = false;
     try {
-      if (app === 'monitor') {
-        await queryRunner.manager.query(`
+      if (app === "monitor") {
+        await queryRunner.manager.query(
+          `
           UPDATE 
             Website as w,
             Domain as d, 
@@ -174,9 +225,12 @@ export class UserService {
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            p.Show_In LIKE "111"`, [userId]);
-  
-        await queryRunner.manager.query(`
+            p.Show_In LIKE "111"`,
+          [userId]
+        );
+
+        await queryRunner.manager.query(
+          `
           UPDATE 
             Website as w,
             Domain as d, 
@@ -189,9 +243,12 @@ export class UserService {
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            LOWER(p.Show_In) = "110"`, [userId]);
-  
-        await queryRunner.manager.query(`
+            LOWER(p.Show_In) = "110"`,
+          [userId]
+        );
+
+        await queryRunner.manager.query(
+          `
           UPDATE 
             Website as w,
             Domain as d, 
@@ -204,15 +261,28 @@ export class UserService {
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            LOWER(p.Show_In) = "100"`, [userId]);
-  
-        await queryRunner.manager.query(`UPDATE Website SET UserId = NULL WHERE UserId = ?`, [userId]);
+            LOWER(p.Show_In) = "100"`,
+          [userId]
+        );
+
+        await queryRunner.manager.query(
+          `UPDATE Website SET UserId = NULL WHERE UserId = ?`,
+          [userId]
+        );
       } else {
-        await queryRunner.manager.query(`DELETE FROM Tag WHERE UserId = ? AND TagId <> 0`, [userId]);
-        await queryRunner.manager.query(`DELETE FROM Website WHERE UserId = ? AND WebsiteId <> 0`, [userId]);
+        await queryRunner.manager.query(
+          `DELETE FROM Tag WHERE UserId = ? AND TagId <> 0`,
+          [userId]
+        );
+        await queryRunner.manager.query(
+          `DELETE FROM Website WHERE UserId = ? AND WebsiteId <> 0`,
+          [userId]
+        );
       }
-  
-      await queryRunner.manager.query(`DELETE FROM User WHERE UserId = ?`, [userId]);
+
+      await queryRunner.manager.query(`DELETE FROM User WHERE UserId = ?`, [
+        userId,
+      ]);
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -243,19 +313,25 @@ export class UserService {
   }
 
   async findAllFromMyMonitor(): Promise<User[]> {
-    return this.userRepository.find({ 
-      select: ['UserId', 'Username', 'Type', 'Register_Date', 'Last_Login'], 
-      where: { Type: 'monitor' } 
+    return this.userRepository.find({
+      select: ["UserId", "Username", "Type", "Register_Date", "Last_Login"],
+      where: { Type: "monitor" },
     });
   }
 
   async findInfo(userId: number): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { UserId: userId }});
+    const user = await this.userRepository.findOne({
+      where: { UserId: userId },
+    });
 
     if (user) {
-
-      if (user.Type === 'monitor') {
-        user['websites'] = await this.userRepository.query(`SELECT * FROM Website WHERE UserId = ?`, [userId]);
+      if (user.Type === "monitor") {
+        user[
+          "websites"
+        ] = await this.userRepository.query(
+          `SELECT * FROM Website WHERE UserId = ?`,
+          [userId]
+        );
       }
 
       delete user.Password;
@@ -276,18 +352,28 @@ export class UserService {
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: 'studies' });
+    return this.userRepository.count({ Type: "studies" });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: 'monitor' });
+    return this.userRepository.count({ Type: "monitor" });
   }
 
-  async findStudyMonitorUserTagByName(userId: number, name: string): Promise<any> {
-    return await this.tagRepository.findOne({ where: { Name: name, UserId: userId }});
+  async findStudyMonitorUserTagByName(
+    userId: number,
+    name: string
+  ): Promise<any> {
+    return await this.tagRepository.findOne({
+      where: { Name: name, UserId: userId },
+    });
   }
 
-  async createOne(user: User, tags: string[], websites: string[], transfer: boolean): Promise<boolean> {
+  async createOne(
+    user: User,
+    tags: string[],
+    websites: string[],
+    transfer: boolean
+  ): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -297,11 +383,16 @@ export class UserService {
     try {
       const insertUser = await queryRunner.manager.save(user);
 
-      if (user.Type === 'monitor' && websites.length > 0) {
-        await queryRunner.manager.update(Website, { WebsiteId: In(websites) }, { UserId: insertUser.UserId });
+      if (user.Type === "monitor" && websites.length > 0) {
+        await queryRunner.manager.update(
+          Website,
+          { WebsiteId: In(websites) },
+          { UserId: insertUser.UserId }
+        );
 
         if (transfer) {
-          await queryRunner.manager.query(`UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
+          await queryRunner.manager.query(
+            `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
             SET 
               p.Show_In = "111",
               e.Show_To = "11" 
@@ -310,22 +401,27 @@ export class UserService {
               dp.DomainId = d.DomainId AND
               p.PageId = dp.PageId AND
               p.Show_In LIKE "101" AND
-              e.PageId = p.PageId`, [websites]);
+              e.PageId = p.PageId`,
+            [websites]
+          );
         }
-      } else if (user.Type === 'studies' && tags.length > 0) {
-        const copyTags = await queryRunner.manager.query(`SELECT * FROM Tag WHERE TagId IN (?)`, [tags]);
+      } else if (user.Type === "studies" && tags.length > 0) {
+        const copyTags = await queryRunner.manager.query(
+          `SELECT * FROM Tag WHERE TagId IN (?)`,
+          [tags]
+        );
         for (const tag of copyTags || []) {
           // Create user tag
           const newTag = new Tag();
           newTag.Name = tag.Name;
           newTag.UserId = insertUser.UserId;
-          newTag.Show_in_Observatorio = 0;
           newTag.Creation_Date = new Date();
 
           const insertTag = await queryRunner.manager.save(newTag);
 
           // Create user tag websites
-          const copyWebsites = await queryRunner.manager.query(`
+          const copyWebsites = await queryRunner.manager.query(
+            `
             SELECT w.*
             FROM
               TagWebsite as tw,
@@ -333,7 +429,9 @@ export class UserService {
             WHERE
               tw.TagId = ? AND
               w.WebsiteId = tw.WebsiteId  
-          `, [tag.TagId]);
+          `,
+            [tag.TagId]
+          );
 
           for (const website of copyWebsites || []) {
             const newWebsite = new Website();
@@ -343,11 +441,17 @@ export class UserService {
 
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
-            await queryRunner.manager.query(`INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`, [insertTag.TagId, insertWebsite.WebsiteId]);
+            await queryRunner.manager.query(
+              `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
+              [insertTag.TagId, insertWebsite.WebsiteId]
+            );
 
             // Create user tag website domain
-            const domain = await queryRunner.manager.query(`SELECT * FROM Domain WHERE WebsiteId = ? AND Active = 1`, [website.WebsiteId]);
-            
+            const domain = await queryRunner.manager.query(
+              `SELECT * FROM Domain WHERE WebsiteId = ? AND Active = 1`,
+              [website.WebsiteId]
+            );
+
             const newDomain = new Domain();
             newDomain.WebsiteId = insertWebsite.WebsiteId;
             newDomain.Active = 1;
@@ -357,10 +461,16 @@ export class UserService {
             const insertDomain = await queryRunner.manager.save(newDomain);
 
             // Create user tag website domain pages connection
-            const pages = await queryRunner.manager.query(`SELECT * FROM DomainPage WHERE DomainId = ?`, [domain[0].DomainId]);
-            
+            const pages = await queryRunner.manager.query(
+              `SELECT * FROM DomainPage WHERE DomainId = ?`,
+              [domain[0].DomainId]
+            );
+
             for (const page of pages || []) {
-              await queryRunner.manager.query(`INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`, [insertDomain.DomainId, page.PageId]);
+              await queryRunner.manager.query(
+                `INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`,
+                [insertDomain.DomainId, page.PageId]
+              );
             }
           }
         }
@@ -381,11 +491,13 @@ export class UserService {
   }
 
   async findType(username: string): Promise<any> {
-    if (username === 'admin') {
-      return 'nimda';
+    if (username === "admin") {
+      return "nimda";
     }
 
-    const user = await this.userRepository.findOne({ where: { Username: username }});
+    const user = await this.userRepository.findOne({
+      where: { Username: username },
+    });
 
     if (user) {
       return user.Type;
@@ -409,7 +521,9 @@ export class UserService {
           w.UserId = u.UserId AND 
           d.WebsiteId = w.WebsiteId AND
           d.Active = "1"
-        GROUP BY w.WebsiteId, d.Url`, [user.toLowerCase()]);
+        GROUP BY w.WebsiteId, d.Url`,
+      [user.toLowerCase()]
+    );
 
     return websites;
   }
@@ -426,7 +540,9 @@ export class UserService {
       WHERE
         LOWER(u.Username) = ? AND
         t.UserId = u.UserId
-      GROUP BY t.TagId`, [user.toLowerCase()]);
+      GROUP BY t.TagId`,
+      [user.toLowerCase()]
+    );
 
     return tags;
   }

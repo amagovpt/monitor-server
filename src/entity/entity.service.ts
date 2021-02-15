@@ -104,13 +104,15 @@ export class EntityService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, t.Show_in_Observatorio, COUNT(t.TagId) as Observatory 
+      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, dir.Show_in_Observatory, COUNT(dir.DirectoryId) as Observatory 
       FROM 
         Website as w
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId AND t.Show_in_Observatorio = 1,
+        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
+        LEFT OUTER JOIN DirectoryTag as dt ON dt.TagId = t.TagId
+        LEFT OUTER JOIN Directory as dir ON dir.DirectoryId = dt.DirectoryId AND dir.Show_in_Observatory = 1,
         Entity as e
       WHERE
         e.EntityId = w.EntityId AND
@@ -160,7 +162,7 @@ export class EntityService {
       [entity.toLowerCase()]
     );
 
-    return websites;
+    return websites.filter((w) => w.Score !== null);
   }
 
   async createOne(entity: EntityTable, websites: string[]): Promise<boolean> {

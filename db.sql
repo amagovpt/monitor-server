@@ -119,12 +119,32 @@ CREATE TABLE `Page` (
   UNIQUE KEY `PageId_UNIQUE` (`PageId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Directory`;
+CREATE TABLE `Directory` (
+  `DirectoryId` int (11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar (255) NOT NULL,
+  `Show_in_Observatory` tinyint (1) NOT NULL DEFAULT '0',
+  `Creation_Date` datetime NOT NULL,
+  PRIMARY KEY (`DirectoryId`),
+  UNIQUE KEY `DirectoryId_UNIQUE` (`DirectoryId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `DirectoryTag`;
+CREATE TABLE `DirectoryTag` (
+  `DirectoryId` int (11) NOT NULL,
+  `TagId` int (11) NOT NULL,
+  PRIMARY KEY (`DirectoryId`,`TagId`),
+  UNIQUE KEY `DirectoryTag` (`DirectoryId`,`TagId`),
+  KEY `TagId_fk_idx` (`TagId`),
+  CONSTRAINT `DTDirectoryId_fk` FOREIGN KEY (`DirectoryId`) REFERENCES `Directory` (`DirectoryId`) ON DELETE CASCADE,
+  CONSTRAINT `DTTagId_fk` FOREIGN KEY (`TagId`) REFERENCES `Tag` (`TagId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `Tag`;
 CREATE TABLE `Tag` (
   `TagId` int(11) NOT NULL AUTO_INCREMENT,
   `UserId` int(11) DEFAULT NULL,
   `Name` varchar(255) NOT NULL,
-  `Show_in_Observatorio` tinyint(1) NOT NULL DEFAULT '0',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`TagId`),
   UNIQUE KEY `TagId_UNIQUE` (`TagId`),

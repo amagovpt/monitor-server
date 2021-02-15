@@ -30,35 +30,15 @@ export class TagController {
   async createOfficialTag(@Request() req: any): Promise<any> {
     const tag = new Tag();
     tag.Name = req.body.name;
-    tag.Show_in_Observatorio = req.body.observatory;
     tag.Creation_Date = new Date();
 
+    const directories = JSON.parse(req.body.directories);
     const websites = JSON.parse(req.body.websites);
 
-    const createSuccess = await this.tagService.createOne(tag, websites);
-
-    if (!createSuccess) {
-      throw new InternalServerErrorException();
-    }
-
-    return success(true);
-  }
-
-  @UseGuards(AuthGuard("jwt-admin"))
-  @Post("directory/create")
-  async createDIrectory(@Request() req: any): Promise<any> {
-    const tag = new Tag();
-    tag.Name = req.body.name;
-    tag.Show_in_Observatorio = req.body.observatory;
-    tag.Creation_Date = new Date();
-
-    const tags = JSON.parse(req.body.tags);
-    const method = req.body.method;
-
-    const createSuccess = await this.tagService.createDirectory(
+    const createSuccess = await this.tagService.createOne(
       tag,
-      tags,
-      method
+      directories,
+      websites
     );
 
     if (!createSuccess) {
@@ -73,14 +53,16 @@ export class TagController {
   async updateOfficialTag(@Request() req: any): Promise<any> {
     const tagId = req.body.tagId;
     const name = req.body.name;
-    const observatory = req.body.observatory;
+    const defaultDirectories = JSON.parse(req.body.defaultDirectories);
+    const directories = JSON.parse(req.body.directories);
     const defaultWebsites = JSON.parse(req.body.defaultWebsites);
     const websites = JSON.parse(req.body.websites);
 
     const updateSuccess = await this.tagService.update(
       tagId,
       name,
-      observatory,
+      defaultDirectories,
+      directories,
       defaultWebsites,
       websites
     );
@@ -111,7 +93,6 @@ export class TagController {
     const tag = new Tag();
     tag.Name = req.body.user_tag_name;
     tag.UserId = req.user.userId;
-    tag.Show_in_Observatorio = 0;
     tag.Creation_Date = new Date();
 
     const type = req.body.type;

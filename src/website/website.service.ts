@@ -68,13 +68,23 @@ export class WebsiteService {
 
   async findAll(): Promise<any> {
     const manager = getManager();
-    const websites = await manager.query(`SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, u.Type as Type, d.DomainId, d.Url as Domain, COUNT(t.TagId) as Observatory
-      FROM Website as w
-      LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-      LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId AND t.Show_in_Observatorio = 1
-      LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
-      LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-      LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+    const websites = await manager.query(`
+      SELECT 
+        w.*, 
+        e.Short_Name as Entity, 
+        e.Long_Name as Entity2, 
+        u.Username as User, u.Type as Type, 
+        d.DomainId, d.Url as Domain, 
+        COUNT(DISTINCT t.TagId) as Observatory
+      FROM 
+        Website as w
+        LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
+        LEFT OUTER JOIN DirectoryTag as dt ON dt.TagId = tw.TagId
+        LEFT OUTER JOIN Directory as dir ON dir.DirectoryId = dt.DirectoryId AND dir.Show_in_Observatory = 1
+        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
       WHERE 
         (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
         w.Deleted = "0"
@@ -270,6 +280,8 @@ export class WebsiteService {
       `
       SELECT t.* 
       FROM
+        Directory as d,
+        DirectoryTag as dt,
         Tag as t,
         TagWebsite as tw,
         Website as w
@@ -279,7 +291,9 @@ export class WebsiteService {
         tw.WebsiteId = w.WebsiteId AND
         t.TagId = tw.TagId AND
         t.UserId IS NULL AND
-        t.Show_In_Observatorio = 1
+        dt.TagId = t.TagId AND
+        d.DirectoryId = dt.DirectoryId AND
+        d.Show_In_Observatory = 1
     `,
       [userId, website]
     );
@@ -304,6 +318,8 @@ export class WebsiteService {
         SELECT
           p.* 
         FROM
+          Directory as dir,
+          DirectoryTag as dt,
           Tag as t,
           TagWebsite as tw,
           Website as w,
@@ -316,7 +332,9 @@ export class WebsiteService {
           tw.WebsiteId = w.WebsiteId AND
           t.TagId = tw.TagId AND
           t.UserId IS NULL AND
-          t.Show_In_Observatorio = 1 AND
+          dt.TagId = t.TagId AND
+          dir.DirectoryId = dt.DirectoryId AND
+          dir.Show_In_Observatory = 1 AND
           d.WebsiteId = w.WebsiteId AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId and
@@ -877,8 +895,19 @@ export class WebsiteService {
   async findNumberOfObservatory(): Promise<number> {
     const manager = getManager();
     return (
-      await manager.query(`SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, Tag as t, TagWebsite as tw 
-      WHERE t.Show_in_Observatorio = "1" AND tw.TagId = t.TagId AND w.WebsiteId = tw.WebsiteId`)
+      await manager.query(`
+      SELECT 
+        COUNT(distinct w.WebsiteId) as Websites 
+      FROM
+        Directory as d,
+        DirectoryTag as dt,
+        TagWebsite as tw,
+        Website as w 
+      WHERE 
+        d.Show_in_Observatory = 1 AND
+        dt.DirectoryId = d.DirectoryId AND
+        tw.TagId = dt.TagId AND 
+        w.WebsiteId = tw.WebsiteId`)
     )[0].Websites;
   }
 

@@ -22,6 +22,7 @@ import { StampModule } from './stamp/stamp.module';
 import { CrawlerModule } from './crawler/crawler.module';
 
 import { readFileSync } from 'fs';
+import { DirectoryModule } from './directory/directory.module';
 
 const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString());
 
@@ -53,6 +54,7 @@ const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString())
     AmpModule,
     StampModule,
     CrawlerModule,
+    DirectoryModule,
     //NestCrawlerModule
   ],
   controllers: [AppController],

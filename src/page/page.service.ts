@@ -57,57 +57,83 @@ export class PageService {
     return pages;
   }
 
-  getObservatoryData(): Promise<any> {
+  async getObservatoryData(): Promise<any> {
     const manager = getManager();
-    return manager.query(`
-      SELECT
-        e.EvaluationId,
-        e.Title,
-        e.Score,
-        e.Errors,
-        e.Tot,
-        e.A,
-        e.AA,
-        e.AAA,
-        e.Evaluation_Date,
-        p.PageId,
-        p.Uri,
-        p.Creation_Date as Page_Creation_Date,
-        d.Url,
-        w.WebsiteId,
-        w.Name as Website_Name,
-        w.Declaration as Website_Declaration,
-        w.Stamp as Website_Stamp,
-        w.Creation_Date as Website_Creation_Date,
-        en.Long_Name as Entity_Name,
-        t.TagId,
-        t.Name as Tag_Name,
-        t.Show_in_Observatorio,
-        t.Creation_Date as Tag_Creation_Date
-      FROM
-        Evaluation as e,
-        Page as p,
-        DomainPage as dp,
-        Domain as d,
-        Website as w
-        LEFT OUTER JOIN Entity as en ON en.EntityId = w.EntityId,
-        TagWebsite as tw,
-        Tag as t
-      WHERE
-        t.Show_in_Observatorio = 1 AND
-        tw.TagId = t.TagId AND
-        w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
-        p.Show_In LIKE '%1' AND
-        e.PageId = p.PageId AND e.Evaluation_Date = (
-          SELECT Evaluation_Date FROM Evaluation 
-          WHERE PageId = p.PageId AND Show_To LIKE "1_" 
-          ORDER BY Evaluation_Date DESC LIMIT 1
-        )
-    `);
+
+    let data = new Array<any>();
+
+    const directories = await manager.query(
+      `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
+    );
+
+    for (const directory of directories) {
+      const tags = await manager.query(
+        `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
+        [directory.DirectoryId]
+      );
+      const tagsId = tags.map((t) => t.TagId);
+
+      const pages = await manager.query(
+        `
+        SELECT
+          e.EvaluationId,
+          e.Title,
+          e.Score,
+          e.Errors,
+          e.Tot,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Evaluation_Date,
+          p.PageId,
+          p.Uri,
+          p.Creation_Date as Page_Creation_Date,
+          d.Url,
+          w.WebsiteId,
+          w.Name as Website_Name,
+          w.Declaration as Website_Declaration,
+          w.Stamp as Website_Stamp,
+          w.Creation_Date as Website_Creation_Date,
+          en.Long_Name as Entity_Name
+        FROM 
+          Evaluation as e,
+          Page as p,
+          DomainPage as dp,
+          Domain as d,
+          Website as w
+          LEFT OUTER JOIN Entity as en ON en.EntityId = w.EntityId,
+          TagWebsite as tw
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1 AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE '%1' AND
+          e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+        GROUP BY
+          w.WebsiteId
+        HAVING
+          COUNT(w.WebsiteId) = ?`,
+        [tagsId, tagsId.length]
+      );
+      pages
+        .filter((p) => p.Score !== null)
+        .map((p) => {
+          p.DirectoryId = directory.DirectoryId;
+          p.Directory_Name = directory.Name;
+          p.Show_in_Observatory = directory.Show_in_Observatory;
+          p.Directory_Creation_Date = directory.Creation_Date;
+        });
+      data = [...data, ...pages];
+    }
+
+    return data;
   }
 
   async findAllFromMyMonitorUserWebsite(

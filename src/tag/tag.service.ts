@@ -86,6 +86,17 @@ export class TagService {
     if (tags) {
       const tag = tags[0];
 
+      tag.directories = await this.tagRepository.query(
+        `SELECT d.* 
+        FROM
+          DirectoryTag as dt,
+          Directory as d
+        WHERE
+          dt.TagId = ? AND 
+          d.DirectoryId = dt.DirectoryId`,
+        [tagId]
+      );
+
       tag.websites = await this.tagRepository.query(
         `SELECT w.* 
         FROM
@@ -132,7 +143,21 @@ export class TagService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    return this.tagRepository.count({ Show_in_Observatorio: 1 });
+    const manager = getManager();
+    return (
+      await manager.query(`
+        SELECT 
+          COUNT(distinct t.TagId) as Tags 
+        FROM 
+          Directory as d,
+          DirectoryTag as dt,
+          Tag as t 
+        WHERE 
+          d.Show_in_Observatory = 1 AND
+          dt.DirectoryId = d.DirectoryId AND
+          t.TagId = dt.TagId 
+          `)
+    )[0].Tags;
   }
 
   async findAllFromStudyMonitorUser(userId: number): Promise<any> {
@@ -370,10 +395,14 @@ export class TagService {
       [tag.toLowerCase()]
     );
 
-    return websites;
+    return websites.filter((w) => w.Score !== null);
   }
 
-  async createOne(tag: Tag, websites: number[]): Promise<boolean> {
+  async createOne(
+    tag: Tag,
+    directories: number[],
+    websites: number[]
+  ): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -382,6 +411,13 @@ export class TagService {
     let hasError = false;
     try {
       const insertTag = await queryRunner.manager.save(tag);
+
+      for (const directoryId of directories || []) {
+        await queryRunner.manager.query(
+          `INSERT INTO DirectoryTag (DirectoryId, TagId) VALUES (?, ?)`,
+          [directoryId, insertTag.TagId]
+        );
+      }
 
       for (const websiteId of websites || []) {
         await queryRunner.manager.query(
@@ -566,7 +602,8 @@ export class TagService {
   async update(
     tagId: number,
     name: string,
-    observatory: number,
+    defaultDirectories: number[],
+    directories: number[],
     defaultWebsites: number[],
     websites: number[]
   ): Promise<any> {
@@ -577,11 +614,25 @@ export class TagService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(
-        Tag,
-        { TagId: tagId },
-        { Name: name, Show_in_Observatorio: observatory }
-      );
+      await queryRunner.manager.update(Tag, { TagId: tagId }, { Name: name });
+
+      for (const id of defaultDirectories || []) {
+        if (!directories.includes(id)) {
+          await queryRunner.manager.query(
+            `DELETE FROM DirectoryTag WHERE DirectoryId = ? AND TagId = ?`,
+            [id, tagId]
+          );
+        }
+      }
+
+      for (const id of directories || []) {
+        if (!defaultDirectories.includes(id)) {
+          await queryRunner.manager.query(
+            `INSERT INTO DirectoryTag (DirectoryId, TagId) VALUES (?, ?)`,
+            [id, tagId]
+          );
+        }
+      }
 
       for (const id of defaultWebsites || []) {
         if (!websites.includes(id)) {
@@ -679,7 +730,7 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, t.Show_in_Observatorio 
+        `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
@@ -786,8 +837,8 @@ export class TagService {
           .replace(/T/, " ")
           .replace(/\..+/, "");
         const insertTag = await queryRunner.manager.query(
-          `INSERT INTO Tag (Name, Show_in_Observatorio, Creation_Date) 
-                    VALUES (?, "0", ?)`,
+          `INSERT INTO Tag (Name, Creation_Date) 
+                    VALUES (?, ?)`,
           [tagName, date]
         );
 
