@@ -52,7 +52,7 @@ export class PageService {
         )
         LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
       WHERE
-        LOWER(p.Show_In) LIKE '1%'
+        p.Show_In LIKE '1%'
       GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`);
     return pages;
   }
@@ -72,8 +72,7 @@ export class PageService {
         [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
-
-      const pages = await manager.query(
+      let pages = await manager.query(
         `
         SELECT
           e.EvaluationId,
@@ -95,14 +94,18 @@ export class PageService {
           w.Stamp as Website_Stamp,
           w.Creation_Date as Website_Creation_Date,
           en.Long_Name as Entity_Name
-        FROM 
-          Evaluation as e,
-          Page as p,
-          DomainPage as dp,
-          Domain as d,
+        FROM
+		      TagWebsite as tw,
           Website as w
           LEFT OUTER JOIN Entity as en ON en.EntityId = w.EntityId,
-          TagWebsite as tw
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_"
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
@@ -110,26 +113,21 @@ export class PageService {
           d.Active = 1 AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
-          p.Show_In LIKE '%1' AND
-          e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId AND Show_To LIKE "1_" 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          )
+          p.Show_In LIKE "__1"
         GROUP BY
-          w.WebsiteId
+          w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
         HAVING
           COUNT(w.WebsiteId) = ?`,
         [tagsId, tagsId.length]
       );
-      pages
-        .filter((p) => p.Score !== null)
-        .map((p) => {
-          p.DirectoryId = directory.DirectoryId;
-          p.Directory_Name = directory.Name;
-          p.Show_in_Observatory = directory.Show_in_Observatory;
-          p.Directory_Creation_Date = directory.Creation_Date;
-        });
+      pages = pages.filter((p) => p.Score !== null);
+
+      pages.map((p) => {
+        p.DirectoryId = directory.DirectoryId;
+        p.Directory_Name = directory.Name;
+        p.Show_in_Observatory = directory.Show_in_Observatory;
+        p.Directory_Creation_Date = directory.Creation_Date;
+      });
       data = [...data, ...pages];
     }
 
@@ -187,8 +185,8 @@ export class PageService {
   ): Promise<any> {
     const manager = getManager();
     const websiteExists = await manager.query(
-      `SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`,
-      [userId, website.toLowerCase()]
+      `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
+      [userId, website]
     );
 
     if (!websiteExists) {
@@ -212,18 +210,18 @@ export class PageService {
         DomainPage as dp,
         Evaluation as e
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         w.UserId = ? AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
-      [tag.toLowerCase(), userId, website.toLowerCase(), userId]
+      [tag, userId, website, userId]
     );
 
     return pages;
@@ -566,22 +564,16 @@ export class PageService {
               Domain as d,
               DomainPage as dp
             WHERE 
-              LOWER(t.Name) = ? AND
+              t.Name = ? AND
               t.UserId = ? AND 
               tw.TagId = t.TagId AND
               w.WebsiteId = tw.WebsiteId AND
-              LOWER(w.Name) = ? AND
+              w.Name = ? AND
               w.UserId = ? AND
               d.WebsiteId = w.WebsiteId AND
               dp.DomainId = d.DomainId AND
               dp.PageId = ?`,
-            [
-              tag.toLowerCase(),
-              userId,
-              website.toLowerCase(),
-              userId,
-              pageExists.PageId,
-            ]
+            [tag, userId, website, userId, pageExists.PageId]
           );
 
           if (domainPage.length === 0) {
@@ -596,20 +588,14 @@ export class PageService {
                 Website as w,
                 Domain as d
               WHERE 
-                LOWER(t.Name) = ? AND
+                t.Name = ? AND
                 t.UserId = ? AND 
                 tw.TagId = t.TagId AND
                 w.WebsiteId = tw.WebsiteId AND
-                LOWER(w.Name) = ? AND
+                w.Name = ? AND
                 w.UserId = ? AND
                 d.WebsiteId = w.WebsiteId`,
-              [
-                pageExists.PageId,
-                tag.toLowerCase(),
-                userId,
-                website.toLowerCase(),
-                userId,
-              ]
+              [pageExists.PageId, tag, userId, website, userId]
             );
           }
 
@@ -643,20 +629,14 @@ export class PageService {
               Website as w,
               Domain as d
             WHERE 
-              LOWER(t.Name) = ? AND
+              t.Name = ? AND
               t.UserId = ? AND 
               tw.TagId = t.TagId AND
               w.WebsiteId = tw.WebsiteId AND
-              LOWER(w.Name) = ? AND
+              w.Name = ? AND
               w.UserId = ? AND
               d.WebsiteId = w.WebsiteId`,
-            [
-              insertPage.PageId,
-              tag.toLowerCase(),
-              userId,
-              website.toLowerCase(),
-              userId,
-            ]
+            [insertPage.PageId, tag, userId, website, userId]
           );
 
           const existingDomain = await queryRunner.manager.query(
@@ -666,17 +646,17 @@ export class PageService {
               Website as w,
               Domain as d
             WHERE
-              LOWER(d.Url) = ? AND
+              d.Url = ? AND
               d.WebsiteId = w.WebsiteId AND
               (
                 w.UserId IS NULL OR
                 (
                   u.UserId = w.UserId AND
-                  LOWER(u.Type) = 'monitor'
+                  u.Type = 'monitor'
                 )
               )
             LIMIT 1`,
-            [domain.toLowerCase()]
+            [domain]
           );
 
           if (existingDomain.length > 0) {
@@ -738,13 +718,13 @@ export class PageService {
           Domain as d,
           DomainPage as dp
         WHERE 
-          LOWER(t.Name) = ? AND
+          t.Name = ? AND
           t.UserId = ? AND
           tw.TagId = t.TagId AND
           d.WebsiteId = tw.WebsiteId AND
           dp.DomainId = d.DomainId AND
           dp.PageId IN (?)`,
-        [tag.toLowerCase(), userId, pagesId]
+        [tag, userId, pagesId]
       );
 
       await queryRunner.commitTransaction();
@@ -970,7 +950,7 @@ export class PageService {
             w.UserId IS NULL OR
             (
               u.UserId = w.UserId AND
-              LOWER(u.Type) = 'monitor'
+              u.Type = 'monitor'
             )
           )
         LIMIT 1

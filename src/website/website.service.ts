@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, IsNull } from "typeorm";
+import { Connection, Repository, getManager, IsNull, Like } from "typeorm";
 import { Website } from "./website.entity";
 import { Domain } from "../domain/domain.entity";
 import { Tag } from "../tag/tag.entity";
@@ -16,8 +16,7 @@ export class WebsiteService {
     private readonly tagRepository: Repository<Tag>,
     @InjectRepository(Domain)
     private readonly domainRepository: Repository<Domain>,
-    private readonly connection: Connection,
-    private readonly evaluationService: EvaluationService
+    private readonly connection: Connection
   ) {}
 
   async addPagesToEvaluate(domainId: number, option: string): Promise<boolean> {
@@ -86,7 +85,7 @@ export class WebsiteService {
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
       WHERE 
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
       GROUP BY w.WebsiteId, d.DomainId`);
     return websites;
@@ -161,16 +160,16 @@ export class WebsiteService {
           User as u
         WHERE
           w.WebsiteId = d.WebsiteId AND
-          LOWER(w.Name) = ? AND
+          w.Name = ? AND
           (
             w.UserId IS NULL OR
             (
               u.UserId = w.UserId AND
-              LOWER(u.Type) != 'studies'
+              u.Type != 'studies'
             )
           )
         GROUP BY d.DomainId`,
-        [website.toLowerCase()]
+        [website]
       );
 
       return domains;
@@ -184,12 +183,12 @@ export class WebsiteService {
           User as u,
           Website as w
         WHERE
-          LOWER(u.Username) = ? AND
+          u.Username = ? AND
           w.UserId = u.UserId AND
-          LOWER(w.Name) = ? AND
+          w.Name = ? AND
           d.WebsiteId = w.WebsiteId
         GROUP BY d.DomainId`,
-        [flags, user.toLowerCase(), website.toLowerCase()]
+        [flags, user, website]
       );
 
       return domains;
@@ -224,15 +223,21 @@ export class WebsiteService {
         Website as w, 
         User as u 
       WHERE 
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"`);
     return websites;
   }
 
   async findByOfficialName(name: string): Promise<any> {
-    return this.websiteRepository.findOne({
+    const website = await this.websiteRepository.findOne({
       where: { Name: name, UserId: IsNull(), Deleted: 0 },
     });
+    return website;
+    /*if (website && website.Name !== name) {
+      return undefined;
+    } else {
+      return website;
+    }*/
   }
 
   async findAllWithoutUser(): Promise<any> {
@@ -252,7 +257,7 @@ export class WebsiteService {
       WHERE 
         w.EntityId IS NULL AND
         w.Deleted = "0" AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies'))`);
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))`);
     return websites;
   }
 
@@ -264,7 +269,7 @@ export class WebsiteService {
         Website as w
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND LOWER(p.Show_In) LIKE '_1%'
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE '_1%'
       WHERE
         w.UserId = ?
       GROUP BY w.WebsiteId, d.Url`,
@@ -449,8 +454,8 @@ export class WebsiteService {
   ): Promise<boolean> {
     const manager = getManager();
     const websiteExists = await manager.query(
-      `SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`,
-      [userId, website.toLowerCase()]
+      `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
+      [userId, website]
     );
 
     if (!websiteExists) {
@@ -468,16 +473,16 @@ export class WebsiteService {
         Domain as d,
         DomainPage as dp
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         w.UserId = ? AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId`,
-      [tag.toLowerCase(), userId, website.toLowerCase(), userId]
+      [tag, userId, website, userId]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -536,14 +541,14 @@ export class WebsiteService {
             SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = e.StudyUserId
           )
         WHERE
-          LOWER(t.Name) = ? AND
+          t.Name = ? AND
           t.UserId = ? AND
           tw.TagId = t.TagId AND
           w.WebsiteId = tw.WebsiteId AND
           w.UserId = ? AND
           d.WebsiteId = w.WebsiteId
         GROUP BY w.WebsiteId, d.Url`,
-        [userId, tagName.toLowerCase(), userId, userId]
+        [userId, tagName, userId, userId]
       );
     } else {
       throw new InternalServerErrorException();
@@ -566,7 +571,7 @@ export class WebsiteService {
         Website as w,
         Domain as d
       WHERE
-        LOWER(t.Name) != ? AND
+        t.Name != ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
@@ -579,7 +584,7 @@ export class WebsiteService {
             TagWebsite as tw2,
             Website as w2
           WHERE
-            LOWER(t2.Name) = ? AND
+            t2.Name = ? AND
             t2.UserId = ? AND
             tw2.TagId = t2.TagId AND
             w2.WebsiteId = tw2.WebsiteId AND
@@ -595,7 +600,7 @@ export class WebsiteService {
             Website as w2,
             Domain as d2
           WHERE
-            LOWER(t2.Name) = ? AND
+            t2.Name = ? AND
             t2.UserId = ? AND
             tw2.TagId = t2.TagId AND
             w2.WebsiteId = tw2.WebsiteId AND
@@ -603,13 +608,13 @@ export class WebsiteService {
             d2.WebsiteId = w2.WebsiteId
         )`,
       [
-        tagName.toLowerCase(),
+        tagName,
         userId,
         userId,
-        tagName.toLowerCase(),
+        tagName,
         userId,
         userId,
-        tagName.toLowerCase(),
+        tagName,
         userId,
         userId,
       ]
@@ -630,14 +635,14 @@ export class WebsiteService {
         TagWebsite as tw,
         Website as w
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = ? AND
-        LOWER(w.Name) = ?
+        w.Name = ?
       LIMIT 1`,
-      [tag.toLowerCase(), userId, userId, websiteName.toLowerCase()]
+      [tag, userId, userId, websiteName]
     );
 
     return website[0];
@@ -656,15 +661,15 @@ export class WebsiteService {
         Website as w,
         Domain as d
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = ? AND
         d.DomainId = w.WebsiteId AND
-        LOWER(d.Url) = ?
+        d.Url = ?
       LIMIT 1`,
-      [tag.toLowerCase(), userId, userId, domain]
+      [tag, userId, userId, domain]
     );
 
     return website[0];
@@ -685,8 +690,8 @@ export class WebsiteService {
       for (const id of websitesId || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) 
-          SELECT TagId, ? FROM Tag WHERE LOWER(Name) = ? AND UserId = ?`,
-          [id, tag.toLowerCase(), userId]
+          SELECT TagId, ? FROM Tag WHERE Name = ? AND UserId = ?`,
+          [id, tag, userId]
         );
       }
 
@@ -775,7 +780,7 @@ export class WebsiteService {
               Website as w,
               Domain as d
             WHERE
-              LOWER(d.Url) = ? AND
+              d.Url = ? AND
               d.WebsiteId = w.WebsiteId AND
               (
                 w.UserId IS NULL OR
@@ -785,7 +790,7 @@ export class WebsiteService {
                 )
               )
             LIMIT 1`,
-            [domain.toLowerCase()]
+            [domain]
           );
 
           if (existingDomain.length > 0) {
@@ -850,10 +855,10 @@ export class WebsiteService {
             `
             DELETE tw FROM Tag as t, TagWebsite as tw 
             WHERE 
-              LOWER(t.Name) = ? AND
+              t.Name = ? AND
               tw.TagId = t.TagId AND
               tw.WebsiteId = ?`,
-            [tag.toLowerCase(), id]
+            [tag, id]
           );
         } else {
           await queryRunner.manager.delete(Website, { WebsiteId: id });
@@ -878,7 +883,7 @@ export class WebsiteService {
     const manager = getManager();
     return (
       await manager.query(
-        `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE LOWER(u.Type) = "studies" AND w.UserId = u.UserId`
+        `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "studies" AND w.UserId = u.UserId`
       )
     )[0].Websites;
   }
@@ -887,7 +892,7 @@ export class WebsiteService {
     const manager = getManager();
     return (
       await manager.query(
-        `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE LOWER(u.Type) = "monitor" AND w.UserId = u.UserId`
+        `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "monitor" AND w.UserId = u.UserId`
       )
     )[0].Websites;
   }
@@ -1027,6 +1032,8 @@ export class WebsiteService {
     name: string,
     declaration: number | null,
     stamp: number | null,
+    declarationDate: any | null,
+    stampDate: any | null,
     entityId: number,
     userId: number,
     oldUserId: number,
@@ -1049,7 +1056,9 @@ export class WebsiteService {
           EntityId: entityId,
           UserId: userId,
           Declaration: declaration,
+          Declaration_Update_Date: declarationDate,
           Stamp: stamp,
+          Stamp_Update_Date: stampDate,
         }
       );
       if (oldUserId === null && userId !== null) {

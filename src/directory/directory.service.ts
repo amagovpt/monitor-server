@@ -242,20 +242,20 @@ export class DirectoryService {
         Tag as t
         LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
       WHERE
-        LOWER(d.Name) = ? AND
+        d.Name = ? AND
         dt.DirectoryId = d.DirectoryId AND
         t.TagId = dt.TagId AND
         t.UserId IS NULL
       GROUP BY t.TagId`,
-      [directory.toLowerCase()]
+      [directory]
     );
   }
 
   async findAllDirectoryWebsites(directory: string): Promise<any> {
     const manager = getManager();
     const nTags = await manager.query(
-      `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE LOWER(d.Name) = ? AND td.DirectoryId = d.DirectoryId`,
-      [directory.toLowerCase()]
+      `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
+      [directory]
     );
     return manager.query(
       `SELECT 
@@ -274,7 +274,7 @@ export class DirectoryService {
       WHERE
         tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
       GROUP BY
         w.WebsiteId
@@ -286,8 +286,8 @@ export class DirectoryService {
   async findAllDirectoryWebsitePages(directory: string): Promise<any> {
     const manager = getManager();
     const nTags = await manager.query(
-      `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE LOWER(d.Name) = ? AND td.DirectoryId = d.DirectoryId`,
-      [directory.toLowerCase()]
+      `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
+      [directory]
     );
     const pages = await manager.query(
       `SELECT 

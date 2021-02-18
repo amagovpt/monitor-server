@@ -40,10 +40,22 @@ export class Website {
   Declaration: number;
 
   @Column({
+    type: "datetime",
+    nullable: true,
+  })
+  Declaration_Update_Date: any;
+
+  @Column({
     type: "int",
     nullable: true,
   })
   Stamp: number;
+
+  @Column({
+    type: "datetime",
+    nullable: true,
+  })
+  Stamp_Update_Date: any;
 
   @Column({
     type: "datetime",

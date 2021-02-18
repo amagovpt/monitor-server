@@ -76,7 +76,7 @@ export class StampService {
             w.UserId IS NULL OR
             (
               u.UserId = w.UserId AND
-              LOWER(u.Type) != 'studies'
+              u.Type != 'studies'
             )
           ) AND
           d.WebsiteId = ? AND

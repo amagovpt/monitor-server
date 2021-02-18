@@ -116,9 +116,9 @@ export class EntityService {
         Entity as e
       WHERE
         e.EntityId = w.EntityId AND
-        LOWER(e.Long_Name) = ?
+        e.Long_Name = ?
       GROUP BY w.WebsiteId`,
-      [entity.toLowerCase()]
+      [entity]
     );
 
     return websites;
@@ -151,7 +151,7 @@ export class EntityService {
           ORDER BY Evaluation_Date DESC LIMIT 1
         )
       WHERE
-        LOWER(en.Long_Name) = ? AND
+        en.Long_Name = ? AND
         w.EntityId = en.EntityId AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
@@ -159,7 +159,7 @@ export class EntityService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-      [entity.toLowerCase()]
+      [entity]
     );
 
     return websites.filter((w) => w.Score !== null);

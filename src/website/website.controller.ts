@@ -35,7 +35,9 @@ export class WebsiteController {
     website.Name = req.body.name;
     website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
     website.Declaration = req.body.declaration;
+    website.Declaration_Update_Date = req.body.declarationDate;
     website.Stamp = req.body.stamp;
+    website.Stamp_Update_Date = req.body.stampDate;
     website.EntityId = parseInt(SqlString.escape(req.body.entityId)) || null;
     website.Creation_Date = new Date();
 
@@ -63,6 +65,8 @@ export class WebsiteController {
     const name = req.body.name;
     const declaration = req.body.declaration;
     const stamp = req.body.stamp;
+    const declarationDate = req.body.declarationDate;
+    const stampDate = req.body.stampDate;
     const entityId = req.body.entityId;
     const userId = req.body.userId;
     const oldUserId = req.body.olderUserId;
@@ -75,6 +79,8 @@ export class WebsiteController {
       name,
       declaration,
       stamp,
+      declarationDate,
+      stampDate,
       entityId,
       userId,
       oldUserId,

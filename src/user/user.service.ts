@@ -243,7 +243,7 @@ export class UserService {
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            LOWER(p.Show_In) = "110"`,
+            p.Show_In = "110"`,
           [userId]
         );
 
@@ -261,7 +261,7 @@ export class UserService {
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
-            LOWER(p.Show_In) = "100"`,
+            p.Show_In = "100"`,
           [userId]
         );
 
@@ -306,7 +306,7 @@ export class UserService {
         COUNT(distinct w.WebsiteId) as Websites
       FROM User as u
       LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
-      WHERE LOWER(u.Type) != "nimda"
+      WHERE u.Type != "nimda"
       GROUP BY u.UserId`);
 
     return users;
@@ -517,12 +517,12 @@ export class UserService {
           User as u,
           Domain as d
         WHERE
-          LOWER(u.Username) = ? AND
+          u.Username = ? AND
           w.UserId = u.UserId AND 
           d.WebsiteId = w.WebsiteId AND
           d.Active = "1"
         GROUP BY w.WebsiteId, d.Url`,
-      [user.toLowerCase()]
+      [user]
     );
 
     return websites;
@@ -538,10 +538,10 @@ export class UserService {
         Tag as t
         LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
       WHERE
-        LOWER(u.Username) = ? AND
+        u.Username = ? AND
         t.UserId = u.UserId
       GROUP BY t.TagId`,
-      [user.toLowerCase()]
+      [user]
     );
 
     return tags;

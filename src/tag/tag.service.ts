@@ -67,14 +67,26 @@ export class TagService {
     return !error;
   }
 
-  findByTagName(tagName: string): Promise<Tag | undefined> {
-    return this.tagRepository.findOne({ where: { Name: tagName } });
+  async findByTagName(tagName: string): Promise<Tag | undefined> {
+    const tag = await this.tagRepository.findOne({ where: { Name: tagName } });
+    return tag;
+    /*if (tag && tag.Name !== tagName) {
+      return undefined;
+    } else {
+      return tag;
+    }*/
   }
 
-  findByOfficialTagName(tagName: string): Promise<Tag | undefined> {
-    return this.tagRepository.findOne({
-      where: { Name: tagName.toLowerCase(), UserId: IsNull() },
+  async findByOfficialTagName(tagName: string): Promise<Tag | undefined> {
+    const tag = await this.tagRepository.findOne({
+      where: { Name: tagName, UserId: IsNull() },
     });
+    return tag;
+    /*if (tag && tag.Name !== tagName) {
+      return undefined;
+    } else {
+      return tag;
+    }*/
   }
 
   async findInfo(tagId: number): Promise<any> {
@@ -137,7 +149,7 @@ export class TagService {
     const manager = getManager();
     return (
       await manager.query(
-        `SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE LOWER(u.Type) = "studies" AND t.UserId = u.UserId`
+        `SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE u.Type = "studies" AND t.UserId = u.UserId`
       )
     )[0].Tags;
   }
@@ -205,7 +217,7 @@ export class TagService {
         DomainPage as dp,
         Evaluation as e
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
@@ -215,7 +227,7 @@ export class TagService {
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
-      [tag.toLowerCase(), userId, userId]
+      [tag, userId, userId]
     );
 
     return pages;
@@ -246,18 +258,18 @@ export class TagService {
         DomainPage as dp,
         Evaluation as e
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         w.UserId = ? AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
-      [tag.toLowerCase(), userId, website.toLowerCase(), userId]
+      [tag, userId, website, userId]
     );
 
     return pages;
@@ -281,8 +293,8 @@ export class TagService {
     const manager = getManager();
 
     const websiteExists = await manager.query(
-      `SELECT * FROM Website WHERE UserId = ? AND LOWER(Name) = ? LIMIT 1`,
-      [userId, website.toLowerCase()]
+      `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
+      [userId, website]
     );
 
     if (tag !== "null") {
@@ -304,18 +316,18 @@ export class TagService {
             DomainPage as dp,
             Evaluation as e
           WHERE
-            LOWER(t.Name) = ? AND
+            t.Name = ? AND
             t.UserId = ? AND
             tw.TagId = t.TagId AND
             w.WebsiteId = tw.WebsiteId AND
-            LOWER(w.Name) = ? AND
+            w.Name = ? AND
             w.UserId = ? AND
             d.WebsiteId = w.WebsiteId AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
             e.PageId = p.PageId AND
             e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
-          [tag.toLowerCase(), userId, website.toLowerCase(), userId]
+          [tag, userId, website, userId]
         );
 
         return pages;
@@ -382,7 +394,7 @@ export class TagService {
           ORDER BY Evaluation_Date DESC LIMIT 1
         )
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId IS NULL AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
@@ -392,7 +404,7 @@ export class TagService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-      [tag.toLowerCase()]
+      [tag]
     );
 
     return websites.filter((w) => w.Score !== null);
@@ -739,12 +751,12 @@ export class TagService {
           Tag as t,
           TagWebsite as tw
         WHERE
-          LOWER(t.Name) = ? AND
+          t.Name = ? AND
           t.UserId IS NULL AND
           tw.TagId = t.TagId AND
           w.WebsiteId = tw.WebsiteId
         GROUP BY w.WebsiteId`,
-        [tag.toLowerCase()]
+        [tag]
       );
 
       return websites;
@@ -759,14 +771,14 @@ export class TagService {
         TagWebsite as tw,
         Domain as d
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         u.Username = ? AND
         t.UserId = u.UserId AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND 
         d.WebsiteId = w.WebsiteId
       GROUP BY w.WebsiteId, d.Url`,
-        [tag.toLowerCase(), user]
+        [tag, user]
       );
 
       return websites;

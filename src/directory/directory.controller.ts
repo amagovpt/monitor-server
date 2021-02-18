@@ -56,6 +56,16 @@ export class DirectoryController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/:directoryName")
+  async checkIfTagNameExists(
+    @Param("directoryName") directoryName: string
+  ): Promise<boolean> {
+    return success(
+      !!(await this.directoryService.findByDirectoryName(directoryName))
+    );
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
   async updateDirectory(@Request() req: any): Promise<any> {
     const directoryId = req.body.directoryId;

@@ -398,11 +398,11 @@ export class EvaluationService {
         Page as p,
         Evaluation as e
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         w.UserId = t.UserId AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
@@ -410,7 +410,7 @@ export class EvaluationService {
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId)
       `,
-      [tag.toLowerCase(), userId, website.toLowerCase()]
+      [tag, userId, website]
     );
 
     const reports = new Array<any>();
@@ -455,28 +455,21 @@ export class EvaluationService {
         Page as p,
         Evaluation as e
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         w.UserId = ? AND
         d.WebsiteId = w.WebsiteId AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
-        LOWER(p.Uri) = ? AND 
+        p.Uri = ? AND 
         e.PageId = p.PageId AND
         e.StudyUserId = ?
       ORDER BY e.Evaluation_Date DESC 
       LIMIT 1`,
-        [
-          tag.toLowerCase(),
-          userId,
-          website.toLowerCase(),
-          userId,
-          url.toLowerCase(),
-          userId,
-        ]
+        [tag, userId, website, userId, url, userId]
       )
     )[0];
 
@@ -514,7 +507,7 @@ export class EvaluationService {
           Page as p,
           Evaluation as e
         WHERE
-          LOWER(p.Uri) = ? AND
+          p.Uri = ? AND
           p.Show_In LIKE "1%%" AND
           e.PageId = p.PageId AND
           e.Show_To LIKE "1_" AND
@@ -522,7 +515,7 @@ export class EvaluationService {
           d.DomainId = dp.DomainId AND
           w.WebsiteId = d.WebsiteId AND
           w.Deleted = "0" AND
-          (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) = "monitor"))
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
         ORDER BY e.Evaluation_Date DESC`;
     } else if (type === "monitor") {
       query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
@@ -534,7 +527,7 @@ export class EvaluationService {
           Page as p,
           Evaluation as e
         WHERE
-          LOWER(p.Uri) = ? AND
+          p.Uri = ? AND
           p.Show_In LIKE "11%" AND
           e.PageId = p.PageId AND
           e.Show_To LIKE "_1" AND
@@ -542,7 +535,7 @@ export class EvaluationService {
           d.DomainId = dp.DomainId AND
           w.WebsiteId = d.WebsiteId AND
           u.UserId = w.UserId AND 
-          LOWER(u.Type) = "monitor"
+          u.Type = "monitor"
         ORDER BY e.Evaluation_Date DESC`;
     } else if (type === "studies") {
       query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
@@ -550,7 +543,7 @@ export class EvaluationService {
           Page as p,
           Evaluation as e
         WHERE
-          LOWER(p.Uri) = ? AND
+          p.Uri = ? AND
           e.PageId = p.PageId
         ORDER BY e.Evaluation_Date DESC
         LIMIT 1`;
@@ -558,7 +551,7 @@ export class EvaluationService {
       throw new InternalServerErrorException();
     }
 
-    const evaluations = await manager.query(query, [page.toLowerCase()]);
+    const evaluations = await manager.query(query, [page]);
     return evaluations;
   }
 

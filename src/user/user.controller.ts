@@ -1,21 +1,26 @@
-import { Controller, InternalServerErrorException, Post, Get, Request, Param, UseGuards, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { UserService } from './user.service';
-import { User } from './user.entity';
-import { generatePasswordHash, createRandomUniqueHash } from '../lib/security';
-import { success } from '../lib/response';
+import {
+  Controller,
+  InternalServerErrorException,
+  Post,
+  Get,
+  Request,
+  Param,
+  UseGuards,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+import { UserService } from "./user.service";
+import { User } from "./user.entity";
+import { generatePasswordHash, createRandomUniqueHash } from "../lib/security";
+import { success } from "../lib/response";
 
-@Controller('user')
+@Controller("user")
 export class UserController {
+  constructor(private readonly userService: UserService) {}
 
-  constructor(
-    private readonly userService: UserService
-  ) { }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Post('changePassword')
+  @UseGuards(AuthGuard("jwt"))
+  @Post("changePassword")
   async changeUserPassword(@Request() req: any): Promise<any> {
-
     if (!this.passwordValidator(req.body.newPassword)) {
       throw new InternalServerErrorException();
     }
@@ -28,7 +33,13 @@ export class UserController {
       throw new UnauthorizedException();
     }
 
-    return success(!!await this.userService.changePassword(req.user.userId, password, newPassword));
+    return success(
+      !!(await this.userService.changePassword(
+        req.user.userId,
+        password,
+        newPassword
+      ))
+    );
   }
 
   private passwordValidator(password: string): boolean {
@@ -44,15 +55,21 @@ export class UserController {
     const numberFormat = /\d/g;
     const hasNumber = numberFormat.test(password);
 
-    if (isShort || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
+    if (
+      isShort ||
+      !hasUpperCase ||
+      !hasLowerCase ||
+      !hasNumber ||
+      !hasSpecial
+    ) {
       return false;
     }
-  
+
     return true;
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('create')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("create")
   async createUser(@Request() req: any): Promise<any> {
     if (!this.passwordValidator(req.body.password)) {
       throw new InternalServerErrorException();
@@ -70,8 +87,13 @@ export class UserController {
     const tags = JSON.parse(req.body.tags);
     const websites = JSON.parse(req.body.websites);
     const transfer = !!req.body.transfer;
-    
-    const createSuccess = await this.userService.createOne(user, tags, websites, transfer);
+
+    const createSuccess = await this.userService.createOne(
+      user,
+      tags,
+      websites,
+      transfer
+    );
     if (!createSuccess) {
       throw new InternalServerErrorException();
     }
@@ -79,8 +101,8 @@ export class UserController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('update')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("update")
   async updateUser(@Request() req: any): Promise<any> {
     const userId = req.body.userId;
     const password = req.body.password;
@@ -101,8 +123,17 @@ export class UserController {
     const websites = JSON.parse(req.body.websites);
     const defaultWebsites = JSON.parse(req.body.defaultWebsites);
     const transfer = !!req.body.transfer;
-    
-    const updateSuccess = await this.userService.update(userId, password, names, emails, app, defaultWebsites, websites, transfer);
+
+    const updateSuccess = await this.userService.update(
+      userId,
+      password,
+      names,
+      emails,
+      app,
+      defaultWebsites,
+      websites,
+      transfer
+    );
     if (!updateSuccess) {
       throw new InternalServerErrorException();
     }
@@ -110,12 +141,12 @@ export class UserController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('delete')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("delete")
   async deleteUser(@Request() req: any): Promise<any> {
     const userId = req.body.userId;
     const app = req.body.app;
-    
+
     const deleteSuccess = await this.userService.delete(userId, app);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
@@ -124,61 +155,71 @@ export class UserController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('get/:id')
-  getUser(@Param('id') id: string): Promise<User> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("get/:id")
+  getUser(@Param("id") id: string): Promise<User> {
     return this.userService.findById(id);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('info/:userId')
-  async getUserInfo(@Param('userId') userId: number): Promise<User> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("info/:userId")
+  async getUserInfo(@Param("userId") userId: number): Promise<User> {
     return success(await this.userService.findInfo(userId));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('exists/:username')
-  async checkIfUsernameExists(@Param('username') username: string): Promise<boolean> {
-    return success(!!await this.userService.findByUsername(username.toLowerCase()));
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/:username")
+  async checkIfUsernameExists(
+    @Param("username") username: string
+  ): Promise<boolean> {
+    return success(!!(await this.userService.findByUsername(username)));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all")
   async getAllNonAdminUsers(): Promise<any> {
     return success(await this.userService.findAllNonAdmin());
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('myMonitor')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("myMonitor")
   async getAllMyMonitorUsers(): Promise<any> {
     return success(await this.userService.findAllFromMyMonitor());
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('studyMonitor/total')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("studyMonitor/total")
   async getNumberOfStudyMonitorUsers(): Promise<any> {
     return success(await this.userService.findNumberOfStudyMonitor());
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('myMonitor/total')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("myMonitor/total")
   async getNumberOfMyMonitorUsers(): Promise<any> {
     return success(await this.userService.findNumberOfMyMonitor());
   }
 
-  @UseGuards(AuthGuard('jwt-study'))
-  @Get('tag/nameExists/:name')
-  async checkIfUserTagNameExists(@Request() req: any, @Param('name') name: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-study"))
+  @Get("tag/nameExists/:name")
+  async checkIfUserTagNameExists(
+    @Request() req: any,
+    @Param("name") name: string
+  ): Promise<any> {
     if (name) {
-      return success(!!await this.userService.findStudyMonitorUserTagByName(req.user.userId, name));
+      return success(
+        !!(await this.userService.findStudyMonitorUserTagByName(
+          req.user.userId,
+          name
+        ))
+      );
     } else {
       return success(false);
     }
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('type/:user')
-  async getUserType(@Param('user') user: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("type/:user")
+  async getUserType(@Param("user") user: string): Promise<any> {
     if (user) {
       return success(await this.userService.findType(user));
     } else {
@@ -186,9 +227,9 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('websites/:user')
-  async getListOfUserWebsites(@Param('user') user: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("websites/:user")
+  async getListOfUserWebsites(@Param("user") user: string): Promise<any> {
     if (user) {
       return success(await this.userService.findAllWebsites(user));
     } else {
@@ -196,9 +237,9 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('tags/:user')
-  async getListOfUserTags(@Param('user') user: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("tags/:user")
+  async getListOfUserTags(@Param("user") user: string): Promise<any> {
     if (user) {
       return success(await this.userService.findAllTags(user));
     } else {

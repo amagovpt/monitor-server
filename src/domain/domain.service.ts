@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository, getManager } from 'typeorm';
-import { Domain } from './domain.entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager } from "typeorm";
+import { Domain } from "./domain.entity";
 
 @Injectable()
 export class DomainService {
-
   constructor(
     @InjectRepository(Domain)
     private readonly domainRepository: Repository<Domain>,
@@ -20,7 +19,11 @@ export class DomainService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(Domain, { WebsiteId: domain.WebsiteId, Active: 1 }, { End_Date: domain.Start_Date, Active: 0 });
+      await queryRunner.manager.update(
+        Domain,
+        { WebsiteId: domain.WebsiteId, Active: 1 },
+        { End_Date: domain.Start_Date, Active: 0 }
+      );
 
       await queryRunner.manager.save(domain);
 
@@ -45,7 +48,11 @@ export class DomainService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(Domain, { DomainId: domainId }, { Url: url });
+      await queryRunner.manager.update(
+        Domain,
+        { DomainId: domainId },
+        { Url: url }
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -70,7 +77,7 @@ export class DomainService {
         LEFT OUTER JOIN Website as w ON w.WebsiteId = d.WebsiteId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND LOWER(u.Type) != 'studies')) AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
       GROUP BY d.DomainId`);
     return domains;
@@ -93,7 +100,7 @@ export class DomainService {
           w.UserId IS NULL OR
           (
             u.UserId = w.UserId AND
-            LOWER(u.Type) != 'studies'
+            u.Type != 'studies'
           )
         ) AND
         w.Deleted = "0"
@@ -102,65 +109,88 @@ export class DomainService {
   }
 
   async findByUrl(url: string): Promise<any> {
-    return this.domainRepository.findOne({ where: { Url: url }});
+    return this.domainRepository.findOne({ where: { Url: url } });
   }
 
   async exists(url: string): Promise<any> {
-    return (await this.domainRepository.query(`SELECT d.*
+    return (
+      (
+        await this.domainRepository.query(
+          `SELECT d.*
       FROM
         Domain as d,
         Website as w,
         User as u
       WHERE
-        LOWER(d.Url) = "${url.toLowerCase()}" AND
+        d.Url = ? AND
         w.WebsiteId = d.WebsiteId AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
-      LIMIT 1`)).length > 0;
+      LIMIT 1`,
+          [url]
+        )
+      ).length > 0
+    );
   }
 
-  async findMyMonitorUserWebsiteDomain(userId: number, website: string): Promise<any> {
+  async findMyMonitorUserWebsiteDomain(
+    userId: number,
+    website: string
+  ): Promise<any> {
     const manager = getManager();
-    const domain = await manager.query(`SELECT d.Url FROM 
+    const domain = await manager.query(
+      `SELECT d.Url FROM 
         Website as w,
         Domain as d
       WHERE
         w.UserId = ? AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1
-      LIMIT 1`, [userId, website]);
+      LIMIT 1`,
+      [userId, website]
+    );
 
     return domain ? domain[0].Url : null;
   }
 
-  async findStudyMonitorUserTagWebsiteDomain(userId: number, tag: string, website: string): Promise<any> {
+  async findStudyMonitorUserTagWebsiteDomain(
+    userId: number,
+    tag: string,
+    website: string
+  ): Promise<any> {
     const manager = getManager();
 
-    const domain = await manager.query(`SELECT d.Url FROM 
+    const domain = await manager.query(
+      `SELECT d.Url FROM 
         Tag as t,
         TagWebsite as tw,
         Website as w,
         Domain as d
       WHERE
-        LOWER(t.Name) = ? AND
+        t.Name = ? AND
         t.UserId = ? AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = ? AND
-        LOWER(w.Name) = ? AND
+        w.Name = ? AND
         d.WebsiteId = w.WebsiteId
-      LIMIT 1`, [tag.toLowerCase(), userId, userId, website.toLowerCase()]);
+      LIMIT 1`,
+      [tag, userId, userId, website]
+    );
 
     return domain ? domain[0].Url : null;
   }
 
   async findUserType(username: string): Promise<any> {
-    if (username === 'admin') {
-      return 'nimda';
+    if (username === "admin") {
+      return "nimda";
     }
 
-    const user = await getManager().query(`SELECT * FROM User WHERE Username = ? LIMIT 1`, [username]);
+    const user = await getManager().query(
+      `SELECT * FROM User WHERE Username = ? LIMIT 1`,
+      [username]
+    );
 
     if (user) {
       return user[0].Type;
@@ -169,11 +199,17 @@ export class DomainService {
     }
   }
 
-  async findAllDomainPages(user: string, type: string, domain: string, flags: string): Promise<any> {
+  async findAllDomainPages(
+    user: string,
+    type: string,
+    domain: string,
+    flags: string
+  ): Promise<any> {
     const manager = getManager();
-    
-    if (type === 'nimda') {
-      const pages = await manager.query(`SELECT 
+
+    if (type === "nimda") {
+      const pages = await manager.query(
+        `SELECT 
           p.*,
           e.A,
           e.AA,
@@ -197,10 +233,10 @@ export class DomainService {
           DomainPage as dp
         WHERE
           (
-            LOWER(u.Type) = "monitor" AND
+            u.Type = "monitor" AND
             w.UserId = u.UserId AND
             d.WebsiteId = w.WebsiteId AND
-            LOWER(d.Url) = ? AND
+            d.Url = ? AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE ?
@@ -209,16 +245,19 @@ export class DomainService {
           (
             w.UserId IS NULL AND
             d.WebsiteId = w.WebsiteId AND
-            LOWER(d.Url) = ? AND
+            d.Url = ? AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE ?
           )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [domain.toLowerCase(), flags, domain.toLowerCase(), flags]);
-      
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`,
+        [domain, flags, domain, flags]
+      );
+
       return pages;
     } else {
-      const pages = await manager.query(`SELECT 
+      const pages = await manager.query(
+        `SELECT 
           p.*,
           e.A,
           e.AA,
@@ -241,14 +280,16 @@ export class DomainService {
           Domain as d,
           DomainPage as dp
         WHERE
-          LOWER(u.Username) = ? AND
+          u.Username = ? AND
           w.UserId = u.UserId AND
           d.WebsiteId = w.WebsiteId AND
-          LOWER(d.Url) = ? AND
+          d.Url = ? AND
           dp.DomainId = d.DomainId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE ?
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`, [user.toLowerCase(), domain.toLowerCase(), flags]);
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`,
+        [user, domain, flags]
+      );
 
       return pages;
     }
