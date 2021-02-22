@@ -66,10 +66,10 @@ export class EntityService {
 
   async findAll(): Promise<any> {
     const manager = getManager();
-    const entities = await manager.query(`SELECT e.*, COUNT(distinct w.WebsiteId) as Websites 
+    const entities = await manager.query(`SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
       FROM 
         Entity as e 
-        LEFT OUTER JOIN Website as w ON w.EntityId = e.EntityId
+        LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
       GROUP BY e.EntityId`);
     return entities;
   }
@@ -83,7 +83,7 @@ export class EntityService {
       entity[
         "websites"
       ] = await this.entityRepository.query(
-        `SELECT * FROM Website WHERE EntityId = ?`,
+        `SELECT w.* FROM EntityWebsite as ew, Website as w WHERE ew.EntityId = ? AND w.WebsiteId = ew.WebsiteId`,
         [entityId]
       );
       return entity;
@@ -104,18 +104,15 @@ export class EntityService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User, dir.Show_in_Observatory, COUNT(dir.DirectoryId) as Observatory 
-      FROM 
-        Website as w
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-        LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
-        LEFT OUTER JOIN DirectoryTag as dt ON dt.TagId = t.TagId
-        LEFT OUTER JOIN Directory as dir ON dir.DirectoryId = dt.DirectoryId AND dir.Show_in_Observatory = 1,
+      `SELECT w.*, d.Url, u.Username as User, COUNT(distinct dp.PageId) as Pages 
+      FROM
         Entity as e
+        LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
+        LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
-        e.EntityId = w.EntityId AND
         e.Long_Name = ?
       GROUP BY w.WebsiteId`,
       [entity]
@@ -141,6 +138,7 @@ export class EntityService {
         e.Evaluation_Date
       FROM 
         Entity as en,
+        EntityWebsite as ew,
         Website as w,
         Domain as d,
         DomainPage as dp,
@@ -152,7 +150,8 @@ export class EntityService {
         )
       WHERE
         en.Long_Name = ? AND
-        w.EntityId = en.EntityId AND
+        ew.EntityId = en.EntityId AND
+        w.WebsiteId = ew.WebsiteId AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
@@ -176,10 +175,9 @@ export class EntityService {
       const insertEntity = await queryRunner.manager.save(entity);
 
       for (const websiteId of websites || []) {
-        await queryRunner.manager.update(
-          Website,
-          { WebsiteId: websiteId },
-          { EntityId: insertEntity.EntityId }
+        await queryRunner.manager.query(
+          `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
+          [insertEntity.EntityId, websiteId]
         );
       }
 
@@ -219,8 +217,8 @@ export class EntityService {
       for (const id of defaultWebsites || []) {
         if (!websites.includes(id)) {
           await queryRunner.manager.query(
-            `UPDATE Website SET EntityId = NULL WHERE WebsiteId = ?`,
-            [id]
+            `DELETE FROM EntityWebsite WHERE EntityId = ? AND WebsiteId = ?`,
+            [entityId, id]
           );
         }
       }
@@ -228,7 +226,7 @@ export class EntityService {
       for (const id of websites || []) {
         if (!defaultWebsites.includes(id)) {
           await queryRunner.manager.query(
-            `UPDATE Website SET EntityId = ? WHERE WebsiteId = ?`,
+            `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
             [entityId, id]
           );
         }

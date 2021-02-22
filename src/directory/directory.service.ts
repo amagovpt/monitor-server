@@ -260,17 +260,15 @@ export class DirectoryService {
     return manager.query(
       `SELECT 
         w.*, 
-        e.Short_Name as Entity, 
-        e.Long_Name as Entity2, 
         u.Username as User, u.Type as Type, 
         d.DomainId, d.Url as Domain, 
-        COUNT(distinct tw.TagId) as Observatory
+        COUNT(distinct dp.PageId) as Pages
       FROM
         TagWebsite as tw,
         Website as w
-        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
       WHERE
         tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
@@ -278,7 +276,7 @@ export class DirectoryService {
         w.Deleted = "0"
       GROUP BY
         w.WebsiteId
-      HAVING COUNT(w.WebsiteId) = ?`,
+      HAVING COUNT(distinct w.WebsiteId) = ?`,
       [nTags.map((t) => t.TagId), nTags.length]
     );
   }

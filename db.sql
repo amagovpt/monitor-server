@@ -116,7 +116,8 @@ CREATE TABLE `Page` (
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
-  UNIQUE KEY `PageId_UNIQUE` (`PageId`)
+  UNIQUE KEY `PageId_UNIQUE` (`PageId`),
+  UNIQUE KEY `PageUri_UNIQUE` (`Uri`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Directory`;
@@ -162,6 +163,17 @@ CREATE TABLE `TagWebsite` (
   KEY `WebsiteId_fk_idx` (`WebsiteId`),
   CONSTRAINT `TWTagId_fk` FOREIGN KEY (`TagId`) REFERENCES `Tag` (`TagId`) ON DELETE CASCADE,
   CONSTRAINT `TWWebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `EntityWebsite`;
+CREATE TABLE `EntityWebsite` (
+  `EntityId` int(11) NOT NULL,
+  `WebsiteId` int(11) NOT NULL,
+  PRIMARY KEY (`EntityId`,`WebsiteId`),
+  UNIQUE KEY `EntityWebsite` (`EntityId`,`WebsiteId`),
+  KEY `WebsiteId_fk_idx` (`WebsiteId`),
+  CONSTRAINT `EWEntityId_fk` FOREIGN KEY (`EntityId`) REFERENCES `Entity` (`EntityId`) ON DELETE CASCADE,
+  CONSTRAINT `EWWebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `User`;

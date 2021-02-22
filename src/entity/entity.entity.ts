@@ -1,32 +1,42 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+} from "typeorm";
+import { Website } from "../website/website.entity";
 
-@Entity('Entity')
+@Entity("Entity")
 export class EntityTable {
-
   @PrimaryGeneratedColumn({
-    type: 'int'
+    type: "int",
   })
   EntityId: number;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
     nullable: false,
-    unique: true
+    unique: true,
   })
   Short_Name: string;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
     nullable: false,
-    unique: true
+    unique: true,
   })
   Long_Name: string;
 
   @Column({
-    type: 'datetime',
-    nullable: false
+    type: "datetime",
+    nullable: false,
   })
   Creation_Date: any;
+
+  @ManyToMany((type) => Website)
+  @JoinTable()
+  Websites: Website[];
 }

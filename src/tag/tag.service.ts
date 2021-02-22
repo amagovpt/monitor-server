@@ -70,11 +70,6 @@ export class TagService {
   async findByTagName(tagName: string): Promise<Tag | undefined> {
     const tag = await this.tagRepository.findOne({ where: { Name: tagName } });
     return tag;
-    /*if (tag && tag.Name !== tagName) {
-      return undefined;
-    } else {
-      return tag;
-    }*/
   }
 
   async findByOfficialTagName(tagName: string): Promise<Tag | undefined> {
@@ -82,11 +77,6 @@ export class TagService {
       where: { Name: tagName, UserId: IsNull() },
     });
     return tag;
-    /*if (tag && tag.Name !== tagName) {
-      return undefined;
-    } else {
-      return tag;
-    }*/
   }
 
   async findInfo(tagId: number): Promise<any> {
@@ -742,11 +732,11 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+        `SELECT w.*, d.Url, u.Username as User, COUNT(distinct dp.PageId) as Pages 
         FROM 
           Website as w
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
           Tag as t,
           TagWebsite as tw

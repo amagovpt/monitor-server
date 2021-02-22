@@ -6,6 +6,7 @@ import {
   ManyToMany,
 } from "typeorm";
 import { Tag } from "../tag/tag.entity";
+import { EntityTable } from "../entity/entity.entity";
 
 @Entity("Website")
 export class Website {
@@ -74,4 +75,8 @@ export class Website {
   @ManyToMany((type) => Tag)
   @JoinTable()
   Tags: Tag[];
+
+  @ManyToMany((type) => EntityTable)
+  @JoinTable()
+  Entities: EntityTable[];
 }

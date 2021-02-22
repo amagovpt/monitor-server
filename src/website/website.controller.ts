@@ -38,10 +38,14 @@ export class WebsiteController {
     website.Declaration_Update_Date = req.body.declarationDate;
     website.Stamp = req.body.stamp;
     website.Stamp_Update_Date = req.body.stampDate;
-    website.EntityId = parseInt(SqlString.escape(req.body.entityId)) || null;
     website.Creation_Date = new Date();
 
     const domain = decodeURIComponent(req.body.domain);
+
+    const entities = JSON.parse(req.body.entities).map((entity: string) =>
+      SqlString.escape(entity)
+    );
+
     const tags = JSON.parse(req.body.tags).map((tag: string) =>
       SqlString.escape(tag)
     );
@@ -49,6 +53,7 @@ export class WebsiteController {
     const createSuccess = await this.websiteService.createOne(
       website,
       domain,
+      entities,
       tags
     );
     if (!createSuccess) {
@@ -67,10 +72,11 @@ export class WebsiteController {
     const stamp = req.body.stamp;
     const declarationDate = req.body.declarationDate;
     const stampDate = req.body.stampDate;
-    const entityId = req.body.entityId;
     const userId = req.body.userId;
     const oldUserId = req.body.olderUserId;
     const transfer = !!req.body.transfer;
+    const defaultEntities = JSON.parse(req.body.defaultEntities);
+    const entities = JSON.parse(req.body.entities);
     const defaultTags = JSON.parse(req.body.defaultTags);
     const tags = JSON.parse(req.body.tags);
 
@@ -81,10 +87,11 @@ export class WebsiteController {
       stamp,
       declarationDate,
       stampDate,
-      entityId,
       userId,
       oldUserId,
       transfer,
+      defaultEntities,
+      entities,
       defaultTags,
       tags
     );

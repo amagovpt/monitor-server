@@ -70,20 +70,14 @@ export class WebsiteService {
     const websites = await manager.query(`
       SELECT 
         w.*, 
-        e.Short_Name as Entity, 
-        e.Long_Name as Entity2, 
         u.Username as User, u.Type as Type, 
         d.DomainId, d.Url as Domain, 
-        COUNT(DISTINCT t.TagId) as Observatory
+        COUNT(distinct dp.PageId) as Pages
       FROM 
         Website as w
-        LEFT OUTER JOIN TagWebsite as tw ON tw.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Tag as t ON t.TagId = tw.TagId
-        LEFT OUTER JOIN DirectoryTag as dt ON dt.TagId = tw.TagId
-        LEFT OUTER JOIN Directory as dir ON dir.DirectoryId = dt.DirectoryId AND dir.Show_in_Observatory = 1
-        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
       WHERE 
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
         w.Deleted = "0"
@@ -98,12 +92,12 @@ export class WebsiteService {
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = ? AND d.Active = 1
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
       WHERE 
         w.WebsiteId = ?
       GROUP BY w.WebsiteId, d.Url 
       LIMIT 1`,
-      [websiteId, websiteId]
+      [websiteId]
     );
 
     if (websites) {
@@ -111,6 +105,11 @@ export class WebsiteService {
 
       website.tags = await this.websiteRepository.query(
         `SELECT t.* FROM Tag as t, TagWebsite as tw WHERE tw.WebsiteId = ? AND t.TagId = tw.TagId`,
+        [websiteId]
+      );
+
+      website.entities = await this.websiteRepository.query(
+        `SELECT e.* FROM Entity as e, EntityWebsite as ew WHERE ew.WebsiteId = ? AND e.EntityId = ew.EntityId`,
         [websiteId]
       );
       return website;
@@ -931,6 +930,7 @@ export class WebsiteService {
   async createOne(
     website: Website,
     domain: string,
+    entities: string[],
     tags: string[]
   ): Promise<boolean> {
     if (domain.endsWith("/")) {
@@ -966,9 +966,6 @@ export class WebsiteService {
         websiteId = websites[0].WebsiteId;
 
         const values = { Name: website.Name, Deleted: 0 };
-        if (website.EntityId !== null) {
-          values["EntityId"] = website.EntityId;
-        }
 
         if (website.UserId !== null) {
           values["UserId"] = website.UserId;
@@ -1006,6 +1003,13 @@ export class WebsiteService {
         await queryRunner.manager.save(newDomain);
       }
 
+      for (const entity of entities || []) {
+        await queryRunner.manager.query(
+          `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
+          [entity, websiteId]
+        );
+      }
+
       for (const tag of tags || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
@@ -1034,10 +1038,11 @@ export class WebsiteService {
     stamp: number | null,
     declarationDate: any | null,
     stampDate: any | null,
-    entityId: number,
     userId: number,
     oldUserId: number,
     transfer: boolean,
+    defaultEntities: number[],
+    entities: number[],
     defaultTags: number[],
     tags: number[]
   ): Promise<any> {
@@ -1053,7 +1058,6 @@ export class WebsiteService {
         { WebsiteId: websiteId },
         {
           Name: name,
-          EntityId: entityId,
           UserId: userId,
           Declaration: declaration,
           Declaration_Update_Date: declarationDate,
@@ -1144,6 +1148,24 @@ export class WebsiteService {
             e.PageId = p.PageId`,
           [websiteId]
         );
+      }
+
+      for (const id of defaultEntities || []) {
+        if (!entities.includes(id)) {
+          await queryRunner.manager.query(
+            `DELETE FROM EntityWebsite WHERE EntityId = ? AND WebsiteId = ?`,
+            [id, websiteId]
+          );
+        }
+      }
+
+      for (const id of entities || []) {
+        if (!defaultEntities.includes(id)) {
+          await queryRunner.manager.query(
+            `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
+            [id, websiteId]
+          );
+        }
       }
 
       for (const id of defaultTags || []) {
