@@ -91,7 +91,9 @@ export class PageService {
           w.WebsiteId,
           w.Name as Website_Name,
           w.Declaration as Website_Declaration,
+          w.Declaration_Update_Date as Declaration_Date,
           w.Stamp as Website_Stamp,
+          w.Stamp_Update_Date as Stamp_Date,
           w.Creation_Date as Website_Creation_Date,
           en.Long_Name as Entity_Name
         FROM
