@@ -94,12 +94,10 @@ export class PageService {
           w.Declaration_Update_Date as Declaration_Date,
           w.Stamp as Website_Stamp,
           w.Stamp_Update_Date as Stamp_Date,
-          w.Creation_Date as Website_Creation_Date,
-          en.Long_Name as Entity_Name
+          w.Creation_Date as Website_Creation_Date
         FROM
 		      TagWebsite as tw,
-          Website as w
-          LEFT OUTER JOIN Entity as en ON en.EntityId = w.EntityId,
+          Website as w,
           Domain as d,
           DomainPage as dp,
           Page as p
@@ -124,11 +122,27 @@ export class PageService {
       );
       pages = pages.filter((p) => p.Score !== null);
 
-      pages.map((p) => {
+      pages.map(async (p) => {
         p.DirectoryId = directory.DirectoryId;
         p.Directory_Name = directory.Name;
         p.Show_in_Observatory = directory.Show_in_Observatory;
         p.Directory_Creation_Date = directory.Creation_Date;
+
+        const entities = await manager.query(
+          `
+          SELECT e.Long_Name
+          FROM
+            EntityWebsite as ew,
+            Entity as e
+          WHERE
+            ew.WebsiteId = ? AND
+            e.EntityId = ew.EntityId
+        `,
+          [p.WebsiteId]
+        );
+        p.Entity_Name = entities
+          ? entities.map((e) => e.Long_Name).join(", ")
+          : null;
       });
       data = [...data, ...pages];
     }
