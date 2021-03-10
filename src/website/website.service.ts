@@ -1251,24 +1251,48 @@ export class WebsiteService {
         [websiteId]
       );
 
-      await queryRunner.manager.query(
+      const pages = await queryRunner.manager.query(
         `
-        UPDATE 
+        SELECT
+          dp.PageId 
+        FROM 
           Domain as d, 
-          DomainPage as dp, 
-          Page as p
-        SET 
-          p.Show_In = "000"
+          DomainPage as dp
         WHERE
           d.WebsiteId = ? AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId
+          dp.DomainId = d.DomainId
       `,
         [websiteId]
       );
 
       await queryRunner.manager.query(
-        `UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
+      );
+
+      const domains = await queryRunner.manager.query(
+        `SELECT DomainId FROM Domain WHERE WebsiteId = ?`,
+        [websiteId]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Domain
+        WHERE
+          DomainId IN (?)
+      `,
+        [domains.map((d) => d.DomainId)]
+      );
+
+      await queryRunner.manager.query(
+        //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
+        `DELETE FROM Website WHERE WebsiteId = ?`,
         [websiteId]
       );
 

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, Like } from "typeorm";
+import { Connection, Repository, getManager, Like, In } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
@@ -817,7 +817,7 @@ export class PageService {
 
     let hasError = false;
     try {
-      for (const id of pages || []) {
+      /*for (const id of pages || []) {
         const page = await queryRunner.manager.findOne(Page, {
           where: { PageId: id },
         });
@@ -834,7 +834,9 @@ export class PageService {
             { Show_In: new_show_in }
           );
         }
-      }
+      }*/
+
+      await queryRunner.manager.delete(Page, { PageId: In(pages) });
 
       await queryRunner.commitTransaction();
     } catch (err) {
