@@ -113,6 +113,19 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("deleteBulk")
+  async deleteWebsites(@Request() req: any): Promise<any> {
+    const websitesId = JSON.parse(req.body.websitesId);
+
+    const deleteSuccess = await this.websiteService.deleteBulk(websitesId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
   async deleteWebsite(@Request() req: any): Promise<any> {
     const websiteId = req.body.websiteId;

@@ -1,11 +1,12 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager } from "typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CrawlDomain, CrawlPage } from "./crawler.entity";
 import { readFileSync, writeFileSync } from "fs";
 import Crawler from "simplecrawler";
 import puppeteer from "puppeteer";
+import { PageService } from "src/page/page.service";
 
 @Injectable()
 export class CrawlerService {
@@ -14,7 +15,8 @@ export class CrawlerService {
   constructor(
     @InjectRepository(CrawlDomain)
     private readonly crawlDomainRepository: Repository<CrawlDomain>,
-    private readonly connection: Connection
+    private readonly connection: Connection,
+    private readonly pageService: PageService
   ) {
     this.isCrawling = false;
   }
@@ -36,18 +38,22 @@ export class CrawlerService {
           );
           if (domain.length > 0) {
             const urls = await this.crawl(domain[0].DomainUri);
+            if (domain[0].Tag !== 1) {
+              for (const url of urls || []) {
+                const newCrawlPage = new CrawlPage();
+                newCrawlPage.Uri = url;
+                newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+                await queryRunner.manager.save(newCrawlPage);
+              }
 
-            for (const url of urls || []) {
-              const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = url;
-              newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
-              await queryRunner.manager.save(newCrawlPage);
+              await queryRunner.manager.query(
+                `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
+                [domain[0].CrawlDomainId]
+              );
+            } else {
+              await this.pageService.addPages(domain[0].DomainId, urls, urls);
+              await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = "?"`, [domain[0].CrawlDomainId]);
             }
-
-            await queryRunner.manager.query(
-              `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
-              [domain[0].CrawlDomainId]
-            );
           }
           await queryRunner.commitTransaction();
         } catch (err) {
@@ -72,8 +78,7 @@ export class CrawlerService {
 
     try {
       await page.goto(url, {
-        timeout: 0,
-        waitUntil: "load",
+        waitUntil: "domcontentloaded",
       });
 
       urls = await page.evaluate((url) => {
@@ -351,13 +356,39 @@ export class CrawlerService {
     }
   }
 
+  async crawlTag(tagId: number): Promise<boolean> {
+    try {
+      const domains = await getManager().query(`
+        SELECT
+          d.DomainId,
+          d.Url 
+        FROM  
+          TagWebsite as tw,
+          Domain as d
+        WHERE
+          tw.TagId = "?" AND
+          d.WebsiteId = tw.WebsiteId AND
+          d.Active = 1`, [tagId]);
+
+      for (const domain of domains || []) {
+        await this.crawlDomain(-1, domain.Url, domain.Url, domain.DomainId, -1, -1, 1);
+      }
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
   async crawlDomain(
     userId: number,
     subDomain: string,
     domain: string,
     domainId: number,
     maxDepth: number,
-    maxPages: number
+    maxPages: number,
+    tag: number
   ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
@@ -372,6 +403,7 @@ export class CrawlerService {
       newCrawlDomain.DomainId = domainId;
       newCrawlDomain.Creation_Date = new Date();
       newCrawlDomain.SubDomainUri = subDomain;
+      newCrawlDomain.Tag = tag;
 
       const insertCrawlDomain = await queryRunner.manager.save(newCrawlDomain);
       //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
@@ -410,6 +442,16 @@ export class CrawlerService {
   async delete(crawlDomainId: number): Promise<any> {
     try {
       await this.crawlDomainRepository.delete({ CrawlDomainId: crawlDomainId });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async deleteBulk(crawlDomainIds: Array<number>): Promise<any> {
+    try {
+      await this.crawlDomainRepository.delete({ CrawlDomainId: In(crawlDomainIds) });
       return true;
     } catch (err) {
       console.error(err);

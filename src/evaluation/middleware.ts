@@ -245,9 +245,9 @@ function parseEvaluation(evaluation: any): any {
 
   const report: any = {};
 
-  report.pagecode = evaluation.system.page.dom.processed.html.plain;
+  report.pagecode = evaluation.system.page.dom.html;
   report["data"] = {};
-  report["data"].title = evaluation.system.page.dom.processed.title;
+  report["data"].title = evaluation.system.page.dom.title;
   report["data"].rawUrl = evaluation?.system?.url?.completeUrl || "";
   report["data"].elems = clone(elements);
   report["data"].nodes = clone(nodes);
@@ -261,13 +261,13 @@ function parseEvaluation(evaluation: any): any {
   report["data"].tot.info.title = clone(report["data"].title);
   report["data"].tot.info.date = clone(report["data"].date);
   report["data"].tot.info.htmlTags =
-    evaluation.system.page.dom.processed.elementCount; //count_html_tags(evaluation.postProcessingHTML);
+    evaluation.system.page.dom.elementCount; //count_html_tags(evaluation.postProcessingHTML);
   report["data"].tot.info.size =
     encodeURI(report.pagecode).split(/%..|./).length - 1;
   //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
   report["data"].tot.info.encoding = "utf-8";
   report["data"].tot.info.lang = getHtmlLang(
-    evaluation.system.page.dom.processed.html.plain
+    evaluation.system.page.dom.html
   );
   report["data"].tot.info.content = "text/html";
   report["data"].tot.info.hash = generateMd5Hash(report["data"].date);

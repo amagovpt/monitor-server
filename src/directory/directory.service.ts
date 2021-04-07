@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager } from "typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
 import { Directory } from "./directory.entity";
 
 @Injectable()
@@ -185,6 +185,29 @@ export class DirectoryService {
     return !hasError;
   }
 
+  async deleteBulk(directoriesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.delete(Directory, { DirectoryId: In(directoriesId) });
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   findByDirectoryName(directoryName: string): Promise<Directory | undefined> {
     return this.directoryRepository.findOne({ where: { Name: directoryName } });
   }
@@ -253,75 +276,147 @@ export class DirectoryService {
 
   async findAllDirectoryWebsites(directory: string): Promise<any> {
     const manager = getManager();
+
+    const _directory = await manager.query(`SELECT * FROM Directory WHERE Name = ? LIMIT 1`, [directory])
+    const method = _directory[0].Method;
+
     const nTags = await manager.query(
       `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
       [directory]
     );
-    return manager.query(
-      `SELECT 
-        w.*, 
-        u.Username as User, u.Type as Type, 
-        d.DomainId, d.Url as Domain, 
-        COUNT(distinct dp.PageId) as Pages
-      FROM
-        TagWebsite as tw,
-        Website as w
-        LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-      WHERE
-        tw.TagId IN (?) AND
-        w.WebsiteId = tw.WebsiteId AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-        w.Deleted = "0"
-      GROUP BY
-        w.WebsiteId
-      HAVING COUNT(distinct w.WebsiteId) = ?`,
-      [nTags.map((t) => t.TagId), nTags.length]
-    );
+    
+    if (method === 0) {
+      return manager.query(
+        `SELECT 
+          w.*, 
+          u.Username as User, u.Type as Type, 
+          d.DomainId, d.Url as Domain, 
+          COUNT(distinct dp.PageId) as Pages
+        FROM
+          TagWebsite as tw,
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+          w.Deleted = "0"
+        GROUP BY
+          w.WebsiteId
+        HAVING COUNT(distinct w.WebsiteId) = ?`,
+        [nTags.map((t) => t.TagId), nTags.length]
+      );
+    } else {
+      return manager.query(
+        `SELECT DISTINCT
+          w.*, 
+          u.Username as User, u.Type as Type, 
+          d.DomainId, d.Url as Domain, 
+          COUNT(distinct dp.PageId) as Pages
+        FROM
+          TagWebsite as tw,
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+          w.Deleted = "0"
+        GROUP BY
+          w.WebsiteId`,
+        [nTags.map((t) => t.TagId)]
+      );
+    }
   }
 
   async findAllDirectoryWebsitePages(directory: string): Promise<any> {
     const manager = getManager();
+
+    const _directory = await manager.query(`SELECT * FROM Directory WHERE Name = ? LIMIT 1`, [directory])
+    const method = _directory[0].Method;
+
     const nTags = await manager.query(
       `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
       [directory]
     );
-    const pages = await manager.query(
-      `SELECT 
-        w.WebsiteId,
-        p.*,
-        e.A,
-        e.AA,
-        e.AAA,
-        e.Score,
-        e.Errors,
-        e.Tot,
-        e.Evaluation_Date
-      FROM 
-        TagWebsite as tw,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
-          SELECT Evaluation_Date FROM Evaluation 
-          WHERE PageId = p.PageId AND Show_To LIKE "1_"
-          ORDER BY Evaluation_Date DESC LIMIT 1
-        )
-      WHERE
-        tw.TagId IN (?) AND
-        w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
-        p.Show_In LIKE "1__"
-      GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-      HAVING COUNT(w.WebsiteId) = ?`,
-      [nTags.map((t) => t.TagId), nTags.length]
-    );
 
-    return pages.filter((p) => p.Score !== null);
+    if (method === 0) {
+      const pages = await manager.query(
+        `SELECT 
+          w.WebsiteId,
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Score,
+          e.Errors,
+          e.Tot,
+          e.Evaluation_Date
+        FROM 
+          TagWebsite as tw,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_"
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1 AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE "1__"
+        GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
+        HAVING COUNT(w.WebsiteId) = ?`,
+        [nTags.map((t) => t.TagId), nTags.length]
+      );
+
+      return pages.filter((p) => p.Score !== null);
+    } else {
+      const pages = await manager.query(
+        `SELECT DISTINCT
+          w.WebsiteId,
+          p.*,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Score,
+          e.Errors,
+          e.Tot,
+          e.Evaluation_Date
+        FROM 
+          TagWebsite as tw,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId AND Show_To LIKE "1_"
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1 AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE "1__"
+        GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+        [nTags.map((t) => t.TagId)]
+      );
+
+      return pages.filter((p) => p.Score !== null);
+    } 
   }
 }

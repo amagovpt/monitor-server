@@ -9,6 +9,7 @@ CREATE TABLE `CrawlDomain` (
   `Creation_Date` datetime NOT NULL,
   `Done` tinyint(1) NOT NULL DEFAULT '0',
   `SubDomainUri` varchar(255) NOT NULL,
+  `Tag` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`CrawlDomainId`),
   UNIQUE KEY `CrawlDomainId_UNIQUE` (`CrawlDomainId`),
   UNIQUE KEY `UserIdDomainId_UNIQUE` (`UserId`,`DomainId`),
@@ -124,6 +125,7 @@ DROP TABLE IF EXISTS `Directory`;
 CREATE TABLE `Directory` (
   `DirectoryId` int (11) NOT NULL AUTO_INCREMENT,
   `Name` varchar (255) NOT NULL,
+  `Method` tinyint(1) NOT NULL DEFAULT '0',
   `Show_in_Observatory` tinyint (1) NOT NULL DEFAULT '0',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`DirectoryId`),

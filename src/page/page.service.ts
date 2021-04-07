@@ -72,79 +72,132 @@ export class PageService {
         [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
-      let pages = await manager.query(
-        `
-        SELECT
-          e.EvaluationId,
-          e.Title,
-          e.Score,
-          e.Errors,
-          e.Tot,
-          e.A,
-          e.AA,
-          e.AAA,
-          e.Evaluation_Date,
-          p.PageId,
-          p.Uri,
-          p.Creation_Date as Page_Creation_Date,
-          d.Url,
-          w.WebsiteId,
-          w.Name as Website_Name,
-          w.Declaration as Website_Declaration,
-          w.Declaration_Update_Date as Declaration_Date,
-          w.Stamp as Website_Stamp,
-          w.Stamp_Update_Date as Stamp_Date,
-          w.Creation_Date as Website_Creation_Date
-        FROM
-		      TagWebsite as tw,
-          Website as w,
-          Domain as d,
-          DomainPage as dp,
-          Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId AND Show_To LIKE "1_"
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          )
-        WHERE
-          tw.TagId IN (?) AND
-          w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1 AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId AND
-          p.Show_In LIKE "__1"
-        GROUP BY
-          w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-        HAVING
-          COUNT(w.WebsiteId) = ?`,
-        [tagsId, tagsId.length]
-      );
-      pages = pages.filter((p) => p.Score !== null);
 
-      pages.map(async (p) => {
-        p.DirectoryId = directory.DirectoryId;
-        p.Directory_Name = directory.Name;
-        p.Show_in_Observatory = directory.Show_in_Observatory;
-        p.Directory_Creation_Date = directory.Creation_Date;
-
-        const entities = await manager.query(
+      let pages = null;
+      if (directory.Method === 0) {
+        pages = await manager.query(
           `
-          SELECT e.Long_Name
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            d.Url,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
           FROM
-            EntityWebsite as ew,
-            Entity as e
+            TagWebsite as tw,
+            Website as w,
+            Domain as d,
+            DomainPage as dp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
           WHERE
-            ew.WebsiteId = ? AND
-            e.EntityId = ew.EntityId
-        `,
-          [p.WebsiteId]
+            tw.TagId IN (?) AND
+            w.WebsiteId = tw.WebsiteId AND
+            d.WebsiteId = w.WebsiteId AND
+            d.Active = 1 AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
+          HAVING
+            COUNT(w.WebsiteId) = ?`,
+          [tagsId, tagsId.length]
         );
-        p.Entity_Name = entities
-          ? entities.map((e) => e.Long_Name).join(", ")
-          : null;
-      });
-      data = [...data, ...pages];
+      } else {
+        pages = await manager.query(
+          `
+          SELECT DISTINCT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            d.Url,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            TagWebsite as tw,
+            Website as w,
+            Domain as d,
+            DomainPage as dp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            tw.TagId IN (?) AND
+            w.WebsiteId = tw.WebsiteId AND
+            d.WebsiteId = w.WebsiteId AND
+            d.Active = 1 AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          []
+        );
+      }
+      if (pages) {
+        pages = pages.filter((p) => p.Score !== null);
+
+        pages.map(async (p) => {
+          p.DirectoryId = directory.DirectoryId;
+          p.Directory_Name = directory.Name;
+          p.Show_in_Observatory = directory.Show_in_Observatory;
+          p.Directory_Creation_Date = directory.Creation_Date;
+
+          const entities = await manager.query(
+            `
+            SELECT e.Long_Name
+            FROM
+              EntityWebsite as ew,
+              Entity as e
+            WHERE
+              ew.WebsiteId = ? AND
+              e.EntityId = ew.EntityId
+          `,
+            [p.WebsiteId]
+          );
+          p.Entity_Name = entities
+            ? entities.map((e) => e.Long_Name).join(", ")
+            : null;
+        });
+        data = [...data, ...pages];
+      }
     }
 
     return data;

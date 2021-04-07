@@ -39,6 +39,7 @@ export class DirectoryController {
     const directory = new Directory();
     directory.Name = req.body.name;
     directory.Show_in_Observatory = req.body.observatory;
+    directory.Method = req.body.method;
     directory.Creation_Date = new Date();
 
     const tags = JSON.parse(req.body.tags);
@@ -91,10 +92,23 @@ export class DirectoryController {
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
-  async deleteOfficialTag(@Request() req: any): Promise<any> {
+  async deleteDirectory(@Request() req: any): Promise<any> {
     const directoryId = req.body.directoryId;
 
     const deleteSuccess = await this.directoryService.delete(directoryId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("deleteBulk")
+  async deleteDirectories(@Request() req: any): Promise<any> {
+    const directoriesId = JSON.parse(req.body.directoriesId);
+
+    const deleteSuccess = await this.directoryService.deleteBulk(directoriesId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }

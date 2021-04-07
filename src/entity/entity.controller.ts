@@ -80,6 +80,19 @@ export class EntityController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
+  @Post('deleteBulk')
+  async deleteEntities(@Request() req: any): Promise<any> {
+    const entitiesId = JSON.parse(req.body.entitiesId);
+
+    const deleteSuccess = await this.entityService.deleteBulk(entitiesId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
   @Get('exists/shortName/:shortName')
   async checkIfShortNameExists(@Param('shortName') shortName: string): Promise<any> {
     return success(!!await this.entityService.findByShortName(shortName));

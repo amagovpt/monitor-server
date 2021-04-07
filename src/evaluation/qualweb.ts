@@ -85,7 +85,9 @@ export async function evaluate(params: any): Promise<any> {
   options["validator"] = "http://194.117.20.202/validate/";
 
   const qualweb = new QualWeb();
-  await qualweb.start({ args: ["--no-sandbox"] });
+  await qualweb.start({
+    args: ["--no-sandbox", "--ignore-certificate-errors"],
+  });
 
   //const reports = await qualweb.evaluate(options);
   let reports = null;

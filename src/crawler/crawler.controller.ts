@@ -43,8 +43,15 @@ export class CrawlerController {
     const subDomain = req.body.subDomain;
     const maxDepth = req.body.max_depth;
     const maxPages = req.body.max_pages;
+    
+    return success(await this.crawlerService.crawlDomain(-1, subDomain, domain, domainId, maxDepth, maxPages, 0));
+  }
 
-    return success(await this.crawlerService.crawlDomain(-1, subDomain, domain, domainId, maxDepth, maxPages));
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('tag')
+  async crawlTag(@Request() req: any): Promise<any> {
+    const tagId = req.body.tagId;
+    return success(await this.crawlerService.crawlTag(tagId));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))
@@ -54,7 +61,7 @@ export class CrawlerController {
     const domain = req.body.domain;
     const domainId = await this.crawlerService.getDomainId(userId, domain);
 
-    return success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null));
+    return success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null, 0));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))
@@ -94,7 +101,7 @@ export class CrawlerController {
     const domain = req.body.domain;
     const domainId = await this.crawlerService.getDomainId(userId, domain);
 
-    return success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null));
+    return success(await this.crawlerService.crawlDomain(userId, domain, domain, domainId, null, null, 0));
   }
 
   @UseGuards(AuthGuard('jwt-study'))
@@ -138,6 +145,14 @@ export class CrawlerController {
     const crawlDomainId = req.body.crawlDomainId;
 
     return success(await this.crawlerService.delete(crawlDomainId));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Post('deleteBulk')
+  async deleteCrawlers(@Request() req: any): Promise<any> {
+    const crawlDomainIds = JSON.parse(req.body.crawlDomainIds);
+
+    return success(await this.crawlerService.deleteBulk(crawlDomainIds));
   }
 
   @UseGuards(AuthGuard('jwt-admin'))

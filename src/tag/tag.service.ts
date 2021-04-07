@@ -690,6 +690,29 @@ export class TagService {
     return !hasError;
   }
 
+  async deleteBulk(tagsId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.delete(Tag, { TagId: In(tagsId) });
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async removeUserTag(tagsId: number[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 

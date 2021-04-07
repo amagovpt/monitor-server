@@ -29,6 +29,13 @@ export class Directory {
   Show_in_Observatory: number;
 
   @Column({
+    type: "tinyint",
+    width: 1,
+    nullable: false,
+  })
+  Method: number;
+
+  @Column({
     type: "datetime",
     nullable: false,
   })

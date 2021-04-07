@@ -68,4 +68,11 @@ export class CrawlDomain {
     nullable: false
   })
   SubDomainUri: string;
+
+  @Column({
+    type: 'tinyint',
+    width: 1,
+    nullable: false
+  })
+  Tag: number;
 }

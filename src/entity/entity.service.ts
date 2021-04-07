@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager } from "typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
 import { EntityTable } from "./entity.entity";
 import { Website } from "../website/website.entity";
 
@@ -260,6 +260,29 @@ export class EntityService {
       );
 
       await queryRunner.manager.delete(EntityTable, { EntityId: entityId });
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async deleteBulk(entitiesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      await queryRunner.manager.delete(EntityTable, { EntityId: In(entitiesId) });
 
       await queryRunner.commitTransaction();
     } catch (err) {
