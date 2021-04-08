@@ -115,6 +115,7 @@ export class DirectoryService {
     directoryId: number,
     name: string,
     observatory: number,
+    method: number,
     defaultTags: number[],
     tags: number[]
   ): Promise<any> {
@@ -128,7 +129,7 @@ export class DirectoryService {
       await queryRunner.manager.update(
         Directory,
         { DirectoryId: directoryId },
-        { Name: name, Show_in_Observatory: observatory }
+        { Name: name, Show_in_Observatory: observatory, Method: method }
       );
 
       for (const id of defaultTags || []) {

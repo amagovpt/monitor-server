@@ -72,6 +72,7 @@ export class DirectoryController {
     const directoryId = req.body.directoryId;
     const name = req.body.name;
     const observatory = req.body.observatory;
+    const method = req.body.method;
     const defaultTags = JSON.parse(req.body.defaultTags);
     const tags = JSON.parse(req.body.tags);
 
@@ -79,6 +80,7 @@ export class DirectoryController {
       directoryId,
       name,
       observatory,
+      method,
       defaultTags,
       tags
     );

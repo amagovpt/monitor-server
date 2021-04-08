@@ -70,6 +70,7 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url) {
+    params.url = params.url.trim();
     if (
       !params.url.startsWith("http://") &&
       !params.url.startsWith("https://")

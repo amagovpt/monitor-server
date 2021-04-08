@@ -74,7 +74,7 @@ export class PageService {
       const tagsId = tags.map((t) => t.TagId);
 
       let pages = null;
-      if (directory.Method === 0) {
+      if (parseInt(directory.Method) === 0) {
         pages = await manager.query(
           `
           SELECT
@@ -168,7 +168,7 @@ export class PageService {
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-          []
+          [tagsId]
         );
       }
       if (pages) {
@@ -366,6 +366,7 @@ export class PageService {
 
     let hasError = false;
     try {
+      console.log(url);
       const page = await queryRunner.manager.findOne(Page, {
         where: { Uri: url },
       });
