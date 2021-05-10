@@ -86,11 +86,9 @@ export class DomainService {
   async findAllOfficial(): Promise<any> {
     const manager = getManager();
     const domains = await manager.query(`SELECT
-        d.*,
-        COUNT(distinct dp.PageId) as Pages
+        d.*
       FROM
-        Domain as d
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId,
+        Domain as d,
         Website as w,
         User as u
       WHERE

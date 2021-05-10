@@ -71,8 +71,9 @@ export class CrawlerService {
   }
 
   private async crawl(url: string): Promise<string[]> {
-    const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-    const page = await browser.newPage();
+    const browser = await puppeteer.launch({ args: ["--no-sandbox", "--ignore-certificate-errors"] });
+    const incognito = await browser.createIncognitoBrowserContext();
+    const page = await incognito.newPage();
 
     let urls = new Array<string>();
 
@@ -82,7 +83,7 @@ export class CrawlerService {
       });
 
       urls = await page.evaluate((url) => {
-        const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|php|json|pptx|txt".split(
+        const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt".split(
           "|"
         );
 
@@ -152,6 +153,7 @@ export class CrawlerService {
     }
 
     await page.close();
+    await incognito.close();
     await browser.close();
 
     const normalizedUrls = urls.map((u) => {

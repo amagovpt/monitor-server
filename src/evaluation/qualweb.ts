@@ -1,7 +1,7 @@
-import { QualWeb, EvaluationReport } from "@qualweb/core";
+import { QualWeb, EvaluationReport, QualwebOptions } from "@qualweb/core";
 
 export async function evaluate(params: any): Promise<any> {
-  const options = {
+  const options: QualwebOptions = {
     "act-rules": {
       rules: [
         "QW-ACT-R1",
@@ -15,7 +15,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R17",
         "QW-ACT-R18",
         "QW-ACT-R19",
-        //"QW-ACT-R37",
+        "QW-ACT-R37",
         "QW-ACT-R68",
       ],
     },
@@ -67,6 +67,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP18",
       ],
     },
+    waitUntil: ["load", "networkidle0"]
   };
 
   if (params.url) {
@@ -78,7 +79,7 @@ export async function evaluate(params: any): Promise<any> {
       params.url = "http://" + params.url;
     }
     options["url"] = params.url;
-    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
   } else if (params.html) {
     options["html"] = params.html;
   }
@@ -86,8 +87,8 @@ export async function evaluate(params: any): Promise<any> {
   options["validator"] = "http://194.117.20.202/validate/";
 
   const qualweb = new QualWeb();
-  await qualweb.start({
-    args: ["--no-sandbox", "--ignore-certificate-errors"],
+  await qualweb.start(undefined, {
+    args: ["--no-sandbox", "--ignore-certificate-errors"]
   });
 
   //const reports = await qualweb.evaluate(options);
@@ -120,7 +121,7 @@ export async function evaluate(params: any): Promise<any> {
   return report;
 }
 
-function timeExceeded(qualweb: QualWeb, options: any): Promise<any> {
+function timeExceeded(qualweb: QualWeb, options: QualwebOptions): Promise<any> {
   return new Promise((resolve, reject) => {
     const exceeded = setTimeout(() => {
       reject("Time exceeded for evaluation");
