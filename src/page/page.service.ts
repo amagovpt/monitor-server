@@ -4,6 +4,7 @@ import { Connection, Repository, getManager, Like, In } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
+import cloneDeep from 'lodash.clonedeep';
 
 @Injectable()
 export class PageService {
@@ -72,7 +73,7 @@ export class PageService {
         [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
-
+      
       let pages = null;
       if (parseInt(directory.Method) === 0) {
         pages = await manager.query(
@@ -126,7 +127,7 @@ export class PageService {
       } else {
         pages = await manager.query(
           `
-          SELECT DISTINCT
+          SELECT
             e.EvaluationId,
             e.Title,
             e.Score,
@@ -174,41 +175,35 @@ export class PageService {
       if (pages) {
         pages = pages.filter((p) => p.Score !== null);
 
-        pages.map(async (p) => {
+        for (const p of pages || []) {
           p.DirectoryId = directory.DirectoryId;
           p.Directory_Name = directory.Name;
           p.Show_in_Observatory = directory.Show_in_Observatory;
           p.Directory_Creation_Date = directory.Creation_Date;
-          if (!p.Entity_Name) {
-            const entities = await manager.query(
-              `
-              SELECT e.Long_Name
-              FROM
-                EntityWebsite as ew,
-                Entity as e
-              WHERE
-                ew.WebsiteId = ? AND
-                e.EntityId = ew.EntityId
-            `,
-              [p.WebsiteId]
-            );
-            if (entities.length > 0) {
-              if (entities.length === 1) {
-                p.Entity_Name = entities[0].Long_Name;
-              } else {
-                p.Entity_Name = entities.map((e) => e.Long_Name).join(", ");
-              }
+          p.Entity_Name = null;
+          
+          const entities = await manager.query(
+            `
+            SELECT e.Long_Name
+            FROM
+              EntityWebsite as ew,
+              Entity as e
+            WHERE
+              ew.WebsiteId = ? AND
+              e.EntityId = ew.EntityId
+          `,
+            [p.WebsiteId]
+          );
+          
+          if (entities.length > 0) {
+            if (entities.length === 1) {
+              p.Entity_Name = entities[0].Long_Name;
             } else {
-              p.Entity_Name = null;
+              p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
             }
           }
-          /*p.Entity_Name = entities.length > 1
-            ? entities.map((e) => e.Long_Name).join(", ")
-            : entities.length === 1 ? entities[0].Long_Name : null;
+        }
 
-          if (directory.Name === 'Administração Pública Central')
-            console.log(p.Entity_Name);*/
-        });
         data = [...data, ...pages];
       }
     }

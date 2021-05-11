@@ -79,12 +79,12 @@ export async function evaluate(params: any): Promise<any> {
       params.url = "http://" + params.url;
     }
     options["url"] = params.url;
-    //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
   } else if (params.html) {
     options["html"] = params.html;
   }
 
-  options["validator"] = "http://194.117.20.202/validate/";
+  options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
   await qualweb.start(undefined, {
@@ -105,7 +105,7 @@ export async function evaluate(params: any): Promise<any> {
   if (reports === null) {
     throw new Error(error);
   }
-
+  
   if (Object.keys(reports).length === 0 && params.url) {
     throw new Error("Invalid resource");
   }
