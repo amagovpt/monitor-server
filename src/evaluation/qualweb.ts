@@ -70,24 +70,18 @@ export async function evaluate(params: any): Promise<any> {
     waitUntil: ["load", "networkidle0"]
   };
 
-  if (params.url) {
-    params.url = params.url.trim();
-    if (
-      !params.url.startsWith("http://") &&
-      !params.url.startsWith("https://")
-    ) {
-      params.url = "http://" + params.url;
-    }
-    options["url"] = params.url;
-    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+  if (params.url || params.urls) {
+    //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    options.url = params.url;
+    options.urls = params.urls;
   } else if (params.html) {
-    options["html"] = params.html;
+    options.html = params.html;
   }
 
   options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
-  await qualweb.start(undefined, {
+  await qualweb.start({ maxConcurrency: 4 }, {
     args: ["--no-sandbox", "--ignore-certificate-errors"]
   });
 
@@ -110,15 +104,15 @@ export async function evaluate(params: any): Promise<any> {
     throw new Error("Invalid resource");
   }
 
-  let report: EvaluationReport;
+  /*let report: EvaluationReport;
 
   if (params.url) {
     report = reports[params.url];
   } else if (params.html) {
     report = reports["customHtml"];
-  }
+  }*/
 
-  return report;
+  return reports;
 }
 
 function timeExceeded(qualweb: QualWeb, options: QualwebOptions): Promise<any> {

@@ -286,11 +286,52 @@ function parseEvaluation(evaluation: any): any {
 }
 
 export async function executeUrlEvaluation(url: string): Promise<any> {
-  const evaluation = await qualweb.evaluate({ url });
-  return parseEvaluation(evaluation);
+  const params = {
+    url
+  };
+
+  params.url = params.url.trim();
+  if (
+    !params.url.startsWith("http://") &&
+    !params.url.startsWith("https://")
+  ) {
+    params.url = "http://" + params.url;
+  }
+
+  const reports = await qualweb.evaluate(params);
+  return parseEvaluation(reports[params.url]);
+}
+
+export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
+
+  const normalized = new Array<string>();
+
+  for (const url of urls ?? []) {
+    const _url = url.trim();
+    if (
+      !_url.startsWith("http://") &&
+      !_url.startsWith("https://")
+    ) {
+      normalized.push("http://" + _url);
+    } else {
+      normalized.push(_url);
+    }
+  }
+
+  const params = {
+    urls: normalized
+  };
+
+  const reports = await qualweb.evaluate(params);
+  for (const url in reports ?? {}) {
+    if (url && reports[url]) {
+      reports[url] = parseEvaluation(reports[url]);
+    }
+  }
+  return reports;
 }
 
 export async function executeHtmlEvaluation(html: string): Promise<any> {
-  const evaluation = await qualweb.evaluate({ html });
-  return parseEvaluation(evaluation);
+  const reports = await qualweb.evaluate({ html });
+  return parseEvaluation(reports['customHtml']);
 }

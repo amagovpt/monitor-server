@@ -3,7 +3,7 @@ import { Connection, getManager } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
 import { Evaluation } from "./evaluation.entity";
-import { executeUrlEvaluation, executeHtmlEvaluation } from "./middleware";
+import { executeUrlEvaluation, executeUrlsEvaluation, executeHtmlEvaluation } from "./middleware";
 
 @Injectable()
 export class EvaluationService {
@@ -23,12 +23,12 @@ export class EvaluationService {
       let pages = [];
       if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`
         );
       } else {
-        const skip = parseInt(process.env.ID) * 10;
+        const skip = parseInt(process.env.ID) * 100;
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100, ${skip}`
         );
       }
 
@@ -123,7 +123,48 @@ export class EvaluationService {
         throw err;
       }
 
-      for (const pte of pages || []) {
+      const reports = clone(await this.evaluateUrls(pages.map(p => p.Url)));
+      
+      const queryRunner = this.connection.createQueryRunner();
+
+      await queryRunner.connect();
+
+      await queryRunner.startTransaction();
+
+      for (const pte of pages ?? []) {
+        if (reports[pte.Url]) {
+          this.savePageEvaluation(
+            queryRunner,
+            pte.PageId,
+            reports[pte.Url],
+            pte.Show_To,
+            pte.StudyUserId
+          );
+
+          await queryRunner.manager.query(
+            `DELETE FROM Evaluation_List WHERE EvaluationListId = ?`,
+            [pte.EvaluationListId]
+          );
+        } else {
+          console.error("Check error log file for more information");
+          await queryRunner.manager.query(
+            `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+            ["Check error log file for more information", pte.EvaluationListId]
+          );
+        }
+      }
+
+      try {
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        // since we have errors lets rollback the changes we made
+        await queryRunner.rollbackTransaction();
+        console.error(err);
+      } finally {
+        await queryRunner.release();
+      }
+
+      /*for (const pte of pages || []) {
         let error = null;
         let evaluation: any;
         try {
@@ -168,12 +209,16 @@ export class EvaluationService {
         } finally {
           await queryRunner.release();
         }
-      }
+      }*/
     }
   }
 
   evaluateUrl(url: string): Promise<any> {
     return executeUrlEvaluation(url);
+  }
+
+  evaluateUrls(urls: string[]): Promise<any> {
+    return executeUrlsEvaluation(urls);
   }
 
   evaluateHtml(html: string): Promise<any> {

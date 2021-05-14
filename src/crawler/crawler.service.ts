@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync } from "fs";
 import Crawler from "simplecrawler";
 import puppeteer from "puppeteer";
 import { PageService } from "src/page/page.service";
+import { QualWeb } from '@qualweb/core';
 
 @Injectable()
 export class CrawlerService {
@@ -37,7 +38,8 @@ export class CrawlerService {
             `SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
           if (domain.length > 0) {
-            const urls = await this.crawl(domain[0].DomainUri);
+            const qualweb = new QualWeb();
+            const urls = await qualweb.crawlDomain(domain[0].DomainUri, { maxDepth: 0 }); //await this.crawl(domain[0].DomainUri);
             if (domain[0].Tag !== 1) {
               for (const url of urls || []) {
                 const newCrawlPage = new CrawlPage();
