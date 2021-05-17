@@ -123,7 +123,13 @@ export class EvaluationService {
         throw err;
       }
 
-      const reports = clone(await this.evaluateUrls(pages.map(p => p.Url)));
+      let reports = {};
+
+      try {
+        reports = clone(await this.evaluateUrls(pages.map(p => p.Url)));
+      } catch (err) {
+        console.error(err);
+      };
       
       const queryRunner = this.connection.createQueryRunner();
 
