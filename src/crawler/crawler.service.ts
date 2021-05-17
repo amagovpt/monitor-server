@@ -4,10 +4,10 @@ import { Connection, Repository, getManager, In } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CrawlDomain, CrawlPage } from "./crawler.entity";
 import { readFileSync, writeFileSync } from "fs";
-import Crawler from "simplecrawler";
+//import Crawler from "simplecrawler";
 import puppeteer from "puppeteer";
 import { PageService } from "src/page/page.service";
-import { QualWeb } from '@qualweb/core';
+import { Crawler } from '@qualweb/crawler';
 
 @Injectable()
 export class CrawlerService {
@@ -38,8 +38,16 @@ export class CrawlerService {
             `SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
           if (domain.length > 0) {
-            const qualweb = new QualWeb();
-            const urls = await qualweb.crawlDomain(domain[0].DomainUri, { maxDepth: 0 }); //await this.crawl(domain[0].DomainUri);
+            const browser = await puppeteer.launch({ args: ["--no-sandbox", "--ignore-certificate-errors"] });
+            const incognito = await browser.createIncognitoBrowserContext();
+            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            //await this.crawl(domain[0].DomainUri);
+            await crawler.crawl({ maxDepth: 0 });
+
+            await incognito.close();
+            await browser.close();
+
+            const urls = crawler.getResults();
             if (domain[0].Tag !== 1) {
               for (const url of urls || []) {
                 const newCrawlPage = new CrawlPage();
@@ -174,7 +182,7 @@ export class CrawlerService {
     return unique.sort();
   }
 
-  private crawler(
+  /*private crawler(
     domain: string,
     max_depth: number,
     max_pages: number,
@@ -247,7 +255,7 @@ export class CrawlerService {
       crawler.maxDepth = max_depth + 1;
       crawler.start();
     });
-  }
+  }*/
 
   findAll(): Promise<any> {
     return this.crawlDomainRepository.find({ where: { UserId: -1 } });
