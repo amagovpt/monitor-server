@@ -1265,15 +1265,17 @@ export class WebsiteService {
         [websiteId]
       );
 
-      await queryRunner.manager.query(
-        `
-        DELETE FROM  
-          Page
-        WHERE
-          PageId IN (?)
-      `,
-        [pages.map((p) => p.PageId)]
-      );
+      if (pages.length > 0) {
+        await queryRunner.manager.query(
+          `
+          DELETE FROM  
+            Page
+          WHERE
+            PageId IN (?)
+        `,
+          [pages.map((p) => p.PageId)]
+        );
+      }
 
       const domains = await queryRunner.manager.query(
         `SELECT DomainId FROM Domain WHERE WebsiteId = ?`,

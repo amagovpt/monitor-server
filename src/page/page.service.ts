@@ -41,21 +41,74 @@ export class PageService {
     return result[0].Total;
   }
 
-  async findAll(): Promise<any> {
+  async adminCount(search: string): Promise<any> {
     const manager = getManager();
-    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+    const count = await manager.query(`SELECT COUNT(*) as Count
       FROM 
-        Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-          SELECT Evaluation_Date FROM Evaluation 
-          WHERE PageId = p.PageId
-          ORDER BY Evaluation_Date DESC LIMIT 1
-        )
-        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+        Page
       WHERE
-        p.Show_In LIKE '1%'
-      GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`);
-    return pages;
+        Uri LIKE ? AND
+        Show_In LIKE '1%'`, [search.trim() !== '' ? `%${search.trim()}%` : '%']);
+    console.log(search)
+    return count[0].Count;
+  }
+
+  async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
+    if (!direction.trim()) {
+      const manager = getManager();
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+        WHERE
+          p.Uri LIKE ? AND
+          p.Show_In LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating
+        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+      return pages;
+    } else {
+      let order = '';
+      switch(sort) {
+        case 'Uri':
+          order = 'p.Uri';
+          break;
+        case 'Score':
+          order = 'e.Score';
+          break;
+        case 'Evaluation_Date':
+          order = 'e.Evaluation_Date';
+          break;
+        case 'State':
+          order = `el.Is_Evaluating ${direction.toUpperCase()}, el.Error`;
+          break;
+        case 'Show_In':
+          order = 'p.Show_In';
+          break;
+      }
+      
+      const manager = getManager();
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+        WHERE
+          p.Uri LIKE ? AND
+          p.Show_In LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating
+        ORDER BY ${order} ${direction.toUpperCase()}
+        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+      return pages;
+    }
   }
 
   async getObservatoryData(): Promise<any> {
