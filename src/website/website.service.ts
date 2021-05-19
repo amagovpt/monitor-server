@@ -65,24 +65,76 @@ export class WebsiteService {
     return !error;
   }
 
-  async findAll(): Promise<any> {
+  async adminCount(search: string): Promise<any> {
     const manager = getManager();
-    const websites = await manager.query(`
-      SELECT 
-        w.*, 
-        u.Username as User, u.Type as Type, 
-        d.DomainId, d.Url as Domain, 
-        COUNT(distinct dp.PageId) as Pages
+    const count = await manager.query(`SELECT COUNT(w.WebsiteId) as Count
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-      WHERE 
+      WHERE
+        w.Name LIKE ? AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-        w.Deleted = "0"
-      GROUP BY w.WebsiteId, d.DomainId`);
-    return websites;
+        w.Deleted = "0"`, [search.trim() !== '' ? `%${search.trim()}%` : '%']);
+    
+    return count[0].Count;
+  }
+
+  async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
+    if (!direction.trim()) {
+      const manager = getManager();
+      const websites = await manager.query(`
+        SELECT 
+          w.*, 
+          u.Username as User, u.Type as Type, 
+          d.DomainId, d.Url as Domain, 
+          COUNT(distinct dp.PageId) as Pages
+        FROM 
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        WHERE
+          w.Name LIKE ? AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+          w.Deleted = "0"
+        GROUP BY w.WebsiteId, d.DomainId
+        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+      return websites;
+    } else {
+      let order = '';
+      switch(sort) {
+        case 'Name':
+          order = 'w.Name';
+          break;
+        case 'Pages':
+          order = 'Pages';
+          break;
+        case 'Creation_Date':
+          order = 'w.Creation_Date';
+          break;
+      }
+
+      const manager = getManager();
+      const websites = await manager.query(`
+        SELECT 
+          w.*, 
+          u.Username as User, u.Type as Type, 
+          d.DomainId, d.Url as Domain, 
+          COUNT(distinct dp.PageId) as Pages
+        FROM 
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        WHERE
+          Name LIKE ? AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+          w.Deleted = "0"
+        GROUP BY w.WebsiteId, d.DomainId
+        ORDER BY ${order} ${direction.toUpperCase()}
+        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+      return websites;
+    }
   }
 
   async findInfo(websiteId: number): Promise<any> {

@@ -147,10 +147,16 @@ export class WebsiteController {
     return success(await this.websiteService.import(websiteId, websiteName));
   }
 
-  @UseGuards(AuthGuard("jwt-admin"))
-  @Get("all")
-  async getAllWebsites(): Promise<any> {
-    return success(await this.websiteService.findAll());
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('all/count/:search')
+  async getAdminWebsiteCount(@Param('search') search: string): Promise<any> {
+    return success(await this.websiteService.adminCount(search.substring(7)));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('all/:size/:page/:sort/:direction/:search')
+  async getAllWebsites(@Param('size') size: string, @Param('page') page: string, @Param('sort') sort: string, @Param('direction') direction: string, @Param('search') search: string): Promise<any> {
+    return success(await this.websiteService.findAll(parseInt(size), parseInt(page), sort.substring(5), direction.substring(10), search.substring(7)));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))

@@ -49,7 +49,7 @@ export class PageService {
       WHERE
         Uri LIKE ? AND
         Show_In LIKE '1%'`, [search.trim() !== '' ? `%${search.trim()}%` : '%']);
-    console.log(search)
+    
     return count[0].Count;
   }
 
