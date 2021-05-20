@@ -56,7 +56,7 @@ export class PageService {
   async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
     if (!direction.trim()) {
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -64,13 +64,12 @@ export class PageService {
             WHERE PageId = p.PageId
             ORDER BY Evaluation_Date DESC LIMIT 1
           )
-          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
         WHERE
           p.Uri LIKE ? AND
           p.Show_In LIKE '1%'
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date
         LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
-      return pages;
+      return pages.map(p => { p.Error = null; return p; });
     } else {
       let order = '';
       switch(sort) {
@@ -92,7 +91,7 @@ export class PageService {
       }
       
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -100,14 +99,13 @@ export class PageService {
             WHERE PageId = p.PageId
             ORDER BY Evaluation_Date DESC LIMIT 1
           )
-          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
         WHERE
           p.Uri LIKE ? AND
           p.Show_In LIKE '1%'
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date
         ORDER BY ${order} ${direction.toUpperCase()}
         LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
-      return pages;
+      return pages.map(p => { p.Error = null; return p; });
     }
   }
 

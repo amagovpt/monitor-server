@@ -1,5 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
-import { PageService } from "../page/page.service";
+import { ObservatoryService } from "./observatory.service";
 import { success } from "../lib/response";
 import clone from "lodash.clone";
 
@@ -9,11 +9,11 @@ import { Website } from "./models/website";
 
 @Controller("observatory")
 export class ObservatoryController {
-  constructor(private readonly pageService: PageService) {}
+  constructor(private readonly observatoryService: ObservatoryService) {}
 
   @Get()
   async getData(): Promise<any> {
-    const data = await this.pageService.getObservatoryData();
+    const data = await this.observatoryService.getData();
 
     /*const tags = new Array<Tag>();
     const tmpTags = this.createTemporaryTags(data);
