@@ -108,7 +108,7 @@ export class PageService {
       }
       
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date,
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -442,7 +442,6 @@ export class PageService {
 
     let hasError = false;
     try {
-      console.log(url);
       const page = await queryRunner.manager.findOne(Page, {
         where: { Uri: url },
       });
