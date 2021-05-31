@@ -4,7 +4,7 @@ import { Connection, Repository, getManager, Like, In } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
-import cloneDeep from 'lodash.clonedeep';
+import cloneDeep from "lodash.clonedeep";
 
 @Injectable()
 export class PageService {
@@ -43,13 +43,16 @@ export class PageService {
 
   async adminCount(search: string): Promise<any> {
     const manager = getManager();
-    const count = await manager.query(`SELECT COUNT(*) as Count
+    const count = await manager.query(
+      `SELECT COUNT(*) as Count
       FROM 
         Page
       WHERE
         Uri LIKE ? AND
-        Show_In LIKE '1%'`, [search.trim() !== '' ? `%${search.trim()}%` : '%']);
-    
+        Show_In LIKE '1%'`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+
     return count[0].Count;
   }
 
@@ -70,10 +73,17 @@ export class PageService {
         LIMIT ? OFFSET ?
   */
 
-  async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
+  async findAll(
+    size: number,
+    page: number,
+    sort: string,
+    direction: string,
+    search: string
+  ): Promise<any> {
     if (!direction.trim()) {
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date
+      const pages = await manager.query(
+        `SELECT p.*, e.Score, e.Evaluation_Date
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -85,30 +95,36 @@ export class PageService {
           p.Uri LIKE ? AND
           p.Show_In LIKE '1%'
         GROUP BY p.PageId, e.Score, e.Evaluation_Date
-        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
-      return pages.map(p => { p.Error = null; return p; });
+        LIMIT ? OFFSET ?`,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
+      return pages.map((p) => {
+        p.Error = null;
+        return p;
+      });
     } else {
-      let order = '';
-      switch(sort) {
-        case 'Uri':
-          order = 'p.Uri';
+      let order = "";
+      switch (sort) {
+        case "Uri":
+          order = "p.Uri";
           break;
-        case 'Score':
-          order = 'e.Score';
+        case "Score":
+          order = "e.Score";
           break;
-        case 'Evaluation_Date':
-          order = 'e.Evaluation_Date';
+        case "Evaluation_Date":
+          order = "e.Evaluation_Date";
           break;
-        case 'State':
+        case "State":
           order = `el.Is_Evaluating ${direction.toUpperCase()}, el.Error`;
           break;
-        case 'Show_In':
-          order = 'p.Show_In';
+        case "Show_In":
+          order = "p.Show_In";
           break;
       }
-      
+
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date
+      const pages = await manager.query(
+        `SELECT p.*, e.Score, e.Evaluation_Date
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -121,8 +137,13 @@ export class PageService {
           p.Show_In LIKE '1%'
         GROUP BY p.PageId, e.Score, e.Evaluation_Date
         ORDER BY ${order} ${direction.toUpperCase()}
-        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
-      return pages.map(p => { p.Error = null; return p; });
+        LIMIT ? OFFSET ?`,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
+      return pages.map((p) => {
+        p.Error = null;
+        return p;
+      });
     }
   }
 
@@ -141,7 +162,7 @@ export class PageService {
         [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
-      
+
       let pages = null;
       if (parseInt(directory.Method) === 0) {
         pages = await manager.query(
@@ -249,7 +270,7 @@ export class PageService {
           p.Show_in_Observatory = directory.Show_in_Observatory;
           p.Directory_Creation_Date = directory.Creation_Date;
           p.Entity_Name = null;
-          
+
           const entities = await manager.query(
             `
             SELECT e.Long_Name
@@ -262,7 +283,7 @@ export class PageService {
           `,
             [p.WebsiteId]
           );
-          
+
           if (entities.length > 0) {
             if (entities.length === 1) {
               p.Entity_Name = entities[0].Long_Name;
@@ -455,6 +476,11 @@ export class PageService {
         await queryRunner.manager.query(
           `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
           [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]
+        );
+      } else {
+        await queryRunner.manager.query(
+          `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+          [evalList[0].EvaluationListId]
         );
       }
 

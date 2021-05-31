@@ -67,7 +67,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP18",
       ],
     },
-    waitUntil: ["load", "networkidle0"]
+    waitUntil: ["load", "networkidle0"],
   };
 
   if (params.url || params.urls) {
@@ -81,15 +81,18 @@ export async function evaluate(params: any): Promise<any> {
   options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
-  await qualweb.start({ maxConcurrency: 4 }, {
-    args: ["--no-sandbox", "--ignore-certificate-errors"]
-  });
+  await qualweb.start(
+    { maxConcurrency: 4, timeout: 1000 * 60 * 2 },
+    {
+      args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"],
+    }
+  );
 
   //const reports = await qualweb.evaluate(options);
   let reports = null;
   let error = null;
   try {
-    reports = await timeExceeded(qualweb, options);
+    reports = await qualweb.evaluate(options); //await timeExceeded(qualweb, options);
   } catch (err) {
     error = err;
   } finally {
@@ -99,7 +102,7 @@ export async function evaluate(params: any): Promise<any> {
   if (reports === null) {
     throw new Error(error);
   }
-  
+
   if (Object.keys(reports).length === 0 && params.url) {
     throw new Error("Invalid resource");
   }
