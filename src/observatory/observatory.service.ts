@@ -42,7 +42,7 @@ export class ObservatoryService {
 
   constructor(private readonly connection: Connection) {}
 
-  //@Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async generateData(): Promise<any> {
     const data = await this.getData();
 
@@ -82,7 +82,26 @@ export class ObservatoryService {
       directories: this.getDirectories(listDirectories),
     };
 
-    return global;
+    const manager = getManager();
+
+    await manager.query(
+      "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
+      [JSON.stringify(global), JSON.stringify({}), new Date()]
+    );
+
+    //return global;
+  }
+
+  async getObservatoryData(): Promise<any> {
+    const manager = getManager();
+
+    const data = (
+      await manager.query(
+        "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+      )
+    )[0].Global_Statistics;
+
+    return JSON.parse(data);
   }
 
   async getData(): Promise<any> {

@@ -9,7 +9,7 @@ export class ObservatoryController {
   @Get()
   async getData(): Promise<any> {
     //const data = await this.observatoryService.getData();
-    const data = await this.observatoryService.generateData();
+    const data = await this.observatoryService.getObservatoryData();
     return success(data);
   }
 }
