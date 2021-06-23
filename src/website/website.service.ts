@@ -45,10 +45,21 @@ export class WebsiteService {
     try {
       for (const page of pages || []) {
         try {
-          await queryRunner.manager.query(
-            `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
-            [page.PageId, -1, page.Uri, "10", new Date()]
+          const pageEval = await queryRunner.manager.query(
+            `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
+            [page.PageId, page.Uri, "10"]
           );
+          if (pageEval.length > 0) {
+            await queryRunner.manager.query(
+              `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+              [pageEval[0].EvaluationListId]
+            );
+          } else {
+            await queryRunner.manager.query(
+              `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
+              [page.PageId, -1, page.Uri, "10", new Date()]
+            );
+          }
         } catch (_) {}
       }
 

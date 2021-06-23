@@ -44,10 +44,21 @@ export class EntityService {
     try {
       for (const page of pages || []) {
         try {
-          await queryRunner.manager.query(
-            `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
-            [page.PageId, -1, page.Uri, "10", new Date()]
+          const pageEval = await queryRunner.manager.query(
+            `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
+            [page.PageId, page.Uri, "10"]
           );
+          if (pageEval.length > 0) {
+            await queryRunner.manager.query(
+              `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+              [pageEval[0].EvaluationListId]
+            );
+          } else {
+            await queryRunner.manager.query(
+              `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
+              [page.PageId, -1, page.Uri, "10", new Date()]
+            );
+          }
         } catch (_) {}
       }
 
@@ -65,9 +76,10 @@ export class EntityService {
   }
 
   async adminCount(search: string): Promise<any> {
-    const name = search.trim() !== '' ? `%${search.trim()}%` : '%';
+    const name = search.trim() !== "" ? `%${search.trim()}%` : "%";
     const manager = getManager();
-    const count = await manager.query(`
+    const count = await manager.query(
+      `
       SELECT 
         COUNT(*) as Count 
       FROM 
@@ -75,17 +87,26 @@ export class EntityService {
       WHERE
         Short_Name LIKE ? OR
         Long_Name LIKE ?
-        `, [name, name]);
-    
+        `,
+      [name, name]
+    );
+
     return count[0].Count;
   }
 
-  async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
-    const name = search.trim() !== '' ? `%${search.trim()}%` : '%';
+  async findAll(
+    size: number,
+    page: number,
+    sort: string,
+    direction: string,
+    search: string
+  ): Promise<any> {
+    const name = search.trim() !== "" ? `%${search.trim()}%` : "%";
     if (!direction.trim()) {
       if (size !== -1) {
         const manager = getManager();
-        const entities = await manager.query(`SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
+        const entities = await manager.query(
+          `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
           FROM 
             Entity as e 
             LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
@@ -93,39 +114,45 @@ export class EntityService {
             e.Short_Name LIKE ? OR
             e.Long_Name LIKE ?
           GROUP BY e.EntityId
-          LIMIT ? OFFSET ?`, [name, name, size, (page) * size]);
+          LIMIT ? OFFSET ?`,
+          [name, name, size, page * size]
+        );
         return entities;
       } else {
         const manager = getManager();
-        const entities = await manager.query(`SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
+        const entities = await manager.query(
+          `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
           FROM 
             Entity as e 
             LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
           WHERE
             e.Short_Name LIKE ? OR
             e.Long_Name LIKE ?
-          GROUP BY e.EntityId`, [name, name]);
+          GROUP BY e.EntityId`,
+          [name, name]
+        );
         return entities;
       }
     } else {
-      let order = '';
-      switch(sort) {
-        case 'Short_Name':
-          order = 'e.Short_Name';
+      let order = "";
+      switch (sort) {
+        case "Short_Name":
+          order = "e.Short_Name";
           break;
-        case 'Long_Name':
-          order = 'e.Long_Name';
+        case "Long_Name":
+          order = "e.Long_Name";
           break;
-        case 'Creation_Date':
-          order = 'e.Creation_Date';
+        case "Creation_Date":
+          order = "e.Creation_Date";
           break;
-        case 'Websites':
+        case "Websites":
           order = `Websites`;
           break;
       }
-      
+
       const manager = getManager();
-      const entities = await manager.query(`SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
+      const entities = await manager.query(
+        `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
         FROM 
           Entity as e 
           LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
@@ -134,7 +161,9 @@ export class EntityService {
           e.Long_Name LIKE ?
         GROUP BY e.EntityId
         ORDER BY ${order} ${direction.toUpperCase()}
-        LIMIT ? OFFSET ?`, [name, name, size, (page) * size]);
+        LIMIT ? OFFSET ?`,
+        [name, name, size, page * size]
+      );
       return entities;
     }
   }
@@ -145,9 +174,7 @@ export class EntityService {
     });
 
     if (entity) {
-      entity[
-        "websites"
-      ] = await this.entityRepository.query(
+      entity["websites"] = await this.entityRepository.query(
         `SELECT w.* FROM EntityWebsite as ew, Website as w WHERE ew.EntityId = ? AND w.WebsiteId = ew.WebsiteId`,
         [entityId]
       );
@@ -347,7 +374,9 @@ export class EntityService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.delete(EntityTable, { EntityId: In(entitiesId) });
+      await queryRunner.manager.delete(EntityTable, {
+        EntityId: In(entitiesId),
+      });
 
       await queryRunner.commitTransaction();
     } catch (err) {

@@ -4,12 +4,18 @@ import orderBy from "lodash.orderby";
 
 export class Website {
   id: number;
+  DirectoryId: number;
   rank: number;
   entity: string;
   name: string;
+  declaration: number | null;
+  declarationDate: Date | null;
+  stamp: number | null;
+  stampDate: Date | null;
   domain: string;
   creationDate: Date;
   pages: Array<Page>;
+  calculatedScore: number;
   score: number;
   A: number;
   AA: number;
@@ -24,16 +30,26 @@ export class Website {
     id: number,
     entity: string,
     name: string,
+    declaration: number | null,
+    declarationDate: Date | null,
+    stamp: number | null,
+    stampDate: Date | null,
     domain: string,
     creationDate: Date
   ) {
     this.id = id;
+    this.DirectoryId = -1;
     this.rank = -1;
     this.entity = entity;
     this.name = name;
+    this.declaration = declaration;
+    this.declarationDate = declarationDate ? new Date(declarationDate) : null;
+    this.stamp = stamp;
+    this.stampDate = stampDate ? new Date(stampDate) : null;
     this.domain = domain;
     this.creationDate = creationDate;
     this.pages = new Array<Page>();
+    this.calculatedScore = 0;
     this.score = 0;
     this.A = 0;
     this.AA = 0;
@@ -70,7 +86,6 @@ export class Website {
       evaluationDate
     );
     this.pages.push(page);
-
     this.score += score;
 
     if (A === 0) {
@@ -94,12 +109,9 @@ export class Website {
       const test = tests[key]["test"];
       const elem = tests[key]["elem"];
       const occurrences =
-        pageErrors[test] === undefined ||
-        pageErrors[test] < 1 ||
-        pageErrors[test] === "lang"
+        pageErrors[test] === undefined || pageErrors[test] < 1
           ? 1
           : pageErrors[test];
-
       const result = tests[key]["result"];
 
       if (result === "failed") {
