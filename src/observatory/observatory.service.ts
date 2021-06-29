@@ -88,8 +88,6 @@ export class ObservatoryService {
       "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
       [JSON.stringify(global), JSON.stringify({}), new Date()]
     );
-
-    //return global;
   }
 
   async getObservatoryData(): Promise<any> {

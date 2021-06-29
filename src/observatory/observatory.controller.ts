@@ -1,6 +1,7 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { ObservatoryService } from "./observatory.service";
-import { success } from "../lib/response";
+import { success, error } from "../lib/response";
+import { AuthGuard } from "@nestjs/passport";
 
 @Controller("observatory")
 export class ObservatoryController {
@@ -11,5 +12,16 @@ export class ObservatoryController {
     //const data = await this.observatoryService.getData();
     const data = await this.observatoryService.getObservatoryData();
     return success(data);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("generate")
+  async generateData(): Promise<any> {
+    try {
+      this.observatoryService.generateData();
+      return success();
+    } catch (err) {
+      return error(err);
+    }
   }
 }
