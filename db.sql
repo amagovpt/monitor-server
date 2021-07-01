@@ -80,6 +80,8 @@ CREATE TABLE `Evaluation` (
   `Evaluation_Date` datetime NOT NULL,
   `Show_To` varchar(2) NOT NULL DEFAULT '00',
   `StudyUserId` int(11) DEFAULT NULL,
+  'Element Count' int(11) DEFAULT NULL,
+  "Tag Count" int(11) DEFAULT NULL,
   PRIMARY KEY (`EvaluationId`),
   UNIQUE KEY `EvalautionId_UNIQUE` (`EvaluationId`),
   KEY `PageId_fk_idx` (`PageId`),
