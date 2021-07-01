@@ -218,6 +218,8 @@ export class DomainService {
           e.Errors,
           e.Tot,
           e.Evaluation_Date,
+          e.Element_Count,
+          e.Tag_Count,
           el.EvaluationListId, el.Error, el.Is_Evaluating
         FROM 
           Page as p
@@ -250,7 +252,8 @@ export class DomainService {
             p.PageId = dp.PageId AND
             p.Show_In LIKE ?
           )
-        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`,
+        GROUP BY p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating,e.Element_Count,
+        e.Tag_Count`,
         [domain, flags, domain, flags]
       );
 

@@ -89,4 +89,17 @@ export class Evaluation {
     nullable: true
   })
   StudyUserId: number;
+
+  @Column({
+    type: 'text',
+    nullable: false
+
+  })
+  Element_Count:string ;
+  @Column({
+    type: 'text',
+    nullable: false
+
+  })
+  Tag_Count:string ;
 }

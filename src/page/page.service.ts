@@ -42,7 +42,7 @@ export class PageService {
 
   async findAll(): Promise<any> {
     const manager = getManager();
-    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating 
+    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating , e.Element_Count, e.Tag_Count
       FROM 
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -53,7 +53,7 @@ export class PageService {
         LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
       WHERE
         p.Show_In LIKE '1%'
-      GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating`);
+      GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating,e.Element_Count, e.Tag_Count`);
     return pages;
   }
 

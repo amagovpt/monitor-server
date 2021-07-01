@@ -1,7 +1,13 @@
-import { QualWeb, EvaluationReport } from "@qualweb/core";
+import { QualWeb, EvaluationReport, QualwebOptions } from "@qualweb/core";
 
 export async function evaluate(params: any): Promise<any> {
-  const options = {
+  const options: QualwebOptions = {
+    "execute":{
+      act: true,
+      wcag: true,
+      bp: true,
+      counter: true
+    },
     "act-rules": {
       rules: [
         "QW-ACT-R1",
@@ -67,6 +73,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP18",
       ],
     },
+    
   };
 
   if (params.url) {
@@ -78,16 +85,18 @@ export async function evaluate(params: any): Promise<any> {
       params.url = "http://" + params.url;
     }
     options["url"] = params.url;
-    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    
   } else if (params.html) {
     options["html"] = params.html;
   }
+ 
 
-  options["validator"] = "http://194.117.20.202/validate/";
+  //options["validator"] = "http://194.117.20.202/validate/";
 
   const qualweb = new QualWeb();
   await qualweb.start({
-    args: ["--no-sandbox", "--ignore-certificate-errors"],
+    args: ["--no-sandbox", "--ignore-certificate-errors"]
   });
 
   //const reports = await qualweb.evaluate(options);
@@ -116,7 +125,7 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     report = reports["customHtml"];
   }
-
+  
   return report;
 }
 
