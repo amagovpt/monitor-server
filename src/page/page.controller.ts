@@ -23,9 +23,15 @@ export class PageController {
   }
 
   @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all')
-  async getAllPages(): Promise<any> {
-    return success(await this.pageService.findAll());
+  @Get('all/count/:search')
+  async getAdminPageCount(@Param('search') search: string): Promise<any> {
+    return success(await this.pageService.adminCount(search.substring(7)));
+  }
+
+  @UseGuards(AuthGuard('jwt-admin'))
+  @Get('all/:size/:page/:sort/:direction/:search')
+  async getAllPages(@Param('size') size: string, @Param('page') page: string, @Param('sort') sort: string, @Param('direction') direction: string, @Param('search') search: string): Promise<any> {
+    return success(await this.pageService.findAll(parseInt(size), parseInt(page), sort.substring(5), direction.substring(10), search.substring(7)));
   }
 
   @UseGuards(AuthGuard('jwt-monitor'))

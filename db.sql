@@ -216,4 +216,14 @@ CREATE TABLE `Website` (
   CONSTRAINT `EntityId_fk` FOREIGN KEY (`EntityId`) REFERENCES `Entity` (`EntityId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Observatory`;
+CREATE TABLE `Observatory` (
+  `ObservatoryId` int(11) NOT NULL AUTO_INCREMENT,
+  `Global_Statistics` MEDIUMTEXT NOT NULL,
+  `Directory_Statistics` MEDIUMTEXT NOT NULL,
+  `Creation_Date` DATETIME NOT NULL,
+  PRIMARY KEY (`ObservatoryId`),
+  UNIQUE KEY `ObservatoryId_UNIQUE` (`ObservatoryId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;

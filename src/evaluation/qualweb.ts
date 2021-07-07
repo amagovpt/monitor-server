@@ -21,7 +21,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R17",
         "QW-ACT-R18",
         "QW-ACT-R19",
-        //"QW-ACT-R37",
+        "QW-ACT-R37",
         "QW-ACT-R68",
       ],
     },
@@ -73,37 +73,32 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP18",
       ],
     },
-    
+    waitUntil: ["load", "networkidle0"],
   };
 
-  if (params.url) {
-    params.url = params.url.trim();
-    if (
-      !params.url.startsWith("http://") &&
-      !params.url.startsWith("https://")
-    ) {
-      params.url = "http://" + params.url;
-    }
-    options["url"] = params.url;
+  if (params.url || params.urls) {
     //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
-    
+    options.url = params.url;
+    options.urls = params.urls;
   } else if (params.html) {
-    options["html"] = params.html;
+    options.html = params.html;
   }
  
-
-  //options["validator"] = "http://194.117.20.202/validate/";
+  options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
-  await qualweb.start({
-    args: ["--no-sandbox", "--ignore-certificate-errors"]
-  });
+  await qualweb.start(
+    { maxConcurrency: 4, timeout: 1000 * 60 * 2 },
+    {
+      args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"],
+    }
+  );
 
   //const reports = await qualweb.evaluate(options);
   let reports = null;
   let error = null;
   try {
-    reports = await timeExceeded(qualweb, options);
+    reports = await qualweb.evaluate(options); //await timeExceeded(qualweb, options);
   } catch (err) {
     error = err;
   } finally {
@@ -118,18 +113,18 @@ export async function evaluate(params: any): Promise<any> {
     throw new Error("Invalid resource");
   }
 
-  let report: EvaluationReport;
+  /*let report: EvaluationReport;
 
   if (params.url) {
     report = reports[params.url];
   } else if (params.html) {
     report = reports["customHtml"];
-  }
-  
-  return report;
+  }*/
+
+  return reports;
 }
 
-function timeExceeded(qualweb: QualWeb, options: any): Promise<any> {
+function timeExceeded(qualweb: QualWeb, options: QualwebOptions): Promise<any> {
   return new Promise((resolve, reject) => {
     const exceeded = setTimeout(() => {
       reject("Time exceeded for evaluation");

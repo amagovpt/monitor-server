@@ -2,7 +2,7 @@ import orderBy from "lodash.orderby";
 import { Website } from "./website";
 import tests from "./tests";
 
-export class Tag {
+export class Directory {
   id: number;
   rank: number;
   name: string;
@@ -11,6 +11,8 @@ export class Tag {
   nPages: number;
   nPagesWithoutErrors: number;
   entities: Array<string>;
+  declarations: number;
+  stamps: number;
   score: number;
   A: number;
   AA: number;
@@ -30,6 +32,8 @@ export class Tag {
     this.nPages = 0;
     this.nPagesWithoutErrors = 0;
     this.entities = new Array<string>();
+    this.declarations = 0;
+    this.stamps = 0;
     this.score = 0;
     this.A = 0;
     this.AA = 0;
@@ -43,6 +47,14 @@ export class Tag {
     this.websites.push(website);
     this.nPages += website.pages.length;
     this.score += website.getScore();
+
+    if (website.declaration) {
+      this.declarations++;
+    }
+
+    if (website.stamp) {
+      this.stamps++;
+    }
 
     this.nPagesWithoutErrors += website.AAA;
 
@@ -107,8 +119,16 @@ export class Tag {
       this.oldestPage = website.oldestPage;
     }
 
-    if (website.entity && !this.entities.includes(website.entity)) {
-      this.entities.push(website.entity);
+    if (website.entity) {
+      if (website.entity.includes("@,@")) {
+        for (const entity of website.entity.split("@,@")) {
+          if (!this.entities.includes(entity.trim())) {
+            this.entities.push(entity.trim());
+          }
+        }
+      } else if (!this.entities.includes(website.entity.trim())) {
+        this.entities.push(website.entity.trim());
+      }
     }
   }
 

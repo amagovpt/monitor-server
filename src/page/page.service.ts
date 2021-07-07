@@ -4,6 +4,7 @@ import { Connection, Repository, getManager, Like, In } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
+import cloneDeep from "lodash.clonedeep";
 
 @Injectable()
 export class PageService {
@@ -40,21 +41,92 @@ export class PageService {
     return result[0].Total;
   }
 
-  async findAll(): Promise<any> {
+  async adminCount(search: string): Promise<any> {
     const manager = getManager();
-    const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating , e.Element_Count, e.Tag_Count
+    const count = await manager.query(
+      `SELECT COUNT(*) as Count
       FROM 
-        Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-          SELECT Evaluation_Date FROM Evaluation 
-          WHERE PageId = p.PageId
-          ORDER BY Evaluation_Date DESC LIMIT 1
-        )
-        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+        Page
       WHERE
-        p.Show_In LIKE '1%'
-      GROUP BY p.PageId, e.Score, e.Evaluation_Date, el.EvaluationListId, el.Error, el.Is_Evaluating,e.Element_Count, e.Tag_Count`);
-    return pages;
+        Uri LIKE ? AND
+        Show_In LIKE '1%'`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+
+    return count[0].Count;
+  }
+
+  async findAll(
+    size: number,
+    page: number,
+    sort: string,
+    direction: string,
+    search: string
+  ): Promise<any> {
+    if (!direction.trim()) {
+      const manager = getManager();
+      const pages = await manager.query(
+        `SELECT p.*, e.Score, e.Evaluation_Date
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+        WHERE
+          p.Uri LIKE ? AND
+          p.Show_In LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date
+        LIMIT ? OFFSET ?`,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
+      return pages.map((p) => {
+        p.Error = null;
+        return p;
+      });
+    } else {
+      let order = "";
+      switch (sort) {
+        case "Uri":
+          order = "p.Uri";
+          break;
+        case "Score":
+          order = "e.Score";
+          break;
+        case "Evaluation_Date":
+          order = "e.Evaluation_Date";
+          break;
+        case "State":
+          order = `el.Is_Evaluating ${direction.toUpperCase()}, el.Error`;
+          break;
+        case "Show_In":
+          order = "p.Show_In";
+          break;
+      }
+      
+      const manager = getManager();
+      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
+        FROM 
+          Page as p
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+        WHERE
+          p.Uri LIKE ? AND
+          p.Show_In LIKE '1%'
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
+        ORDER BY ${order} ${direction.toUpperCase()}
+        LIMIT ? OFFSET ?
+        `, [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]);
+
+      return pages.map((p) => {
+        p.Error = null;
+        return p;
+      });
+    }
   }
 
   async getObservatoryData(): Promise<any> {
@@ -126,7 +198,7 @@ export class PageService {
       } else {
         pages = await manager.query(
           `
-          SELECT DISTINCT
+          SELECT
             e.EvaluationId,
             e.Title,
             e.Score,
@@ -174,11 +246,12 @@ export class PageService {
       if (pages) {
         pages = pages.filter((p) => p.Score !== null);
 
-        pages.map(async (p) => {
+        for (const p of pages || []) {
           p.DirectoryId = directory.DirectoryId;
           p.Directory_Name = directory.Name;
           p.Show_in_Observatory = directory.Show_in_Observatory;
           p.Directory_Creation_Date = directory.Creation_Date;
+          p.Entity_Name = null;
 
           const entities = await manager.query(
             `
@@ -192,10 +265,16 @@ export class PageService {
           `,
             [p.WebsiteId]
           );
-          p.Entity_Name = entities
-            ? entities.map((e) => e.Long_Name).join(", ")
-            : null;
-        });
+
+          if (entities.length > 0) {
+            if (entities.length === 1) {
+              p.Entity_Name = entities[0].Long_Name;
+            } else {
+              p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
+            }
+          }
+        }
+
         data = [...data, ...pages];
       }
     }
@@ -366,7 +445,6 @@ export class PageService {
 
     let hasError = false;
     try {
-      console.log(url);
       const page = await queryRunner.manager.findOne(Page, {
         where: { Uri: url },
       });
@@ -380,6 +458,11 @@ export class PageService {
         await queryRunner.manager.query(
           `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
           [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]
+        );
+      } else {
+        await queryRunner.manager.query(
+          `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+          [evalList[0].EvaluationListId]
         );
       }
 
