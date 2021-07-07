@@ -23,7 +23,6 @@ const wcag_mapping = {
   "QW-WCAG-T9": QW_HTML_T9,
   "QW-WCAG-T14": QW_HTML_T17,
   "QW-WCAG-T15": QW_HTML_T19,
-  "QW-WCAG-T16": QW_HTML_T20,
   "QW-WCAG-T17": QW_HTML_T25,
   "QW-WCAG-T32": QW_HTML_T28,
   "QW-WCAG-T18": QW_HTML_T30,
@@ -453,7 +452,7 @@ function QW_HTML_T19(
   }
 }
 
-function QW_HTML_T20(
+/*function QW_HTML_T20(
   elements: any,
   results: any,
   nodes: any,
@@ -478,7 +477,7 @@ function QW_HTML_T20(
       technique.results.filter((r: any) => r.verdict === "passed")
     );
   }
-}
+}*/
 
 function QW_HTML_T25(
   elements: any,

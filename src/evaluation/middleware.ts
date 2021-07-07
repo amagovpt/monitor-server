@@ -260,8 +260,9 @@ function parseEvaluation(evaluation: any): any {
   report["data"].tot.info.url = clone(report["data"].rawUrl);
   report["data"].tot.info.title = clone(report["data"].title);
   report["data"].tot.info.date = clone(report["data"].date);
-  report["data"].tot.info.htmlTags =
-    evaluation.system.page.dom.elementCount; //count_html_tags(evaluation.postProcessingHTML);
+  report["data"].tot.info.htmlTags = evaluation.system.page.dom.elementCount; //count_html_tags(evaluation.postProcessingHTML);
+  report["data"].tot.info.roles = evaluation.modules.counter.data.roles;
+  report["data"].tot.info.cTags = evaluation.modules.counter.data.tags;
   report["data"].tot.info.size =
     encodeURI(report.pagecode).split(/%..|./).length - 1;
   //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
@@ -281,7 +282,6 @@ function parseEvaluation(evaluation: any): any {
 
   report["data"].score = generateScore(report);
   report["data"].tot.info.score = clone(report["data"].score);
-
   return report;
 }
 

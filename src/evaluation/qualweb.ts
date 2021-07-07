@@ -2,6 +2,12 @@ import { QualWeb, EvaluationReport, QualwebOptions } from "@qualweb/core";
 
 export async function evaluate(params: any): Promise<any> {
   const options: QualwebOptions = {
+    "execute":{
+      act: true,
+      wcag: true,
+      bp: true,
+      counter: true
+    },
     "act-rules": {
       rules: [
         "QW-ACT-R1",
@@ -77,7 +83,7 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     options.html = params.html;
   }
-
+ 
   options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();

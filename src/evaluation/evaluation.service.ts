@@ -320,14 +320,14 @@ export class EvaluationService {
     ).toString("base64");
 
     const conform = evaluation.data.conform.split("@");
-
     newEvaluation.A = conform[0];
     newEvaluation.AA = conform[1];
     newEvaluation.AAA = conform[2];
     newEvaluation.Evaluation_Date = evaluation.data.date;
     newEvaluation.Show_To = showTo;
     newEvaluation.StudyUserId = studyUserId;
-
+    newEvaluation.Element_Count = JSON.stringify (evaluation.data.tot.info.roles);
+    newEvaluation.Tag_Count = JSON.stringify (evaluation.data.tot.info.cTags);
     await queryRunner.manager.save(newEvaluation);
   }
 
@@ -549,7 +549,7 @@ export class EvaluationService {
     let query = "";
 
     if (type === "admin") {
-      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+      query = `SELECT distinct e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM
           User as u,
           Website as w,
