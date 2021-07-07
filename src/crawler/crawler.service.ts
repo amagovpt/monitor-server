@@ -7,11 +7,12 @@ import { readFileSync, writeFileSync } from "fs";
 //import Crawler from "simplecrawler";
 import puppeteer from "puppeteer";
 import { PageService } from "src/page/page.service";
-import { Crawler } from '@qualweb/crawler';
+import { Crawler } from "@qualweb/crawler";
 
 @Injectable()
 export class CrawlerService {
-  private isCrawling: boolean;
+  private isAdminCrawling: boolean;
+  private isUserCrawling: boolean;
 
   constructor(
     @InjectRepository(CrawlDomain)
@@ -19,14 +20,15 @@ export class CrawlerService {
     private readonly connection: Connection,
     private readonly pageService: PageService
   ) {
-    this.isCrawling = false;
+    this.isAdminCrawling = false;
+    this.isUserCrawling = false;
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
-  async nestCrawl(): Promise<void> {
+  async nestAdminCrawl(): Promise<void> {
     if (process.env.ID === undefined || process.env.ID === "0") {
-      if (!this.isCrawling) {
-        this.isCrawling = true;
+      if (!this.isAdminCrawling) {
+        this.isAdminCrawling = true;
 
         const queryRunner = this.connection.createQueryRunner();
 
@@ -38,7 +40,9 @@ export class CrawlerService {
             `SELECT * FROM CrawlDomain WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
           if (domain.length > 0) {
-            const browser = await puppeteer.launch({ args: ["--no-sandbox", "--ignore-certificate-errors"] });
+            const browser = await puppeteer.launch({
+              args: ["--no-sandbox", "--ignore-certificate-errors"],
+            });
             const incognito = await browser.createIncognitoBrowserContext();
             const crawler = new Crawler(incognito, domain[0].DomainUri);
             //await this.crawl(domain[0].DomainUri);
@@ -62,7 +66,10 @@ export class CrawlerService {
               );
             } else {
               await this.pageService.addPages(domain[0].DomainId, urls, urls);
-              await queryRunner.manager.query(`DELETE FROM CrawlDomain WHERE CrawlDomainId = "?"`, [domain[0].CrawlDomainId]);
+              await queryRunner.manager.query(
+                `DELETE FROM CrawlDomain WHERE CrawlDomainId = "?"`,
+                [domain[0].CrawlDomainId]
+              );
             }
           }
           await queryRunner.commitTransaction();
@@ -75,13 +82,70 @@ export class CrawlerService {
           await queryRunner.release();
         }
 
-        this.isCrawling = false;
+        this.isAdminCrawling = false;
+      }
+    }
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async nestUserCrawl(): Promise<void> {
+    if (process.env.ID === undefined || process.env.ID === "1") {
+      if (!this.isUserCrawling) {
+        this.isUserCrawling = true;
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        try {
+          await queryRunner.connect();
+          await queryRunner.startTransaction();
+
+          const domain = await queryRunner.manager.query(
+            `SELECT * FROM CrawlDomain WHERE UserId <> -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
+          );
+          if (domain.length > 0) {
+            const browser = await puppeteer.launch({
+              args: ["--no-sandbox", "--ignore-certificate-errors"],
+            });
+            const incognito = await browser.createIncognitoBrowserContext();
+            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            //await this.crawl(domain[0].DomainUri);
+            await crawler.crawl({ maxDepth: 0 });
+
+            await incognito.close();
+            await browser.close();
+
+            const urls = crawler.getResults();
+            for (const url of urls || []) {
+              const newCrawlPage = new CrawlPage();
+              newCrawlPage.Uri = url;
+              newCrawlPage.CrawlDomainId = domain[0].CrawlDomainId;
+              await queryRunner.manager.save(newCrawlPage);
+            }
+
+            await queryRunner.manager.query(
+              `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
+              [domain[0].CrawlDomainId]
+            );
+          }
+          await queryRunner.commitTransaction();
+        } catch (err) {
+          // since we have errors lets rollback the changes we made
+          await queryRunner.rollbackTransaction();
+          console.error(err);
+        } finally {
+          // you need to release a queryRunner which was manually instantiated
+          await queryRunner.release();
+        }
+
+        this.isUserCrawling = false;
       }
     }
   }
 
   private async crawl(url: string): Promise<string[]> {
-    const browser = await puppeteer.launch({ args: ["--no-sandbox", "--ignore-certificate-errors"] });
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--ignore-certificate-errors"],
+    });
     const incognito = await browser.createIncognitoBrowserContext();
     const page = await incognito.newPage();
 
@@ -93,9 +157,10 @@ export class CrawlerService {
       });
 
       urls = await page.evaluate((url) => {
-        const notHtml = "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt".split(
-          "|"
-        );
+        const notHtml =
+          "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt".split(
+            "|"
+          );
 
         const links = document.querySelectorAll("body a");
 
@@ -370,7 +435,8 @@ export class CrawlerService {
 
   async crawlTag(tagId: number): Promise<boolean> {
     try {
-      const domains = await getManager().query(`
+      const domains = await getManager().query(
+        `
         SELECT
           d.DomainId,
           d.Url 
@@ -380,10 +446,20 @@ export class CrawlerService {
         WHERE
           tw.TagId = "?" AND
           d.WebsiteId = tw.WebsiteId AND
-          d.Active = 1`, [tagId]);
+          d.Active = 1`,
+        [tagId]
+      );
 
       for (const domain of domains || []) {
-        await this.crawlDomain(-1, domain.Url, domain.Url, domain.DomainId, -1, -1, 1);
+        await this.crawlDomain(
+          -1,
+          domain.Url,
+          domain.Url,
+          domain.DomainId,
+          -1,
+          -1,
+          1
+        );
       }
 
       return true;
@@ -463,7 +539,9 @@ export class CrawlerService {
 
   async deleteBulk(crawlDomainIds: Array<number>): Promise<any> {
     try {
-      await this.crawlDomainRepository.delete({ CrawlDomainId: In(crawlDomainIds) });
+      await this.crawlDomainRepository.delete({
+        CrawlDomainId: In(crawlDomainIds),
+      });
       return true;
     } catch (err) {
       console.error(err);

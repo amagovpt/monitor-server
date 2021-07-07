@@ -108,7 +108,7 @@ export class UserController {
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
 
-    if (!this.passwordValidator(password)) {
+    if (password && confirmPassword && !this.passwordValidator(password)) {
       throw new InternalServerErrorException();
     }
 
