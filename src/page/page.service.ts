@@ -66,7 +66,7 @@ export class PageService {
     if (!direction.trim()) {
       const manager = getManager();
       const pages = await manager.query(
-        `SELECT p.*, e.Score, e.Evaluation_Date
+        `SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -77,7 +77,7 @@ export class PageService {
         WHERE
           p.Uri LIKE ? AND
           p.Show_In LIKE '1%'
-        GROUP BY p.PageId, e.Score, e.Evaluation_Date
+        GROUP BY p.PageId, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
@@ -104,9 +104,10 @@ export class PageService {
           order = "p.Show_In";
           break;
       }
-      
+
       const manager = getManager();
-      const pages = await manager.query(`SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
+      const pages = await manager.query(
+        `SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -120,7 +121,9 @@ export class PageService {
         GROUP BY p.PageId, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         ORDER BY ${order} ${direction.toUpperCase()}
         LIMIT ? OFFSET ?
-        `, [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]);
+        `,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
 
       return pages.map((p) => {
         p.Error = null;
