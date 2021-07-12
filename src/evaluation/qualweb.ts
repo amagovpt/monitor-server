@@ -2,11 +2,11 @@ import { QualWeb, EvaluationReport, QualwebOptions } from "@qualweb/core";
 
 export async function evaluate(params: any): Promise<any> {
   const options: QualwebOptions = {
-    "execute":{
+    execute: {
       act: true,
       wcag: true,
       bp: true,
-      counter: true
+      counter: true,
     },
     "act-rules": {
       rules: [
@@ -78,13 +78,13 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url || params.urls) {
-    //options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
     options.url = params.url;
     options.urls = params.urls;
   } else if (params.html) {
     options.html = params.html;
   }
- 
+
   options["validator"] = "http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
