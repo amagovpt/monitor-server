@@ -115,7 +115,7 @@ CREATE TABLE `Invalid_Token` (
 DROP TABLE IF EXISTS `Page`;
 CREATE TABLE `Page` (
   `PageId` int(11) NOT NULL AUTO_INCREMENT,
-  `Uri` varchar(2048) NOT NULL,
+  `Uri` varchar(1024) NOT NULL,
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),

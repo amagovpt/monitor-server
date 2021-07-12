@@ -9,6 +9,7 @@ const act_mapping = {
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R35": QW_ACT_R35,
   "QW-ACT-R37": QW_ACT_R37,
   "QW-ACT-R68": QW_ACT_R68,
 };
@@ -237,6 +238,26 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "iframeTitleNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+
+function QW_ACT_R35(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "hxHasAName", rule.metadata.passed);
+    addToResults(results, "heading_01");
+    addToNodes(
+      nodes,
+      "hxHasAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "hxWithoutAName", rule.metadata.failed);
+    addToResults(results, "heading_02");
+    addToNodes(
+      nodes,
+      "hxWithoutAName",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
