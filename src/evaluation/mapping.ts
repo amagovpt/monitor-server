@@ -24,6 +24,7 @@ const wcag_mapping = {
   "QW-WCAG-T9": QW_HTML_T9,
   "QW-WCAG-T14": QW_HTML_T17,
   "QW-WCAG-T15": QW_HTML_T19,
+  "QW-WCAG-T16": QW_HTML_T20,
   "QW-WCAG-T17": QW_HTML_T25,
   "QW-WCAG-T32": QW_HTML_T28,
   "QW-WCAG-T18": QW_HTML_T30,
@@ -473,7 +474,7 @@ function QW_HTML_T19(
   }
 }
 
-/*function QW_HTML_T20(
+function QW_HTML_T20(
   elements: any,
   results: any,
   nodes: any,
@@ -488,17 +489,22 @@ function QW_HTML_T19(
       "w3cValidatorErrors",
       technique.results.filter((r: any) => r.verdict === "failed")
     );
-  } else if (technique.metadata.outcome === "passed") {
+  } else if (
+    technique.metadata.outcome === "passed" ||
+    technique.metadata.outcome === "warning"
+  ) {
     addToElements(elements, "w3cValidator", "true");
-    addToElements(elements, "w3cValidatorErrors", undefined);
+    addToElements(elements, "w3cValidatorErrors", 0);
     addToResults(results, "w3c_validator_01a");
     addToNodes(
       nodes,
       "w3cValidatorErrors",
-      technique.results.filter((r: any) => r.verdict === "passed")
+      technique.results.filter(
+        (r: any) => r.verdict === "passed" || r.verdict === "warning"
+      )
     );
   }
-}*/
+}
 
 function QW_HTML_T25(
   elements: any,

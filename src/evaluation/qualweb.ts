@@ -85,7 +85,7 @@ export async function evaluate(params: any): Promise<any> {
     options.html = params.html;
   }
 
-  options["validator"] = "http://194.117.20.242/validate/";
+  options["validator"] = "http://127.0.0.1:5555/"; //"http://194.117.20.242/validate/";
 
   const qualweb = new QualWeb();
   await qualweb.start(
