@@ -226,4 +226,14 @@ CREATE TABLE `Observatory` (
   UNIQUE KEY `ObservatoryId_UNIQUE` (`ObservatoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Evaluation_Request_Counter`;
+CREATE TABLE `Evaluation_Request_Counter` (
+  `EvaluationRequestCounterId` int(11) NOT NULL AUTO_INCREMENT,
+  `Application` varchar(100) NOT NULL,
+  `Counter` int(11) NOT NULL DEFAULT 0,
+  `Last_Request` DATETIME NOT NULL,
+  PRIMARY KEY (`EvaluationRequestCounterId`),
+  UNIQUE KEY `EvaluationRequestCounterId_UNIQUE` (`EvaluationRequestCounterId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;

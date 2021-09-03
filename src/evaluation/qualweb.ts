@@ -85,11 +85,11 @@ export async function evaluate(params: any): Promise<any> {
     options.html = params.html;
   }
 
-  options["validator"] = "http://127.0.0.1:5555/"; //"http://194.117.20.242/validate/";
+  options["validator"] = "http://127.0.0.1:5555/";
 
   const qualweb = new QualWeb();
   await qualweb.start(
-    { maxConcurrency: 4, timeout: 1000 * 60 * 2 },
+    { maxConcurrency: 2, timeout: 1000 * 60 * 2 },
     {
       args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"],
     }

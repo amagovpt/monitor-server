@@ -3,12 +3,17 @@ import { Connection, getManager } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
 import { Evaluation } from "./evaluation.entity";
-import { executeUrlEvaluation, executeUrlsEvaluation, executeHtmlEvaluation } from "./middleware";
+import {
+  executeUrlEvaluation,
+  executeUrlsEvaluation,
+  executeHtmlEvaluation,
+} from "./middleware";
 
 @Injectable()
 export class EvaluationService {
   private isEvaluatingAdminInstance: boolean;
   private isEvaluatingUserInstance: boolean;
+  private SKIP = 20;
 
   constructor(private readonly connection: Connection) {
     this.isEvaluatingAdminInstance = false;
@@ -23,12 +28,12 @@ export class EvaluationService {
       let pages = [];
       if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * 100;
+        const skip = parseInt(process.env.ID) * this.SKIP;
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 100, ${skip}`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
       }
 
@@ -46,12 +51,12 @@ export class EvaluationService {
       let pages = [];
       if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * 10;
+        const skip = parseInt(process.env.ID) * this.SKIP;
         pages = await getManager().query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 10, ${skip}`
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
       }
 
@@ -126,11 +131,11 @@ export class EvaluationService {
       let reports = {};
 
       try {
-        reports = clone(await this.evaluateUrls(pages.map(p => p.Url)));
+        reports = clone(await this.evaluateUrls(pages.map((p) => p.Url)));
       } catch (err) {
         console.error(err);
-      };
-      
+      }
+
       const queryRunner = this.connection.createQueryRunner();
 
       await queryRunner.connect();
@@ -326,9 +331,39 @@ export class EvaluationService {
     newEvaluation.Evaluation_Date = evaluation.data.date;
     newEvaluation.Show_To = showTo;
     newEvaluation.StudyUserId = studyUserId;
-    newEvaluation.Element_Count = JSON.stringify (evaluation.data.tot.info.roles);
-    newEvaluation.Tag_Count = JSON.stringify (evaluation.data.tot.info.cTags);
+    newEvaluation.Element_Count = JSON.stringify(
+      evaluation.data.tot.info.roles
+    );
+    newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
     await queryRunner.manager.save(newEvaluation);
+  }
+
+  async resetAdminWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE UserId = -1`
+    );
+    return true;
+  }
+
+  async deleteAdminWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(`DELETE FROM Evaluation_List WHERE UserId = -1`);
+    return true;
+  }
+
+  async resetUserWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE UserId <> -1`
+    );
+    return true;
+  }
+
+  async deleteUserWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(`DELETE FROM Evaluation_List WHERE UserId <> -1`);
+    return true;
   }
 
   async findMyMonitorUserWebsitePageEvaluations(

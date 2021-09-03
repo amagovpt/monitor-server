@@ -33,10 +33,50 @@ export class PageService {
     }
   }
 
-  async findAllInEvaluationList(): Promise<number> {
+  async findAdminEvaluatingInEvaluationList(): Promise<number> {
     const manager = getManager();
     const result = await manager.query(
-      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Error IS NULL"
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 1"
+    );
+    return result[0].Total;
+  }
+
+  async findAdminWaitingInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NULL"
+    );
+    return result[0].Total;
+  }
+
+  async findAdminWithErrorInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
+    );
+    return result[0].Total;
+  }
+
+  async findUserEvaluatingInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 1"
+    );
+    return result[0].Total;
+  }
+
+  async findUserWaitingInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 0 AND Error IS NULL"
+    );
+    return result[0].Total;
+  }
+
+  async findUserWithErrorInEvaluationList(): Promise<number> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
     );
     return result[0].Total;
   }
