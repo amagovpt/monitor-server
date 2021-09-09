@@ -277,6 +277,32 @@ export class WebsiteService {
 
     return pages;
   }
+  async findAllElementsOfWebsitePages(websitename: string): Promise<any> {
+    const manager = getManager();
+
+    const pages = await manager.query(
+      `SELECT w.Name,p.PageId,p.Uri, p.Show_In, e.Element_Count, e.Tag_Count
+      FROM
+        Domain as d,
+        DomainPage as dp,
+        Page as p,
+        Website as w,
+        Evaluation as e
+      WHERE
+		    w.Name = ? AND
+        w.WebsiteId = d.WebsiteId AND
+        d.Active = "1" AND
+        dp.DomainId = d.DomainId AND
+        p.PageId = dp.PageId AND
+        p.PageId = e.PageId AND
+        p.Show_In LIKE "1__"` ,
+      [websitename]
+    );
+
+    return pages;
+  }
+
+
 
   async findAllOfficial(): Promise<any> {
     const manager = getManager();

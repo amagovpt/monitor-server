@@ -206,6 +206,14 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get("pages/elements/:websiteName")
+  async getAllElementPagesWebsite(
+    @Param("websiteName") websiteName: string
+  ): Promise<any> {
+    return success(await this.websiteService.findAllElementsOfWebsitePages(websiteName));
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("official")
   async getAllOfficialWebsites(): Promise<any> {
     return success(await this.websiteService.findAllOfficial());
