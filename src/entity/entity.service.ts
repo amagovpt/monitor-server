@@ -62,6 +62,11 @@ export class EntityService {
         } catch (_) {}
       }
 
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [pages.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -196,13 +201,15 @@ export class EntityService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, u.Username as User, COUNT(distinct dp.PageId) as Pages 
+      `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
       FROM
         Entity as e
         LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
         LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+        LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
         e.Long_Name = ?

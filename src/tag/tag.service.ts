@@ -65,6 +65,11 @@ export class TagService {
         } catch (_) {}
       }
 
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [pages.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -766,11 +771,13 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, u.Username as User, COUNT(distinct dp.PageId) as Pages 
+        `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
           Tag as t,
           TagWebsite as tw

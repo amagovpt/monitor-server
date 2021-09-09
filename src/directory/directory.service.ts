@@ -79,6 +79,11 @@ export class DirectoryService {
         } catch (_) {}
       }
 
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [pages.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -205,7 +210,9 @@ export class DirectoryService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.delete(Directory, { DirectoryId: In(directoriesId) });
+      await queryRunner.manager.delete(Directory, {
+        DirectoryId: In(directoriesId),
+      });
       await queryRunner.commitTransaction();
     } catch (err) {
       console.log(err);
@@ -289,14 +296,17 @@ export class DirectoryService {
   async findAllDirectoryWebsites(directory: string): Promise<any> {
     const manager = getManager();
 
-    const _directory = await manager.query(`SELECT * FROM Directory WHERE Name = ? LIMIT 1`, [directory])
+    const _directory = await manager.query(
+      `SELECT * FROM Directory WHERE Name = ? LIMIT 1`,
+      [directory]
+    );
     const method = _directory[0].Method;
 
     const nTags = await manager.query(
       `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
       [directory]
     );
-    
+
     if (method === 0) {
       return manager.query(
         `SELECT 
@@ -348,7 +358,10 @@ export class DirectoryService {
   async findAllDirectoryWebsitePages(directory: string): Promise<any> {
     const manager = getManager();
 
-    const _directory = await manager.query(`SELECT * FROM Directory WHERE Name = ? LIMIT 1`, [directory])
+    const _directory = await manager.query(
+      `SELECT * FROM Directory WHERE Name = ? LIMIT 1`,
+      [directory]
+    );
     const method = _directory[0].Method;
 
     const nTags = await manager.query(
@@ -429,6 +442,6 @@ export class DirectoryService {
       );
 
       return pages.filter((p) => p.Score !== null);
-    } 
+    }
   }
 }

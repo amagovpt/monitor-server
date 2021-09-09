@@ -523,6 +523,60 @@ export class PageService {
     return !hasError;
   }
 
+  async addPagesToEvaluate(
+    urls: string[],
+    showTo: string = "10",
+    userId: number | null = null,
+    studyUserId: number | null = null
+  ): Promise<boolean> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const url of urls ?? []) {
+        const page = await queryRunner.manager.findOne(Page, {
+          where: { Uri: url },
+        });
+
+        const evalList = await queryRunner.manager.query(
+          "SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = ? LIMIT 1",
+          [page.PageId, userId]
+        );
+
+        if (evalList.length === 0) {
+          await queryRunner.manager.query(
+            `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
+            [page.PageId, userId, page.Uri, showTo, new Date(), studyUserId]
+          );
+        } else {
+          await queryRunner.manager.query(
+            `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+            [evalList[0].EvaluationListId]
+          );
+        }
+      }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [urls.length]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+      console.log(err);
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async addPages(
     domainId: number,
     uris: string[],
@@ -585,6 +639,12 @@ export class PageService {
           );
         }
       }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [uris.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -666,6 +726,11 @@ export class PageService {
           );
         }
       }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "MyMonitor"`,
+        [uris.length]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -875,6 +940,11 @@ export class PageService {
           );
         }
       }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "StudyMonitor"`,
+        [uris.length]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {

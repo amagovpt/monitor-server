@@ -190,7 +190,7 @@ function QW_ACT_R16(elements: any, results: any, nodes: any, rule: any): void {
     addToResults(results, "input_02b");
     addToNodes(
       nodes,
-      "inputLabel",
+      "inputLabelNo",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (rule.metadata.outcome === "failed") {
@@ -513,8 +513,7 @@ function QW_HTML_T25(
   technique: any
 ): void {
   const incorrectLabelResults = technique.results.filter(
-    (r: any) =>
-      r.resultCode === "RC1" || r.resultCode === "RC2" || r.resultCode === "RC3"
+    (r: any) => r.verdict === "failed"
   );
   if (incorrectLabelResults.length > 0) {
     addToElements(elements, "labelPosNo", incorrectLabelResults.length);

@@ -63,6 +63,11 @@ export class WebsiteService {
         } catch (_) {}
       }
 
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+        [pages.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -78,72 +83,93 @@ export class WebsiteService {
 
   async adminCount(search: string): Promise<any> {
     const manager = getManager();
-    const count = await manager.query(`SELECT COUNT(w.WebsiteId) as Count
+    const count = await manager.query(
+      `SELECT COUNT(w.WebsiteId) as Count
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
         w.Name LIKE ? AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-        w.Deleted = "0"`, [search.trim() !== '' ? `%${search.trim()}%` : '%']);
-    
+        w.Deleted = "0"`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+
     return count[0].Count;
   }
 
-  async findAll(size: number, page: number, sort: string, direction: string, search: string): Promise<any> {
+  async findAll(
+    size: number,
+    page: number,
+    sort: string,
+    direction: string,
+    search: string
+  ): Promise<any> {
     if (!direction.trim()) {
       const manager = getManager();
-      const websites = await manager.query(`
+      const websites = await manager.query(
+        `
         SELECT 
           w.*, 
           u.Username as User, u.Type as Type, 
           d.DomainId, d.Url as Domain, 
-          COUNT(distinct dp.PageId) as Pages
+          COUNT(distinct p.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
           w.Name LIKE ? AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
-        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+        LIMIT ? OFFSET ?`,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
       return websites;
     } else {
-      let order = '';
-      switch(sort) {
-        case 'Name':
-          order = 'w.Name';
+      let order = "";
+      switch (sort) {
+        case "Name":
+          order = "w.Name";
           break;
-        case 'Pages':
-          order = 'Pages';
+        case "Pages":
+          order = "Pages";
           break;
-        case 'Creation_Date':
-          order = 'w.Creation_Date';
+        case "Creation_Date":
+          order = "w.Creation_Date";
           break;
       }
 
       const manager = getManager();
-      const websites = await manager.query(`
+      const websites = await manager.query(
+        `
         SELECT 
           w.*, 
           u.Username as User, u.Type as Type, 
           d.DomainId, d.Url as Domain, 
-          COUNT(distinct dp.PageId) as Pages
+          COUNT(distinct p.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
           Name LIKE ? AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
         ORDER BY ${order} ${direction.toUpperCase()}
-        LIMIT ? OFFSET ?`, [search.trim() !== '' ? `%${search.trim()}%` : '%', size, (page) * size]);
+        LIMIT ? OFFSET ?`,
+        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+      );
       return websites;
     }
   }
@@ -211,13 +237,15 @@ export class WebsiteService {
         `SELECT
           d.*,
           COUNT(distinct p.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages,
           u2.Username as User
         FROM
           Domain as d
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
           LEFT OUTER JOIN Website as w2 ON w2.WebsiteId = d.WebsiteId
           LEFT OUTER JOIN User as u2 ON u2.UserId = w2.UserId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__",
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId,
           Website as w,
           User as u
         WHERE
@@ -496,6 +524,11 @@ export class WebsiteService {
         } catch (_) {}
       }
 
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "MyMonitor"`,
+        [pages.length]
+      );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
@@ -563,6 +596,11 @@ export class WebsiteService {
           );
         } catch (_) {}
       }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "StudyMonitor"`,
+        [pages.length]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -874,6 +912,11 @@ export class WebsiteService {
           );
         }
       }
+
+      await queryRunner.manager.query(
+        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "StudyMonitor"`,
+        [pages.length]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {

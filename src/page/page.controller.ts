@@ -10,17 +10,30 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 import { PageService } from "./page.service";
 import { success } from "../lib/response";
+import { EvaluationService } from "../evaluation/evaluation.service";
 
 @Controller("page")
 export class PageController {
-  constructor(private readonly pageService: PageService) {}
+  constructor(
+    private readonly pageService: PageService,
+    private readonly evaluationService: EvaluationService
+  ) {}
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluatePage(@Request() req: any): Promise<any> {
     const page = decodeURIComponent(req.body.page);
 
+    await this.evaluationService.increaseAMSObservatoryRequestCounter();
+
     return success(await this.pageService.addPageToEvaluate(page, "10", -1));
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("reEvaluateMulti")
+  async reEvaluatePages(@Request() req: any): Promise<any> {
+    const pages = decodeURIComponent(req.body.pages)?.split(",");
+    return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -169,6 +182,7 @@ export class PageController {
     const page = await this.pageService.findPageFromUrl(url);
 
     if (page) {
+      await this.evaluationService.increaseAMSObservatoryRequestCounter();
       return success(await this.pageService.addPageToEvaluate(url, "10", -1));
     } else {
       throw new UnauthorizedException();
@@ -187,6 +201,7 @@ export class PageController {
     );
 
     if (isUserPage) {
+      await this.evaluationService.increaseMyMonitorRequestCounter();
       return success(
         await this.pageService.addPageToEvaluate(url, "01", userId)
       );
@@ -211,6 +226,7 @@ export class PageController {
     );
 
     if (isUserPage) {
+      await this.evaluationService.increaseStudyMonitorRequestCounter();
       return success(
         await this.pageService.addPageToEvaluate(url, "00", userId, userId)
       );

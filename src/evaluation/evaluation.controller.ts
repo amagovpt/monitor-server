@@ -15,6 +15,36 @@ export class EvaluationController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get("ams/counter")
+  async getAMSObservatoryRequestCounter(): Promise<any> {
+    return success(
+      await this.evaluationService.getAMSObservatoryRequestCounter()
+    );
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("mm/counter")
+  async getMyMonitorRequestCounter(): Promise<any> {
+    return success(await this.evaluationService.getMyMonitorRequestCounter());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("sm/counter")
+  async getStudyMonitorRequestCounter(): Promise<any> {
+    return success(
+      await this.evaluationService.getStudyMonitorRequestCounter()
+    );
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("am/counter")
+  async getAccessMonitorRequestCounter(): Promise<any> {
+    return success(
+      await this.evaluationService.getAccessMonitorRequestCounter()
+    );
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("admin/reset")
   async resetAdminEvaluationList(): Promise<any> {
     return success(await this.evaluationService.resetAdminWaitingList());
@@ -27,15 +57,27 @@ export class EvaluationController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("user/reset")
-  async resetUserEvaluationList(): Promise<any> {
-    return success(await this.evaluationService.resetUserWaitingList());
+  @Get("mm/reset")
+  async resetMMEvaluationList(): Promise<any> {
+    return success(await this.evaluationService.resetMMWaitingList());
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("user/delete")
-  async deleteUserEvaluationList(): Promise<any> {
-    return success(await this.evaluationService.deleteUserWaitingList());
+  @Get("mm/delete")
+  async deleteMMEvaluationList(): Promise<any> {
+    return success(await this.evaluationService.deleteMMWaitingList());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("sm/reset")
+  async resetSMEvaluationList(): Promise<any> {
+    return success(await this.evaluationService.resetSMWaitingList());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("sm/delete")
+  async deleteSMEvaluationList(): Promise<any> {
+    return success(await this.evaluationService.deleteSMWaitingList());
   }
 
   @UseGuards(AuthGuard("jwt-monitor"))

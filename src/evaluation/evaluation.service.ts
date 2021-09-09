@@ -338,6 +338,66 @@ export class EvaluationService {
     await queryRunner.manager.save(newEvaluation);
   }
 
+  async increaseAMSObservatoryRequestCounter(): Promise<void> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AMS/Observatory"`
+    );
+  }
+
+  async increaseMyMonitorRequestCounter(): Promise<void> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "MyMonitor"`
+    );
+  }
+
+  async increaseStudyMonitorRequestCounter(): Promise<void> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "StudyMonitor"`
+    );
+  }
+
+  async increaseAccessMonitorRequestCounter(): Promise<void> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AccessMonitor"`
+    );
+  }
+
+  async getAMSObservatoryRequestCounter(): Promise<number> {
+    const manager = getManager();
+    const counter = await manager.query(
+      `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
+    );
+    return counter[0].Counter;
+  }
+
+  async getMyMonitorRequestCounter(): Promise<number> {
+    const manager = getManager();
+    const counter = await manager.query(
+      `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
+    );
+    return counter[0].Counter;
+  }
+
+  async getStudyMonitorRequestCounter(): Promise<number> {
+    const manager = getManager();
+    const counter = await manager.query(
+      `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
+    );
+    return counter[0].Counter;
+  }
+
+  async getAccessMonitorRequestCounter(): Promise<number> {
+    const manager = getManager();
+    const counter = await manager.query(
+      `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
+    );
+    return counter[0].Counter;
+  }
+
   async resetAdminWaitingList(): Promise<boolean> {
     const manager = getManager();
     await manager.query(
@@ -352,17 +412,59 @@ export class EvaluationService {
     return true;
   }
 
-  async resetUserWaitingList(): Promise<boolean> {
+  async resetMMWaitingList(): Promise<boolean> {
     const manager = getManager();
     await manager.query(
-      `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE UserId <> -1`
+      `UPDATE 
+        Evaluation_List as el, User as u
+      SET 
+        el.Is_Evaluating = 0, 
+        el.Error = NULL 
+      WHERE 
+        el.UserId <> -1 AND
+        u.UserId = el.UserId AND
+        u.Type = "monitor"`
     );
     return true;
   }
 
-  async deleteUserWaitingList(): Promise<boolean> {
+  async deleteMMWaitingList(): Promise<boolean> {
     const manager = getManager();
-    await manager.query(`DELETE FROM Evaluation_List WHERE UserId <> -1`);
+    await manager.query(
+      `DELETE el.* FROM Evaluation_List as el, User as u 
+       WHERE 
+        el.UserId <> -1 AND
+        u.UserId = el.UserId AND
+        u.Type = "monitor"`
+    );
+    return true;
+  }
+
+  async resetSMWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(
+      `UPDATE 
+        Evaluation_List as el, User as u
+      SET 
+        el.Is_Evaluating = 0, 
+        el.Error = NULL 
+      WHERE 
+        el.UserId <> -1 AND
+        u.UserId = el.UserId AND
+        u.Type = "studies"`
+    );
+    return true;
+  }
+
+  async deleteSMWaitingList(): Promise<boolean> {
+    const manager = getManager();
+    await manager.query(
+      `DELETE el.* FROM Evaluation_List as el, User as u 
+       WHERE 
+        el.UserId <> -1 AND
+        u.UserId = el.UserId AND
+        u.Type = "studies"`
+    );
     return true;
   }
 
