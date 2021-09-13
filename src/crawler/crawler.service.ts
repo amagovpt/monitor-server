@@ -46,7 +46,13 @@ export class CrawlerService {
             const incognito = await browser.createIncognitoBrowserContext();
             const crawler = new Crawler(incognito, domain[0].DomainUri);
             //await this.crawl(domain[0].DomainUri);
-            await crawler.crawl({ maxDepth: 0 });
+
+            const config = await this.getConfig();
+
+            await crawler.crawl({
+              maxDepth: config.maxDepth,
+              maxUrls: config.maxPages,
+            });
 
             await incognito.close();
             await browser.close();

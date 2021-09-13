@@ -394,7 +394,7 @@ export class TagService {
         Domain as d,
         DomainPage as dp,
         Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
           WHERE PageId = p.PageId AND Show_To LIKE "1_"
           ORDER BY Evaluation_Date DESC LIMIT 1
