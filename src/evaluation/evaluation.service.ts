@@ -366,36 +366,36 @@ export class EvaluationService {
     );
   }
 
-  async getAMSObservatoryRequestCounter(): Promise<number> {
+  async getAMSObservatoryRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getMyMonitorRequestCounter(): Promise<number> {
+  async getMyMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getStudyMonitorRequestCounter(): Promise<number> {
+  async getStudyMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getAccessMonitorRequestCounter(): Promise<number> {
+  async getAccessMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async resetAdminWaitingList(): Promise<boolean> {

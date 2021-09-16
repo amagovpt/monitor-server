@@ -12,7 +12,10 @@ export class EntityService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(entityId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(
+    entitiesId: number[],
+    option: string
+  ): Promise<boolean> {
     const pages = await this.entityRepository.query(
       `
       SELECT
@@ -24,14 +27,14 @@ export class EntityService {
         DomainPage as dp,
         Page as p
       WHERE
-        w.EntityId = ? AND
+        w.EntityId IN (?) AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
     `,
-      [entityId, option === "all" ? "1__" : "1_1"]
+      [entitiesId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();

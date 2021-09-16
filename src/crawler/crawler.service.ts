@@ -439,7 +439,7 @@ export class CrawlerService {
     }
   }
 
-  async crawlTag(tagId: number): Promise<boolean> {
+  async crawlTags(tagsId: number[]): Promise<boolean> {
     try {
       const domains = await getManager().query(
         `
@@ -450,18 +450,16 @@ export class CrawlerService {
           TagWebsite as tw,
           Domain as d
         WHERE
-          tw.TagId = "?" AND
+          tw.TagId IN (?) AND
           d.WebsiteId = tw.WebsiteId AND
           d.Active = 1`,
-        [tagId]
+        [tagsId]
       );
 
       for (const domain of domains || []) {
         await this.crawlDomain(
           -1,
-          domain.Url,
-          domain.Url,
-          domain.DomainId,
+          [{ url: domain.Url, domainId: domain.DomainId }],
           -1,
           -1,
           1
@@ -477,9 +475,7 @@ export class CrawlerService {
 
   async crawlDomain(
     userId: number,
-    subDomain: string,
-    domain: string,
-    domainId: number,
+    websites: any,
     maxDepth: number,
     maxPages: number,
     tag: number
@@ -491,16 +487,18 @@ export class CrawlerService {
 
     let hasError = false;
     try {
-      const newCrawlDomain = new CrawlDomain();
-      newCrawlDomain.UserId = userId;
-      newCrawlDomain.DomainUri = domain;
-      newCrawlDomain.DomainId = domainId;
-      newCrawlDomain.Creation_Date = new Date();
-      newCrawlDomain.SubDomainUri = subDomain;
-      newCrawlDomain.Tag = tag;
+      for (const website of websites ?? []) {
+        const newCrawlDomain = new CrawlDomain();
+        newCrawlDomain.UserId = userId;
+        newCrawlDomain.DomainUri = website.url;
+        newCrawlDomain.DomainId = website.domainId;
+        newCrawlDomain.Creation_Date = new Date();
+        newCrawlDomain.SubDomainUri = website.url;
+        newCrawlDomain.Tag = tag;
 
-      const insertCrawlDomain = await queryRunner.manager.save(newCrawlDomain);
-      //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
+        await queryRunner.manager.save(newCrawlDomain);
+        //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
+      }
 
       await queryRunner.commitTransaction();
     } catch (err) {

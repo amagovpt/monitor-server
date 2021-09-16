@@ -13,7 +13,7 @@ export class TagService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(tagId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(tagsId: number[], option: string): Promise<boolean> {
     const pages = await this.tagRepository.query(
       `
       SELECT
@@ -26,7 +26,7 @@ export class TagService {
         DomainPage as dp,
         Page as p
       WHERE
-        tw.TagId = ? AND
+        tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
@@ -34,7 +34,7 @@ export class TagService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
     `,
-      [tagId, option === "all" ? "1__" : "1_1"]
+      [tagsId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();

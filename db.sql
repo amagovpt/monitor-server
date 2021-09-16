@@ -231,6 +231,7 @@ CREATE TABLE `Evaluation_Request_Counter` (
   `EvaluationRequestCounterId` int(11) NOT NULL AUTO_INCREMENT,
   `Application` varchar(100) NOT NULL,
   `Counter` int(11) NOT NULL DEFAULT 0,
+  `Start_Date` DATETIME NOT NULL DEFAULT NOW(),
   `Last_Request` DATETIME NOT NULL,
   PRIMARY KEY (`EvaluationRequestCounterId`),
   UNIQUE KEY `EvaluationRequestCounterId_UNIQUE` (`EvaluationRequestCounterId`)

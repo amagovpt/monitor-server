@@ -28,149 +28,146 @@ export class StampService {
         w.WebsiteId = tw.WebsiteId
     `);
 
-    const errors = [];
-
-    for (const website of websites || []) {
-      const result = await this.generateWebsiteDigitalStamp(
-        website.WebsiteId,
-        website.Domain
-      );
-      if (!result) {
-        errors.push(website.Name);
-      }
-    }
-
-    return errors;
-  }
-
-  async generateWebsiteDigitalStamp(
-    websiteId: number,
-    name: string
-  ): Promise<boolean> {
-    let hasError = false;
+    let error = null;
 
     try {
-      const manager = getManager();
-      const pages = await manager.query(
-        `SELECT
-          p.PageId,
-          e.Tot,
-          e.A,
-          e.AA,
-          e.AAA,
-          e.Score
-        FROM
-          User as u,
-          Website as w,
-          Domain as d,
-          DomainPage as dp,
-          Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          )
-        WHERE
-          w.WebsiteId = ? AND
-          (
-            w.UserId IS NULL OR
-            (
-              u.UserId = w.UserId AND
-              u.Type != 'studies'
+      await this.generateWebsitesDigitalStamp(websites.map((w) => w.WebsiteId));
+    } catch (err) {
+      error = err;
+    }
+
+    return error;
+  }
+
+  async generateWebsitesDigitalStamp(websitesId: number[]): Promise<boolean> {
+    let hasError = false;
+
+    for (const id of websitesId ?? []) {
+      try {
+        const manager = getManager();
+        let pages = await manager.query(
+          `SELECT
+            p.PageId,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Score
+          FROM
+            User as u,
+            Website as w,
+            Domain as d,
+            DomainPage as dp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId 
+              ORDER BY Evaluation_Date DESC LIMIT 1
             )
-          ) AND
-          d.WebsiteId = ? AND
-          d.Active = 1 AND
-          dp.DomainId = d.DomainId AND
-          p.PageId = dp.PageId AND
-          p.Show_In LIKE "1_1"
-        GROUP BY p.PageId, e.Tot, e.A, e.AA, e.AAA, e.Score`,
-        [websiteId, websiteId]
-      );
+          WHERE
+            w.WebsiteId = ? AND
+            (
+              w.UserId IS NULL OR
+              (
+                u.UserId = w.UserId AND
+                u.Type != 'studies'
+              )
+            ) AND
+            d.WebsiteId = ? AND
+            d.Active = 1 AND
+            dp.DomainId = d.DomainId AND
+            p.PageId = dp.PageId AND
+            p.Show_In LIKE "1_1"
+          GROUP BY p.PageId, e.Tot, e.A, e.AA, e.AAA, e.Score`,
+          [id, id]
+        );
 
-      const hasLevelError = {
-        A: {
-          passed: 0,
-          warning: 0,
-          failed: 0,
-        },
-        AA: {
-          passed: 0,
-          warning: 0,
-          failed: 0,
-        },
-        AAA: {
-          passed: 0,
-          warning: 0,
-          failed: 0,
-        },
-      };
+        pages = pages.filter((p) => p.Score !== null);
 
-      let score = 0;
+        const hasLevelError = {
+          A: {
+            passed: 0,
+            warning: 0,
+            failed: 0,
+          },
+          AA: {
+            passed: 0,
+            warning: 0,
+            failed: 0,
+          },
+          AAA: {
+            passed: 0,
+            warning: 0,
+            failed: 0,
+          },
+        };
 
-      const passed = {
-        A: 0,
-        AA: 0,
-        AAA: 0,
-      };
+        let score = 0;
 
-      for (const page of pages || []) {
-        score += parseFloat(page.Score);
-        if (page.A === 0) {
-          passed.A++;
-          if (page.AA === 0) {
-            passed.AA++;
-            if (page.AAA === 0) {
-              passed.AAA++;
+        const passed = {
+          A: 0,
+          AA: 0,
+          AAA: 0,
+        };
+
+        for (const page of pages || []) {
+          score += parseFloat(page.Score);
+          if (page.A === 0) {
+            passed.A++;
+            if (page.AA === 0) {
+              passed.AA++;
+              if (page.AAA === 0) {
+                passed.AAA++;
+              }
             }
           }
+          /*const tot = JSON.parse(Buffer.from(page.Tot, 'base64').toString());
+          for (const res in tot.results || {}) {
+            const test = tests[res];
+            if (test) {
+              const lvl = test['level'].toUpperCase();
+              const r = test.result;
+              hasLevelError[lvl][r]++;
+            }
+          }*/
         }
-        /*const tot = JSON.parse(Buffer.from(page.Tot, 'base64').toString());
-        for (const res in tot.results || {}) {
-          const test = tests[res];
-          if (test) {
-            const lvl = test['level'].toUpperCase();
-            const r = test.result;
-            hasLevelError[lvl][r]++;
-          }
-        }*/
+
+        let levelToShow = "";
+        let percentage = 0;
+
+        if (passed.A === 0) {
+          levelToShow = "Não conforme";
+          percentage = 0;
+        } else if (passed.A > passed.AA) {
+          levelToShow = "A";
+          percentage = Math.round((passed.A / pages.length) * 100);
+        } else if (passed.AA > passed.AAA) {
+          levelToShow = "AA";
+          percentage = Math.round((passed.AA / pages.length) * 100);
+        } else {
+          levelToShow = "AAA";
+          percentage = Math.round((passed.AAA / pages.length) * 100);
+        }
+
+        //const levelToShow = hasLevelError.A.failed === 0 ? hasLevelError.AA.failed === 0 ? 'AAA' : 'AA' : 'A';
+
+        //const totalErrors = hasLevelError[levelToShow].failed + hasLevelError[levelToShow].passed;
+        const fixedScore = (score / pages.length).toFixed(1);
+
+        const path = __dirname + "/../../public/stamps/" + id + ".svg";
+
+        hasError = !(await this.generateSVG(
+          500,
+          500,
+          percentage,
+          levelToShow,
+          fixedScore,
+          path
+        ));
+      } catch (err) {
+        console.log(err);
+        hasError = true;
       }
-
-      let levelToShow = "";
-      let percentage = 0;
-
-      if (passed.A === 0) {
-        levelToShow = "Não conforme";
-        percentage = 0;
-      } else if (passed.A > passed.AA) {
-        levelToShow = "A";
-        percentage = Math.round((passed.A / pages.length) * 100);
-      } else if (passed.AA > passed.AAA) {
-        levelToShow = "AA";
-        percentage = Math.round((passed.AA / pages.length) * 100);
-      } else {
-        levelToShow = "AAA";
-        percentage = Math.round((passed.AAA / pages.length) * 100);
-      }
-
-      //const levelToShow = hasLevelError.A.failed === 0 ? hasLevelError.AA.failed === 0 ? 'AAA' : 'AA' : 'A';
-
-      //const totalErrors = hasLevelError[levelToShow].failed + hasLevelError[levelToShow].passed;
-      const fixedScore = (score / pages.length).toFixed(1);
-
-      const path = __dirname + "/../../public/stamps/" + websiteId + ".svg";
-
-      hasError = !(await this.generateSVG(
-        500,
-        500,
-        percentage,
-        levelToShow,
-        fixedScore,
-        path
-      ));
-    } catch (err) {
-      console.log(err);
-      hasError = true;
     }
 
     return !hasError;

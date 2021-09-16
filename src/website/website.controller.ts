@@ -20,11 +20,11 @@ export class WebsiteController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const domainId = req.body.domainId;
+    const domainsId = JSON.parse(req.body.domainsId);
     const option = req.body.option;
 
     return success(
-      await this.websiteService.addPagesToEvaluate(domainId, option)
+      await this.websiteService.addPagesToEvaluate(domainsId, option)
     );
   }
 
@@ -147,16 +147,30 @@ export class WebsiteController {
     return success(await this.websiteService.import(websiteId, websiteName));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all/count/:search')
-  async getAdminWebsiteCount(@Param('search') search: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/count/:search")
+  async getAdminWebsiteCount(@Param("search") search: string): Promise<any> {
     return success(await this.websiteService.adminCount(search.substring(7)));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all/:size/:page/:sort/:direction/:search')
-  async getAllWebsites(@Param('size') size: string, @Param('page') page: string, @Param('sort') sort: string, @Param('direction') direction: string, @Param('search') search: string): Promise<any> {
-    return success(await this.websiteService.findAll(parseInt(size), parseInt(page), sort.substring(5), direction.substring(10), search.substring(7)));
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/:size/:page/:sort/:direction/:search")
+  async getAllWebsites(
+    @Param("size") size: string,
+    @Param("page") page: string,
+    @Param("sort") sort: string,
+    @Param("direction") direction: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    return success(
+      await this.websiteService.findAll(
+        parseInt(size),
+        parseInt(page),
+        sort.substring(5),
+        direction.substring(10),
+        search.substring(7)
+      )
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -374,11 +388,12 @@ export class WebsiteController {
     const tag = req.body.tag;
     const websitesId = JSON.parse(req.body.websitesId);
 
-    const linkSuccess = await this.websiteService.linkStudyMonitorUserTagWebsite(
-      userId,
-      tag,
-      websitesId
-    );
+    const linkSuccess =
+      await this.websiteService.linkStudyMonitorUserTagWebsite(
+        userId,
+        tag,
+        websitesId
+      );
     if (!linkSuccess) {
       throw new InternalServerErrorException();
     }
@@ -399,13 +414,14 @@ export class WebsiteController {
       decodeURIComponent(page)
     );
 
-    const createSuccess = await this.websiteService.createStudyMonitorUserTagWebsite(
-      userId,
-      tag,
-      websiteName,
-      domain,
-      pages
-    );
+    const createSuccess =
+      await this.websiteService.createStudyMonitorUserTagWebsite(
+        userId,
+        tag,
+        websiteName,
+        domain,
+        pages
+      );
     if (!createSuccess) {
       throw new InternalServerErrorException();
     }
@@ -422,11 +438,12 @@ export class WebsiteController {
     const tag = req.body.tag;
     const websitesId = JSON.parse(req.body.websitesId);
 
-    const removeSuccess = await this.websiteService.removeStudyMonitorUserTagWebsite(
-      userId,
-      tag,
-      websitesId
-    );
+    const removeSuccess =
+      await this.websiteService.removeStudyMonitorUserTagWebsite(
+        userId,
+        tag,
+        websitesId
+      );
     if (!removeSuccess) {
       throw new InternalServerErrorException();
     }

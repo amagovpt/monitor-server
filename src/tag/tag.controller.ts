@@ -19,10 +19,10 @@ export class TagController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const tagId = req.body.tagId;
+    const tagsId = JSON.parse(req.body.tagsId);
     const option = req.body.option;
 
-    return success(await this.tagService.addPagesToEvaluate(tagId, option));
+    return success(await this.tagService.addPagesToEvaluate(tagsId, option));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))

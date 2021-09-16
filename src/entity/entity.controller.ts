@@ -1,43 +1,66 @@
-import { Controller, InternalServerErrorException, Get, Post, Request, Param, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { EntityService } from './entity.service';
-import { EntityTable } from './entity.entity';
-import { success } from '../lib/response';
+import {
+  Controller,
+  InternalServerErrorException,
+  Get,
+  Post,
+  Request,
+  Param,
+  UseGuards,
+} from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+import { EntityService } from "./entity.service";
+import { EntityTable } from "./entity.entity";
+import { success } from "../lib/response";
 
-@Controller('entity')
+@Controller("entity")
 export class EntityController {
+  constructor(private readonly entityService: EntityService) {}
 
-  constructor(private readonly entityService: EntityService) { }
-
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('reEvaluate')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const entityId = req.body.entityId;
+    const entitiesId = JSON.parse(req.body.entitiesId);
     const option = req.body.option;
 
-    return success(await this.entityService.addPagesToEvaluate(entityId, option));
+    return success(
+      await this.entityService.addPagesToEvaluate(entitiesId, option)
+    );
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all/count/:search')
-  async getAdminEntityCount(@Param('search') search: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/count/:search")
+  async getAdminEntityCount(@Param("search") search: string): Promise<any> {
     return success(await this.entityService.adminCount(search.substring(7)));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('all/:size/:page/:sort/:direction/:search')
-  async getAllEntities(@Param('size') size: string, @Param('page') page: string, @Param('sort') sort: string, @Param('direction') direction: string, @Param('search') search: string): Promise<any> {
-    return success(await this.entityService.findAll(parseInt(size), parseInt(page), sort.substring(5), direction.substring(10), search.substring(7)));
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/:size/:page/:sort/:direction/:search")
+  async getAllEntities(
+    @Param("size") size: string,
+    @Param("page") page: string,
+    @Param("sort") sort: string,
+    @Param("direction") direction: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    return success(
+      await this.entityService.findAll(
+        parseInt(size),
+        parseInt(page),
+        sort.substring(5),
+        direction.substring(10),
+        search.substring(7)
+      )
+    );
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('info/:entityId')
-  async getEntityInfo(@Param('entityId') entityId: number): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("info/:entityId")
+  async getEntityInfo(@Param("entityId") entityId: number): Promise<any> {
     return success(await this.entityService.findInfo(entityId));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('create')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("create")
   async createEntity(@Request() req: any): Promise<any> {
     const entity = new EntityTable();
     entity.Short_Name = req.body.shortName;
@@ -54,8 +77,8 @@ export class EntityController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('update')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("update")
   async updateEntity(@Request() req: any): Promise<any> {
     const entityId = req.body.entityId;
     const shortName = req.body.shortName;
@@ -64,7 +87,13 @@ export class EntityController {
     const defaultWebsites = JSON.parse(req.body.defaultWebsites);
     const websites = JSON.parse(req.body.websites);
 
-    const updateSuccess = await this.entityService.update(entityId, shortName, longName, websites, defaultWebsites);
+    const updateSuccess = await this.entityService.update(
+      entityId,
+      shortName,
+      longName,
+      websites,
+      defaultWebsites
+    );
     if (!updateSuccess) {
       throw new InternalServerErrorException();
     }
@@ -72,8 +101,8 @@ export class EntityController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('delete')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("delete")
   async deleteEntity(@Request() req: any): Promise<any> {
     const entityId = req.body.entityId;
 
@@ -85,8 +114,8 @@ export class EntityController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Post('deleteBulk')
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("deleteBulk")
   async deleteEntities(@Request() req: any): Promise<any> {
     const entitiesId = JSON.parse(req.body.entitiesId);
 
@@ -98,27 +127,33 @@ export class EntityController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('exists/shortName/:shortName')
-  async checkIfShortNameExists(@Param('shortName') shortName: string): Promise<any> {
-    return success(!!await this.entityService.findByShortName(shortName));
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/shortName/:shortName")
+  async checkIfShortNameExists(
+    @Param("shortName") shortName: string
+  ): Promise<any> {
+    return success(!!(await this.entityService.findByShortName(shortName)));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('exists/longName/:longName')
-  async checkIfLongNameExists(@Param('longName') longName: string): Promise<any> {
-    return success(!!await this.entityService.findByLongName(longName));
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/longName/:longName")
+  async checkIfLongNameExists(
+    @Param("longName") longName: string
+  ): Promise<any> {
+    return success(!!(await this.entityService.findByLongName(longName)));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('websites/:entity')
-  async getListOfEntityWebsites(@Param('entity') entity: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("websites/:entity")
+  async getListOfEntityWebsites(@Param("entity") entity: string): Promise<any> {
     return success(await this.entityService.findAllWebsites(entity));
   }
 
-  @UseGuards(AuthGuard('jwt-admin'))
-  @Get('websites/pages/:entity')
-  async getListOfEntityWebsitePages(@Param('entity') entity: string): Promise<any> {
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("websites/pages/:entity")
+  async getListOfEntityWebsitePages(
+    @Param("entity") entity: string
+  ): Promise<any> {
     return success(await this.entityService.findAllWebsitePages(entity));
   }
 }

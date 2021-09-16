@@ -19,7 +19,10 @@ export class WebsiteService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(domainId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(
+    domainsId: number[],
+    option: string
+  ): Promise<boolean> {
     const pages = await this.websiteRepository.query(
       `
       SELECT 
@@ -29,10 +32,10 @@ export class WebsiteService {
         DomainPage as dp, 
         Page as p
       WHERE
-        dp.DomainId = ? AND
+        dp.DomainId IN (?) AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?`,
-      [domainId, option === "all" ? "1__" : "1_1"]
+      [domainsId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();

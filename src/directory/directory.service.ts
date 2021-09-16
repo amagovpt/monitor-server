@@ -12,86 +12,89 @@ export class DirectoryService {
   ) {}
 
   async addPagesToEvaluate(
-    directoryId: number,
+    directoriesId: number[],
     option: string
   ): Promise<boolean> {
-    const nTags = await this.directoryRepository.query(
-      `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
-      [directoryId]
-    );
-
-    const pages = await this.directoryRepository.query(
-      `
-      SELECT
-        p.PageId, 
-        p.Uri
-      FROM
-        TagWebsite as tw,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        tw.TagId IN (?) AND
-        w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
-        p.Show_In LIKE ?
-      GROUP BY 
-        w.WebsiteId, p.PageId
-      HAVING 
-        COUNT(w.WebsiteId) = ?
-    `,
-      [
-        nTags.map((t) => t.TagId),
-        option === "all" ? "1__" : "1_1",
-        nTags.length,
-      ]
-    );
-
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-
-    await queryRunner.startTransaction();
-
     let error = false;
-    try {
-      for (const page of pages || []) {
-        try {
-          const pageEval = await queryRunner.manager.query(
-            `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
-            [page.PageId, page.Uri, "10"]
-          );
-          if (pageEval.length > 0) {
-            await queryRunner.manager.query(
-              `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-              [pageEval[0].EvaluationListId]
-            );
-          } else {
-            await queryRunner.manager.query(
-              `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
-              [page.PageId, -1, page.Uri, "10", new Date()]
-            );
-          }
-        } catch (_) {}
-      }
 
-      await queryRunner.manager.query(
-        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
-        [pages.length]
+    for (const directoryId of directoriesId ?? []) {
+      const nTags = await this.directoryRepository.query(
+        `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
+        [directoryId]
       );
 
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      // since we have errors lets rollback the changes we made
-      await queryRunner.rollbackTransaction();
-      console.log(err);
-      error = true;
-    } finally {
-      await queryRunner.release();
+      const pages = await this.directoryRepository.query(
+        `
+        SELECT
+          p.PageId, 
+          p.Uri
+        FROM
+          TagWebsite as tw,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1 AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?
+        GROUP BY 
+          w.WebsiteId, p.PageId
+        HAVING 
+          COUNT(w.WebsiteId) = ?
+      `,
+        [
+          nTags.map((t) => t.TagId),
+          option === "all" ? "1__" : "1_1",
+          nTags.length,
+        ]
+      );
+
+      const queryRunner = this.connection.createQueryRunner();
+
+      await queryRunner.connect();
+
+      await queryRunner.startTransaction();
+
+      try {
+        for (const page of pages || []) {
+          try {
+            const pageEval = await queryRunner.manager.query(
+              `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
+              [page.PageId, page.Uri, "10"]
+            );
+            if (pageEval.length > 0) {
+              await queryRunner.manager.query(
+                `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+                [pageEval[0].EvaluationListId]
+              );
+            } else {
+              await queryRunner.manager.query(
+                `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
+                [page.PageId, -1, page.Uri, "10", new Date()]
+              );
+            }
+          } catch (_) {}
+        }
+
+        await queryRunner.manager.query(
+          `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+          [pages.length]
+        );
+
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        // since we have errors lets rollback the changes we made
+        await queryRunner.rollbackTransaction();
+        console.log(err);
+        error = true;
+      } finally {
+        await queryRunner.release();
+      }
     }
 
     return !error;
@@ -329,7 +332,7 @@ export class DirectoryService {
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY
-          w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
+          w.WebsiteId
         HAVING COUNT(distinct w.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
       );
@@ -407,7 +410,7 @@ export class DirectoryService {
           p.PageId = dp.PageId AND
           p.Show_In LIKE "1__"
         GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-        HAVING COUNT(w.WebsiteId) = ?`,
+        HAVING COUNT(distinct w.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
       );
 

@@ -19,11 +19,11 @@ export class DirectoryController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const directoryId = req.body.directoryId;
+    const directoriesId = JSON.parse(req.body.directoriesId);
     const option = req.body.option;
 
     return success(
-      await this.directoryService.addPagesToEvaluate(directoryId, option)
+      await this.directoryService.addPagesToEvaluate(directoriesId, option)
     );
   }
 
