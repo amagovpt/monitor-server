@@ -1353,8 +1353,8 @@ export class WebsiteService {
       `,
         [websiteId]
       );
-
-      if (pages.length > 0) {
+      
+      if (pages.length >0) {
         await queryRunner.manager.query(
           `
           DELETE FROM  
@@ -1366,6 +1366,7 @@ export class WebsiteService {
         );
       }
 
+      
       const domains = await queryRunner.manager.query(
         `SELECT DomainId FROM Domain WHERE WebsiteId = ?`,
         [websiteId]
@@ -1427,7 +1428,7 @@ export class WebsiteService {
       `,
         [websitesId]
       );
-
+      if(pages.length>0){
       await queryRunner.manager.query(
         `
         DELETE FROM  
@@ -1437,7 +1438,7 @@ export class WebsiteService {
       `,
         [pages.map((p) => p.PageId)]
       );
-
+      }
       const domains = await queryRunner.manager.query(
         `SELECT DomainId FROM Domain WHERE WebsiteId IN (?)`,
         [websitesId]
