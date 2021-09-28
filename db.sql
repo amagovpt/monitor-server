@@ -6,6 +6,8 @@ CREATE TABLE `CrawlDomain` (
   `UserId` int(11) NOT NULL,
   `DomainUri` varchar(255) NOT NULL,
   `DomainId` int(11) NOT NULL,
+  `Max_Depth` int(11) NOT NULL DEFAULT 0,
+  `Max_Pages` int(11) NOT NULL DEFAULT 0,
   `Creation_Date` datetime NOT NULL,
   `Done` tinyint(1) NOT NULL DEFAULT '0',
   `SubDomainUri` varchar(255) NOT NULL,

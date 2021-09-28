@@ -45,8 +45,8 @@ export class CrawlerController {
   @Post("crawl")
   async crawlPage(@Request() req: any): Promise<any> {
     const websites = JSON.parse(req.body.websites);
-    const maxDepth = req.body.max_depth;
-    const maxPages = req.body.max_pages;
+    const maxDepth = req.body.maxDepth;
+    const maxPages = req.body.maxPages;
 
     return success(
       await this.crawlerService.crawlDomain(-1, websites, maxDepth, maxPages, 0)
@@ -71,8 +71,8 @@ export class CrawlerController {
       await this.crawlerService.crawlDomain(
         userId,
         [{ url: domain, domainId }],
-        null,
-        null,
+        0,
+        0,
         0
       )
     );
@@ -125,8 +125,8 @@ export class CrawlerController {
       await this.crawlerService.crawlDomain(
         userId,
         [{ url: domain, domainId }],
-        null,
-        null,
+        0,
+        0,
         0
       )
     );

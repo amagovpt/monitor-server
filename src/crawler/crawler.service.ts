@@ -47,11 +47,9 @@ export class CrawlerService {
             const crawler = new Crawler(incognito, domain[0].DomainUri);
             //await this.crawl(domain[0].DomainUri);
 
-            const config = await this.getConfig();
-
             await crawler.crawl({
-              maxDepth: config.maxDepth,
-              maxUrls: config.maxPages,
+              maxDepth: domain[0].Max_Depth,
+              maxUrls: domain[0].Max_Pages ? domain[0].Max_Pages : undefined,
             });
 
             await incognito.close();
@@ -492,6 +490,8 @@ export class CrawlerService {
         newCrawlDomain.UserId = userId;
         newCrawlDomain.DomainUri = website.url;
         newCrawlDomain.DomainId = website.domainId;
+        newCrawlDomain.Max_Depth = maxDepth;
+        newCrawlDomain.Max_Pages = maxPages;
         newCrawlDomain.Creation_Date = new Date();
         newCrawlDomain.SubDomainUri = website.url;
         newCrawlDomain.Tag = tag;

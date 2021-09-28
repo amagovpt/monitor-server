@@ -771,7 +771,7 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
+        `SELECT w.*, d.Url as Domain, d.DomainId, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
