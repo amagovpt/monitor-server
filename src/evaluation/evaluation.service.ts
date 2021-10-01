@@ -22,7 +22,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateAdminPageList(): Promise<void> {
-    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingAdminInstance) {
+    if (process.env.NAMESPACE === "ADMIN" && !this.isEvaluatingAdminInstance) {
       this.isEvaluatingAdminInstance = true;
 
       let pages = [];
@@ -45,7 +45,7 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateUserPageList(): Promise<void> {
-    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingUserInstance) {
+    if (process.env.NAMESPACE === "USER" && !this.isEvaluatingUserInstance) {
       this.isEvaluatingUserInstance = true;
 
       let pages = [];

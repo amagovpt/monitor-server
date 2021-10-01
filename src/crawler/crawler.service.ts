@@ -92,7 +92,7 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestUserCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === "1") {
+    if (process.env.ID === undefined || process.env.ID === "0") {
       if (!this.isUserCrawling) {
         this.isUserCrawling = true;
 
