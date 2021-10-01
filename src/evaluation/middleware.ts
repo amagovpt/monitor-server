@@ -69,8 +69,8 @@ function completeMissingReportElements(report: any): void {
     report.data.elems["tableComplex"] = table.length;
   }
 
-  const tabletable = CSSselect.selectAll("table table", _dom);
-  report.data.elems["tableNested"] = tabletable.length;
+  //const tabletable = CSSselect.selectAll("table table", _dom);
+  //report.data.elems["tableNested"] = tabletable.length;
 
   const iframe = CSSselect.selectAll("iframe", _dom);
   report.data.elems["iframe"] = iframe.length;
@@ -267,9 +267,7 @@ function parseEvaluation(evaluation: any): any {
     encodeURI(report.pagecode).split(/%..|./).length - 1;
   //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
   report["data"].tot.info.encoding = "utf-8";
-  report["data"].tot.info.lang = getHtmlLang(
-    evaluation.system.page.dom.html
-  );
+  report["data"].tot.info.lang = getHtmlLang(evaluation.system.page.dom.html);
   report["data"].tot.info.content = "text/html";
   report["data"].tot.info.hash = generateMd5Hash(report["data"].date);
   report["data"].tot.info.tests = Object.keys(results).length;
@@ -287,14 +285,11 @@ function parseEvaluation(evaluation: any): any {
 
 export async function executeUrlEvaluation(url: string): Promise<any> {
   const params = {
-    url
+    url,
   };
 
   params.url = params.url.trim();
-  if (
-    !params.url.startsWith("http://") &&
-    !params.url.startsWith("https://")
-  ) {
+  if (!params.url.startsWith("http://") && !params.url.startsWith("https://")) {
     params.url = "http://" + params.url;
   }
 
@@ -303,15 +298,11 @@ export async function executeUrlEvaluation(url: string): Promise<any> {
 }
 
 export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
-
   const normalized = new Array<string>();
 
   for (const url of urls ?? []) {
     const _url = url.trim();
-    if (
-      !_url.startsWith("http://") &&
-      !_url.startsWith("https://")
-    ) {
+    if (!_url.startsWith("http://") && !_url.startsWith("https://")) {
       normalized.push("http://" + _url);
     } else {
       normalized.push(_url);
@@ -319,7 +310,7 @@ export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
   }
 
   const params = {
-    urls: normalized
+    urls: normalized,
   };
 
   const reports = await qualweb.evaluate(params);
@@ -333,5 +324,5 @@ export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
 
 export async function executeHtmlEvaluation(html: string): Promise<any> {
   const reports = await qualweb.evaluate({ html });
-  return parseEvaluation(reports['customHtml']);
+  return parseEvaluation(reports["customHtml"]);
 }

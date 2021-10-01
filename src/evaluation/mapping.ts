@@ -15,32 +15,32 @@ const act_mapping = {
 };
 
 const wcag_mapping = {
-  "QW-WCAG-T1": QW_HTML_T1,
-  "QW-WCAG-T2": QW_HTML_T2,
-  "QW-WCAG-T3": QW_HTML_T3,
-  "QW-WCAG-T6": QW_HTML_T6,
-  "QW-WCAG-T7": QW_HTML_T7,
-  "QW-WCAG-T8": QW_HTML_T8,
-  "QW-WCAG-T9": QW_HTML_T9,
-  "QW-WCAG-T14": QW_HTML_T17,
-  "QW-WCAG-T15": QW_HTML_T19,
-  "QW-WCAG-T16": QW_HTML_T20,
-  "QW-WCAG-T17": QW_HTML_T25,
-  "QW-WCAG-T32": QW_HTML_T28,
-  "QW-WCAG-T18": QW_HTML_T30,
-  "QW-WCAG-T19": QW_HTML_T32,
-  "QW-WCAG-T20": QW_HTML_T33,
-  "QW-WCAG-T21": QW_HTML_T34,
-  "QW-WCAG-T22": QW_HTML_T35,
-  "QW-WCAG-T23": QW_HTML_T38,
-  "QW-WCAG-T24": QW_HTML_T40,
-  "QW-WCAG-T25": QW_HTML_T41,
-  "QW-WCAG-T26": QW_HTML_T42,
-  "QW-WCAG-T27": QW_HTML_T43,
-  "QW-WCAG-T28": QW_CSS_T1,
-  "QW-WCAG-T29": QW_CSS_T2,
-  "QW-WCAG-T30": QW_CSS_T6,
-  "QW-WCAG-T31": QW_CSS_T7,
+  "QW-WCAG-T1": QW_WCAG_T1,
+  "QW-WCAG-T2": QW_WCAG_T2,
+  "QW-WCAG-T3": QW_WCAG_T3,
+  "QW-WCAG-T6": QW_WCAG_T6,
+  "QW-WCAG-T7": QW_WCAG_T7,
+  "QW-WCAG-T8": QW_WCAG_T8,
+  "QW-WCAG-T9": QW_WCAG_T9,
+  "QW-WCAG-T14": QW_WCAG_T14,
+  "QW-WCAG-T15": QW_WCAG_T15,
+  "QW-WCAG-T16": QW_WCAG_T16,
+  "QW-WCAG-T17": QW_WCAG_T17,
+  "QW-WCAG-T18": QW_WCAG_T18,
+  "QW-WCAG-T19": QW_WCAG_T19,
+  "QW-WCAG-T20": QW_WCAG_T20,
+  "QW-WCAG-T21": QW_WCAG_T21,
+  "QW-WCAG-T22": QW_WCAG_T22,
+  "QW-WCAG-T23": QW_WCAG_T23,
+  "QW-WCAG-T24": QW_WCAG_T24,
+  "QW-WCAG-T25": QW_WCAG_T25,
+  "QW-WCAG-T26": QW_WCAG_T26,
+  "QW-WCAG-T27": QW_WCAG_T27,
+  "QW-WCAG-T28": QW_WCAG_T28,
+  "QW-WCAG-T29": QW_WCAG_T29,
+  "QW-WCAG-T30": QW_WCAG_T30,
+  "QW-WCAG-T31": QW_WCAG_T31,
+  "QW-WCAG-T32": QW_WCAG_T32,
 };
 
 const bp_mapping = {
@@ -63,14 +63,14 @@ const bp_mapping = {
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "failed") {
-    const noTitle = rule.results.filter((r: any) => r.resultCode === "RC1");
+    const noTitle = rule.results.filter((r: any) => r.resultCode === "F1");
     if (noTitle.length !== 0) {
       addToElements(elements, "titleNo", noTitle.length);
       addToResults(results, "title_02");
       addToNodes(nodes, "titleNo", null);
     }
 
-    const titleEmpty = rule.results.filter((r: any) => r.resultCode === "RC2");
+    const titleEmpty = rule.results.filter((r: any) => r.resultCode === "F2");
     if (titleEmpty.length !== 0) {
       addToElements(elements, "titleNull", titleEmpty.length);
       addToResults(results, "title_03");
@@ -120,14 +120,14 @@ function QW_ACT_R3(elements: any, results: any, nodes: any, rule: any): void {
 }
 
 function QW_ACT_R4(elements: any, results: any, nodes: any, rule: any): void {
-  const failRefresh = rule.results.filter((r: any) => r.resultCode === "RC9");
+  const failRefresh = rule.results.filter((r: any) => r.resultCode === "F1");
   if (failRefresh.length !== 0) {
     addToElements(elements, "metaRefresh", failRefresh.length);
     addToResults(results, "meta_01");
     addToNodes(nodes, "metaRefresh", failRefresh);
   }
 
-  const failRedirect = rule.results.filter((r: any) => r.resultCode === "RC14");
+  const failRedirect = rule.results.filter((r: any) => r.resultCode === "F2");
   if (failRedirect.length !== 0) {
     addToElements(elements, "metaRedir", failRedirect.length);
     addToResults(results, "meta_02");
@@ -223,7 +223,7 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 
-  const imgEmptyAlt = rule.results.filter((r: any) => r.resultCode === "RC1");
+  const imgEmptyAlt = rule.results.filter((r: any) => r.resultCode === "P1");
 
   if (imgEmptyAlt.length > 0) {
     addToElements(elements, "imgAltNull", imgEmptyAlt.length);
@@ -288,7 +288,7 @@ function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 
-function QW_HTML_T1(
+function QW_WCAG_T1(
   elements: any,
   results: any,
   nodes: any,
@@ -318,7 +318,7 @@ function QW_HTML_T1(
   }
 }
 
-function QW_HTML_T2(
+function QW_WCAG_T2(
   elements: any,
   results: any,
   nodes: any,
@@ -335,14 +335,14 @@ function QW_HTML_T2(
   }
 }
 
-function QW_HTML_T3(
+function QW_WCAG_T3(
   elements: any,
   results: any,
   nodes: any,
   technique: any
 ): void {
   const outsideFieldset = technique.results.filter(
-    (r: any) => r.resultCode === "RC1"
+    (r: any) => r.resultCode === "W1"
   );
   if (outsideFieldset.length !== 0) {
     addToElements(elements, "fieldNoForm", outsideFieldset.length);
@@ -351,7 +351,7 @@ function QW_HTML_T3(
   }
 
   const fieldsetNoLegend = technique.results.filter(
-    (r: any) => r.resultCode === "RC2" || r.resultCode === "RC3"
+    (r: any) => r.resultCode === "F1" || r.resultCode === "F2"
   );
   if (fieldsetNoLegend.length !== 0) {
     addToElements(elements, "fieldLegNo", fieldsetNoLegend.length);
@@ -360,7 +360,7 @@ function QW_HTML_T3(
   }
 }
 
-function QW_HTML_T6(
+function QW_WCAG_T6(
   elements: any,
   results: any,
   nodes: any,
@@ -381,7 +381,7 @@ function QW_HTML_T6(
   }
 }
 
-function QW_HTML_T7(
+function QW_WCAG_T7(
   elements: any,
   results: any,
   nodes: any,
@@ -398,7 +398,7 @@ function QW_HTML_T7(
   }
 }
 
-function QW_HTML_T8(
+function QW_WCAG_T8(
   elements: any,
   results: any,
   nodes: any,
@@ -415,14 +415,14 @@ function QW_HTML_T8(
   }
 }
 
-function QW_HTML_T9(
+function QW_WCAG_T9(
   elements: any,
   results: any,
   nodes: any,
   technique: any
 ): void {
   const failsH1Results = technique.results.filter(
-    (r: any) => r.resultCode === "RC3"
+    (r: any) => r.resultCode === "F3"
   );
   if (failsH1Results.length > 0) {
     addToElements(elements, "h1", undefined);
@@ -431,7 +431,7 @@ function QW_HTML_T9(
   }
 
   const incorrectOrderResults = technique.results.filter(
-    (r: any) => r.resultCode === "RC1"
+    (r: any) => r.resultCode === "F1"
   );
   if (incorrectOrderResults.length > 0) {
     addToElements(elements, "hxSkip", incorrectOrderResults.length);
@@ -440,7 +440,7 @@ function QW_HTML_T9(
   }
 }
 
-function QW_HTML_T17(
+function QW_WCAG_T14(
   elements: any,
   results: any,
   nodes: any,
@@ -457,7 +457,7 @@ function QW_HTML_T17(
   }
 }
 
-function QW_HTML_T19(
+function QW_WCAG_T15(
   elements: any,
   results: any,
   nodes: any,
@@ -474,7 +474,7 @@ function QW_HTML_T19(
   }
 }
 
-function QW_HTML_T20(
+function QW_WCAG_T16(
   elements: any,
   results: any,
   nodes: any,
@@ -506,7 +506,7 @@ function QW_HTML_T20(
   }
 }
 
-function QW_HTML_T25(
+function QW_WCAG_T17(
   elements: any,
   results: any,
   nodes: any,
@@ -522,7 +522,7 @@ function QW_HTML_T25(
   }
 }
 
-function QW_HTML_T28(
+function QW_WCAG_T32(
   elements: any,
   results: any,
   nodes: any,
@@ -539,7 +539,7 @@ function QW_HTML_T28(
   }
 }
 
-function QW_HTML_T30(
+function QW_WCAG_T18(
   elements: any,
   results: any,
   nodes: any,
@@ -556,7 +556,7 @@ function QW_HTML_T30(
   }
 }
 
-function QW_HTML_T32(
+function QW_WCAG_T19(
   elements: any,
   results: any,
   nodes: any,
@@ -581,14 +581,14 @@ function QW_HTML_T32(
   }
 }
 
-function QW_HTML_T33(
+function QW_WCAG_T20(
   elements: any,
   results: any,
   nodes: any,
   technique: any
 ): void {
   const titleMatchResults = technique.results.filter(
-    (r: any) => r.resultCode === "RC2"
+    (r: any) => r.resultCode === "F2"
   );
   if (titleMatchResults.length > 0) {
     addToElements(elements, "aTitleMatch", titleMatchResults.length);
@@ -597,7 +597,7 @@ function QW_HTML_T33(
   }
 }
 
-function QW_HTML_T34(
+function QW_WCAG_T21(
   elements: any,
   results: any,
   nodes: any,
@@ -614,7 +614,7 @@ function QW_HTML_T34(
   }
 }
 
-function QW_HTML_T35(
+function QW_WCAG_T22(
   elements: any,
   results: any,
   nodes: any,
@@ -631,7 +631,7 @@ function QW_HTML_T35(
   }
 }
 
-/*function QW_HTML_T37(elements: any, results: any, nodes: any, technique: any): void {
+/*function QW_WCAG_T37(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === 'warning') {
     addToElements(elements, 'aSkip', technique.metadata.warning);
     addToResults(results, 'a_02b');
@@ -643,7 +643,7 @@ function QW_HTML_T35(
   }
 }*/
 
-function QW_HTML_T38(
+function QW_WCAG_T23(
   elements: any,
   results: any,
   nodes: any,
@@ -668,7 +668,7 @@ function QW_HTML_T38(
   }
 }
 
-function QW_HTML_T40(
+function QW_WCAG_T24(
   elements: any,
   results: any,
   nodes: any,
@@ -685,14 +685,14 @@ function QW_HTML_T40(
   }
 }
 
-function QW_HTML_T41(
+function QW_WCAG_T25(
   elements: any,
   results: any,
   nodes: any,
   technique: any
 ): void {
   const incorrectScope = technique.results.filter(
-    (r: any) => r.resultCode === "RC2" || r.resultCode === "RC4"
+    (r: any) => r.resultCode === "F2" || r.resultCode === "F3"
   );
   if (incorrectScope.length > 0) {
     addToElements(elements, "scopeNo", incorrectScope.length);
@@ -701,7 +701,7 @@ function QW_HTML_T41(
   }
 }
 
-function QW_HTML_T42(
+function QW_WCAG_T26(
   elements: any,
   results: any,
   nodes: any,
@@ -718,7 +718,7 @@ function QW_HTML_T42(
   }
 }
 
-function QW_HTML_T43(
+function QW_WCAG_T27(
   elements: any,
   results: any,
   nodes: any,
@@ -735,7 +735,7 @@ function QW_HTML_T43(
   }
 }
 
-function QW_CSS_T1(
+function QW_WCAG_T28(
   elements: any,
   results: any,
   nodes: any,
@@ -752,7 +752,7 @@ function QW_CSS_T1(
   }
 }
 
-function QW_CSS_T2(
+function QW_WCAG_T29(
   elements: any,
   results: any,
   nodes: any,
@@ -769,7 +769,7 @@ function QW_CSS_T2(
   }
 }
 
-function QW_CSS_T6(
+function QW_WCAG_T30(
   elements: any,
   results: any,
   nodes: any,
@@ -784,7 +784,7 @@ function QW_CSS_T6(
   }
 }
 
-function QW_CSS_T7(
+function QW_WCAG_T31(
   elements: any,
   results: any,
   nodes: any,
