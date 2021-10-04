@@ -133,6 +133,14 @@ export class WebsiteService {
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
+
+      /* 
+        LEFT OUTER JOIN Evaluation as e2 ON e.PageId = p.PageId AND e2.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+      */
       return websites;
     } else {
       let order = "";

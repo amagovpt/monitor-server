@@ -87,7 +87,7 @@ export async function evaluate(params: any): Promise<any> {
 
   //options["validator"] = "http://127.0.0.1:5555/";
 
-  const qualweb = new QualWeb();
+  const qualweb = new QualWeb({ stealth: true });
   await qualweb.start(
     { maxConcurrency: 2, timeout: 1000 * 60 * 2 },
     {
