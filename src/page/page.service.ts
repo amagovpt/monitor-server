@@ -80,6 +80,29 @@ export class PageService {
     return result[0].Total;
   }
 
+  async deleteAdminPagesWithError(pages: number[]): Promise<boolean> {
+    try {
+      const manager = getManager();
+      await manager.query(
+        "DELETE FROM Evaluation_List WHERE EvaluationListId IN (?)",
+        [pages]
+      );
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+
+    return true;
+  }
+
+  async getAdminPagesWithError(): Promise<any> {
+    const manager = getManager();
+    const result = await manager.query(
+      "SELECT * FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
+    );
+    return result;
+  }
+
   async adminCount(search: string): Promise<any> {
     const manager = getManager();
     const count = await manager.query(

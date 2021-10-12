@@ -89,7 +89,7 @@ export default {
   title_06: "G",
   title_07: "Y",
   values_01a: "Y",
-  values_01b: "R",
+  values_01b: "G",
   values_02a: "Y",
   values_02b: "G",
   w3c_validator_01a: "G",

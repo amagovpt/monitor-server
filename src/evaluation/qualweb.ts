@@ -75,6 +75,7 @@ export async function evaluate(params: any): Promise<any> {
       ],
     },
     waitUntil: ["load", "networkidle0"],
+    log: { console: true },
   };
 
   if (params.url || params.urls) {
@@ -95,16 +96,17 @@ export async function evaluate(params: any): Promise<any> {
     }
   );
 
-  //const reports = await qualweb.evaluate(options);
   let reports = null;
   let error = null;
   try {
-    reports = await qualweb.evaluate(options); //await timeExceeded(qualweb, options);
+    reports = await qualweb.evaluate(options);
   } catch (err) {
     error = err;
   } finally {
     await qualweb.stop();
   }
+
+  console.log(reports);
 
   if (reports === null) {
     throw new Error(error);
@@ -114,26 +116,5 @@ export async function evaluate(params: any): Promise<any> {
     throw new Error("Invalid resource");
   }
 
-  /*let report: EvaluationReport;
-
-  if (params.url) {
-    report = reports[params.url];
-  } else if (params.html) {
-    report = reports["customHtml"];
-  }*/
-
   return reports;
-}
-
-function timeExceeded(qualweb: QualWeb, options: QualwebOptions): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const exceeded = setTimeout(() => {
-      reject("Time exceeded for evaluation");
-    }, 1000 * 60 * 2);
-
-    qualweb.evaluate(options).then((reports) => {
-      clearTimeout(exceeded);
-      resolve(reports);
-    });
-  });
 }

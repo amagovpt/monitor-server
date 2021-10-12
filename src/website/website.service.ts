@@ -126,12 +126,17 @@ export class WebsiteService {
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          w.Name LIKE ? AND
+          (w.Name LIKE ? OR d.Url LIKE ?) AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
         LIMIT ? OFFSET ?`,
-        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+        [
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          size,
+          page * size,
+        ]
       );
 
       /* 
@@ -173,13 +178,18 @@ export class WebsiteService {
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          Name LIKE ? AND
+          (w.Name LIKE ? OR d.Url LIKE ?) AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
         ORDER BY ${order} ${direction.toUpperCase()}
         LIMIT ? OFFSET ?`,
-        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+        [
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          size,
+          page * size,
+        ]
       );
       return websites;
     }
