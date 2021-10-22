@@ -47,9 +47,17 @@ export class CrawlerController {
     const websites = JSON.parse(req.body.websites);
     const maxDepth = req.body.maxDepth;
     const maxPages = req.body.maxPages;
+    const waitJS = req.body.waitJS;
 
     return success(
-      await this.crawlerService.crawlDomain(-1, websites, maxDepth, maxPages, 0)
+      await this.crawlerService.crawlDomain(
+        -1,
+        websites,
+        maxDepth,
+        maxPages,
+        waitJS,
+        0
+      )
     );
   }
 
@@ -71,6 +79,7 @@ export class CrawlerController {
       await this.crawlerService.crawlDomain(
         userId,
         [{ url: domain, domainId }],
+        0,
         0,
         0,
         0
@@ -125,6 +134,7 @@ export class CrawlerController {
       await this.crawlerService.crawlDomain(
         userId,
         [{ url: domain, domainId }],
+        0,
         0,
         0,
         0

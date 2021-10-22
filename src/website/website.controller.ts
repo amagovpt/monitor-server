@@ -150,7 +150,11 @@ export class WebsiteController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminWebsiteCount(@Param("search") search: string): Promise<any> {
-    return success(await this.websiteService.adminCount(search.substring(7)));
+    return success(
+      await this.websiteService.adminCount(
+        decodeURIComponent(search.substring(7))
+      )
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -168,7 +172,7 @@ export class WebsiteController {
         parseInt(page),
         sort.substring(5),
         direction.substring(10),
-        search.substring(7)
+        decodeURIComponent(search.substring(7))
       )
     );
   }

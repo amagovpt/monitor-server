@@ -4,7 +4,8 @@ import { Connection, Repository, getManager, In } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CrawlDomain, CrawlPage } from "./crawler.entity";
 import { readFileSync, writeFileSync } from "fs";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { PageService } from "src/page/page.service";
 import { Crawler } from "@qualweb/crawler";
 
@@ -21,6 +22,7 @@ export class CrawlerService {
   ) {
     this.isAdminCrawling = false;
     this.isUserCrawling = false;
+    puppeteer.use(StealthPlugin());
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
@@ -43,7 +45,12 @@ export class CrawlerService {
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            const crawler = new Crawler(
+              incognito,
+              domain[0].DomainUri,
+              undefined,
+              domain[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
+            );
             //await this.crawl(domain[0].DomainUri);
 
             await crawler.crawl({
@@ -110,7 +117,12 @@ export class CrawlerService {
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            const crawler = new Crawler(
+              incognito,
+              domain[0].DomainUri,
+              undefined,
+              domain[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
+            );
             //await this.crawl(domain[0].DomainUri);
             await crawler.crawl({ maxDepth: 0 });
 
@@ -277,8 +289,9 @@ export class CrawlerService {
         await this.crawlDomain(
           -1,
           [{ url: domain.Url, domainId: domain.DomainId }],
-          -1,
-          -1,
+          0,
+          0,
+          0,
           1
         );
       }
@@ -295,6 +308,7 @@ export class CrawlerService {
     websites: any,
     maxDepth: number,
     maxPages: number,
+    waitJS: number,
     tag: number
   ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
@@ -311,6 +325,7 @@ export class CrawlerService {
         newCrawlDomain.DomainId = website.domainId;
         newCrawlDomain.Max_Depth = maxDepth;
         newCrawlDomain.Max_Pages = maxPages;
+        newCrawlDomain.Wait_JS = waitJS;
         newCrawlDomain.Creation_Date = new Date();
         newCrawlDomain.SubDomainUri = website.url;
         newCrawlDomain.Tag = tag;

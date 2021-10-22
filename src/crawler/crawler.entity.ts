@@ -62,6 +62,13 @@ export class CrawlDomain {
   Max_Pages: number;
 
   @Column({
+    type: "tinyint",
+    nullable: false,
+    default: 0,
+  })
+  Wait_JS: number;
+
+  @Column({
     type: "datetime",
     nullable: false,
   })

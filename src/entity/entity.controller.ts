@@ -30,7 +30,11 @@ export class EntityController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminEntityCount(@Param("search") search: string): Promise<any> {
-    return success(await this.entityService.adminCount(search.substring(7)));
+    return success(
+      await this.entityService.adminCount(
+        decodeURIComponent(search.substring(7))
+      )
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -48,7 +52,7 @@ export class EntityController {
         parseInt(page),
         sort.substring(5),
         direction.substring(10),
-        search.substring(7)
+        decodeURIComponent(search.substring(7))
       )
     );
   }

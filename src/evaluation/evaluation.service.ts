@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { Connection, getManager } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
+import fs from "fs";
 import { Evaluation } from "./evaluation.entity";
 import {
   executeUrlEvaluation,
@@ -18,6 +19,23 @@ export class EvaluationService {
   constructor(private readonly connection: Connection) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  cleanUpErrorFiles(): void {
+    fs.readdir("./", (err, files: string[]) => {
+      if (!err) {
+        for (const file of files ?? []) {
+          if (file.startsWith("qualweb-errors")) {
+            fs.unlink(file, (err2) => {
+              if (err2) {
+                console.error(err2);
+              }
+            });
+          }
+        }
+      }
+    });
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
@@ -161,10 +179,10 @@ export class EvaluationService {
             [pte.EvaluationListId]
           );
         } else {
-          console.error("Check error log file for more information");
+          const error = this.findUrlError(pte.Url);
           await queryRunner.manager.query(
             `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-            ["Check error log file for more information", pte.EvaluationListId]
+            [error, pte.EvaluationListId]
           );
         }
       }
@@ -226,6 +244,24 @@ export class EvaluationService {
         }
       }*/
     }
+  }
+
+  private findUrlError(url: string): string {
+    let error = "";
+    const files = fs.readdirSync("./", { encoding: "utf-8" });
+    for (const file of files ?? []) {
+      if (file.startsWith("qualweb-errors") && !error) {
+        const content = fs.readFileSync(file, { encoding: "utf-8" });
+        if (content.includes(url)) {
+          let split = content.split(url);
+          split = split[1].split("-----------");
+          split = split[0].split(":");
+          error = split.splice(1).join(":").trim();
+        }
+      }
+    }
+
+    return error;
   }
 
   evaluateUrl(url: string): Promise<any> {

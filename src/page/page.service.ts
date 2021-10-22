@@ -128,7 +128,7 @@ export class PageService {
     if (!direction.trim()) {
       const manager = getManager();
       const pages = await manager.query(
-        `SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
+        `SELECT p.*, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (
@@ -156,6 +156,15 @@ export class PageService {
         case "Score":
           order = "e.Score";
           break;
+        case "A":
+          order = "e.A";
+          break;
+        case "AA":
+          order = "e.AA";
+          break;
+        case "AAA":
+          order = "e.AAA";
+          break;
         case "Evaluation_Date":
           order = "e.Evaluation_Date";
           break;
@@ -169,7 +178,7 @@ export class PageService {
 
       const manager = getManager();
       const pages = await manager.query(
-        `SELECT p.*, e.Score, e.Evaluation_Date, e.Element_Count, e.Tag_Count
+        `SELECT p.*, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Evaluation_Date = (

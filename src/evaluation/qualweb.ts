@@ -75,7 +75,6 @@ export async function evaluate(params: any): Promise<any> {
       ],
     },
     waitUntil: ["load", "networkidle0"],
-    log: { console: true },
   };
 
   if (params.url || params.urls) {
@@ -85,6 +84,8 @@ export async function evaluate(params: any): Promise<any> {
   } else if (params.html) {
     options.html = params.html;
   }
+
+  options.log = { file: true };
 
   //options["validator"] = "http://127.0.0.1:5555/";
 
@@ -105,8 +106,6 @@ export async function evaluate(params: any): Promise<any> {
   } finally {
     await qualweb.stop();
   }
-
-  console.log(reports);
 
   if (reports === null) {
     throw new Error(error);

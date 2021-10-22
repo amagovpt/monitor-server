@@ -90,7 +90,9 @@ export class PageController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminPageCount(@Param("search") search: string): Promise<any> {
-    return success(await this.pageService.adminCount(search.substring(7)));
+    return success(
+      await this.pageService.adminCount(decodeURIComponent(search.substring(7)))
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -108,7 +110,7 @@ export class PageController {
         parseInt(page),
         sort.substring(5),
         direction.substring(10),
-        search.substring(7)
+        decodeURIComponent(search.substring(7))
       )
     );
   }
