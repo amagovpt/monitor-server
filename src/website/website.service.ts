@@ -329,9 +329,10 @@ export class WebsiteService {
 
   async findAllOfficial(): Promise<any> {
     const manager = getManager();
-    const websites = await manager.query(`SELECT distinct w.* 
+    const websites = await manager.query(`SELECT distinct w.*, d.Url
       FROM 
-        Website as w, 
+        Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId,
         User as u 
       WHERE 
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND

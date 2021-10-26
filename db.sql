@@ -53,7 +53,7 @@ CREATE TABLE `DomainPage` (
   UNIQUE KEY `DomainPage` (`DomainId`,`PageId`),
   KEY `DPPageId_idx` (`PageId`),
   CONSTRAINT `DPDomainId_fk` FOREIGN KEY (`DomainId`) REFERENCES `Domain` (`DomainId`) ON DELETE CASCADE,
-  CONSTRAINT `DPPageId` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+  CONSTRAINT `DPPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Entity`;
@@ -103,8 +103,9 @@ CREATE TABLE `Evaluation_List` (
   `Is_Evaluating` tinyint(1) NOT NULL DEFAULT '0',
   `StudyUserId` int(11) DEFAULT NULL,
   PRIMARY KEY (`EvaluationListId`),
-  UNIQUE KEY `PairKey` (`UserId`,`PageId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  UNIQUE KEY `PairKey` (`UserId`,`PageId`),
+  CONSTRAINT `ELPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Invalid_Token`;
 CREATE TABLE `Invalid_Token` (
