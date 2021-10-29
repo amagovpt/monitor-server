@@ -31,15 +31,12 @@ export class DirectoryService {
         FROM
           TagWebsite as tw,
           Website as w,
-          Domain as d,
-          DomainPage as dp,
+          WebsitePage as wp,
           Page as p
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1 AND
-          dp.DomainId = d.DomainId AND
+          wp.WebsiteId = w.WebsiteId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE ?
         GROUP BY 
@@ -314,16 +311,14 @@ export class DirectoryService {
       return manager.query(
         `SELECT 
           w.*, 
-          u.Username as User, u.Type as Type, 
-          d.DomainId, d.Url as Domain, 
+          u.Username as User, u.Type as Type,  
           COUNT(distinct dp.PageId) as Pages,
           COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
           TagWebsite as tw,
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
@@ -341,15 +336,13 @@ export class DirectoryService {
         `SELECT DISTINCT
           w.*, 
           u.Username as User, u.Type as Type, 
-          d.DomainId, d.Url as Domain, 
           COUNT(distinct dp.PageId) as Pages,
           COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
           TagWebsite as tw,
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
@@ -393,8 +386,7 @@ export class DirectoryService {
         FROM 
           TagWebsite as tw,
           Website as w,
-          Domain as d,
-          DomainPage as dp,
+          WebsitePage as wp,
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
@@ -404,9 +396,7 @@ export class DirectoryService {
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1 AND
-          dp.DomainId = d.DomainId AND
+          wp.WebsiteId = w.WebsiteId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE "1__"
         GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
@@ -430,8 +420,7 @@ export class DirectoryService {
         FROM 
           TagWebsite as tw,
           Website as w,
-          Domain as d,
-          DomainPage as dp,
+          WebsitePage as wp,
           Page as p
           LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
@@ -441,9 +430,7 @@ export class DirectoryService {
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1 AND
-          dp.DomainId = d.DomainId AND
+          wp.WebsiteId = w.WebsiteId AND
           p.PageId = dp.PageId AND
           p.Show_In LIKE "1__"
         GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,

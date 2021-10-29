@@ -135,9 +135,9 @@ export class ObservatoryService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
             w.WebsiteId,
             w.Name as Website_Name,
+            w.StartingUrl,
             w.Declaration as Website_Declaration,
             w.Declaration_Update_Date as Declaration_Date,
             w.Stamp as Website_Stamp,
@@ -146,8 +146,7 @@ export class ObservatoryService {
           FROM
             TagWebsite as tw,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Page as p
             LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
               SELECT Evaluation_Date FROM Evaluation 
@@ -157,9 +156,7 @@ export class ObservatoryService {
           WHERE
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
-            d.WebsiteId = w.WebsiteId AND
-            d.Active = 1 AND
-            dp.DomainId = d.DomainId AND
+            wp.WebsiteId = w.WebsiteId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
@@ -184,9 +181,9 @@ export class ObservatoryService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
             w.WebsiteId,
             w.Name as Website_Name,
+            w.StartingUrl,
             w.Declaration as Website_Declaration,
             w.Declaration_Update_Date as Declaration_Date,
             w.Stamp as Website_Stamp,
@@ -195,8 +192,7 @@ export class ObservatoryService {
           FROM
             TagWebsite as tw,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Page as p
             LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
               SELECT Evaluation_Date FROM Evaluation 
@@ -206,9 +202,7 @@ export class ObservatoryService {
           WHERE
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
-            d.WebsiteId = w.WebsiteId AND
-            d.Active = 1 AND
-            dp.DomainId = d.DomainId AND
+            wp.WebsiteId = w.WebsiteId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
@@ -294,7 +288,7 @@ export class ObservatoryService {
           declarationDate: wb.Declaration_Date,
           stamp: wb.Website_Stamp,
           stampDate: wb.Stamp_Date,
-          domain: wb.Url,
+          startingUrl: wb.StartingUrl,
           creation_date: wb.Website_Creation_Date,
         });
       }
@@ -317,7 +311,7 @@ export class ObservatoryService {
       website.declarationDate,
       website.stamp,
       website.stampDate,
-      website.domain,
+      website.startingUrl,
       website.creation_date
     );
 
@@ -804,7 +798,7 @@ export class ObservatoryService {
       websites[website.id] = {
         id: website.id,
         name: website.name,
-        domain: website.domain,
+        startingUrl: website.startingUrl,
         oldestPage: website.oldestPage,
         recentPage: website.recentPage,
         score: website.getScore(),

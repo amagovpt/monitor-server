@@ -35,6 +35,13 @@ export class Website {
   Name: string;
 
   @Column({
+    type: "varchar",
+    length: 255,
+    nullable: false,
+  })
+  StartingUrl: string;
+
+  @Column({
     type: "int",
     nullable: true,
   })

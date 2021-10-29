@@ -8,7 +8,6 @@ import { Connection, Repository, getManager, In } from "typeorm";
 import { User } from "./user.entity";
 import { Tag } from "../tag/tag.entity";
 import { Website } from "../website/website.entity";
-import { Domain } from "../domain/domain.entity";
 import { comparePasswordHash, generatePasswordHash } from "../lib/security";
 
 @Injectable()
@@ -102,16 +101,16 @@ export class UserService {
             await queryRunner.manager.query(
               `
               UPDATE
-                Domain as d, 
-                DomainPage as dp, 
+                Website as w, 
+                WebsitePage as wp, 
                 Page as p,
                 Evaluation as e
               SET 
                 p.Show_In = "101",
                 e.Show_To = "10" 
               WHERE
-                d.WebsiteId = ? AND
-                dp.DomainId = d.DomainId AND
+                w.WebsiteId = ? AND
+                wp.WebsiteId = w.WebsiteId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "111" AND
                 e.PageId = p.PageId`,
@@ -121,16 +120,16 @@ export class UserService {
             await queryRunner.manager.query(
               `
               UPDATE 
-                Domain as d, 
-                DomainPage as dp, 
+                Website as w, 
+                WebsitePage as wp, 
                 Page as p,
                 Evaluation as e
               SET 
                 p.Show_In = "100",
                 e.Show_To = "10"
               WHERE
-                d.WebsiteId = ? AND
-                dp.DomainId = d.DomainId AND
+                w.WebsiteId = ? AND
+                wp.WebsiteId = w.WebsiteId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "110" AND
                 e.PageId = p.PageId`,
@@ -140,16 +139,16 @@ export class UserService {
             await queryRunner.manager.query(
               `
               UPDATE 
-                Domain as d, 
-                DomainPage as dp, 
+                Website as w, 
+                WebsitePage as wp, 
                 Page as p,
                 Evaluation as e
               SET 
                 p.Show_In = "000",
                 e.Show_To = "10" 
               WHERE
-                d.WebsiteId = ? AND
-                dp.DomainId = d.DomainId AND
+                w.WebsiteId = ? AND
+                wp.WebsiteId = w.WebsiteId AND
                 p.PageId = dp.PageId AND
                 p.Show_In = "010" AND
                 e.PageId = p.PageId`,
@@ -174,10 +173,10 @@ export class UserService {
 
             if (transfer) {
               await queryRunner.manager.query(
-                `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
+                `UPDATE Website as w, WebsitePage as wp, Page as p, Evaluation as e SET p.Show_In = "111", e.Show_To = "11" 
                 WHERE
-                  d.WebsiteId = ? AND
-                  dp.DomainId = d.DomainId AND
+                  w.WebsiteId = ? AND
+                  wp.WebsiteId = w.WebsiteId AND
                   p.PageId = dp.PageId AND
                   p.Show_In = "101" AND
                   e.PageId = e.PageId`,
@@ -215,15 +214,13 @@ export class UserService {
           `
           UPDATE 
             Website as w,
-            Domain as d, 
-            DomainPage as dp, 
+            WebsitePage as wp, 
             Page as p 
           SET 
             p.Show_In = "101" 
           WHERE
             w.UserId = ? AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
+            wp.WebsiteId = w.WebsiteId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE "111"`,
           [userId]
@@ -233,15 +230,13 @@ export class UserService {
           `
           UPDATE 
             Website as w,
-            Domain as d, 
-            DomainPage as dp, 
+            WebsitePage as wp, 
             Page as p 
           SET 
             p.Show_In = "100" 
           WHERE
             w.UserId = ? AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
+            wp.WebsiteId = w.WebsiteId AND
             p.PageId = dp.PageId AND
             p.Show_In = "110"`,
           [userId]
@@ -250,16 +245,14 @@ export class UserService {
         await queryRunner.manager.query(
           `
           UPDATE 
-            Website as w,
-            Domain as d, 
-            DomainPage as dp, 
+            Website as w, 
+            WebsitePage as wp, 
             Page as p 
           SET 
             p.Show_In = "000" 
           WHERE
             w.UserId = ? AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
+            wp.WebsiteId = w.WebsiteId AND
             p.PageId = dp.PageId AND
             p.Show_In = "100"`,
           [userId]
@@ -326,9 +319,7 @@ export class UserService {
 
     if (user) {
       if (user.Type === "monitor") {
-        user[
-          "websites"
-        ] = await this.userRepository.query(
+        user["websites"] = await this.userRepository.query(
           `SELECT * FROM Website WHERE UserId = ?`,
           [userId]
         );
@@ -392,13 +383,13 @@ export class UserService {
 
         if (transfer) {
           await queryRunner.manager.query(
-            `UPDATE Domain as d, DomainPage as dp, Page as p, Evaluation as e
+            `UPDATE Website as w, WebsitePage as wp, Page as p, Evaluation as e
             SET 
               p.Show_In = "111",
               e.Show_To = "11" 
             WHERE
-              d.WebsiteId IN (?) AND
-              dp.DomainId = d.DomainId AND
+              w.WebsiteId IN (?) AND
+              wp.WebsiteId = w.WebsiteId AND
               p.PageId = dp.PageId AND
               p.Show_In LIKE "101" AND
               e.PageId = p.PageId`,
@@ -436,6 +427,7 @@ export class UserService {
           for (const website of copyWebsites || []) {
             const newWebsite = new Website();
             newWebsite.Name = website.Name;
+            newWebsite.StartingUrl = website.StaringUrl;
             newWebsite.UserId = insertUser.UserId;
             newWebsite.Creation_Date = new Date();
 
@@ -446,30 +438,16 @@ export class UserService {
               [insertTag.TagId, insertWebsite.WebsiteId]
             );
 
-            // Create user tag website domain
-            const domain = await queryRunner.manager.query(
-              `SELECT * FROM Domain WHERE WebsiteId = ? AND Active = 1`,
-              [website.WebsiteId]
-            );
-
-            const newDomain = new Domain();
-            newDomain.WebsiteId = insertWebsite.WebsiteId;
-            newDomain.Active = 1;
-            newDomain.Start_Date = new Date();
-            newDomain.Url = domain[0].Url;
-
-            const insertDomain = await queryRunner.manager.save(newDomain);
-
-            // Create user tag website domain pages connection
+            // Create user tag website pages connection
             const pages = await queryRunner.manager.query(
-              `SELECT * FROM DomainPage WHERE DomainId = ?`,
-              [domain[0].DomainId]
+              `SELECT * FROM WebsitePage WHERE WebsiteId = ?`,
+              [website[0].WebsiteId]
             );
 
             for (const page of pages || []) {
               await queryRunner.manager.query(
-                `INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`,
-                [insertDomain.DomainId, page.PageId]
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
+                [insertWebsite.WebsiteId, page.PageId]
               );
             }
           }
@@ -510,18 +488,15 @@ export class UserService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
+      `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           Website as w
           LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
-          User as u,
-          Domain as d
+          User as u
         WHERE
           u.Username = ? AND
-          w.UserId = u.UserId AND 
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = "1"
-        GROUP BY w.WebsiteId, d.Url`,
+          w.UserId = u.UserId
+        GROUP BY w.WebsiteId, w.StartingUrl`,
       [user]
     );
 

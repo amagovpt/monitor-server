@@ -23,14 +23,11 @@ export class EntityService {
         p.Uri
       FROM
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
       WHERE
         w.EntityId IN (?) AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
+        wp.WebsiteId = w.WebsiteId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
     `,
@@ -209,8 +206,7 @@ export class EntityService {
         Entity as e
         LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
         LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
@@ -242,8 +238,7 @@ export class EntityService {
         Entity as en,
         EntityWebsite as ew,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
@@ -254,9 +249,7 @@ export class EntityService {
         en.Long_Name = ? AND
         ew.EntityId = en.EntityId AND
         w.WebsiteId = ew.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
+        wp.WebsiteId = w.WebsiteId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
