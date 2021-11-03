@@ -236,7 +236,7 @@ export class PageService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
+            w.StartingUrl,
             w.WebsiteId,
             w.Name as Website_Name,
             w.Declaration as Website_Declaration,
@@ -258,7 +258,7 @@ export class PageService {
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
@@ -282,7 +282,7 @@ export class PageService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
+            w.StartingUrl,
             w.WebsiteId,
             w.Name as Website_Name,
             w.Declaration as Website_Declaration,
@@ -304,7 +304,7 @@ export class PageService {
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
@@ -382,7 +382,7 @@ export class PageService {
       w.Name = ? AND
       w.UserId = ? AND
       wp.WebsiteId = w.WebsiteId AND
-      p.PageId = dp.PageId AND
+      p.PageId = wp.PageId AND
       e.PageId = p.PageId AND
       p.Show_In LIKE '_1_' AND
       e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
@@ -430,7 +430,7 @@ export class PageService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
       [tag, userId, website, userId]
@@ -465,7 +465,7 @@ export class PageService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        dp.PageId = p.PageId AND
+        wp.PageId = p.PageId AND
         p.PageId = ?
       `,
       [tag, userId, website, userId, pageId]
@@ -484,7 +484,7 @@ export class PageService {
       WHERE
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        dp.PageId = p.PageId AND
+        wp.PageId = p.PageId AND
         p.PageId = ?
       `,
       [userId, pageId]
@@ -983,7 +983,7 @@ export class PageService {
       await queryRunner.manager.query(
         `
         DELETE 
-          dp.* 
+          wp.* 
         FROM
           Tag as t,
           TagWebsite as tw,
@@ -993,7 +993,7 @@ export class PageService {
           t.UserId = ? AND
           tw.TagId = t.TagId AND
           wp.WebsiteId = tw.WebsiteId AND
-          dp.PageId IN (?)`,
+          wp.PageId IN (?)`,
         [tag, userId, pagesId]
       );
 
@@ -1175,7 +1175,7 @@ export class PageService {
     let hasError = false;
     try {
       const tag = await queryRunner.manager.query(
-        `SELECT w.*, d.*
+        `SELECT w.*
         FROM
           User as u,
           Tag as t, 
@@ -1208,7 +1208,7 @@ export class PageService {
 
       const websiteP = await queryRunner.manager.query(
         `
-        SELECT w.WebsiteId, w.Deleted, w.WebsiteId
+        SELECT w.WebsiteId, w.WebsiteId
         FROM
           User as u,
           Website as w
@@ -1242,13 +1242,6 @@ export class PageService {
             await queryRunner.manager.query(
               `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
               [websiteP[0].WebsiteId, pageId]
-            );
-          }
-
-          if (websiteP[0].Deleted === 1) {
-            await queryRunner.manager.query(
-              `UPDATE Website SET Name = ?, Deleted = 0 WHERE WebsiteId = ?`,
-              [website, websiteP[0].WebsiteId]
             );
           }
         } else {

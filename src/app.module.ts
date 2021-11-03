@@ -5,7 +5,6 @@ import { AppService } from "./app.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
-//import { NestCrawlerModule } from 'nest-crawler';
 import { join } from "path";
 
 import { AuthModule } from "./auth/auth.module";
@@ -24,7 +23,7 @@ import { readFileSync } from "fs";
 import { DirectoryModule } from "./directory/directory.module";
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
+  readFileSync("../monitor_db2.json").toString()
 );
 
 @Module({
@@ -55,7 +54,6 @@ const databaseConfig = JSON.parse(
     StampModule,
     CrawlerModule,
     DirectoryModule,
-    //NestCrawlerModule
   ],
   controllers: [AppController],
   providers: [AppService],

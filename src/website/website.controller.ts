@@ -233,6 +233,14 @@ export class WebsiteController {
     return success(!!(await this.websiteService.findByOfficialName(name)));
   }
 
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/url/:url")
+  async checkIfWebsiteUrlExists(@Param("url") url: string): Promise<any> {
+    return success(
+      !!(await this.websiteService.existsUrl(decodeURIComponent(url)))
+    );
+  }
+
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("isInObservatory")
   async checkIfIsInObservatory(@Request() req: any): Promise<any> {

@@ -111,7 +111,7 @@ export class UserService {
               WHERE
                 w.WebsiteId = ? AND
                 wp.WebsiteId = w.WebsiteId AND
-                p.PageId = dp.PageId AND
+                p.PageId = wp.PageId AND
                 p.Show_In = "111" AND
                 e.PageId = p.PageId`,
               [id]
@@ -130,7 +130,7 @@ export class UserService {
               WHERE
                 w.WebsiteId = ? AND
                 wp.WebsiteId = w.WebsiteId AND
-                p.PageId = dp.PageId AND
+                p.PageId = wp.PageId AND
                 p.Show_In = "110" AND
                 e.PageId = p.PageId`,
               [id]
@@ -149,7 +149,7 @@ export class UserService {
               WHERE
                 w.WebsiteId = ? AND
                 wp.WebsiteId = w.WebsiteId AND
-                p.PageId = dp.PageId AND
+                p.PageId = wp.PageId AND
                 p.Show_In = "010" AND
                 e.PageId = p.PageId`,
               [id]
@@ -177,7 +177,7 @@ export class UserService {
                 WHERE
                   w.WebsiteId = ? AND
                   wp.WebsiteId = w.WebsiteId AND
-                  p.PageId = dp.PageId AND
+                  p.PageId = wp.PageId AND
                   p.Show_In = "101" AND
                   e.PageId = e.PageId`,
                 [id]
@@ -221,7 +221,7 @@ export class UserService {
           WHERE
             w.UserId = ? AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "111"`,
           [userId]
         );
@@ -237,7 +237,7 @@ export class UserService {
           WHERE
             w.UserId = ? AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In = "110"`,
           [userId]
         );
@@ -253,7 +253,7 @@ export class UserService {
           WHERE
             w.UserId = ? AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In = "100"`,
           [userId]
         );
@@ -390,7 +390,7 @@ export class UserService {
             WHERE
               w.WebsiteId IN (?) AND
               wp.WebsiteId = w.WebsiteId AND
-              p.PageId = dp.PageId AND
+              p.PageId = wp.PageId AND
               p.Show_In LIKE "101" AND
               e.PageId = p.PageId`,
             [websites]

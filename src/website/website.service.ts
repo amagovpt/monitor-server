@@ -30,7 +30,7 @@ export class WebsiteService {
         Page as p
       WHERE
         wp.WebsiteId IN (?) AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ?`,
       [websitesId, option === "all" ? "1__" : "1_1"]
     );
@@ -90,8 +90,7 @@ export class WebsiteService {
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
         w.Name LIKE ? AND
-        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-        w.Deleted = "0"`,
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))`,
       [search.trim() !== "" ? `%${search.trim()}%` : "%"]
     );
 
@@ -117,13 +116,12 @@ export class WebsiteService {
         FROM 
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          (w.Name LIKE ? OR d.Url LIKE ?) AND
-          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-          w.Deleted = "0"
+          (w.Name LIKE ? OR w.StartingUrl LIKE ?) AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
         GROUP BY w.WebsiteId
         LIMIT ? OFFSET ?`,
         [
@@ -168,12 +166,11 @@ export class WebsiteService {
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
           LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          (w.Name LIKE ? OR d.Url LIKE ?) AND
-          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
-          w.Deleted = "0"
+          (w.Name LIKE ? OR w.StartingUrl LIKE ?) AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
         GROUP BY w.WebsiteId
         ORDER BY ${order} ${direction.toUpperCase()}
         LIMIT ? OFFSET ?`,
@@ -247,7 +244,7 @@ export class WebsiteService {
         Page as p
       WHERE
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE "1__"`,
       [websiteId]
     );
@@ -268,7 +265,7 @@ export class WebsiteService {
 
   async findByOfficialName(name: string): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: { Name: name, UserId: IsNull(), Deleted: 0 },
+      where: { Name: name, UserId: IsNull() },
     });
     return website;
     /*if (website && website.Name !== name) {
@@ -278,10 +275,28 @@ export class WebsiteService {
     }*/
   }
 
+  async existsUrl(url: string): Promise<any> {
+    return (
+      (
+        await this.websiteRepository.query(
+          `SELECT w.*
+      FROM
+        Website as w,
+        User as u
+      WHERE
+        w.StartingUrl = ? AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+      LIMIT 1`,
+          [url]
+        )
+      ).length > 0
+    );
+  }
+
   async findAllWithoutUser(): Promise<any> {
     const manager = getManager();
     const websites = await manager.query(
-      `SELECT * FROM Website WHERE UserId IS NULL AND Deleted = "0"`
+      `SELECT * FROM Website WHERE UserId IS NULL`
     );
     return websites;
   }
@@ -294,7 +309,6 @@ export class WebsiteService {
         User as u 
       WHERE 
         w.EntityId IS NULL AND
-        w.Deleted = "0" AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))`);
     return websites;
   }
@@ -305,8 +319,8 @@ export class WebsiteService {
       `SELECT w.*, COUNT(distinct p.PageId) as Pages
       FROM
         Website as w
-        LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE '_1%'
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE '_1%'
       WHERE
         w.UserId = ?
       GROUP BY w.WebsiteId, w.StartingUrl`,
@@ -377,7 +391,7 @@ export class WebsiteService {
           dir.DirectoryId = dt.DirectoryId AND
           dir.Show_In_Observatory = 1 AND
           wp.WebsiteId = w.WebsiteId AND
-          p.PageId = dp.PageId and
+          p.PageId = wp.PageId and
           p.Show_In LIKE "_01"
       `,
         [userId, website]
@@ -445,7 +459,7 @@ export class WebsiteService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE '_1_'`,
       [website.Name, website.UserId]
     );
@@ -517,7 +531,7 @@ export class WebsiteService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId`,
+        p.PageId = wp.PageId`,
       [tag, userId, website, userId]
     );
 
@@ -568,15 +582,15 @@ export class WebsiteService {
         `SELECT 
           w.WebsiteId,
           w.Name,
-          d.Url,
+          w.StartingUrl,
           COUNT(distinct p.PageId) as Pages,
           AVG(e.Score) as Score
         FROM
           Tag as t,
           TagWebsite as tw,
           Website as w
-          LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId
           LEFT OUTER JOIN Evaluation as e ON e.StudyUserId = ? AND e.Evaluation_Date IN (
             SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = e.StudyUserId
           )
@@ -585,9 +599,8 @@ export class WebsiteService {
           t.UserId = ? AND
           tw.TagId = t.TagId AND
           w.WebsiteId = tw.WebsiteId AND
-          w.UserId = ? AND
-          d.WebsiteId = w.WebsiteId
-        GROUP BY w.WebsiteId, d.Url`,
+          w.UserId = ?
+        GROUP BY w.WebsiteId, w.StartingUrl`,
         [userId, tagName, userId, userId]
       );
     } else {
@@ -955,6 +968,8 @@ export class WebsiteService {
       startingUrl = startingUrl.substring(0, startingUrl.length - 1);
     }
 
+    website.StartingUrl = startingUrl;
+
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -1039,7 +1054,7 @@ export class WebsiteService {
               e.Show_To = "11" 
             WHERE
               wp.WebsiteId = ? AND
-              p.PageId = dp.PageId AND
+              p.PageId = wp.PageId AND
               p.Show_In LIKE "101" AND
               e.PageId = p.PageId`,
             [websiteId]
@@ -1053,17 +1068,15 @@ export class WebsiteService {
           await queryRunner.manager.query(
             `
             UPDATE
-              Domain as d, 
-              DomainPage as dp, 
+              WebsitePage as wp, 
               Page as p,
               Evaluation as e
             SET 
               p.Show_In = "101",
               e.Show_To = "10" 
             WHERE
-              d.WebsiteId = ? AND
-              dp.DomainId = d.DomainId AND
-              p.PageId = dp.PageId AND
+              wp.WebsiteId = ? AND
+              p.PageId = wp.PageId AND
               p.Show_In = "111" AND
               e.PageId = p.PageId`,
             [websiteId]
@@ -1072,18 +1085,16 @@ export class WebsiteService {
 
         await queryRunner.manager.query(
           `
-          UPDATE 
-            Domain as d, 
-            DomainPage as dp, 
+          UPDATE  
+            WebsitePage as wp, 
             Page as p,
             Evaluation as e
           SET 
             p.Show_In = "100",
             e.Show_To = "10"
           WHERE
-            d.WebsiteId = ? AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = ? AND
+            p.PageId = wp.PageId AND
             p.Show_In = "110" AND
             e.PageId = p.PageId`,
           [websiteId]
@@ -1092,17 +1103,15 @@ export class WebsiteService {
         await queryRunner.manager.query(
           `
           UPDATE 
-            Domain as d, 
-            DomainPage as dp, 
+            WebsitePage as wp, 
             Page as p,
             Evaluation as e
           SET 
             p.Show_In = "000",
             e.Show_To = "10"
           WHERE
-            d.WebsiteId = ? AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = ? AND
+            p.PageId = wp.PageId AND
             p.Show_In = "010" AND
             e.PageId = p.PageId`,
           [websiteId]
@@ -1213,13 +1222,11 @@ export class WebsiteService {
       const pages = await queryRunner.manager.query(
         `
         SELECT
-          dp.PageId 
+          wp.PageId 
         FROM 
-          Domain as d, 
-          DomainPage as dp
+          WebsitePage as wp
         WHERE
-          d.WebsiteId = ? AND
-          dp.DomainId = d.DomainId
+          wp.WebsiteId = ?
       `,
         [websiteId]
       );
@@ -1235,21 +1242,6 @@ export class WebsiteService {
           [pages.map((p) => p.PageId)]
         );
       }
-
-      const domains = await queryRunner.manager.query(
-        `SELECT DomainId FROM Domain WHERE WebsiteId = ?`,
-        [websiteId]
-      );
-
-      await queryRunner.manager.query(
-        `
-        DELETE FROM  
-          Domain
-        WHERE
-          DomainId IN (?)
-      `,
-        [domains.map((d) => d.DomainId)]
-      );
 
       await queryRunner.manager.query(
         //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
@@ -1287,13 +1279,11 @@ export class WebsiteService {
       const pages = await queryRunner.manager.query(
         `
         SELECT
-          dp.PageId 
+          wp.PageId 
         FROM 
-          Domain as d, 
-          DomainPage as dp
+          WebsitePage as wp
         WHERE
-          d.WebsiteId IN (?) AND
-          dp.DomainId = d.DomainId
+          wp.WebsiteId IN (?)
       `,
         [websitesId]
       );
@@ -1306,21 +1296,6 @@ export class WebsiteService {
           PageId IN (?)
       `,
         [pages.map((p) => p.PageId)]
-      );
-
-      const domains = await queryRunner.manager.query(
-        `SELECT DomainId FROM Domain WHERE WebsiteId IN (?)`,
-        [websitesId]
-      );
-
-      await queryRunner.manager.query(
-        `
-        DELETE FROM  
-          Domain
-        WHERE
-          DomainId IN (?)
-      `,
-        [domains.map((d) => d.DomainId)]
       );
 
       await queryRunner.manager.query(
@@ -1352,105 +1327,82 @@ export class WebsiteService {
 
     let hasError = false;
     try {
-      const webDomain = await queryRunner.manager.query(
-        `SELECT distinct w.*, d.*
+      const website = await queryRunner.manager.query(
+        `SELECT *
         FROM 
-          Page as p, 
-          Domain as d, 
-          Website as w,
-          DomainPage as dp 
+          Website
         WHERE 
-          w.WebsiteId = ? AND
-          d.WebsiteId = w.WebsiteId AND 
-          d.Active = "1"`,
+          w.WebsiteId = ?`,
         [websiteId]
       );
 
-      const domDate = webDomain[0].Start_Date.toISOString()
-        .replace(/T/, " ")
-        .replace(/\..+/, "");
-      const webDate = webDomain[0].Creation_Date.toISOString()
+      const webDate = website[0].Creation_Date.toISOString()
         .replace(/T/, " ")
         .replace(/\..+/, "");
 
       const pages = await queryRunner.manager.query(
         `SELECT p.*
         FROM 
-          Page as p, 
-          Domain as d, 
+          Page as p,  
           Website as w,
-          DomainPage as dp 
+          WebsitePage as wp 
         WHERE 
           w.WebsiteId = ? AND
-          d.WebsiteId = w.WebsiteId AND 
-          dp.domainId = d.DomainId AND
-          dp.PageId = p.PageId`,
+          wp.WebsiteId = w.WebsiteId AND
+          wp.PageId = p.PageId`,
         [websiteId]
       );
 
-      const domainP = (
+      const websiteP = (
         await queryRunner.manager.query(
-          `SELECT distinct d.DomainId, w.*
+          `SELECT distinct w.*
         FROM  
-          Domain as d,
           Website as w,
           User as u
         WHERE 
-          d.Url = ? AND
-          w.WebsiteId = d.WebsiteId AND
+          w.StartingUrl = ? AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
         LIMIT 1
         `,
-          [webDomain[0].Url]
+          [website[0].StartingUrl]
         )
       )[0];
 
-      const domainUrl = webDomain[0].Url;
+      const websiteUrl = website[0].StartingUrl;
 
-      if (webDomain.length > 0) {
-        if (domainP) {
+      if (website.length > 0) {
+        if (websiteP) {
           for (const page of pages || []) {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
               try {
                 await queryRunner.manager.query(
-                  `INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`,
-                  [domainP.DomainId, page.PageId]
+                  `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
+                  [websiteP.WebsiteId, page.PageId]
                 );
               } catch (err) {
                 // ignore - don't know why
               }
             }
           }
-          if (domainP.Deleted === 1) {
-            await queryRunner.manager.query(
-              `UPDATE Website SET Name = ?, Creation_Date = ?, Deleted = "0" WHERE WebsiteId = ?`,
-              [websiteName || domainP.Name, webDate, domainP.WebsiteId]
-            );
-          } else {
-            await queryRunner.manager.query(
-              `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
-              [webDate, domainP.DomainId]
-            );
-          }
+
+          await queryRunner.manager.query(
+            `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
+            [webDate, websiteP.WebsiteId]
+          );
         } else {
           const insertWebsite = await queryRunner.manager.query(
-            `INSERT INTO Website (Name, Creation_Date) VALUES (?, ?)`,
-            [websiteName, webDate]
+            `INSERT INTO Website (Name, StartingUrl, Creation_Date) VALUES (?, ?, ?)`,
+            [websiteName, websiteUrl, webDate]
           );
           returnWebsiteId = insertWebsite.WebsiteId;
-
-          const domain = await queryRunner.manager.query(
-            `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`,
-            [insertWebsite.websiteId, domainUrl, domDate]
-          );
 
           for (const page of pages || []) {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
               await queryRunner.manager.query(
-                `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`,
-                [domain.DomainId, page.PageId]
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES ("${website.insertId}", "${page.PageId}")`,
+                [website.WebsiteId, page.PageId]
               );
             }
           }

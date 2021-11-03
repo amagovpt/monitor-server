@@ -27,7 +27,7 @@ export class TagService {
         tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ?
     `,
       [tagsId, option === "all" ? "1__" : "1_1"]
@@ -180,7 +180,7 @@ export class TagService {
       `SELECT 
         distinct t.*, 
         COUNT(distinct tw.WebsiteId) as Websites,
-        COUNT(distinct dp.PageId) as Pages 
+        COUNT(distinct wp.PageId) as Pages 
       FROM 
         Tag as t
         LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
@@ -223,7 +223,7 @@ export class TagService {
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
       [tag, userId, userId]
@@ -263,7 +263,7 @@ export class TagService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
       [tag, userId, website, userId]
@@ -319,7 +319,7 @@ export class TagService {
             w.Name = ? AND
             w.UserId = ? AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             e.PageId = p.PageId AND
             e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
           [tag, userId, website, userId]
@@ -347,7 +347,7 @@ export class TagService {
             w.Name = ? AND
             w.UserId = ? AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             e.PageId = p.PageId AND
             p.Show_In LIKE '_1_' AND
             e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
@@ -391,7 +391,7 @@ export class TagService {
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
       [tag]
@@ -524,28 +524,28 @@ export class TagService {
           let websites = null;
           if (tagsId.length > 1) {
             websites = await queryRunner.manager.query(
-              `SELECT w.Name, w.WebsiteId, d.Url, d.Start_Date
+              `SELECT w.Name, w.WebsiteId, w.StartingUrl
               FROM 
                 TagWebsite as tw
                 LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
               WHERE 
                 tw.TagId IN (?)
               GROUP BY
-                w.Name, w.WebsiteId, d.Url, d.Start_Date
+                w.Name, w.WebsiteId, w.StartingUrl
               HAVING
                 COUNT(tw.WebsiteId) = ?`,
               [tagsId, tagsId.length]
             );
           } else {
             websites = await queryRunner.manager.query(
-              `SELECT w.Name, w.WebsiteId, d.Url, d.Start_Date
+              `SELECT w.Name, w.WebsiteId, w.StartingUrl
               FROM 
                 TagWebsite as tw
                 LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
               WHERE 
                 tw.TagId = ?
               GROUP BY
-                w.Name, w.WebsiteId, d.Url, d.Start_Date`,
+                w.Name, w.WebsiteId, w.StartingUrl`,
               [tagsId[0]]
             );
           }
@@ -559,7 +559,7 @@ export class TagService {
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
             const pages = await queryRunner.manager.query(
-              `SELECT dp.* FROM WebsitePage as wp, Page as p WHERE wp.WebsiteId = ? AND p.PageId = dp.PageId AND p.Show_In LIKE "1_1"`,
+              `SELECT wp.* FROM WebsitePage as wp, Page as p WHERE wp.WebsiteId = ? AND p.PageId = wp.PageId AND p.Show_In LIKE "1_1"`,
               [website.WebsiteId]
             );
 
@@ -750,8 +750,8 @@ export class TagService {
         `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
-          LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
           Tag as t,
@@ -801,7 +801,7 @@ export class TagService {
       WHERE 
         w.WebsiteId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        dp.PageId = p.PageId AND
+        wp.PageId = p.PageId AND
         p.Show_In LIKE '0%'`,
       [websiteId]
     );
@@ -908,7 +908,7 @@ export class TagService {
       WHERE 
         w.WebsiteId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        dp.PageId = p.PageId`,
+        wp.PageId = p.PageId`,
       [websiteId]
     );
 
@@ -944,17 +944,10 @@ export class TagService {
             }
           }
         }
-        if (websiteP.Deleted === 1) {
-          await queryRunner.manager.query(
-            `UPDATE Website SET Name = ?, Creation_Date = ?, Deleted = "0" WHERE WebsiteId = ?`,
-            [websiteName || websiteP.Name, webDate, website.WebsiteId]
-          );
-        } else {
-          await queryRunner.manager.query(
-            `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
-            [webDate, websiteP.WebsiteId]
-          );
-        }
+        await queryRunner.manager.query(
+          `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
+          [webDate, websiteP.WebsiteId]
+        );
       } else {
         const insertWebsite = await queryRunner.manager.query(
           `INSERT INTO Website (Name, StartingUrl, Creation_Date) VALUES (?, ?)`,

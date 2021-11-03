@@ -157,7 +157,7 @@ export class ObservatoryService {
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
@@ -203,7 +203,7 @@ export class ObservatoryService {
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,

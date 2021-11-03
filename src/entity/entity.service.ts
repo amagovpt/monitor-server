@@ -28,7 +28,7 @@ export class EntityService {
       WHERE
         w.EntityId IN (?) AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ?
     `,
       [entitiesId, option === "all" ? "1__" : "1_1"]
@@ -201,13 +201,13 @@ export class EntityService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
+      `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
       FROM
         Entity as e
         LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
         LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+        LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
         LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
@@ -250,7 +250,7 @@ export class EntityService {
         ew.EntityId = en.EntityId AND
         w.WebsiteId = ew.WebsiteId AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
       [entity]

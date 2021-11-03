@@ -72,7 +72,7 @@ export class StampService {
               )
             ) AND
             wp.WebsiteId = w.WebsiteId AND
-            p.PageId = dp.PageId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "1_1"
           GROUP BY p.PageId, e.Tot, e.A, e.AA, e.AAA, e.Score`,
           [id]

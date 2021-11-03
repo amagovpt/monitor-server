@@ -525,7 +525,7 @@ export class EvaluationService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE '_1_' AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '_1')
@@ -574,7 +574,7 @@ export class EvaluationService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Uri = ? AND 
         e.PageId = p.PageId AND 
         e.Show_To LIKE '_1'
@@ -628,7 +628,7 @@ export class EvaluationService {
         w.Name = ? AND
         w.UserId = t.UserId AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId)
       `,
@@ -683,7 +683,7 @@ export class EvaluationService {
         w.Name = ? AND
         w.UserId = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Uri = ? AND 
         e.PageId = p.PageId AND
         e.StudyUserId = ?
@@ -732,7 +732,6 @@ export class EvaluationService {
           e.Show_To LIKE "1_" AND
           wp.PageId = p.PageId AND
           w.WebsiteId = wp.WebsiteId AND
-          w.Deleted = "0" AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
         ORDER BY e.Evaluation_Date DESC`;
     } else if (type === "monitor") {
@@ -865,7 +864,7 @@ export class EvaluationService {
       WHERE
         w.StartingUrl = ? AND
         wp.WebsiteId = w.WebsiteId AND
-        p.PageId = dp.PageId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ? AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '1_')
