@@ -184,6 +184,20 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get(":website/user/:user/pages")
+  async getAllWebsiteDomains(
+    @Param("website") website: string,
+    @Param("user") user: string
+  ): Promise<any> {
+    const websiteId = await this.websiteService.getIdFromUserAndName(
+      user,
+      website
+    );
+
+    return success(await this.websiteService.findAllPages(websiteId));
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("pages/:websiteId")
   async getAllWebsitePages(
     @Param("websiteId") websiteId: number

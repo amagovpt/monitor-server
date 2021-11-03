@@ -97,6 +97,22 @@ export class WebsiteService {
     return count[0].Count;
   }
 
+  async getIdFromUserAndName(user: string, name: string): Promise<number> {
+    const manager = getManager();
+    const website = await manager.query(
+      `
+      SELECT w.* FROM Website as w, User as u
+      WHERE
+        w.Name LIKE ? AND
+        ((w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) OR
+        w.UserId IS NOT NULL AND (u.UserId = w.UserId AND u.Username LIKE ?))
+      LIMIT 1
+    `,
+      [name, user]
+    );
+    return website[0].WebsiteId;
+  }
+
   async findAll(
     size: number,
     page: number,
@@ -145,6 +161,9 @@ export class WebsiteService {
       switch (sort) {
         case "Name":
           order = "w.Name";
+          break;
+        case "StartingUrl":
+          order = "w.StartingUrl";
           break;
         case "Pages":
           order = "Pages";
@@ -238,14 +257,28 @@ export class WebsiteService {
     const manager = getManager();
 
     const pages = await manager.query(
-      `SELECT p.PageId, p.Uri, p.Show_In
+      `SELECT
+        distinct p.*,
+        e.Score,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Tot,
+        e.Errors,
+        e.Element_Count,
+        e.Tag_Count,
+        e.Evaluation_Date,
+        el.EvaluationListId, el.Error, el.Is_Evaluating
       FROM
         WebsitePage as wp,
         Page as p
+        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1,
+        Evaluation as e
       WHERE
-        wp.WebsiteId = w.WebsiteId AND
+        wp.WebsiteId = ? AND
         p.PageId = wp.PageId AND
-        p.Show_In LIKE "1__"`,
+        p.Show_In LIKE "1__" AND
+        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
       [websiteId]
     );
 
