@@ -48,12 +48,12 @@ export class EvaluationService {
       this.isEvaluatingAdminInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+      if (process.env.ID === undefined || parseInt(process.env.AMSID) === 0) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * this.SKIP;
+        const skip = parseInt(process.env.AMSID) * this.SKIP;
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
@@ -71,12 +71,12 @@ export class EvaluationService {
       this.isEvaluatingUserInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+      if (process.env.ID === undefined || parseInt(process.env.USRID) === 0) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * this.SKIP;
+        const skip = parseInt(process.env.USRID) * this.SKIP;
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
