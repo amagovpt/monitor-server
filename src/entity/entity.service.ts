@@ -180,16 +180,13 @@ export class EntityService {
 
     if (entity) {
       entity["websites"] = await this.entityRepository.query(
-        `SELECT w.*, d.Url 
+        `SELECT w.*
         FROM 
           EntityWebsite as ew, 
-          Website as w,
-          Domain as d
+          Website as w
         WHERE 
           ew.EntityId = ? AND 
-          w.WebsiteId = ew.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1`,
+          w.WebsiteId = ew.WebsiteId`,
         [entityId]
       );
       return entity;

@@ -112,16 +112,13 @@ export class TagService {
       );
 
       tag.websites = await this.tagRepository.query(
-        `SELECT w.*, d.Url
+        `SELECT w.*
         FROM
           TagWebsite as tw,
-          Website as w,
-          Domain as d
+          Website as w
         WHERE
           tw.TagId = ? AND 
-          w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND 
-          d.Active = 1`,
+          w.WebsiteId = tw.WebsiteId`,
         [tagId]
       );
 

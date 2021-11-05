@@ -29,7 +29,7 @@ export class CrawlerService {
   async nestAdminCrawl(): Promise<void> {
     if (
       process.env.ID === undefined ||
-      (process.env.NAMESPACE === "ADMIN" && process.env.ID === "0")
+      (process.env.NAMESPACE === "ADMIN" && process.env.AMSID === "0")
     ) {
       if (!this.isAdminCrawling) {
         this.isAdminCrawling = true;
@@ -103,7 +103,7 @@ export class CrawlerService {
   async nestUserCrawl(): Promise<void> {
     if (
       process.env.ID === undefined ||
-      (process.env.NAMESPACE === "USER" && process.env.ID === "0")
+      (process.env.NAMESPACE === "USER" && process.env.USRID === "0")
     ) {
       if (!this.isUserCrawling) {
         this.isUserCrawling = true;
