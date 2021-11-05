@@ -158,6 +158,6 @@ export class EntityController {
   async getListOfEntityWebsitePages(
     @Param("entity") entity: string
   ): Promise<any> {
-    return success(await this.entityService.findAllWebsitePages(entity));
+    return success(await this.entityService.findAllWebsitesPages(entity));
   }
 }

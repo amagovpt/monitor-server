@@ -183,7 +183,16 @@ export class EntityService {
 
     if (entity) {
       entity["websites"] = await this.entityRepository.query(
-        `SELECT w.* FROM EntityWebsite as ew, Website as w WHERE ew.EntityId = ? AND w.WebsiteId = ew.WebsiteId`,
+        `SELECT w.*, d.Url 
+        FROM 
+          EntityWebsite as ew, 
+          Website as w,
+          Domain as d
+        WHERE 
+          ew.EntityId = ? AND 
+          w.WebsiteId = ew.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1`,
         [entityId]
       );
       return entity;
@@ -223,7 +232,7 @@ export class EntityService {
     return websites;
   }
 
-  async findAllWebsitePages(entity: string): Promise<any> {
+  async findAllWebsitesPages(entity: string): Promise<any> {
     const manager = getManager();
 
     const websites = await manager.query(
@@ -263,7 +272,7 @@ export class EntityService {
       [entity]
     );
 
-    return websites.filter((w) => w.Score !== null);
+    return websites; //.filter((w) => w.Score !== null);
   }
 
   async createOne(entity: EntityTable, websites: string[]): Promise<boolean> {
