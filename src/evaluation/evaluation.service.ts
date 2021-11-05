@@ -48,7 +48,10 @@ export class EvaluationService {
       this.isEvaluatingAdminInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.AMSID) === 0) {
+      if (
+        process.env.NAMESPACE === undefined ||
+        parseInt(process.env.AMSID) === 0
+      ) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
@@ -67,11 +70,18 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateUserPageList(): Promise<void> {
-    if (process.env.NAMESPACE === "USER" && !this.isEvaluatingUserInstance) {
+    if (
+      (process.env.NAMESPACE === undefined ||
+        process.env.NAMESPACE === "USER") &&
+      !this.isEvaluatingUserInstance
+    ) {
       this.isEvaluatingUserInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.USRID) === 0) {
+      if (
+        process.env.NAMESPACE === undefined ||
+        parseInt(process.env.USRID) === 0
+      ) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
