@@ -435,7 +435,7 @@ export class DirectoryService {
         [nTags.map((t) => t.TagId)]
       );
 
-      return pages.filter((p) => p.Score !== null);
+      return pages; //.filter((p) => p.Score !== null);
     }
   }
 }

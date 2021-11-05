@@ -27,7 +27,10 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestAdminCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === "0") {
+    if (
+      process.env.ID === undefined ||
+      (process.env.NAMESPACE === "ADMIN" && process.env.ID === "0")
+    ) {
       if (!this.isAdminCrawling) {
         this.isAdminCrawling = true;
 
@@ -98,7 +101,10 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestUserCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === "0") {
+    if (
+      process.env.ID === undefined ||
+      (process.env.NAMESPACE === "USER" && process.env.ID === "0")
+    ) {
       if (!this.isUserCrawling) {
         this.isUserCrawling = true;
 

@@ -112,13 +112,16 @@ export class TagService {
       );
 
       tag.websites = await this.tagRepository.query(
-        `SELECT w.* 
+        `SELECT w.*, d.Url
         FROM
           TagWebsite as tw,
-          Website as w 
+          Website as w,
+          Domain as d
         WHERE
           tw.TagId = ? AND 
-          w.WebsiteId = tw.WebsiteId`,
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND 
+          d.Active = 1`,
         [tagId]
       );
 
@@ -397,7 +400,7 @@ export class TagService {
       [tag]
     );
 
-    return websites.filter((w) => w.Score !== null);
+    return websites; //.filter((w) => w.Score !== null);
   }
 
   async createOne(
