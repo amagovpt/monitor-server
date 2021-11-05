@@ -68,6 +68,7 @@ export class WebsiteController {
   async updateWebsite(@Request() req: any): Promise<any> {
     const websiteId = req.body.websiteId;
     const name = req.body.name;
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
     const declaration = req.body.declaration;
     const stamp = req.body.stamp;
     const declarationDate = req.body.declarationDate;
@@ -83,6 +84,7 @@ export class WebsiteController {
     const updateSuccess = await this.websiteService.update(
       websiteId,
       name,
+      startingUrl,
       declaration,
       stamp,
       declarationDate,
@@ -136,6 +138,20 @@ export class WebsiteController {
     }
 
     return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-monitor"))
+  @Get("myMonitor/url/:website")
+  async getMyMonitorUserWebsiteDomain(
+    @Request() req: any,
+    @Param("website") website: string
+  ): Promise<any> {
+    return success(
+      await this.websiteService.findMyMonitorUserWebsiteStartingUrl(
+        req.user.userId,
+        website
+      )
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))

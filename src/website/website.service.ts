@@ -206,11 +206,12 @@ export class WebsiteService {
 
   async findInfo(websiteId: number): Promise<any> {
     const websites = await this.websiteRepository.query(
-      `SELECT w.*, u.Username as User, e.Long_Name as Entity
+      `SELECT w.*, u.Username as User, e.Long_Name as Entity, COUNT(distinct wp.PageId) as Pages
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
       WHERE 
         w.WebsiteId = ?
       GROUP BY w.WebsiteId, w.StartingUrl 
@@ -1043,6 +1044,7 @@ export class WebsiteService {
   async update(
     websiteId: number,
     name: string,
+    startingUrl: string,
     declaration: number | null,
     stamp: number | null,
     declarationDate: any | null,
@@ -1067,6 +1069,7 @@ export class WebsiteService {
         { WebsiteId: websiteId },
         {
           Name: name,
+          StartingUrl: startingUrl,
           UserId: userId,
           Declaration: declaration,
           Declaration_Update_Date: declarationDate,
@@ -1199,6 +1202,24 @@ export class WebsiteService {
     }
 
     return !hasError;
+  }
+
+  async findMyMonitorUserWebsiteStartingUrl(
+    userId: number,
+    websiteName: string
+  ): Promise<any> {
+    const manager = getManager();
+    const website = await manager.query(
+      `SELECT w.StartingUrl FROM 
+        Website as w
+      WHERE
+        w.UserId = ? AND
+        w.Name = ?
+      LIMIT 1`,
+      [userId, websiteName]
+    );
+
+    return website ? website[0].StartingUrl : null;
   }
 
   async updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any> {
