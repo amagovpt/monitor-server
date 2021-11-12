@@ -273,13 +273,14 @@ export class WebsiteService {
       FROM
         WebsitePage as wp,
         Page as p
-        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1,
-        Evaluation as e
+        LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+        LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId AND e.Evaluation_Date IN (
+          SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId
+        )
       WHERE
         wp.WebsiteId = ? AND
         p.PageId = wp.PageId AND
-        p.Show_In LIKE "1__" AND
-        e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
+        p.Show_In LIKE "1__"`,
       [websiteId]
     );
 
