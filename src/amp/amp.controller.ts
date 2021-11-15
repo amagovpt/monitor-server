@@ -19,7 +19,16 @@ export class AmpController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
   @Get("eval/:url")
-  async evaluateUrl(@Param("url") url: string): Promise<any> {
+  async evaluateUrl(
+    @Request() req: any,
+    @Param("url") url: string
+  ): Promise<any> {
+    if (process.env.NAMESPACE !== undefined) {
+      if (!req.headers.referer?.startsWith("")) {
+        throw new InternalServerErrorException();
+      }
+    }
+
     const isValid = await this.checkIfValidUrl(decodeURIComponent(url));
 
     if (!isValid) {
