@@ -327,7 +327,7 @@ export class DirectoryService {
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
         GROUP BY
           w.WebsiteId
-        HAVING COUNT(distinct w.WebsiteId) = ?`,
+        HAVING COUNT(w.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
       );
     } else {

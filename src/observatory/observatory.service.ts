@@ -82,12 +82,12 @@ export class ObservatoryService {
       directories: this.getDirectories(listDirectories),
     };
 
-    const manager = getManager();
+    /*const manager = getManager();
 
     await manager.query(
       "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
       [JSON.stringify(global), JSON.stringify({}), new Date()]
-    );
+    );*/
   }
 
   async getObservatoryData(): Promise<any> {
@@ -119,7 +119,7 @@ export class ObservatoryService {
       const tagsId = tags.map((t) => t.TagId);
 
       let pages = null;
-      if (parseInt(directory.Method) === 0) {
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
         pages = await manager.query(
           `
           SELECT
@@ -165,6 +165,7 @@ export class ObservatoryService {
             COUNT(w.WebsiteId) = ?`,
           [tagsId, tagsId.length]
         );
+        console.log(pages.length);
       } else {
         pages = await manager.query(
           `

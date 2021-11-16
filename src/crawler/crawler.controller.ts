@@ -41,7 +41,7 @@ export class CrawlerController {
     const maxDepth = req.body.maxDepth;
     const maxPages = req.body.maxPages;
     const waitJS = req.body.waitJS;
-    console.log(websites);
+
     return success(
       await this.crawlerService.crawlWebsite(
         -1,
