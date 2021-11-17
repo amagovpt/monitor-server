@@ -82,12 +82,12 @@ export class ObservatoryService {
       directories: this.getDirectories(listDirectories),
     };
 
-    /*const manager = getManager();
+    const manager = getManager();
 
     await manager.query(
       "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
       [JSON.stringify(global), JSON.stringify({}), new Date()]
-    );*/
+    );
   }
 
   async getObservatoryData(): Promise<any> {
@@ -120,6 +120,29 @@ export class ObservatoryService {
 
       let pages = null;
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        const websites = await manager.query(
+          `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+          [tagsId]
+        );
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+
         pages = await manager.query(
           `
           SELECT
@@ -144,7 +167,6 @@ export class ObservatoryService {
             w.Stamp_Update_Date as Stamp_Date,
             w.Creation_Date as Website_Creation_Date
           FROM
-            TagWebsite as tw,
             Website as w,
             WebsitePage as wp,
             Page as p
@@ -154,18 +176,14 @@ export class ObservatoryService {
               ORDER BY Evaluation_Date DESC LIMIT 1
             )
           WHERE
-            tw.TagId IN (?) AND
-            w.WebsiteId = tw.WebsiteId AND
+            w.WebsiteId IN (?) AND
             wp.WebsiteId = w.WebsiteId AND
             p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
-            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-          HAVING
-            COUNT(w.WebsiteId) = ?`,
-          [tagsId, tagsId.length]
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          [websitesToFetch]
         );
-        console.log(pages.length);
       } else {
         pages = await manager.query(
           `

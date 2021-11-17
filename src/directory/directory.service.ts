@@ -308,15 +308,15 @@ export class DirectoryService {
     );
 
     if (method === 0) {
-      return manager.query(
+      /*return manager.query(
         `SELECT 
           w.*, 
           u.Username as User, u.Type as Type,  
           COUNT(distinct wp.PageId) as Pages,
           COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
-          TagWebsite as tw,
-          Website as w
+          TagWebsite as tw
+          LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
           LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
           LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
@@ -327,8 +327,52 @@ export class DirectoryService {
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
         GROUP BY
           w.WebsiteId
-        HAVING COUNT(w.WebsiteId) = ?`,
+        HAVING COUNT(tw.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
+      );*/
+      const websites = await manager.query(
+        `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+        [nTags.map((t) => t.TagId)]
+      );
+
+      const counts = {};
+      for (const w of websites ?? []) {
+        if (counts[w.WebsiteId]) {
+          counts[w.WebsiteId]++;
+        } else {
+          counts[w.WebsiteId] = 1;
+        }
+      }
+
+      const websitesToFetch = new Array<Number>();
+      for (const id of Object.keys(counts) ?? []) {
+        if (counts[id] === nTags.length) {
+          websitesToFetch.push(parseInt(id));
+        }
+      }
+
+      return manager.query(
+        `
+        SELECT 
+          w.*, 
+          u.Username as User, u.Type as Type,  
+          COUNT(distinct wp.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
+        FROM
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
+        WHERE
+          w.WebsiteId IN (?) AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+        GROUP BY
+          w.WebsiteId
+      `,
+        [websitesToFetch]
       );
     } else {
       return manager.query(

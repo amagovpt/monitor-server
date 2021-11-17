@@ -212,7 +212,7 @@ export class EntityService {
         Entity as e
         LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
-        LEFT OUTER JOIN WebsitePage as dp ON wp.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
         LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId

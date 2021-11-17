@@ -43,6 +43,7 @@ export class CrawlerService {
           const website = await queryRunner.manager.query(
             `SELECT * FROM CrawlWebsite WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
+
           if (website.length > 0) {
             const browser = await puppeteer.launch({
               args: ["--no-sandbox", "--ignore-certificate-errors"],
@@ -117,6 +118,7 @@ export class CrawlerService {
           const website = await queryRunner.manager.query(
             `SELECT * FROM CrawlWebsite WHERE UserId <> -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
+
           if (website.length > 0) {
             const browser = await puppeteer.launch({
               args: ["--no-sandbox", "--ignore-certificate-errors"],
