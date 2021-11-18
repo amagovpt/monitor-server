@@ -89,10 +89,23 @@ export class TagController {
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteBulkOfficialTag(@Request() req: any): Promise<any> {
+  async deleteBulkOfficialTags(@Request() req: any): Promise<any> {
     const tagsId = JSON.parse(req.body.tagsId);
 
     const deleteSuccess = await this.tagService.deleteBulk(tagsId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("pages/deleteBulk")
+  async deleteBulkOfficialTagsPages(@Request() req: any): Promise<any> {
+    const tagsId = JSON.parse(req.body.tagsId);
+
+    const deleteSuccess = await this.tagService.pagesDeleteBulk(tagsId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }

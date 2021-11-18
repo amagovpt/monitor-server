@@ -732,6 +732,59 @@ export class TagService {
     return !hasError;
   }
 
+  async pagesDeleteBulk(tagsId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const websites = await queryRunner.manager.query(
+        `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+        [tagsId]
+      );
+
+      const pages = await queryRunner.manager.query(
+        `
+        SELECT
+          dp.PageId 
+        FROM 
+          Domain as d, 
+          DomainPage as dp
+        WHERE
+          d.WebsiteId IN (?) AND
+          dp.DomainId = d.DomainId
+      `,
+        [websites.map((w) => w.WebsiteId)]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async removeUserTag(tagsId: number[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 

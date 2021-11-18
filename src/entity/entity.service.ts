@@ -409,4 +409,56 @@ export class EntityService {
 
     return !hasError;
   }
+
+  async pagesDeleteBulk(entitiesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const websites = await queryRunner.manager.query(
+        `
+        SELECT * FROM EntityWebsite WHERE EntityId IN (?)
+      `,
+        [entitiesId]
+      );
+
+      const pages = await queryRunner.manager.query(
+        `
+        SELECT
+          dp.PageId 
+        FROM 
+          Domain as d, 
+          DomainPage as dp
+        WHERE
+          d.WebsiteId IN (?) AND
+          dp.DomainId = d.DomainId
+      `,
+        [websites.map((w) => w.WebsiteId)]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
 }

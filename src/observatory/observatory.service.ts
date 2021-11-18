@@ -119,7 +119,30 @@ export class ObservatoryService {
       const tagsId = tags.map((t) => t.TagId);
 
       let pages = null;
-      if (parseInt(directory.Method) === 0) {
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        const websites = await manager.query(
+          `
+          SELECT * FROM TagWebsite WHERE TagId IN (?)
+        `,
+          [tagsId]
+        );
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+
         pages = await manager.query(
           `
           SELECT
@@ -144,7 +167,6 @@ export class ObservatoryService {
             w.Stamp_Update_Date as Stamp_Date,
             w.Creation_Date as Website_Creation_Date
           FROM
-            TagWebsite as tw,
             Website as w,
             Domain as d,
             DomainPage as dp,
@@ -155,18 +177,15 @@ export class ObservatoryService {
               ORDER BY Evaluation_Date DESC LIMIT 1
             )
           WHERE
-            tw.TagId IN (?) AND
-            w.WebsiteId = tw.WebsiteId AND
+            w.WebsiteId IN (?) AND
             d.WebsiteId = w.WebsiteId AND
             d.Active = 1 AND
             dp.DomainId = d.DomainId AND
             p.PageId = dp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
-            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-          HAVING
-            COUNT(w.WebsiteId) = ?`,
-          [tagsId, tagsId.length]
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          [websitesToFetch]
         );
       } else {
         pages = await manager.query(

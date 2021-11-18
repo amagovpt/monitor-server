@@ -119,6 +119,21 @@ export class DirectoryController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("pages/deleteBulk")
+  async deleteDirectoriesPages(@Request() req: any): Promise<any> {
+    const directoriesId = JSON.parse(req.body.directoriesId);
+
+    const deleteSuccess = await this.directoryService.pagesDeleteBulk(
+      directoriesId
+    );
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("observatory/total")
   async getNumberOfObservatoryTags(): Promise<any> {
     return success(await this.directoryService.findNumberOfObservatory());
