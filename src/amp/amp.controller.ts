@@ -1,16 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Request,
-  InternalServerErrorException,
-} from "@nestjs/common";
+import { Controller, Get, Post, Param, Request } from "@nestjs/common";
 import { EvaluationService } from "../evaluation/evaluation.service";
-import { success } from "../lib/response";
+import { success, accessDenied } from "../lib/response";
 import { readFileSync } from "fs";
 import dns from "dns";
 import ipRangeCheck from "ip-range-check";
+import { RateLimit } from "nestjs-rate-limiter";
 
 const blackList = readFileSync("../black-list.txt").toString().split("\n");
 
@@ -18,21 +12,29 @@ const blackList = readFileSync("../black-list.txt").toString().split("\n");
 export class AmpController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
+  @RateLimit({
+    keyPrefix: "amp",
+    points: 3,
+    duration: 60,
+    //blockDuration: 5 * 60,
+    //whiteList: blackList,
+    customResponseSchema: () => accessDenied(),
+  })
   @Get("eval/:url")
   async evaluateUrl(
     @Request() req: any,
     @Param("url") url: string
   ): Promise<any> {
-    if (process.env.NAMESPACE !== undefined) {
-      if (!req.headers.referer?.startsWith("")) {
-        throw new InternalServerErrorException();
+    if (process.env.NAMESPACE !== undefined && process.env.REFERER) {
+      if (!req.headers.referer?.startsWith(process.env.REFERER)) {
+        return accessDenied();
       }
     }
 
     const isValid = await this.checkIfValidUrl(decodeURIComponent(url));
 
     if (!isValid) {
-      throw new InternalServerErrorException();
+      return accessDenied();
     }
 
     await this.evaluationService.increaseAccessMonitorRequestCounter();
@@ -61,4 +63,8 @@ export class AmpController {
     url = url.replace("http://", "").replace("https://", "");
     return url.split("/")[0];
   }
+}
+
+function getRequestIp(): string {
+  return "amp";
 }

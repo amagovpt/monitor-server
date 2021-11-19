@@ -78,7 +78,9 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url || params.urls) {
-    options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    if (process.env.VALIDATOR) {
+      options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    }
     options.url = params.url;
     options.urls = params.urls;
   } else if (params.html) {
@@ -87,7 +89,9 @@ export async function evaluate(params: any): Promise<any> {
 
   options.log = { file: true };
 
-  options["validator"] = "http://127.0.0.1:5555/";
+  if (process.env.VALIDATOR) {
+    options["validator"] = process.env.VALIDATOR;
+  }
 
   const qualweb = new QualWeb({ stealth: true });
   await qualweb.start(
