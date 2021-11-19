@@ -15,9 +15,8 @@ export class AmpController {
   @RateLimit({
     keyPrefix: "amp",
     points: 3,
-    duration: 60,
-    //blockDuration: 5 * 60,
-    //whiteList: blackList,
+    duration: 1 * 60,
+    blockDuration: 1 * 60,
     customResponseSchema: () => accessDenied(),
   })
   @Get("eval/:url")
