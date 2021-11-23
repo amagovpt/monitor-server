@@ -355,7 +355,16 @@ export class WebsiteService {
   async findAllWithoutUser(): Promise<any> {
     const manager = getManager();
     const websites = await manager.query(
-      `SELECT * FROM Website WHERE UserId IS NULL AND Deleted = "0"`
+      `SELECT 
+        w.*, d.* 
+      FROM 
+        Website as w, 
+        Domain as d 
+      WHERE 
+        w.UserId IS NULL AND 
+        w.Deleted = "0" AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1`
     );
     return websites;
   }
