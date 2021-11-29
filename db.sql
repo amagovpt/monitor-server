@@ -115,7 +115,6 @@ CREATE TABLE `Entity` (
 DROP TABLE IF EXISTS `Website`;
 CREATE TABLE `Website` (
   `WebsiteId` int(11) NOT NULL AUTO_INCREMENT,
-  `EntityId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `Name` varchar(255) NOT NULL,
   `StartingUrl` varchar(255) NOT NULL,
