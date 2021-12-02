@@ -15,7 +15,6 @@ import { ObservatoryModule } from "./observatory/observatory.module";
 import { PageModule } from "./page/page.module";
 import { TagModule } from "./tag/tag.module";
 import { WebsiteModule } from "./website/website.module";
-import { DomainModule } from "./domain/domain.module";
 import { EntityModule } from "./entity/entity.module";
 import { EvaluationModule } from "./evaluation/evaluation.module";
 import { AmpModule } from "./amp/amp.module";
@@ -24,7 +23,7 @@ import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
+  readFileSync("../monitor_db2.json").toString()
 );
 
 @Module({
@@ -52,7 +51,6 @@ const databaseConfig = JSON.parse(
     PageModule,
     TagModule,
     WebsiteModule,
-    DomainModule,
     EntityModule,
     EvaluationModule,
     AmpModule,

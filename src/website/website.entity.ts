@@ -35,6 +35,13 @@ export class Website {
   Name: string;
 
   @Column({
+    type: "varchar",
+    length: 255,
+    nullable: false,
+  })
+  StartingUrl: string;
+
+  @Column({
     type: "int",
     nullable: true,
   })
@@ -63,14 +70,6 @@ export class Website {
     nullable: false,
   })
   Creation_Date: any;
-
-  @Column({
-    type: "tinyint",
-    width: 1,
-    nullable: false,
-    default: 0,
-  })
-  Deleted: number;
 
   @ManyToMany((type) => Tag)
   @JoinTable()

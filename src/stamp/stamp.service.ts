@@ -12,14 +12,13 @@ export class StampService {
       SELECT DISTINCT
         w.WebsiteId,
         w.Name,
-        d.Url as Domain
+        w.StartingUrl
       FROM
         Directory as dir,
         DirectoryTag as dt,
         Tag as t,
         TagWebsite as tw,
         Website as w
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
       WHERE
         dir.Show_in_Observatory = 1 AND
         dir.DirectoryId = dt.DirectoryId AND
@@ -56,8 +55,7 @@ export class StampService {
           FROM
             User as u,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Page as p
             LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
               SELECT Evaluation_Date FROM Evaluation 
@@ -73,13 +71,11 @@ export class StampService {
                 u.Type != 'studies'
               )
             ) AND
-            d.WebsiteId = ? AND
-            d.Active = 1 AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "1_1"
           GROUP BY p.PageId, e.Tot, e.A, e.AA, e.AAA, e.Score`,
-          [id, id]
+          [id]
         );
 
         pages = pages.filter((p) => p.Score !== null);

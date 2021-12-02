@@ -532,16 +532,14 @@ export class EvaluationService {
       `SELECT e.*, p.Uri 
       FROM
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p,
         Evaluation as e
       WHERE
         w.Name = ? AND
         w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE '_1_' AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '_1')
@@ -583,16 +581,14 @@ export class EvaluationService {
         `SELECT e.* 
       FROM
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p,
         Evaluation as e
       WHERE
         w.Name = ? AND
         w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Uri = ? AND 
         e.PageId = p.PageId AND 
         e.Show_To LIKE '_1'
@@ -635,8 +631,7 @@ export class EvaluationService {
         Tag as t,
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p,
         Evaluation as e
       WHERE
@@ -646,9 +641,8 @@ export class EvaluationService {
         w.WebsiteId = tw.WebsiteId AND
         w.Name = ? AND
         w.UserId = t.UserId AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId)
       `,
@@ -692,8 +686,7 @@ export class EvaluationService {
         Tag as t,
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p,
         Evaluation as e
       WHERE
@@ -703,9 +696,8 @@ export class EvaluationService {
         w.WebsiteId = tw.WebsiteId AND
         w.Name = ? AND
         w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Uri = ? AND 
         e.PageId = p.PageId AND
         e.StudyUserId = ?
@@ -744,8 +736,7 @@ export class EvaluationService {
         FROM
           User as u,
           Website as w,
-          Domain as d,
-          DomainPage as dp,
+          WebsitePage as wp,
           Page as p,
           Evaluation as e
         WHERE
@@ -753,10 +744,8 @@ export class EvaluationService {
           p.Show_In LIKE "1%%" AND
           e.PageId = p.PageId AND
           e.Show_To LIKE "1_" AND
-          dp.PageId = p.PageId AND
-          d.DomainId = dp.DomainId AND
-          w.WebsiteId = d.WebsiteId AND
-          w.Deleted = "0" AND
+          wp.PageId = p.PageId AND
+          w.WebsiteId = wp.WebsiteId AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
         ORDER BY e.Evaluation_Date DESC`;
     } else if (type === "monitor") {
@@ -764,8 +753,7 @@ export class EvaluationService {
         FROM
           User as u,
           Website as w,
-          Domain as d,
-          DomainPage as dp,
+          WebsitePage as wp,
           Page as p,
           Evaluation as e
         WHERE
@@ -773,9 +761,8 @@ export class EvaluationService {
           p.Show_In LIKE "11%" AND
           e.PageId = p.PageId AND
           e.Show_To LIKE "_1" AND
-          dp.PageId = p.PageId AND
-          d.DomainId = dp.DomainId AND
-          w.WebsiteId = d.WebsiteId AND
+          wp.PageId = p.PageId AND
+          w.WebsiteId = wp.WebsiteId AND
           u.UserId = w.UserId AND 
           u.Type = "monitor"
         ORDER BY e.Evaluation_Date DESC`;
@@ -878,25 +865,25 @@ export class EvaluationService {
     return !hasError;
   }
 
-  async findDomainEvaluations(domain: string, sample: boolean): Promise<any> {
+  async findWebsiteEvaluations(website: string, sample: boolean): Promise<any> {
     const manager = getManager();
 
     const evaluations = await manager.query(
       `SELECT distinct e.*, p.Uri
       FROM
-        Domain as d,
-        DomainPage as dp,
+        Website as w,
+        WebsitePage as wp,
         Page as p,
         Evaluation as e
       WHERE
-        d.Url = ? AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        w.StartingUrl = ? AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ? AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE '1_')
       `,
-      [domain, sample ? "1__" : "1_1"]
+      [website, sample ? "1__" : "1_1"]
     );
 
     const reports = new Array<any>();

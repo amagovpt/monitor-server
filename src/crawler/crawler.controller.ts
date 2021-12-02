@@ -35,22 +35,15 @@ export class CrawlerController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("isSubDomainDone/:subDomain")
-  async isSubDomainDone(@Param("subDomain") subDomain: string): Promise<any> {
-    subDomain = decodeURIComponent(subDomain);
-    return success(await this.crawlerService.isCrawlSubDomainDone(subDomain));
-  }
-
-  @UseGuards(AuthGuard("jwt-admin"))
   @Post("crawl")
-  async crawlPage(@Request() req: any): Promise<any> {
+  async crawlWebsite(@Request() req: any): Promise<any> {
     const websites = JSON.parse(req.body.websites);
     const maxDepth = req.body.maxDepth;
     const maxPages = req.body.maxPages;
     const waitJS = req.body.waitJS;
 
     return success(
-      await this.crawlerService.crawlDomain(
+      await this.crawlerService.crawlWebsite(
         -1,
         websites,
         maxDepth,
@@ -72,13 +65,16 @@ export class CrawlerController {
   @Post("crawlUser")
   async crawlUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.crawlDomain(
+      await this.crawlerService.crawlWebsite(
         userId,
-        [{ url: domain, domainId }],
+        [{ url: websiteUrl, websiteId }],
         0,
         0,
         0,
@@ -91,11 +87,14 @@ export class CrawlerController {
   @Post("crawlUserCheck")
   async checkCrawlUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.isUserCrawlerDone(userId, domainId)
+      await this.crawlerService.isUserCrawlerDone(userId, websiteId)
     );
   }
 
@@ -103,11 +102,14 @@ export class CrawlerController {
   @Post("crawlUserResults")
   async getCrawlUserPageResults(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.getUserCrawlResults(userId, domainId)
+      await this.crawlerService.getUserCrawlResults(userId, websiteId)
     );
   }
 
@@ -115,11 +117,14 @@ export class CrawlerController {
   @Post("crawlUserDelete")
   async deleteCrawlUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.deleteUserCrawler(userId, domainId)
+      await this.crawlerService.deleteUserCrawler(userId, websiteId)
     );
   }
 
@@ -127,13 +132,16 @@ export class CrawlerController {
   @Post("crawlStudiesUser")
   async crawlStudiesUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.crawlDomain(
+      await this.crawlerService.crawlWebsite(
         userId,
-        [{ url: domain, domainId }],
+        [{ url: websiteUrl, websiteId }],
         0,
         0,
         0,
@@ -146,11 +154,14 @@ export class CrawlerController {
   @Post("crawlStudiesUserCheck")
   async checkStudiesCrawlUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domain = req.body.domain;
-    const domainId = await this.crawlerService.getDomainId(userId, domain);
+    const websiteUrl = req.body.website;
+    const websiteId = await this.crawlerService.getWebsiteId(
+      userId,
+      websiteUrl
+    );
 
     return success(
-      await this.crawlerService.isUserCrawlerDone(userId, domainId)
+      await this.crawlerService.isUserCrawlerDone(userId, websiteId)
     );
   }
 
@@ -173,10 +184,10 @@ export class CrawlerController {
   @Post("crawlStudiesUserResults")
   async getCrawlStudiesUserPageResults(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domainId = req.body.domain;
+    const websiteId = req.body.website;
 
     return success(
-      await this.crawlerService.getUserCrawlResults(userId, domainId)
+      await this.crawlerService.getUserCrawlResults(userId, websiteId)
     );
   }
 
@@ -184,37 +195,37 @@ export class CrawlerController {
   @Post("crawlStudiesUserDelete")
   async deleteCrawlStudiesUserPage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const domainId = req.body.domain;
+    const websiteId = req.body.website;
 
     return success(
-      await this.crawlerService.deleteUserCrawler(userId, domainId)
+      await this.crawlerService.deleteUserCrawler(userId, websiteId)
     );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
   async deleteCrawl(@Request() req: any): Promise<any> {
-    const crawlDomainId = req.body.crawlDomainId;
+    const crawlWebsiteId = req.body.crawlWebsiteId;
 
-    return success(await this.crawlerService.delete(crawlDomainId));
+    return success(await this.crawlerService.delete(crawlWebsiteId));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
   async deleteCrawlers(@Request() req: any): Promise<any> {
-    const crawlDomainIds = JSON.parse(req.body.crawlDomainIds);
+    const crawlWebsiteIds = JSON.parse(req.body.crawlWebsiteIds);
 
-    return success(await this.crawlerService.deleteBulk(crawlDomainIds));
+    return success(await this.crawlerService.deleteBulk(crawlWebsiteIds));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("getByCrawlDomainID/:crawlDomainId")
-  async getCrawlResultsCrawlDomainID(
-    @Param("crawlDomainId") crawlDomainId: string
+  @Get("getByCrawlWebsiteID/:crawlWebsiteId")
+  async getCrawlResultsCrawlWebsiteID(
+    @Param("crawlWebsiteId") crawlWebsiteId: string
   ): Promise<any> {
     return success(
-      await this.crawlerService.getCrawlResultsCrawlDomainID(
-        parseInt(crawlDomainId)
+      await this.crawlerService.getCrawlResultsByCrawlWebsiteID(
+        parseInt(crawlWebsiteId)
       )
     );
   }

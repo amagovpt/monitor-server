@@ -196,15 +196,15 @@ export class EvaluationController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("domain/:domain/evaluations/:sample")
-  async getDomainPageEvaluations(
+  @Get("website/:website/evaluations/:sample")
+  async getWebsitePageEvaluations(
     @Request() req: any,
-    @Param("domain") domain: string,
+    @Param("website") website: string,
     @Param("sample") sample: string
   ): Promise<any> {
     return success(
-      await this.evaluationService.findDomainEvaluations(
-        decodeURIComponent(domain),
+      await this.evaluationService.findWebsiteEvaluations(
+        decodeURIComponent(website),
         sample === "true"
       )
     );

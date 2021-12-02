@@ -11,7 +11,7 @@ export class CrawlPage {
     type: "int",
     nullable: false,
   })
-  CrawlDomainId: number;
+  CrawlWebsiteId: number;
 
   @Column({
     type: "varchar",
@@ -21,12 +21,12 @@ export class CrawlPage {
   Uri: string;
 }
 
-@Entity("CrawlDomain")
-export class CrawlDomain {
+@Entity("CrawlWebsite")
+export class CrawlWebsite {
   @PrimaryGeneratedColumn({
     type: "int",
   })
-  CrawlDomainId: number;
+  CrawlWebsiteId: number;
 
   @Column({
     type: "int",
@@ -39,13 +39,13 @@ export class CrawlDomain {
     length: 255,
     nullable: false,
   })
-  DomainUri: string;
+  StartingUrl: string;
 
   @Column({
     type: "int",
     nullable: false,
   })
-  DomainId: number;
+  WebsiteId: number;
 
   @Column({
     type: "int",
@@ -80,13 +80,6 @@ export class CrawlDomain {
     nullable: false,
   })
   Done: number;
-
-  @Column({
-    type: "varchar",
-    length: 255,
-    nullable: false,
-  })
-  SubDomainUri: string;
 
   @Column({
     type: "tinyint",

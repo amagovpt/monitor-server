@@ -122,6 +122,30 @@ export class ObservatoryService {
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
         const websites = await manager.query(
           `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+          [tagsId]
+        );
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        const websites = await manager.query(
+          `
           SELECT * FROM TagWebsite WHERE TagId IN (?)
         `,
           [tagsId]
@@ -158,9 +182,9 @@ export class ObservatoryService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
             w.WebsiteId,
             w.Name as Website_Name,
+            w.StartingUrl,
             w.Declaration as Website_Declaration,
             w.Declaration_Update_Date as Declaration_Date,
             w.Stamp as Website_Stamp,
@@ -168,8 +192,7 @@ export class ObservatoryService {
             w.Creation_Date as Website_Creation_Date
           FROM
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Page as p
             LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
               SELECT Evaluation_Date FROM Evaluation 
@@ -178,10 +201,8 @@ export class ObservatoryService {
             )
           WHERE
             w.WebsiteId IN (?) AND
-            d.WebsiteId = w.WebsiteId AND
-            d.Active = 1 AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
@@ -203,9 +224,9 @@ export class ObservatoryService {
             p.PageId,
             p.Uri,
             p.Creation_Date as Page_Creation_Date,
-            d.Url,
             w.WebsiteId,
             w.Name as Website_Name,
+            w.StartingUrl,
             w.Declaration as Website_Declaration,
             w.Declaration_Update_Date as Declaration_Date,
             w.Stamp as Website_Stamp,
@@ -214,8 +235,7 @@ export class ObservatoryService {
           FROM
             TagWebsite as tw,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Page as p
             LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
               SELECT Evaluation_Date FROM Evaluation 
@@ -225,10 +245,8 @@ export class ObservatoryService {
           WHERE
             tw.TagId IN (?) AND
             w.WebsiteId = tw.WebsiteId AND
-            d.WebsiteId = w.WebsiteId AND
-            d.Active = 1 AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
@@ -313,7 +331,7 @@ export class ObservatoryService {
           declarationDate: wb.Declaration_Date,
           stamp: wb.Website_Stamp,
           stampDate: wb.Stamp_Date,
-          domain: wb.Url,
+          startingUrl: wb.StartingUrl,
           creation_date: wb.Website_Creation_Date,
         });
       }
@@ -336,7 +354,7 @@ export class ObservatoryService {
       website.declarationDate,
       website.stamp,
       website.stampDate,
-      website.domain,
+      website.startingUrl,
       website.creation_date
     );
 
@@ -823,7 +841,7 @@ export class ObservatoryService {
       websites[website.id] = {
         id: website.id,
         name: website.name,
-        domain: website.domain,
+        startingUrl: website.startingUrl,
         oldestPage: website.oldestPage,
         recentPage: website.recentPage,
         score: website.getScore(),
