@@ -57,7 +57,7 @@ export class ObservatoryService {
     const listDirectories = new ListDirectories(data, directories);
 
     const { declarations, badges } = this.countDeclarationsAndStamps(
-      listDirectories.directories
+        listDirectories.directories
     );
 
     const global = {
@@ -77,7 +77,7 @@ export class ObservatoryService {
       scoreDistributionFrequency: listDirectories.frequencies,
       errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
       bestPracticesDistribution:
-        this.getGlobalBestPracticesDistribution(listDirectories),
+          this.getGlobalBestPracticesDistribution(listDirectories),
       directoriesList: this.getSortedDirectoriesList(listDirectories),
       directories: this.getDirectories(listDirectories),
     };
@@ -85,8 +85,8 @@ export class ObservatoryService {
     const manager = getManager();
 
     await manager.query(
-      "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
-      [JSON.stringify(global), JSON.stringify({}), new Date()]
+        "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), JSON.stringify({}), new Date()]
     );
   }
 
@@ -94,9 +94,9 @@ export class ObservatoryService {
     const manager = getManager();
 
     const data = (
-      await manager.query(
-        "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
-      )
+        await manager.query(
+            "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+        )
     )[0].Global_Statistics;
 
     return JSON.parse(data);
@@ -108,47 +108,23 @@ export class ObservatoryService {
     let data = new Array<any>();
 
     const directories = await manager.query(
-      `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
+        `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
     );
 
     for (const directory of directories) {
       const tags = await manager.query(
-        `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
-        [directory.DirectoryId]
+          `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
+          [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
 
       let pages = null;
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
         const websites = await manager.query(
-          `
+            `
         SELECT * FROM TagWebsite WHERE TagId IN (?)
       `,
-          [tagsId]
-        );
-
-        const counts = {};
-        for (const w of websites ?? []) {
-          if (counts[w.WebsiteId]) {
-            counts[w.WebsiteId]++;
-          } else {
-            counts[w.WebsiteId] = 1;
-          }
-        }
-
-        const websitesToFetch = new Array<Number>();
-        for (const id of Object.keys(counts) ?? []) {
-          if (counts[id] === tags.length) {
-            websitesToFetch.push(parseInt(id));
-          }
-        }
-
-      if (parseInt(directory.Method) === 0 && tags.length > 1) {
-        const websites = await manager.query(
-          `
-          SELECT * FROM TagWebsite WHERE TagId IN (?)
-        `,
-          [tagsId]
+            [tagsId]
         );
 
         const counts = {};
@@ -168,7 +144,7 @@ export class ObservatoryService {
         }
 
         pages = await manager.query(
-          `
+            `
           SELECT
             e.EvaluationId,
             e.Title,
@@ -206,11 +182,11 @@ export class ObservatoryService {
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-          [websitesToFetch]
+            [websitesToFetch]
         );
       } else {
         pages = await manager.query(
-          `
+            `
           SELECT
             e.EvaluationId,
             e.Title,
@@ -250,7 +226,7 @@ export class ObservatoryService {
             p.Show_In LIKE "__1"
           GROUP BY
             w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-          [tagsId]
+            [tagsId]
         );
       }
       if (pages) {
@@ -264,7 +240,7 @@ export class ObservatoryService {
           p.Entity_Name = null;
 
           const entities = await manager.query(
-            `
+              `
             SELECT e.Long_Name
             FROM
               EntityWebsite as ew,
@@ -273,7 +249,7 @@ export class ObservatoryService {
               ew.WebsiteId = ? AND
               e.EntityId = ew.EntityId
           `,
-            [p.WebsiteId]
+              [p.WebsiteId]
           );
 
           if (entities.length > 0) {
@@ -311,16 +287,16 @@ export class ObservatoryService {
 
   private createDirectory(directory: any, data: any): Directory {
     const newDirectory = new Directory(
-      directory.id,
-      directory.name,
-      directory.creation_date
+        directory.id,
+        directory.name,
+        directory.creation_date
     );
     const tmpWebsitesIds = new Array<number>();
     const websites = new Array<any>();
     for (const wb of data || []) {
       if (
-        wb.DirectoryId === directory.id &&
-        !tmpWebsitesIds.includes(wb.WebsiteId)
+          wb.DirectoryId === directory.id &&
+          !tmpWebsitesIds.includes(wb.WebsiteId)
       ) {
         tmpWebsitesIds.push(wb.WebsiteId);
         websites.push({
@@ -347,15 +323,15 @@ export class ObservatoryService {
 
   private createWebsite(website: any, directory: any, data: any): Website {
     const newWebsite = new Website(
-      website.id,
-      website.entity,
-      website.name,
-      website.declaration,
-      website.declarationDate,
-      website.stamp,
-      website.stampDate,
-      website.startingUrl,
-      website.creation_date
+        website.id,
+        website.entity,
+        website.name,
+        website.declaration,
+        website.declarationDate,
+        website.stamp,
+        website.stampDate,
+        website.startingUrl,
+        website.creation_date
     );
 
     const pages = new Array<any>();
@@ -387,18 +363,18 @@ export class ObservatoryService {
 
   private addPageToWebsite(website: any, page: any): void {
     website.addPage(
-      page.pageId,
-      page.uri,
-      page.creation_date,
-      page.evaluationId,
-      page.title,
-      page.score,
-      page.errors,
-      page.tot,
-      page.A,
-      page.AA,
-      page.AAA,
-      page.evaluation_date
+        page.pageId,
+        page.uri,
+        page.creation_date,
+        page.evaluationId,
+        page.title,
+        page.score,
+        page.errors,
+        page.tot,
+        page.A,
+        page.AA,
+        page.AAA,
+        page.evaluation_date
     );
   }
 
@@ -464,9 +440,9 @@ export class ObservatoryService {
     for (const directory of directories) {
       for (const website of directory.websites) {
         if (
-          !websitesDeclarationsInList.includes(website.id) &&
-          website.declaration &&
-          website.declarationDate
+            !websitesDeclarationsInList.includes(website.id) &&
+            website.declaration &&
+            website.declarationDate
         ) {
           switch (website.declaration) {
             case 1:
@@ -496,9 +472,9 @@ export class ObservatoryService {
           websitesDeclarationsInList.push(website.id);
         }
         if (
-          !websitesStampsInList.includes(website.id) &&
-          website.stamp &&
-          website.stampDate
+            !websitesStampsInList.includes(website.id) &&
+            website.stamp &&
+            website.stampDate
         ) {
           switch (website.stamp) {
             case 1:
@@ -535,10 +511,10 @@ export class ObservatoryService {
 
   getTopFiveWebsites(listDirectories: ListDirectories): any {
     const websites = listDirectories
-      .getWebsites()
-      .slice()
-      .sort((a: Website, b: Website) => b.getScore() - a.getScore())
-      .slice(0, 5);
+        .getWebsites()
+        .slice()
+        .sort((a: Website, b: Website) => b.getScore() - a.getScore())
+        .slice(0, 5);
 
     const topFiveWebsites = new Array<any>();
 
@@ -580,8 +556,8 @@ export class ObservatoryService {
     graphData = graphData.sort(function (a, b) {
       //return a.elem === b.elem ? (b.n_pages === a.n_pages ? b.n_elems - a.n_elems : b.n_pages - a.n_pages) : a.elem.localeCompare(b.elem);
       return b.n_pages === a.n_pages
-        ? a.key.localeCompare(b.key)
-        : b.n_pages - a.n_pages;
+          ? a.key.localeCompare(b.key)
+          : b.n_pages - a.n_pages;
     });
 
     // because we only want the top 10
@@ -606,8 +582,8 @@ export class ObservatoryService {
         let result = _tests[key]["result"];
 
         let quartiles = this.calculateQuartilesGlobalBestPractices(
-          listDirectories,
-          k
+            listDirectories,
+            k
         );
         tableData.push(this.addToTableData(k, v, quartiles));
         graphData.push({ key, elem, n_pages, n_websites, result });
@@ -617,8 +593,8 @@ export class ObservatoryService {
     graphData = graphData.sort(function (a, b) {
       //return a.elem === b.elem ? (b.n_pages === a.n_pages ? b.n_elems - a.n_elems : b.n_pages - a.n_pages) : a.elem.localeCompare(b.elem);
       return b.n_pages === a.n_pages
-        ? a.key.localeCompare(b.key)
-        : b.n_pages - a.n_pages;
+          ? a.key.localeCompare(b.key)
+          : b.n_pages - a.n_pages;
     });
 
     // because we only want the top 10
@@ -645,14 +621,14 @@ export class ObservatoryService {
   getSortedDirectoriesList(listDirectories: ListDirectories): any {
     let rank = 1;
     const directories = listDirectories.directories
-      .slice()
-      .sort((a: Directory, b: Directory) => a.getScore() - b.getScore())
-      .reverse()
-      .map((d: Directory) => {
-        d.rank = rank;
-        rank++;
-        return d;
-      });
+        .slice()
+        .sort((a: Directory, b: Directory) => a.getScore() - b.getScore())
+        .reverse()
+        .map((d: Directory) => {
+          d.rank = rank;
+          rank++;
+          return d;
+        });
 
     const sortedDirectories = new Array<any>();
 
@@ -690,7 +666,7 @@ export class ObservatoryService {
         scoreDistributionFrequency: directory.frequencies,
         errorDistribution: this.getDirectoryErrorsDistribution(directory),
         bestPracticesDistribution:
-          this.getDirectoryBestPracticesDistribution(directory),
+            this.getDirectoryBestPracticesDistribution(directory),
         websitesList: this.getSortedDirectoryWebsitesList(directory),
         websites: this.getDirectoryWebsites(directory),
       };
@@ -722,8 +698,8 @@ export class ObservatoryService {
     graphData = graphData.sort(function (a, b) {
       //return a.elem === b.elem ? (b.n_pages === a.n_pages ? b.n_elems - a.n_elems : b.n_pages - a.n_pages) : a.elem.localeCompare(b.elem);
       return b.n_pages === a.n_pages
-        ? a.key.localeCompare(b.key)
-        : b.n_pages - a.n_pages;
+          ? a.key.localeCompare(b.key)
+          : b.n_pages - a.n_pages;
     });
 
     // because we only want the top 10
@@ -748,8 +724,8 @@ export class ObservatoryService {
         let result = _tests[key]["result"];
 
         let quartiles = this.calculateQuartilesDirectoryBestPractices(
-          directory,
-          k
+            directory,
+            k
         );
         tableData.push(this.addToTableData(k, v, quartiles));
         graphData.push({ key, elem, n_pages, n_websites, result });
@@ -759,8 +735,8 @@ export class ObservatoryService {
     graphData = graphData.sort(function (a, b) {
       //return a.elem === b.elem ? (b.n_pages === a.n_pages ? b.n_elems - a.n_elems : b.n_pages - a.n_pages) : a.elem.localeCompare(b.elem);
       return b.n_pages === a.n_pages
-        ? a.key.localeCompare(b.key)
-        : b.n_pages - a.n_pages;
+          ? a.key.localeCompare(b.key)
+          : b.n_pages - a.n_pages;
     });
 
     // because we only want the top 10
@@ -779,9 +755,9 @@ export class ObservatoryService {
     });
 
     websites = orderBy(
-      websites,
-      ["calculatedScore", "AAA", "AA", "A", "name"],
-      ["desc", "desc", "desc", "desc", "asc"]
+        websites,
+        ["calculatedScore", "AAA", "AA", "A", "name"],
+        ["desc", "desc", "desc", "desc", "asc"]
     ).map((w: Website) => {
       w.rank = rank;
       rank++;
@@ -858,7 +834,7 @@ export class ObservatoryService {
         errors: website.errors,
         success: website.success,
         successDetailsTable:
-          this.getDirectoryWebsiteSuccessDetailsTable(website),
+            this.getDirectoryWebsiteSuccessDetailsTable(website),
         errorsDetailsTable: this.getDirectoryWebsiteErrorsDetailsTable(website),
       };
     }
@@ -876,16 +852,16 @@ export class ObservatoryService {
           n_pages: website.success[key].n_pages,
           lvl: _tests[key].level.toUpperCase(),
           quartiles: this.calculateQuartiles(
-            website.getPassedOccurrencesByPage(key)
+              website.getPassedOccurrencesByPage(key)
           ),
         });
       }
     }
 
     const practicesData = orderBy(
-      practices,
-      ["n_pages", "n_occurrences"],
-      ["desc", "desc"]
+        practices,
+        ["n_pages", "n_occurrences"],
+        ["desc", "desc"]
     );
     const practicesKeys = Object.keys(practicesData);
 
@@ -902,16 +878,16 @@ export class ObservatoryService {
           n_pages: website.errors[key].n_pages,
           lvl: _tests[key].level.toUpperCase(),
           quartiles: this.calculateQuartiles(
-            website.getErrorOccurrencesByPage(key)
+              website.getErrorOccurrencesByPage(key)
           ),
         });
       }
     }
 
     const practicesData = orderBy(
-      practices,
-      ["n_pages", "n_occurrences"],
-      ["desc", "desc"]
+        practices,
+        ["n_pages", "n_occurrences"],
+        ["desc", "desc"]
     );
     const practicesKeys = Object.keys(practicesData);
 
@@ -919,8 +895,8 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesGlobalErrors(
-    directories: any,
-    test: any
+      directories: any,
+      test: any
   ): Array<any> {
     let data = directories.getErrorOccurrenceByDirectory(test);
 
@@ -990,8 +966,8 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesGlobalBestPractices(
-    directories: any,
-    test: any
+      directories: any,
+      test: any
   ): Array<any> {
     let data = directories.getPassedOccurrenceByDirectory(test);
 
@@ -1061,8 +1037,8 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesDirectoryErrors(
-    directory: Directory,
-    test: any
+      directory: Directory,
+      test: any
   ): Array<any> {
     let data = directory.getErrorOccurrencesByWebsite(test);
 
@@ -1132,8 +1108,8 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesDirectoryBestPractices(
-    directory: Directory,
-    test: any
+      directory: Directory,
+      test: any
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
 
@@ -1204,8 +1180,8 @@ export class ObservatoryService {
 
   private calculateQuartiles(practices: any): Array<any> {
     const values = practices
-      .filter((e: any) => e !== undefined)
-      .sort((a: number, b: number) => a - b);
+        .filter((e: any) => e !== undefined)
+        .sort((a: number, b: number) => a - b);
 
     let q1: number;
     let q2: number;

@@ -479,52 +479,6 @@ export class DirectoryService {
         `
         SELECT 
           w.*, 
-          u.Username as User, u.Type as Type, 
-          d.DomainId, d.Url as Domain, 
-          COUNT(distinct dp.PageId) as Pages,
-          COUNT(distinct e.PageId) as Evaluated_Pages
-        FROM
-          Website as w
-          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
-          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
-        WHERE
-          w.WebsiteId IN (?) AND
-          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
-        GROUP BY
-          w.WebsiteId
-      `,
-        [websitesToFetch]
-      );*/
-      const websites = await manager.query(
-        `
-        SELECT * FROM TagWebsite WHERE TagId IN (?)
-      `,
-        [nTags.map((t) => t.TagId)]
-      );
-
-      const counts = {};
-      for (const w of websites ?? []) {
-        if (counts[w.WebsiteId]) {
-          counts[w.WebsiteId]++;
-        } else {
-          counts[w.WebsiteId] = 1;
-        }
-      }
-
-      const websitesToFetch = new Array<Number>();
-      for (const id of Object.keys(counts) ?? []) {
-        if (counts[id] === nTags.length) {
-          websitesToFetch.push(parseInt(id));
-        }
-      }
-
-      return manager.query(
-        `
-        SELECT 
-          w.*, 
           u.Username as User, u.Type as Type,  
           COUNT(distinct wp.PageId) as Pages,
           COUNT(distinct e.PageId) as Evaluated_Pages
