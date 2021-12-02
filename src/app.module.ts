@@ -32,7 +32,7 @@ const databaseConfig = JSON.parse(readFileSync('../monitor_db.json').toString())
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: databaseConfig.host,
-      port: 3306,
+      port: databaseConfig.port ? databaseConfig.port : 3306,
       username: databaseConfig.user,
       password: databaseConfig.password,
       database: databaseConfig.database,

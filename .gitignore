@@ -7,3 +7,8 @@ dist
 package-lock.json
 
 qualweb-errors-*.log
+
+.idea
+/.secrets/
+
+*.iml
