@@ -12,7 +12,10 @@ export class EntityService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(entityId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(
+    entitiesId: number[],
+    option: string
+  ): Promise<boolean> {
     const pages = await this.entityRepository.query(
       `
       SELECT
@@ -24,14 +27,14 @@ export class EntityService {
         DomainPage as dp,
         Page as p
       WHERE
-        w.EntityId = ? AND
+        w.EntityId IN (?) AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
         dp.DomainId = d.DomainId AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
     `,
-      [entityId, option === "all" ? "1__" : "1_1"]
+      [entitiesId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -180,7 +183,16 @@ export class EntityService {
 
     if (entity) {
       entity["websites"] = await this.entityRepository.query(
-        `SELECT w.* FROM EntityWebsite as ew, Website as w WHERE ew.EntityId = ? AND w.WebsiteId = ew.WebsiteId`,
+        `SELECT w.*, d.Url 
+        FROM 
+          EntityWebsite as ew, 
+          Website as w,
+          Domain as d
+        WHERE 
+          ew.EntityId = ? AND 
+          w.WebsiteId = ew.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1`,
         [entityId]
       );
       return entity;
@@ -220,7 +232,7 @@ export class EntityService {
     return websites;
   }
 
-  async findAllWebsitePages(entity: string): Promise<any> {
+  async findAllWebsitesPages(entity: string): Promise<any> {
     const manager = getManager();
 
     const websites = await manager.query(
@@ -242,7 +254,7 @@ export class EntityService {
         Domain as d,
         DomainPage as dp,
         Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
           WHERE PageId = p.PageId AND Show_To LIKE "1_"
           ORDER BY Evaluation_Date DESC LIMIT 1
@@ -260,7 +272,7 @@ export class EntityService {
       [entity]
     );
 
-    return websites.filter((w) => w.Score !== null);
+    return websites; //.filter((w) => w.Score !== null);
   }
 
   async createOne(entity: EntityTable, websites: string[]): Promise<boolean> {
@@ -384,6 +396,58 @@ export class EntityService {
       await queryRunner.manager.delete(EntityTable, {
         EntityId: In(entitiesId),
       });
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
+  async pagesDeleteBulk(entitiesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const websites = await queryRunner.manager.query(
+        `
+        SELECT * FROM EntityWebsite WHERE EntityId IN (?)
+      `,
+        [entitiesId]
+      );
+
+      const pages = await queryRunner.manager.query(
+        `
+        SELECT
+          dp.PageId 
+        FROM 
+          Domain as d, 
+          DomainPage as dp
+        WHERE
+          d.WebsiteId IN (?) AND
+          dp.DomainId = d.DomainId
+      `,
+        [websites.map((w) => w.WebsiteId)]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
+      );
 
       await queryRunner.commitTransaction();
     } catch (err) {

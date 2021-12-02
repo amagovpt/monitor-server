@@ -6,6 +6,9 @@ CREATE TABLE `CrawlDomain` (
   `UserId` int(11) NOT NULL,
   `DomainUri` varchar(255) NOT NULL,
   `DomainId` int(11) NOT NULL,
+  `Max_Depth` int(11) NOT NULL DEFAULT 0,
+  `Max_Pages` int(11) NOT NULL DEFAULT 0,
+  `Wait_JS` tinyint(1) NOT NULL DEFAULT 0,
   `Creation_Date` datetime NOT NULL,
   `Done` tinyint(1) NOT NULL DEFAULT '0',
   `SubDomainUri` varchar(255) NOT NULL,
@@ -50,7 +53,7 @@ CREATE TABLE `DomainPage` (
   UNIQUE KEY `DomainPage` (`DomainId`,`PageId`),
   KEY `DPPageId_idx` (`PageId`),
   CONSTRAINT `DPDomainId_fk` FOREIGN KEY (`DomainId`) REFERENCES `Domain` (`DomainId`) ON DELETE CASCADE,
-  CONSTRAINT `DPPageId` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+  CONSTRAINT `DPPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Entity`;
@@ -100,8 +103,9 @@ CREATE TABLE `Evaluation_List` (
   `Is_Evaluating` tinyint(1) NOT NULL DEFAULT '0',
   `StudyUserId` int(11) DEFAULT NULL,
   PRIMARY KEY (`EvaluationListId`),
-  UNIQUE KEY `PairKey` (`UserId`,`PageId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  UNIQUE KEY `PairKey` (`UserId`,`PageId`),
+  CONSTRAINT `ELPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Invalid_Token`;
 CREATE TABLE `Invalid_Token` (
@@ -231,6 +235,7 @@ CREATE TABLE `Evaluation_Request_Counter` (
   `EvaluationRequestCounterId` int(11) NOT NULL AUTO_INCREMENT,
   `Application` varchar(100) NOT NULL,
   `Counter` int(11) NOT NULL DEFAULT 0,
+  `Start_Date` DATETIME NOT NULL DEFAULT NOW(),
   `Last_Request` DATETIME NOT NULL,
   PRIMARY KEY (`EvaluationRequestCounterId`),
   UNIQUE KEY `EvaluationRequestCounterId_UNIQUE` (`EvaluationRequestCounterId`)

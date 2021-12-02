@@ -75,9 +75,24 @@ export class PageController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("evaluationList/error/delete")
+  async deleteAdminPagesWithError(@Request() req: any): Promise<any> {
+    const pages = req.body.pages;
+    return success(await this.pageService.deleteAdminPagesWithError(pages));
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("evaluationList/error")
+  async getAdminPagesWithError(): Promise<any> {
+    return success(await this.pageService.getAdminPagesWithError());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminPageCount(@Param("search") search: string): Promise<any> {
-    return success(await this.pageService.adminCount(search.substring(7)));
+    return success(
+      await this.pageService.adminCount(decodeURIComponent(search.substring(7)))
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -95,7 +110,7 @@ export class PageController {
         parseInt(page),
         sort.substring(5),
         direction.substring(10),
-        search.substring(7)
+        decodeURIComponent(search.substring(7))
       )
     );
   }

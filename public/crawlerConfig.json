@@ -1,4 +1,4 @@
 {
-  "maxDepth": "1",
-  "maxPages": 10
+  "maxDepth": 0,
+  "maxPages": 0
 }

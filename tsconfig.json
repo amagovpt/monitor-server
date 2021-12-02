@@ -13,7 +13,7 @@
     "baseUrl": "./",
     "incremental": true,
     "typeRoots": ["../node_modules/@qualweb/types"],
-    "types": ["./node_modules/@qualweb/types"], 
+    "types": ["./node_modules/@qualweb/types"]
   },
   "exclude": ["node_modules", "dist"]
 }

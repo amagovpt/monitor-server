@@ -19,7 +19,10 @@ export class WebsiteService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(domainId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(
+    domainsId: number[],
+    option: string
+  ): Promise<boolean> {
     const pages = await this.websiteRepository.query(
       `
       SELECT 
@@ -29,10 +32,10 @@ export class WebsiteService {
         DomainPage as dp, 
         Page as p
       WHERE
-        dp.DomainId = ? AND
+        dp.DomainId IN (?) AND
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?`,
-      [domainId, option === "all" ? "1__" : "1_1"]
+      [domainsId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -123,13 +126,26 @@ export class WebsiteService {
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          w.Name LIKE ? AND
+          (w.Name LIKE ? OR d.Url LIKE ?) AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
         LIMIT ? OFFSET ?`,
-        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+        [
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          size,
+          page * size,
+        ]
       );
+
+      /* 
+        LEFT OUTER JOIN Evaluation as e2 ON e.PageId = p.PageId AND e2.Evaluation_Date = (
+            SELECT Evaluation_Date FROM Evaluation 
+            WHERE PageId = p.PageId
+            ORDER BY Evaluation_Date DESC LIMIT 1
+          )
+      */
       return websites;
     } else {
       let order = "";
@@ -162,13 +178,18 @@ export class WebsiteService {
           LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
-          Name LIKE ? AND
+          (w.Name LIKE ? OR d.Url LIKE ?) AND
           (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
           w.Deleted = "0"
         GROUP BY w.WebsiteId, d.DomainId
         ORDER BY ${order} ${direction.toUpperCase()}
         LIMIT ? OFFSET ?`,
-        [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
+        [
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          search.trim() !== "" ? `%${search.trim()}%` : "%",
+          size,
+          page * size,
+        ]
       );
       return websites;
     }
@@ -308,9 +329,10 @@ export class WebsiteService {
 
   async findAllOfficial(): Promise<any> {
     const manager = getManager();
-    const websites = await manager.query(`SELECT distinct w.* 
+    const websites = await manager.query(`SELECT distinct w.*, d.Url
       FROM 
-        Website as w, 
+        Website as w
+        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId,
         User as u 
       WHERE 
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
@@ -333,7 +355,16 @@ export class WebsiteService {
   async findAllWithoutUser(): Promise<any> {
     const manager = getManager();
     const websites = await manager.query(
-      `SELECT * FROM Website WHERE UserId IS NULL AND Deleted = "0"`
+      `SELECT 
+        w.*, d.* 
+      FROM 
+        Website as w, 
+        Domain as d 
+      WHERE 
+        w.UserId IS NULL AND 
+        w.Deleted = "0" AND
+        d.WebsiteId = w.WebsiteId AND
+        d.Active = 1`
     );
     return websites;
   }
@@ -1474,6 +1505,52 @@ export class WebsiteService {
         //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
         `DELETE FROM Website WHERE WebsiteId IN (?)`,
         [websitesId]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return websitesId;
+  }
+
+  async pagesDeleteBulk(websitesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const pages = await queryRunner.manager.query(
+        `
+        SELECT
+          dp.PageId 
+        FROM 
+          Domain as d, 
+          DomainPage as dp
+        WHERE
+          d.WebsiteId IN (?) AND
+          dp.DomainId = d.DomainId
+      `,
+        [websitesId]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
       );
 
       await queryRunner.commitTransaction();

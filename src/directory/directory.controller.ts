@@ -19,11 +19,11 @@ export class DirectoryController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const directoryId = req.body.directoryId;
+    const directoriesId = JSON.parse(req.body.directoriesId);
     const option = req.body.option;
 
     return success(
-      await this.directoryService.addPagesToEvaluate(directoryId, option)
+      await this.directoryService.addPagesToEvaluate(directoriesId, option)
     );
   }
 
@@ -111,6 +111,21 @@ export class DirectoryController {
     const directoriesId = JSON.parse(req.body.directoriesId);
 
     const deleteSuccess = await this.directoryService.deleteBulk(directoriesId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("pages/deleteBulk")
+  async deleteDirectoriesPages(@Request() req: any): Promise<any> {
+    const directoriesId = JSON.parse(req.body.directoriesId);
+
+    const deleteSuccess = await this.directoryService.pagesDeleteBulk(
+      directoriesId
+    );
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }

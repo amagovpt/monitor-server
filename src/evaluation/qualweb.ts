@@ -78,16 +78,22 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url || params.urls) {
-    // options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    if (process.env.VALIDATOR) {
+      options["wcag-techniques"].techniques.push("QW-WCAG-T16");
+    }
     options.url = params.url;
     options.urls = params.urls;
   } else if (params.html) {
     options.html = params.html;
   }
 
-  // options["validator"] = "http://127.0.0.1:5555/";
+  options.log = { file: true };
 
-  const qualweb = new QualWeb();
+  if (process.env.VALIDATOR) {
+    options["validator"] = process.env.VALIDATOR;
+  }
+
+  const qualweb = new QualWeb({ stealth: true });
   await qualweb.start(
     { maxConcurrency: 2, timeout: 1000 * 60 * 2 },
     {
@@ -95,11 +101,10 @@ export async function evaluate(params: any): Promise<any> {
     }
   );
 
-  //const reports = await qualweb.evaluate(options);
   let reports = null;
   let error = null;
   try {
-    reports = await qualweb.evaluate(options); //await timeExceeded(qualweb, options);
+    reports = await qualweb.evaluate(options);
   } catch (err) {
     error = err;
   } finally {
@@ -114,26 +119,5 @@ export async function evaluate(params: any): Promise<any> {
     throw new Error("Invalid resource");
   }
 
-  /*let report: EvaluationReport;
-
-  if (params.url) {
-    report = reports[params.url];
-  } else if (params.html) {
-    report = reports["customHtml"];
-  }*/
-
   return reports;
-}
-
-function timeExceeded(qualweb: QualWeb, options: QualwebOptions): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const exceeded = setTimeout(() => {
-      reject("Time exceeded for evaluation");
-    }, 1000 * 60 * 2);
-
-    qualweb.evaluate(options).then((reports) => {
-      clearTimeout(exceeded);
-      resolve(reports);
-    });
-  });
 }

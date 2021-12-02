@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { Connection, getManager } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
+import fs from "fs";
 import { Evaluation } from "./evaluation.entity";
 import {
   executeUrlEvaluation,
@@ -22,18 +23,42 @@ export class EvaluationService {
     this.isEvaluatingUserInstance = false;
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  cleanUpErrorFiles(): void {
+    fs.readdir("./", (err, files: string[]) => {
+      if (!err) {
+        for (const file of files ?? []) {
+          if (file.startsWith("qualweb-errors")) {
+            fs.unlink(file, (err2) => {
+              if (err2) {
+                console.error(err2);
+              }
+            });
+          }
+        }
+      }
+    });
+  }
+
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateAdminPageList(): Promise<void> {
-    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingAdminInstance) {
+    if (
+      (process.env.NAMESPACE === undefined ||
+        process.env.NAMESPACE === "ADMIN") &&
+      !this.isEvaluatingAdminInstance
+    ) {
       this.isEvaluatingAdminInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+      if (
+        process.env.NAMESPACE === undefined ||
+        parseInt(process.env.AMSID) === 0
+      ) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * this.SKIP;
+        const skip = parseInt(process.env.AMSID) * this.SKIP;
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
@@ -47,16 +72,23 @@ export class EvaluationService {
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateUserPageList(): Promise<void> {
-    if (process.env.NAMESPACE !== "AMP" && !this.isEvaluatingUserInstance) {
+    if (
+      (process.env.NAMESPACE === undefined ||
+        process.env.NAMESPACE === "USER") &&
+      !this.isEvaluatingUserInstance
+    ) {
       this.isEvaluatingUserInstance = true;
 
       let pages = [];
-      if (process.env.ID === undefined || parseInt(process.env.ID) === 0) {
+      if (
+        process.env.NAMESPACE === undefined ||
+        parseInt(process.env.USRID) === 0
+      ) {
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
-        const skip = parseInt(process.env.ID) * this.SKIP;
+        const skip = parseInt(process.env.USRID) * this.SKIP;
         pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
@@ -159,10 +191,10 @@ export class EvaluationService {
             [pte.EvaluationListId]
           );
         } else {
-          console.error("Check error log file for more information");
+          const error = this.findUrlError(pte.Url);
           await queryRunner.manager.query(
             `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-            ["Check error log file for more information", pte.EvaluationListId]
+            [error, pte.EvaluationListId]
           );
         }
       }
@@ -224,6 +256,24 @@ export class EvaluationService {
         }
       }*/
     }
+  }
+
+  private findUrlError(url: string): string {
+    let error = "";
+    const files = fs.readdirSync("./", { encoding: "utf-8" });
+    for (const file of files ?? []) {
+      if (file.startsWith("qualweb-errors") && !error) {
+        const content = fs.readFileSync(file, { encoding: "utf-8" });
+        if (content.includes(url)) {
+          let split = content.split(url);
+          split = split[1].split("-----------");
+          split = split[0].split(":");
+          error = split.splice(1).join(":").trim();
+        }
+      }
+    }
+
+    return error;
   }
 
   evaluateUrl(url: string): Promise<any> {
@@ -370,36 +420,36 @@ export class EvaluationService {
     );
   }
 
-  async getAMSObservatoryRequestCounter(): Promise<number> {
+  async getAMSObservatoryRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getMyMonitorRequestCounter(): Promise<number> {
+  async getMyMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getStudyMonitorRequestCounter(): Promise<number> {
+  async getStudyMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
-  async getAccessMonitorRequestCounter(): Promise<number> {
+  async getAccessMonitorRequestCounter(): Promise<any> {
     const manager = getManager();
     const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
     );
-    return counter[0].Counter;
+    return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async resetAdminWaitingList(): Promise<boolean> {

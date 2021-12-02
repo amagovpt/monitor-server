@@ -4,8 +4,8 @@ import { Connection, Repository, getManager, In } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CrawlDomain, CrawlPage } from "./crawler.entity";
 import { readFileSync, writeFileSync } from "fs";
-//import Crawler from "simplecrawler";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { PageService } from "src/page/page.service";
 import { Crawler } from "@qualweb/crawler";
 
@@ -22,11 +22,15 @@ export class CrawlerService {
   ) {
     this.isAdminCrawling = false;
     this.isUserCrawling = false;
+    puppeteer.use(StealthPlugin());
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestAdminCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === "0") {
+    if (
+      process.env.NAMESPACE === undefined ||
+      (process.env.NAMESPACE === "ADMIN" && process.env.AMSID === "0")
+    ) {
       if (!this.isAdminCrawling) {
         this.isAdminCrawling = true;
 
@@ -44,9 +48,18 @@ export class CrawlerService {
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            const crawler = new Crawler(
+              incognito,
+              domain[0].DomainUri,
+              undefined,
+              domain[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
+            );
             //await this.crawl(domain[0].DomainUri);
-            await crawler.crawl({ maxDepth: 0 });
+
+            await crawler.crawl({
+              maxDepth: domain[0].Max_Depth,
+              maxUrls: domain[0].Max_Pages ? domain[0].Max_Pages : undefined,
+            });
 
             await incognito.close();
             await browser.close();
@@ -89,7 +102,10 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestUserCrawl(): Promise<void> {
-    if (process.env.ID === undefined || process.env.ID === "1") {
+    if (
+      process.env.NAMESPACE === undefined ||
+      (process.env.NAMESPACE === "USER" && process.env.USRID === "0")
+    ) {
       if (!this.isUserCrawling) {
         this.isUserCrawling = true;
 
@@ -107,7 +123,12 @@ export class CrawlerService {
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(incognito, domain[0].DomainUri);
+            const crawler = new Crawler(
+              incognito,
+              domain[0].DomainUri,
+              undefined,
+              domain[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
+            );
             //await this.crawl(domain[0].DomainUri);
             await crawler.crawl({ maxDepth: 0 });
 
@@ -141,186 +162,6 @@ export class CrawlerService {
       }
     }
   }
-
-  private async crawl(url: string): Promise<string[]> {
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--ignore-certificate-errors"],
-    });
-    const incognito = await browser.createIncognitoBrowserContext();
-    const page = await incognito.newPage();
-
-    let urls = new Array<string>();
-
-    try {
-      await page.goto(url, {
-        waitUntil: "domcontentloaded",
-      });
-
-      urls = await page.evaluate((url) => {
-        const notHtml =
-          "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt".split(
-            "|"
-          );
-
-        const links = document.querySelectorAll("body a");
-
-        const urls = new Array();
-
-        for (const link of links || []) {
-          if (link.hasAttribute("href")) {
-            const href = link.getAttribute("href");
-
-            if (
-              href &&
-              href.trim() &&
-              (href.startsWith(url) ||
-                href.startsWith("/") ||
-                href.startsWith("./") ||
-                (!href.startsWith("http") && !href.startsWith("#")))
-            ) {
-              let valid = true;
-              for (const not of notHtml || []) {
-                if (href.endsWith(not)) {
-                  valid = false;
-                  break;
-                }
-                const parts = href.split("/");
-                if (parts.length > 0) {
-                  const lastPart = parts[parts.length - 1];
-                  if (
-                    lastPart.startsWith("#") ||
-                    lastPart.startsWith("javascript:") ||
-                    lastPart.startsWith("tel:") ||
-                    lastPart.startsWith("mailto:")
-                  ) {
-                    valid = false;
-                    break;
-                  }
-                }
-              }
-
-              if (valid) {
-                try {
-                  let correctUrl = "";
-                  if (href.startsWith(url)) {
-                    correctUrl = href;
-                  } else if (href.startsWith("./")) {
-                    correctUrl = url + href.slice(1);
-                  } else if (!href.startsWith("/")) {
-                    correctUrl = url + "/" + href;
-                  } else {
-                    correctUrl = url + href;
-                  }
-                  const parsedUrl = new URL(correctUrl);
-                  if (parsedUrl.hash.trim() === "") {
-                    urls.push(correctUrl);
-                  }
-                } catch (err) {}
-              }
-            }
-          }
-        }
-
-        return urls;
-      }, url);
-    } catch (err) {
-      //console.error("err", typeof err);
-    }
-
-    await page.close();
-    await incognito.close();
-    await browser.close();
-
-    const normalizedUrls = urls.map((u) => {
-      if (u.endsWith("/")) {
-        u = u.substring(0, u.length - 1);
-      }
-      if (u.startsWith(url)) {
-        return u.trim();
-      } else {
-        return (url + u).trim();
-      }
-    });
-
-    const unique = [...new Set(normalizedUrls)];
-
-    return unique.sort();
-  }
-
-  /*private crawler(
-    domain: string,
-    max_depth: number,
-    max_pages: number,
-    crawl_domain_id: number
-  ): Promise<any> {
-    const queryRunner = this.connection.createQueryRunner();
-    return new Promise(async (resolve, reject) => {
-      const crawler = Crawler(domain);
-      let urlList = [];
-      let pageNumber = 0;
-      let emit = false;
-
-      crawler.on("fetchcomplete", async (r, q) => {
-        let contentType = r["stateData"]["contentType"];
-        if (
-          (contentType.includes("text/html") ||
-            contentType.includes("image/svg+xml")) &&
-          (pageNumber <= max_pages || max_pages === 0)
-        ) {
-          urlList.push(r["url"]);
-          urlList = urlList.filter(
-            (url: string, index: number, self: any) =>
-              self.indexOf(url) === index
-          );
-          pageNumber = urlList.length;
-        }
-
-        if (pageNumber >= max_pages && max_pages !== 0 && !emit) {
-          emit = true;
-          crawler.emit("complete");
-        }
-      });
-
-      crawler.on("complete", async function () {
-        crawler.stop();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        let hasError = false;
-        try {
-          for (const page of urlList || []) {
-            const newCrawlPage = new CrawlPage();
-            newCrawlPage.Uri = page;
-            newCrawlPage.CrawlDomainId = crawl_domain_id;
-            await queryRunner.manager.save(newCrawlPage);
-          }
-          await queryRunner.manager.query(
-            `UPDATE CrawlDomain SET Done = "1" WHERE CrawlDomainId = ?`,
-            [crawl_domain_id]
-          );
-
-          await queryRunner.commitTransaction();
-        } catch (err) {
-          // since we have errors lets rollback the changes we made
-          await queryRunner.rollbackTransaction();
-          hasError = true;
-        } finally {
-          // you need to release a queryRunner which was manually instantiated
-          await queryRunner.release();
-        }
-
-        if (hasError) {
-          reject();
-        } else {
-          resolve(urlList);
-        }
-      });
-      crawler.nextConcurrency = 25;
-      crawler.interval = 0.1;
-      crawler.maxDepth = max_depth + 1;
-      crawler.start();
-    });
-  }*/
 
   findAll(): Promise<any> {
     return this.crawlDomainRepository.find({ where: { UserId: -1 } });
@@ -433,7 +274,7 @@ export class CrawlerService {
     }
   }
 
-  async crawlTag(tagId: number): Promise<boolean> {
+  async crawlTags(tagsId: number[]): Promise<boolean> {
     try {
       const domains = await getManager().query(
         `
@@ -444,20 +285,19 @@ export class CrawlerService {
           TagWebsite as tw,
           Domain as d
         WHERE
-          tw.TagId = "?" AND
+          tw.TagId IN (?) AND
           d.WebsiteId = tw.WebsiteId AND
           d.Active = 1`,
-        [tagId]
+        [tagsId]
       );
 
       for (const domain of domains || []) {
         await this.crawlDomain(
           -1,
-          domain.Url,
-          domain.Url,
-          domain.DomainId,
-          -1,
-          -1,
+          [{ url: domain.Url, domainId: domain.DomainId }],
+          0,
+          0,
+          0,
           1
         );
       }
@@ -471,11 +311,10 @@ export class CrawlerService {
 
   async crawlDomain(
     userId: number,
-    subDomain: string,
-    domain: string,
-    domainId: number,
+    websites: any,
     maxDepth: number,
     maxPages: number,
+    waitJS: number,
     tag: number
   ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
@@ -485,16 +324,21 @@ export class CrawlerService {
 
     let hasError = false;
     try {
-      const newCrawlDomain = new CrawlDomain();
-      newCrawlDomain.UserId = userId;
-      newCrawlDomain.DomainUri = domain;
-      newCrawlDomain.DomainId = domainId;
-      newCrawlDomain.Creation_Date = new Date();
-      newCrawlDomain.SubDomainUri = subDomain;
-      newCrawlDomain.Tag = tag;
+      for (const website of websites ?? []) {
+        const newCrawlDomain = new CrawlDomain();
+        newCrawlDomain.UserId = userId;
+        newCrawlDomain.DomainUri = website.url;
+        newCrawlDomain.DomainId = website.domainId;
+        newCrawlDomain.Max_Depth = maxDepth;
+        newCrawlDomain.Max_Pages = maxPages;
+        newCrawlDomain.Wait_JS = waitJS;
+        newCrawlDomain.Creation_Date = new Date();
+        newCrawlDomain.SubDomainUri = website.url;
+        newCrawlDomain.Tag = tag;
 
-      const insertCrawlDomain = await queryRunner.manager.save(newCrawlDomain);
-      //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
+        await queryRunner.manager.save(newCrawlDomain);
+        //this.crawler(subDomain, maxDepth, maxPages, insertCrawlDomain.CrawlDomainId);
+      }
 
       await queryRunner.commitTransaction();
     } catch (err) {

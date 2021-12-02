@@ -12,86 +12,89 @@ export class DirectoryService {
   ) {}
 
   async addPagesToEvaluate(
-    directoryId: number,
+    directoriesId: number[],
     option: string
   ): Promise<boolean> {
-    const nTags = await this.directoryRepository.query(
-      `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
-      [directoryId]
-    );
-
-    const pages = await this.directoryRepository.query(
-      `
-      SELECT
-        p.PageId, 
-        p.Uri
-      FROM
-        TagWebsite as tw,
-        Website as w,
-        Domain as d,
-        DomainPage as dp,
-        Page as p
-      WHERE
-        tw.TagId IN (?) AND
-        w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
-        p.Show_In LIKE ?
-      GROUP BY 
-        w.WebsiteId, p.PageId
-      HAVING 
-        COUNT(w.WebsiteId) = ?
-    `,
-      [
-        nTags.map((t) => t.TagId),
-        option === "all" ? "1__" : "1_1",
-        nTags.length,
-      ]
-    );
-
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-
-    await queryRunner.startTransaction();
-
     let error = false;
-    try {
-      for (const page of pages || []) {
-        try {
-          const pageEval = await queryRunner.manager.query(
-            `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
-            [page.PageId, page.Uri, "10"]
-          );
-          if (pageEval.length > 0) {
-            await queryRunner.manager.query(
-              `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-              [pageEval[0].EvaluationListId]
-            );
-          } else {
-            await queryRunner.manager.query(
-              `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
-              [page.PageId, -1, page.Uri, "10", new Date()]
-            );
-          }
-        } catch (_) {}
-      }
 
-      await queryRunner.manager.query(
-        `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
-        [pages.length]
+    for (const directoryId of directoriesId ?? []) {
+      const nTags = await this.directoryRepository.query(
+        `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
+        [directoryId]
       );
 
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      // since we have errors lets rollback the changes we made
-      await queryRunner.rollbackTransaction();
-      console.log(err);
-      error = true;
-    } finally {
-      await queryRunner.release();
+      const pages = await this.directoryRepository.query(
+        `
+        SELECT
+          p.PageId, 
+          p.Uri
+        FROM
+          TagWebsite as tw,
+          Website as w,
+          Domain as d,
+          DomainPage as dp,
+          Page as p
+        WHERE
+          tw.TagId IN (?) AND
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND
+          d.Active = 1 AND
+          dp.DomainId = d.DomainId AND
+          p.PageId = dp.PageId AND
+          p.Show_In LIKE ?
+        GROUP BY 
+          w.WebsiteId, p.PageId
+        HAVING 
+          COUNT(w.WebsiteId) = ?
+      `,
+        [
+          nTags.map((t) => t.TagId),
+          option === "all" ? "1__" : "1_1",
+          nTags.length,
+        ]
+      );
+
+      const queryRunner = this.connection.createQueryRunner();
+
+      await queryRunner.connect();
+
+      await queryRunner.startTransaction();
+
+      try {
+        for (const page of pages || []) {
+          try {
+            const pageEval = await queryRunner.manager.query(
+              `SELECT * FROM Evaluation_List WHERE PageId = ? AND UserId = -1 AND Url = ? AND Show_To = ? LIMIT 1`,
+              [page.PageId, page.Uri, "10"]
+            );
+            if (pageEval.length > 0) {
+              await queryRunner.manager.query(
+                `UPDATE Evaluation_List SET Error = NULL, Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+                [pageEval[0].EvaluationListId]
+              );
+            } else {
+              await queryRunner.manager.query(
+                `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
+                [page.PageId, -1, page.Uri, "10", new Date()]
+              );
+            }
+          } catch (_) {}
+        }
+
+        await queryRunner.manager.query(
+          `UPDATE Evaluation_Request_Counter SET Counter = Counter + ?, Last_Request = NOW() WHERE Application = "AMS/Observatory"`,
+          [pages.length]
+        );
+
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        // since we have errors lets rollback the changes we made
+        await queryRunner.rollbackTransaction();
+        console.log(err);
+        error = true;
+      } finally {
+        await queryRunner.release();
+      }
     }
 
     return !error;
@@ -227,6 +230,128 @@ export class DirectoryService {
     return !hasError;
   }
 
+  async pagesDeleteBulk(directoriesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const id of directoriesId ?? []) {
+        const directory = await queryRunner.manager.query(
+          `SELECT * FROM Directory WHERE DirectoryId = ? LIMIT 1`,
+          [id]
+        );
+
+        const method = directory[0].Method;
+
+        const nTags = await queryRunner.manager.query(
+          `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
+          [id]
+        );
+
+        let websites = new Array();
+
+        if (method === 0) {
+          const _websites = await queryRunner.manager.query(
+            `
+              SELECT * FROM TagWebsite WHERE TagId IN (?)
+            `,
+            [nTags.map((t) => t.TagId)]
+          );
+
+          const counts = {};
+          for (const w of _websites ?? []) {
+            if (counts[w.WebsiteId]) {
+              counts[w.WebsiteId]++;
+            } else {
+              counts[w.WebsiteId] = 1;
+            }
+          }
+
+          const websitesToFetch = new Array<Number>();
+          for (const id of Object.keys(counts) ?? []) {
+            if (counts[id] === nTags.length) {
+              websitesToFetch.push(parseInt(id));
+            }
+          }
+
+          websites = await queryRunner.manager.query(
+            `
+              SELECT 
+                w.*
+              FROM
+                Website as w
+                LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+              WHERE
+                w.WebsiteId IN (?) AND
+                (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+              GROUP BY
+                w.WebsiteId
+            `,
+            [websitesToFetch]
+          );
+        } else {
+          websites = await queryRunner.manager.query(
+            `SELECT DISTINCT
+              w.*
+            FROM
+              TagWebsite as tw,
+              Website as w
+              LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+            WHERE
+              tw.TagId IN (?) AND
+              w.WebsiteId = tw.WebsiteId AND
+              (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+              w.Deleted = "0"
+            GROUP BY
+              w.WebsiteId`,
+            [nTags.map((t) => t.TagId)]
+          );
+        }
+
+        if (websites.length > 0) {
+          const pages = await queryRunner.manager.query(
+            `
+              SELECT
+                dp.PageId 
+              FROM 
+                Domain as d, 
+                DomainPage as dp
+              WHERE
+                d.WebsiteId IN (?) AND
+                dp.DomainId = d.DomainId
+            `,
+            [websites.map((w) => w.WebsiteId)]
+          );
+
+          await queryRunner.manager.query(
+            `
+              DELETE FROM  
+                Page
+              WHERE
+                PageId IN (?)
+            `,
+            [pages.map((p) => p.PageId)]
+          );
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   findByDirectoryName(directoryName: string): Promise<Directory | undefined> {
     return this.directoryRepository.findOne({ where: { Name: directoryName } });
   }
@@ -308,18 +433,21 @@ export class DirectoryService {
     );
 
     if (method === 0) {
-      return manager.query(
+      /*return manager.query(
         `SELECT 
           w.*, 
           u.Username as User, u.Type as Type, 
           d.DomainId, d.Url as Domain, 
-          COUNT(distinct dp.PageId) as Pages
+          COUNT(distinct dp.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
           TagWebsite as tw,
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
@@ -329,6 +457,52 @@ export class DirectoryService {
           w.WebsiteId
         HAVING COUNT(distinct w.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
+      );*/
+      const websites = await manager.query(
+        `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+        [nTags.map((t) => t.TagId)]
+      );
+
+      const counts = {};
+      for (const w of websites ?? []) {
+        if (counts[w.WebsiteId]) {
+          counts[w.WebsiteId]++;
+        } else {
+          counts[w.WebsiteId] = 1;
+        }
+      }
+
+      const websitesToFetch = new Array<Number>();
+      for (const id of Object.keys(counts) ?? []) {
+        if (counts[id] === nTags.length) {
+          websitesToFetch.push(parseInt(id));
+        }
+      }
+
+      return manager.query(
+        `
+        SELECT 
+          w.*, 
+          u.Username as User, u.Type as Type, 
+          d.DomainId, d.Url as Domain, 
+          COUNT(distinct dp.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
+        FROM
+          Website as w
+          LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
+          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
+        WHERE
+          w.WebsiteId IN (?) AND
+          (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+        GROUP BY
+          w.WebsiteId
+      `,
+        [websitesToFetch]
       );
     } else {
       return manager.query(
@@ -336,13 +510,16 @@ export class DirectoryService {
           w.*, 
           u.Username as User, u.Type as Type, 
           d.DomainId, d.Url as Domain, 
-          COUNT(distinct dp.PageId) as Pages
+          COUNT(distinct dp.PageId) as Pages,
+          COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
           TagWebsite as tw,
           Website as w
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = "1"
+          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
           LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
         WHERE
           tw.TagId IN (?) AND
           w.WebsiteId = tw.WebsiteId AND
@@ -387,7 +564,7 @@ export class DirectoryService {
           Domain as d,
           DomainPage as dp,
           Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
             WHERE PageId = p.PageId AND Show_To LIKE "1_"
             ORDER BY Evaluation_Date DESC LIMIT 1
@@ -401,7 +578,7 @@ export class DirectoryService {
           p.PageId = dp.PageId AND
           p.Show_In LIKE "1__"
         GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date
-        HAVING COUNT(w.WebsiteId) = ?`,
+        HAVING COUNT(distinct w.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
       );
 
@@ -424,7 +601,7 @@ export class DirectoryService {
           Domain as d,
           DomainPage as dp,
           Page as p
-          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+          LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
             SELECT Evaluation_Date FROM Evaluation 
             WHERE PageId = p.PageId AND Show_To LIKE "1_"
             ORDER BY Evaluation_Date DESC LIMIT 1
@@ -441,7 +618,7 @@ export class DirectoryService {
         [nTags.map((t) => t.TagId)]
       );
 
-      return pages.filter((p) => p.Score !== null);
+      return pages; //.filter((p) => p.Score !== null);
     }
   }
 }

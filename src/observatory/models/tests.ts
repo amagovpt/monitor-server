@@ -183,7 +183,7 @@ const tests = {
     ref: "F84",
     scs: "2.4.9",
     dis: "52122",
-    result: "failed",
+    result: "warning",
   },
   a_06: {
     type: "decr",

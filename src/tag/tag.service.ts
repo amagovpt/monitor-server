@@ -13,7 +13,7 @@ export class TagService {
     private readonly connection: Connection
   ) {}
 
-  async addPagesToEvaluate(tagId: number, option: string): Promise<boolean> {
+  async addPagesToEvaluate(tagsId: number[], option: string): Promise<boolean> {
     const pages = await this.tagRepository.query(
       `
       SELECT
@@ -26,7 +26,7 @@ export class TagService {
         DomainPage as dp,
         Page as p
       WHERE
-        tw.TagId = ? AND
+        tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
         d.WebsiteId = w.WebsiteId AND
         d.Active = 1 AND
@@ -34,7 +34,7 @@ export class TagService {
         p.PageId = dp.PageId AND
         p.Show_In LIKE ?
     `,
-      [tagId, option === "all" ? "1__" : "1_1"]
+      [tagsId, option === "all" ? "1__" : "1_1"]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -116,13 +116,16 @@ export class TagService {
       );
 
       tag.websites = await this.tagRepository.query(
-        `SELECT w.* 
+        `SELECT w.*, d.Url
         FROM
           TagWebsite as tw,
-          Website as w 
+          Website as w,
+          Domain as d
         WHERE
           tw.TagId = ? AND 
-          w.WebsiteId = tw.WebsiteId`,
+          w.WebsiteId = tw.WebsiteId AND
+          d.WebsiteId = w.WebsiteId AND 
+          d.Active = 1`,
         [tagId]
       );
 
@@ -394,7 +397,7 @@ export class TagService {
         Domain as d,
         DomainPage as dp,
         Page as p
-        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "10" AND e.Evaluation_Date = (
+        LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
           WHERE PageId = p.PageId AND Show_To LIKE "1_"
           ORDER BY Evaluation_Date DESC LIMIT 1
@@ -413,7 +416,7 @@ export class TagService {
       [tag]
     );
 
-    return websites.filter((w) => w.Score !== null);
+    return websites; //.filter((w) => w.Score !== null);
   }
 
   async createOne(
@@ -729,6 +732,59 @@ export class TagService {
     return !hasError;
   }
 
+  async pagesDeleteBulk(tagsId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      const websites = await queryRunner.manager.query(
+        `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+        [tagsId]
+      );
+
+      const pages = await queryRunner.manager.query(
+        `
+        SELECT
+          dp.PageId 
+        FROM 
+          Domain as d, 
+          DomainPage as dp
+        WHERE
+          d.WebsiteId IN (?) AND
+          dp.DomainId = d.DomainId
+      `,
+        [websites.map((w) => w.WebsiteId)]
+      );
+
+      await queryRunner.manager.query(
+        `
+        DELETE FROM  
+          Page
+        WHERE
+          PageId IN (?)
+      `,
+        [pages.map((p) => p.PageId)]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   async removeUserTag(tagsId: number[]): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
@@ -771,7 +827,7 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
+        `SELECT w.*, d.Url as Domain, d.DomainId, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
           LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
