@@ -22,8 +22,17 @@ export class UsabilityController {
 
     @Put("/processed/:declarationId")
     public async markUsabilityDeclarationAsProcessed(@Param('declarationId') declarationId: number): Promise<void> {
+        await this.masUsabilityDeclarationAs(declarationId, true);
+    }
+
+    @Put("/non-processed/:declarationId")
+    public async markUsabilityDeclarationAsNonProcessed(@Param('declarationId') declarationId: number): Promise<void> {
+        await this.masUsabilityDeclarationAs(declarationId, false);
+    }
+
+    private async masUsabilityDeclarationAs(declarationId: number, processed: boolean) {
         try {
-            await this.usabilityDeclarationService.markUsabilityDeclarationAsProcessed(declarationId);
+            await this.usabilityDeclarationService.markUsabilityDeclarationAs(declarationId, processed);
         } catch (e) {
             if (e instanceof UsabilityError) {
                 throw new BadRequestException(e.message);

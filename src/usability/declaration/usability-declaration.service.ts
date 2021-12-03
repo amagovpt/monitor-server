@@ -48,13 +48,16 @@ export class UsabilityDeclarationService {
         return usabilityDeclarations.map((declaration) => UsabilityDeclarationModel.toModel(declaration))
     }
 
-    public async markUsabilityDeclarationAsProcessed(declarationId: number): Promise<void> {
+    public async markUsabilityDeclarationAs(declarationId: number, processed: boolean): Promise<void> {
         const declaration = await this.getDeclarationsById(declarationId)
-        if (declaration.Processed) {
+        if (processed && declaration.Processed) {
             throw new UsabilityError("Unexpected Error: Usability Declaration is already processed.")
         }
+        if (!processed && !declaration.Processed) {
+            throw new UsabilityError("Unexpected Error: Usability Declaration is already non processed.")
+        }
         await this.usabilityDeclarationRepository.update(declaration.UsabilityDeclarationId, {
-            Processed: true,
+            Processed: processed,
         });
     }
 
@@ -87,9 +90,8 @@ export class UsabilityDeclarationService {
         return this.usabilityDeclarationRepository.query(`
             SELECT UD.*, W.Name FROM Usability_Declaration UD
                 INNER JOIN Page P ON UD.PageId = P.PageId
-                INNER JOIN DomainPage DP ON P.PageId = DP.PageId
-                INNER JOIN Domain D ON DP.DomainId = D.DomainId
-                INNER JOIN Website W ON D.WebsiteId = W.WebsiteId
+                INNER JOIN WebsitePage WP ON P.PageId = WP.PageId
+                INNER JOIN Website W ON WP.WebsiteId = W.WebsiteId
             WHERE UD.Processed = ?;
         `, [processed])
     }
@@ -98,9 +100,8 @@ export class UsabilityDeclarationService {
         const queryResult = await this.usabilityDeclarationRepository.query(`
             SELECT W.WebsiteId FROM Usability_Declaration UD
                 INNER JOIN Page P ON UD.PageId = P.PageId
-                INNER JOIN DomainPage DP ON P.PageId = DP.PageId
-                INNER JOIN Domain D ON DP.DomainId = D.DomainId
-                INNER JOIN Website W ON D.WebsiteId = W.WebsiteId
+                INNER JOIN WebsitePage WP ON P.PageId = WP.PageId
+                INNER JOIN Website W ON WP.WebsiteId = W.WebsiteId
             WHERE UD.UsabilityDeclarationId = ?;
         `, [usabilityDeclarationId])
         return queryResult[0].WebsiteId

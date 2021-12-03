@@ -23,7 +23,7 @@ import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db2.json").toString()
+  readFileSync("../monitor_db.json").toString()
 );
 
 @Module({
