@@ -14,7 +14,6 @@ CREATE TABLE `CrawlWebsite` (
   `Tag` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`CrawlWebsiteId`),
   UNIQUE KEY `CrawlWebsiteId_UNIQUE` (`CrawlWebsiteId`),
-  UNIQUE KEY `UserIdWebsiteId_UNIQUE` (`UserId`,`WebsiteId`),
   KEY `CWWebsiteId_fk` (`WebsiteId`),
   CONSTRAINT `CWWebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
