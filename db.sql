@@ -124,8 +124,7 @@ CREATE TABLE `Website` (
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`WebsiteId`),
   UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`),
-  KEY `fk_Website_1_idx` (`EntityId`),
-  CONSTRAINT `EntityId_fk` FOREIGN KEY (`EntityId`) REFERENCES `Entity` (`EntityId`) ON DELETE CASCADE
+  CONSTRAINT `WebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `EntityWebsite` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Page`;
