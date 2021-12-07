@@ -123,14 +123,13 @@ CREATE TABLE `Website` (
   `Stamp_Update_Date` DATETIME,
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`WebsiteId`),
-  UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`),
-  CONSTRAINT `WebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `EntityWebsite` (`WebsiteId`) ON DELETE CASCADE
+  UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Page`;
 CREATE TABLE `Page` (
   `PageId` int(11) NOT NULL AUTO_INCREMENT,
-  `Uri` varchar(767) NOT NULL,
+  `Uri` varchar(255) NOT NULL,
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
