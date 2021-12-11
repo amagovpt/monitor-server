@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { getManager } from "typeorm";
-import { writeFile } from "fs-extra";
+import { writeFileSync } from "fs";
 import badge from "svg-builder";
-import tests from "../evaluation/tests";
 
 @Injectable()
 export class StampService {
@@ -355,7 +354,7 @@ export class StampService {
 
       const render = badge.render();
 
-      await writeFile(path, render);
+      writeFileSync(path, render);
     } catch (err) {
       console.log(err);
       hasError = true;

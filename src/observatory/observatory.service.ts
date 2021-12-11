@@ -6,7 +6,6 @@ import { Directory } from "./models/directory";
 import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
-import without from "lodash.without";
 import _tests from "./models/tests";
 
 @Injectable()
@@ -901,12 +900,14 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesGlobalErrors(
-    directories: any,
+    directories: ListDirectories,
     test: any
   ): Array<any> {
     let data = directories.getErrorOccurrenceByDirectory(test);
 
-    const values = without(data, undefined).sort((a, b) => a - b);
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
 
     let q1, q2, q3, q4;
 
@@ -972,12 +973,14 @@ export class ObservatoryService {
   }
 
   private calculateQuartilesGlobalBestPractices(
-    directories: any,
+    directories: ListDirectories,
     test: any
   ): Array<any> {
     let data = directories.getPassedOccurrenceByDirectory(test);
 
-    const values = without(data, undefined).sort((a, b) => a - b);
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
 
     let q1, q2, q3, q4;
 
@@ -1048,7 +1051,9 @@ export class ObservatoryService {
   ): Array<any> {
     let data = directory.getErrorOccurrencesByWebsite(test);
 
-    const values = without(data, undefined).sort((a, b) => a - b);
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
 
     let q1, q2, q3, q4;
 
@@ -1119,7 +1124,9 @@ export class ObservatoryService {
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
 
-    const values = without(data, undefined).sort((a, b) => a - b);
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
 
     let q1, q2, q3, q4;
 

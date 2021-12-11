@@ -123,8 +123,7 @@ CREATE TABLE `Page` (
   `Show_In` varchar(3) NOT NULL DEFAULT '000',
   `Creation_Date` datetime NOT NULL,
   PRIMARY KEY (`PageId`),
-  UNIQUE KEY `PageId_UNIQUE` (`PageId`),
-  UNIQUE KEY `PageUri_UNIQUE` (`Uri`)
+  UNIQUE KEY `PageId_UNIQUE` (`PageId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Directory`;
