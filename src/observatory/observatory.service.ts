@@ -42,7 +42,7 @@ export class ObservatoryService {
 
   constructor(private readonly connection: Connection) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
   async generateData(): Promise<any> {
     const data = await this.getData();
 

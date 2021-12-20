@@ -32,7 +32,7 @@ export class PageController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluateMulti")
   async reEvaluatePages(@Request() req: any): Promise<any> {
-    const pages = decodeURIComponent(req.body.pages)?.split(",");
+    const pages = decodeURIComponent(req.body.pages)?.split(",") ?? [];
     return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
