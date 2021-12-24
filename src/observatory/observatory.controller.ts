@@ -18,7 +18,7 @@ export class ObservatoryController {
   @Post("generate")
   async generateData(): Promise<any> {
     try {
-      this.observatoryService.generateData();
+      this.observatoryService.generateData(true);
       return success();
     } catch (err) {
       return error(err);

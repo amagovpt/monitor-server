@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Connection, getManager } from "typeorm";
+import { Connection, getManager, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ListDirectories } from "./models/list-directories";
 import { Directory } from "./models/directory";
@@ -7,6 +7,8 @@ import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
 import _tests from "./models/tests";
+import { Observatory } from "./observatory.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class ObservatoryService {
@@ -39,54 +41,68 @@ export class ObservatoryService {
     w3cValidator: "validator",
   };
 
-  constructor(private readonly connection: Connection) {}
+  constructor(
+    @InjectRepository(Observatory)
+    private readonly observatoryRepository: Repository<Observatory>
+  ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async generateData(): Promise<any> {
-    const data = await this.getData();
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  async generateData(manual = false): Promise<any> {
+    if (
+      process.env.NAMESPACE === undefined ||
+      parseInt(process.env.AMSID) === 0
+    ) {
+      const data = await this.getData();
 
-    const directories = new Array<Directory>();
-    const tmpDirectories = this.createTemporaryDirectories(data);
+      const directories = new Array<Directory>();
+      const tmpDirectories = this.createTemporaryDirectories(data);
 
-    for (const directory of tmpDirectories || []) {
-      const newDirectory = this.createDirectory(directory, clone(data));
-      directories.push(newDirectory);
+      for (const directory of tmpDirectories || []) {
+        const newDirectory = this.createDirectory(directory, clone(data));
+        directories.push(newDirectory);
+      }
+
+      const listDirectories = new ListDirectories(data, directories);
+
+      const { declarations, badges } = this.countDeclarationsAndStamps(
+        listDirectories.directories
+      );
+
+      const global = {
+        score: listDirectories.getScore(),
+        nDirectories: listDirectories.directories.length,
+        nWebsites: listDirectories.nWebsites,
+        nEntities: listDirectories.nEntities,
+        nPages: listDirectories.nPages,
+        nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
+        recentPage: listDirectories.recentPage,
+        oldestPage: listDirectories.oldestPage,
+        topFiveWebsites: this.getTopFiveWebsites(listDirectories),
+        topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
+        topFiveErrors: listDirectories.getTopFiveErrors(),
+        declarations,
+        badges,
+        scoreDistributionFrequency: listDirectories.frequencies,
+        errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
+        bestPracticesDistribution:
+          this.getGlobalBestPracticesDistribution(listDirectories),
+        directoriesList: this.getSortedDirectoriesList(listDirectories),
+        directories: this.getDirectories(listDirectories),
+      };
+
+      const manager = getManager();
+
+      if (manual) {
+        this.observatoryRepository.delete({
+          Type: "manual",
+        });
+      }
+
+      await manager.query(
+        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
+      );
     }
-
-    const listDirectories = new ListDirectories(data, directories);
-
-    const { declarations, badges } = this.countDeclarationsAndStamps(
-      listDirectories.directories
-    );
-
-    const global = {
-      score: listDirectories.getScore(),
-      nDirectories: listDirectories.directories.length,
-      nWebsites: listDirectories.nWebsites,
-      nEntities: listDirectories.nEntities,
-      nPages: listDirectories.nPages,
-      nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
-      recentPage: listDirectories.recentPage,
-      oldestPage: listDirectories.oldestPage,
-      topFiveWebsites: this.getTopFiveWebsites(listDirectories),
-      topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
-      topFiveErrors: listDirectories.getTopFiveErrors(),
-      declarations,
-      badges,
-      scoreDistributionFrequency: listDirectories.frequencies,
-      errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
-      bestPracticesDistribution:
-        this.getGlobalBestPracticesDistribution(listDirectories),
-      directoriesList: this.getSortedDirectoriesList(listDirectories),
-      directories: this.getDirectories(listDirectories),
-    };
-
-    const manager = getManager();
-
-    await manager.query(
-      "INSERT INTO Observatory (Global_Statistics, Directory_Statistics, Creation_Date) VALUES (?, ?, ?)",
-      [JSON.stringify(global), JSON.stringify({}), new Date()]
-    );
   }
 
   async getObservatoryData(): Promise<any> {

@@ -223,7 +223,7 @@ DROP TABLE IF EXISTS `Observatory`;
 CREATE TABLE `Observatory` (
   `ObservatoryId` int(11) NOT NULL AUTO_INCREMENT,
   `Global_Statistics` MEDIUMTEXT NOT NULL,
-  `Directory_Statistics` MEDIUMTEXT NOT NULL,
+  `Type` varchar(255) NOT NULL DEFAULT "auto",
   `Creation_Date` DATETIME NOT NULL,
   PRIMARY KEY (`ObservatoryId`),
   UNIQUE KEY `ObservatoryId_UNIQUE` (`ObservatoryId`)
