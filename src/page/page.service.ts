@@ -32,6 +32,19 @@ export class PageService {
     }
   }
 
+  async findNumberOfObservatory(): Promise<number> {
+    const manager = getManager();
+
+    const data = (
+      await manager.query(
+        "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+      )
+    )[0].Global_Statistics;
+
+    const parsedData = JSON.parse(data);
+    return parsedData.nPages;
+  }
+
   async findAdminEvaluatingInEvaluationList(): Promise<number> {
     const manager = getManager();
     const result = await manager.query(

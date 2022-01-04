@@ -1034,7 +1034,7 @@ export class WebsiteService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    const manager = getManager();
+    /*const manager = getManager();
     return (
       await manager.query(`
       SELECT 
@@ -1049,7 +1049,17 @@ export class WebsiteService {
         dt.DirectoryId = d.DirectoryId AND
         tw.TagId = dt.TagId AND 
         w.WebsiteId = tw.WebsiteId`)
-    )[0].Websites;
+    )[0].Websites;*/
+    const manager = getManager();
+
+    const data = (
+      await manager.query(
+        "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+      )
+    )[0].Global_Statistics;
+
+    const parsedData = JSON.parse(data);
+    return parsedData.nWebsites;
   }
 
   async findCurrentDomain(websiteId: number): Promise<any> {

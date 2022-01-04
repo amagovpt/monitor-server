@@ -30,6 +30,12 @@ export class PageController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get("observatory/total")
+  async getNumberOfObservatoryEntities(): Promise<any> {
+    return success(await this.pageService.findNumberOfObservatory());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluateMulti")
   async reEvaluatePages(@Request() req: any): Promise<any> {
     const pages = decodeURIComponent(req.body.pages)?.split(",");

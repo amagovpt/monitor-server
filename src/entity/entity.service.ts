@@ -102,6 +102,19 @@ export class EntityService {
     return count[0].Count;
   }
 
+  async findNumberOfObservatory(): Promise<number> {
+    const manager = getManager();
+
+    const data = (
+      await manager.query(
+        "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+      )
+    )[0].Global_Statistics;
+
+    const parsedData = JSON.parse(data);
+    return parsedData.nEntities;
+  }
+
   async findAll(
     size: number,
     page: number,

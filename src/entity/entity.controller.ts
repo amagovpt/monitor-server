@@ -28,6 +28,12 @@ export class EntityController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Get("observatory/total")
+  async getNumberOfObservatoryEntities(): Promise<any> {
+    return success(await this.entityService.findNumberOfObservatory());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminEntityCount(@Param("search") search: string): Promise<any> {
     return success(
