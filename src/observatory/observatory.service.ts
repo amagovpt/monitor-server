@@ -546,6 +546,7 @@ export class ObservatoryService {
     for (const website of websites) {
       topFiveWebsites.push({
         index: i,
+        id: website.id,
         DirectoryId: website.DirectoryId,
         entity: website.entity,
         name: website.name,
@@ -846,6 +847,7 @@ export class ObservatoryService {
         recentPage: website.recentPage,
         score: website.getScore(),
         nPages: website.pages.length,
+        entity: website.entity,
         pagesWithErrors,
         pagesWithoutErrorsA,
         pagesWithoutErrorsAA,
