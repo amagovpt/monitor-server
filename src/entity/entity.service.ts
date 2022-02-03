@@ -354,11 +354,11 @@ export class EntityService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(
+      /*await queryRunner.manager.update(
         Website,
         { EntityId: entityId },
         { EntityId: null }
-      );
+      );*/
 
       await queryRunner.manager.delete(EntityTable, { EntityId: entityId });
 

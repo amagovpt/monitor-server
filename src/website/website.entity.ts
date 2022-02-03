@@ -19,12 +19,6 @@ export class Website {
     type: "int",
     nullable: true,
   })
-  EntityId: number;
-
-  @Column({
-    type: "int",
-    nullable: true,
-  })
   UserId: number;
 
   @Column({

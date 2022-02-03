@@ -206,11 +206,10 @@ export class WebsiteService {
 
   async findInfo(websiteId: number): Promise<any> {
     const websites = await this.websiteRepository.query(
-      `SELECT w.*, u.Username as User, e.Long_Name as Entity, COUNT(distinct wp.PageId) as Pages
+      `SELECT w.*, u.Username as User, COUNT(distinct wp.PageId) as Pages
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
-        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId
         LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
       WHERE 
         w.WebsiteId = ?
@@ -1343,15 +1342,17 @@ export class WebsiteService {
         [websitesId]
       );
 
-      await queryRunner.manager.query(
-        `
-        DELETE FROM  
-          Page
-        WHERE
-          PageId IN (?)
-      `,
-        [pages.map((p) => p.PageId)]
-      );
+      if (pages.length > 0) {
+        await queryRunner.manager.query(
+          `
+          DELETE FROM  
+            Page
+          WHERE
+            PageId IN (?)
+        `,
+          [pages.map((p) => p.PageId)]
+        );
+      }
 
       await queryRunner.manager.query(
         //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
