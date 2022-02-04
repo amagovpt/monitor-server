@@ -221,4 +221,21 @@ CREATE TABLE `WebsitePage` (
   CONSTRAINT `WPPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Usability_Declaration`;
+CREATE TABLE `Usability_Declaration` (
+    `UsabilityDeclarationId`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `DeclarationUrls`               VARCHAR(255)    NOT NULL,
+    `Processed`                     TINYINT(1)      NOT NULL DEFAULT '0',
+    `Synced`                        TINYINT(1)      NOT NULL DEFAULT '0',
+    `FunctionalAspectsCompliance`   INT(11)         NULL,
+    `ContentCompliance`             INT(11)         NULL,
+    `TransactionCompliance`         INT(11)         NULL,
+    `PageId`                        INT(11)         NOT NULL,
+    `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `UpdatedAt`                     DATETIME        DEFAULT NULL,
+    PRIMARY KEY (`UsabilityDeclarationId`),
+    UNIQUE KEY `UsabilityDeclarationId_UNIQUE` (`UsabilityDeclarationId`),
+    CONSTRAINT `UsabilityDeclaration_PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;

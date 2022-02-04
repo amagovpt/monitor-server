@@ -1,0 +1,17 @@
+services:
+  monitor-server-db:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql:ro
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: accessmonitor
+    ports:
+      - 3307:3306
+  monitor-server:
+    build: .
+    depends_on:
+      - monitor-server-db
+    ports:
+      - 3000:3000

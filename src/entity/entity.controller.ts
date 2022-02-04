@@ -132,6 +132,19 @@ export class EntityController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("pages/deleteBulk")
+  async deleteEntitiesPages(@Request() req: any): Promise<any> {
+    const entitiesId = JSON.parse(req.body.entitiesId);
+
+    const deleteSuccess = await this.entityService.pagesDeleteBulk(entitiesId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Get("exists/shortName/:shortName")
   async checkIfShortNameExists(
     @Param("shortName") shortName: string

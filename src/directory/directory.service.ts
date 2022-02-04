@@ -227,6 +227,128 @@ export class DirectoryService {
     return !hasError;
   }
 
+  async pagesDeleteBulk(directoriesId: Array<number>): Promise<any> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let hasError = false;
+    try {
+      for (const id of directoriesId ?? []) {
+        const directory = await queryRunner.manager.query(
+          `SELECT * FROM Directory WHERE DirectoryId = ? LIMIT 1`,
+          [id]
+        );
+
+        const method = directory[0].Method;
+
+        const nTags = await queryRunner.manager.query(
+          `SELECT * FROM DirectoryTag WHERE DirectoryId = ?`,
+          [id]
+        );
+
+        let websites = new Array();
+
+        if (method === 0) {
+          const _websites = await queryRunner.manager.query(
+            `
+              SELECT * FROM TagWebsite WHERE TagId IN (?)
+            `,
+            [nTags.map((t) => t.TagId)]
+          );
+
+          const counts = {};
+          for (const w of _websites ?? []) {
+            if (counts[w.WebsiteId]) {
+              counts[w.WebsiteId]++;
+            } else {
+              counts[w.WebsiteId] = 1;
+            }
+          }
+
+          const websitesToFetch = new Array<Number>();
+          for (const id of Object.keys(counts) ?? []) {
+            if (counts[id] === nTags.length) {
+              websitesToFetch.push(parseInt(id));
+            }
+          }
+
+          websites = await queryRunner.manager.query(
+            `
+              SELECT 
+                w.*
+              FROM
+                Website as w
+                LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+              WHERE
+                w.WebsiteId IN (?) AND
+                (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+              GROUP BY
+                w.WebsiteId
+            `,
+            [websitesToFetch]
+          );
+        } else {
+          websites = await queryRunner.manager.query(
+            `SELECT DISTINCT
+              w.*
+            FROM
+              TagWebsite as tw,
+              Website as w
+              LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+            WHERE
+              tw.TagId IN (?) AND
+              w.WebsiteId = tw.WebsiteId AND
+              (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies')) AND
+              w.Deleted = "0"
+            GROUP BY
+              w.WebsiteId`,
+            [nTags.map((t) => t.TagId)]
+          );
+        }
+
+        if (websites.length > 0) {
+          const pages = await queryRunner.manager.query(
+            `
+              SELECT
+                dp.PageId 
+              FROM 
+                Domain as d, 
+                DomainPage as dp
+              WHERE
+                d.WebsiteId IN (?) AND
+                dp.DomainId = d.DomainId
+            `,
+            [websites.map((w) => w.WebsiteId)]
+          );
+
+          await queryRunner.manager.query(
+            `
+              DELETE FROM  
+                Page
+              WHERE
+                PageId IN (?)
+            `,
+            [pages.map((p) => p.PageId)]
+          );
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      console.log(err);
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      hasError = true;
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+
+    return !hasError;
+  }
+
   findByDirectoryName(directoryName: string): Promise<Directory | undefined> {
     return this.directoryRepository.findOne({ where: { Name: directoryName } });
   }
@@ -311,7 +433,7 @@ export class DirectoryService {
       /*return manager.query(
         `SELECT 
           w.*, 
-          u.Username as User, u.Type as Type,  
+          u.Username as User, u.Type as Type,
           COUNT(distinct wp.PageId) as Pages,
           COUNT(distinct e.PageId) as Evaluated_Pages
         FROM
