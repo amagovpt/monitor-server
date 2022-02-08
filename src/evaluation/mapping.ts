@@ -12,6 +12,7 @@ const act_mapping = {
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R22": QW_ACT_R22,
   "QW-ACT-R24": QW_ACT_R24,
   "QW-ACT-R25": QW_ACT_R25,
   "QW-ACT-R27": QW_ACT_R27,
@@ -307,6 +308,25 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "iframeTitleNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R22(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementLang", rule.metadata.passed);
+    addToResults(results, "element_06");
+    addToNodes(
+      nodes,
+      "elementLang",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotLang", rule.metadata.failed);
+    addToResults(results, "element_07");
+    addToNodes(
+      nodes,
+      "elementNotLang",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
