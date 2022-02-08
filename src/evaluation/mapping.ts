@@ -7,6 +7,7 @@ const act_mapping = {
   "QW-ACT-R6": QW_ACT_R6,
   "QW-ACT-R9": QW_ACT_R9,
   "QW-ACT-R11": QW_ACT_R11,
+  "QW-ACT-R13": QW_ACT_R13,
   "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
@@ -19,6 +20,8 @@ const act_mapping = {
   "QW-ACT-R35": QW_ACT_R35,
   "QW-ACT-R37": QW_ACT_R37,
   "QW-ACT-R38": QW_ACT_R38,
+  "QW-ACT-R48": QW_ACT_R48,
+  "QW-ACT-R62": QW_ACT_R62,
   "QW-ACT-R68": QW_ACT_R68,
 };
 
@@ -206,6 +209,25 @@ function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "buttonNotAname",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R13(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementDec", rule.metadata.passed);
+    addToResults(results, "element_02");
+    addToNodes(
+      nodes,
+      "elementDec",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotDec", rule.metadata.failed);
+    addToResults(results, "element_03");
+    addToNodes(
+      nodes,
+      "elementNotDec",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
@@ -416,6 +438,36 @@ function QW_ACT_R38(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "ariaReqElem",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R48(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementHiddenFocus", rule.metadata.passed);
+    addToResults(results, "element_04");
+    addToNodes(
+      nodes,
+      "elementHiddenFocus",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotHiddenFocus", rule.metadata.failed);
+    addToResults(results, "element_05");
+    addToNodes(
+      nodes,
+      "elementNotHiddenFocus",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R62(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "seqFocus", rule.metadata.passed);
+    addToResults(results, "element_01");
+    addToNodes(
+      nodes,
+      "seqFocus",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   }
