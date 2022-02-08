@@ -9,7 +9,10 @@ const act_mapping = {
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R25": QW_ACT_R25,
+  "QW-ACT-R27": QW_ACT_R27,
   "QW-ACT-R33": QW_ACT_R33,
+  "QW-ACT-R34": QW_ACT_R34,
   "QW-ACT-R35": QW_ACT_R35,
   "QW-ACT-R37": QW_ACT_R37,
   "QW-ACT-R38": QW_ACT_R38,
@@ -245,6 +248,44 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R25(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaStPermitted", rule.metadata.passed);
+    addToResults(results, "aria_05");
+    addToNodes(
+      nodes,
+      "ariaStPermitted",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaStNotPermitted", rule.metadata.failed);
+    addToResults(results, "aria_06");
+    addToNodes(
+      nodes,
+      "ariaStNotPermitted",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R27(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaAtribDefined", rule.metadata.passed);
+    addToResults(results, "aria_07");
+    addToNodes(
+      nodes,
+      "ariaAtribDefined",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaAtribNotDefined", rule.metadata.failed);
+    addToResults(results, "aria_08");
+    addToNodes(
+      nodes,
+      "ariaAtribNotDefined",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "ariaCntxRole", rule.metadata.passed);
@@ -255,6 +296,25 @@ function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } 
+}
+function QW_ACT_R34(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaStValid", rule.metadata.passed);
+    addToResults(results, "aria_03");
+    addToNodes(
+      nodes,
+      "ariaStValid",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaStNotValid", rule.metadata.failed);
+    addToResults(results, "aria_04");
+    addToNodes(
+      nodes,
+      "ariaStNotValid",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
 }
 
 function QW_ACT_R35(elements: any, results: any, nodes: any, rule: any): void {
