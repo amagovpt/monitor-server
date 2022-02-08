@@ -17,6 +17,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R5",
         "QW-ACT-R6",
         "QW-ACT-R9",
+        "QW-ACT-R11",
         "QW-ACT-R15",
         "QW-ACT-R16",
         "QW-ACT-R17",

@@ -6,6 +6,7 @@ const act_mapping = {
   "QW-ACT-R5": QW_ACT_R5,
   "QW-ACT-R6": QW_ACT_R6,
   "QW-ACT-R9": QW_ACT_R9,
+  "QW-ACT-R11": QW_ACT_R11,
   "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
@@ -187,6 +188,25 @@ function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
       nodes,
       "aSameText",
       rule.results.filter((r: any) => r.verdict === "warning")
+    );
+  }
+}
+function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "buttonAname", rule.metadata.passed);
+    addToResults(results, "button_01");
+    addToNodes(
+      nodes,
+      "buttonAname",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "buttonNotAname", rule.metadata.failed);
+    addToResults(results, "button_02");
+    addToNodes(
+      nodes,
+      "buttonNotAname",
+      rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
 }
