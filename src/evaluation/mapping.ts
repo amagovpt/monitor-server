@@ -6,9 +6,11 @@ const act_mapping = {
   "QW-ACT-R5": QW_ACT_R5,
   "QW-ACT-R6": QW_ACT_R6,
   "QW-ACT-R9": QW_ACT_R9,
+  "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R24": QW_ACT_R24,
   "QW-ACT-R25": QW_ACT_R25,
   "QW-ACT-R27": QW_ACT_R27,
   "QW-ACT-R33": QW_ACT_R33,
@@ -188,6 +190,25 @@ function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R15(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "audioAvoidsAutoPlay", undefined);
+    addToResults(results, "audio_video_01");
+    addToNodes(
+      nodes,
+      "audioAvoidsAutoPlay",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "audioAutoPlay", rule.metadata.failed);
+    addToResults(results, "audio_video_02");
+    addToNodes(
+      nodes,
+      "audioAutoPlay",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 
 function QW_ACT_R16(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
@@ -244,6 +265,25 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "iframeTitleNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R24(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "autoCmpltValid", rule.metadata.passed);
+    addToResults(results, "autocomplete_01");
+    addToNodes(
+      nodes,
+      "autoCmpltValid",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "autoCmpltNotValid", rule.metadata.failed);
+    addToResults(results, "autocomplete_02");
+    addToNodes(
+      nodes,
+      "autoCmpltNotValid",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
