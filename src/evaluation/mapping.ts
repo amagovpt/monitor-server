@@ -29,6 +29,7 @@ const act_mapping = {
   "QW-ACT-R62": QW_ACT_R62,
   "QW-ACT-R65": QW_ACT_R65,
   "QW-ACT-R68": QW_ACT_R68,
+  "QW-ACT-R70": QW_ACT_R70,
 };
 
 const wcag_mapping = {
@@ -601,6 +602,25 @@ function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "lineHeightNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R70(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "iframeNegTabIndex", rule.metadata.passed);
+    addToResults(results, "iframe_04");
+    addToNodes(
+      nodes,
+      "iframeNegTabIndex",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "iframeNegTabIndexNot", rule.metadata.failed);
+    addToResults(results, "iframe_05");
+    addToNodes(
+      nodes,
+      "iframeNegTabIndexNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
