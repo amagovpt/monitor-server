@@ -16,13 +16,16 @@ const act_mapping = {
   "QW-ACT-R24": QW_ACT_R24,
   "QW-ACT-R25": QW_ACT_R25,
   "QW-ACT-R27": QW_ACT_R27,
+  "QW-ACT-R28": QW_ACT_R28,
   "QW-ACT-R33": QW_ACT_R33,
   "QW-ACT-R34": QW_ACT_R34,
   "QW-ACT-R35": QW_ACT_R35,
+  "QW-ACT-R36": QW_ACT_R36,
   "QW-ACT-R37": QW_ACT_R37,
   "QW-ACT-R38": QW_ACT_R38,
   "QW-ACT-R48": QW_ACT_R48,
   "QW-ACT-R62": QW_ACT_R62,
+  "QW-ACT-R65": QW_ACT_R65,
   "QW-ACT-R68": QW_ACT_R68,
 };
 
@@ -388,6 +391,17 @@ function QW_ACT_R27(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R28(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementRole", rule.metadata.passed);
+    addToResults(results, "element_10");
+    addToNodes(
+      nodes,
+      "elementRole",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
 function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "ariaCntxRole", rule.metadata.passed);
@@ -434,6 +448,25 @@ function QW_ACT_R35(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "hxWithoutAName",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R36(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "headerAtt", rule.metadata.passed);
+    addToResults(results, "headers_01");
+    addToNodes(
+      nodes,
+      "headerAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "headerAttNot", rule.metadata.failed);
+    addToResults(results, "headers_02");
+    addToNodes(
+      nodes,
+      "headerAttNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
@@ -489,6 +522,33 @@ function QW_ACT_R62(elements: any, results: any, nodes: any, rule: any): void {
       nodes,
       "seqFocus",
       rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R65(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(
+      elements,
+      "elementPresentChildrenNoFocus",
+      rule.metadata.passed
+    );
+    addToResults(results, "element_08");
+    addToNodes(
+      nodes,
+      "elementPresentChildrenNoFocus",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(
+      elements,
+      "elementPresentChildrenFocus",
+      rule.metadata.failed
+    );
+    addToResults(results, "element_09");
+    addToNodes(
+      nodes,
+      "elementPresentChildrenFocus",
+      rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
 }
