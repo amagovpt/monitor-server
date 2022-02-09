@@ -6,11 +6,13 @@ const act_mapping = {
   "QW-ACT-R5": QW_ACT_R5,
   "QW-ACT-R6": QW_ACT_R6,
   "QW-ACT-R9": QW_ACT_R9,
+  "QW-ACT-R10": QW_ACT_R10,
   "QW-ACT-R11": QW_ACT_R11,
   "QW-ACT-R13": QW_ACT_R13,
   "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
+  "QW-ACT-R18": QW_ACT_R18,
   "QW-ACT-R19": QW_ACT_R19,
   "QW-ACT-R22": QW_ACT_R22,
   "QW-ACT-R24": QW_ACT_R24,
@@ -198,6 +200,25 @@ function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R10(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "iframeSameAName", rule.metadata.passed);
+    addToResults(results, "iframe_02");
+    addToNodes(
+      nodes,
+      "iframeSameAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "iframeSameANameDiferent", rule.metadata.failed);
+    addToResults(results, "iframe_03");
+    addToNodes(
+      nodes,
+      "iframeSameANameDiferent",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "buttonAname", rule.metadata.passed);
@@ -301,6 +322,26 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
     addToElements(elements, "imgAltNull", imgEmptyAlt.length);
     addToResults(results, "img_02");
     addToNodes(nodes, "imgAltNull", imgEmptyAlt);
+  }
+}
+
+function QW_ACT_R18(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "idAtt", rule.metadata.passed);
+    addToResults(results, "id_01");
+    addToNodes(
+      nodes,
+      "idAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "idAttNot", rule.metadata.failed);
+    addToResults(results, "id_02");
+    addToNodes(
+      nodes,
+      "idAttNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
   }
 }
 

@@ -1354,7 +1354,7 @@ export default {
   id_02: {
     type: "prop",
     elem: "all",
-    test: "idAtt",
+    test: "idAttNot",
     score: 10,
     level: "A",
     trust: "1",
