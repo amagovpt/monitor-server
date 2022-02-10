@@ -20,11 +20,11 @@ export class WebsiteController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const domainsId = JSON.parse(req.body.domainsId);
+    const websitesId = JSON.parse(req.body.websitesId);
     const option = req.body.option;
 
     return success(
-      await this.websiteService.addPagesToEvaluate(domainsId, option)
+      await this.websiteService.addPagesToEvaluate(websitesId, option)
     );
   }
 
@@ -40,7 +40,7 @@ export class WebsiteController {
     website.Stamp_Update_Date = req.body.stampDate;
     website.Creation_Date = new Date();
 
-    const domain = decodeURIComponent(req.body.domain);
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
 
     const entities = JSON.parse(req.body.entities).map((entity: string) =>
       SqlString.escape(entity)
@@ -52,7 +52,7 @@ export class WebsiteController {
 
     const createSuccess = await this.websiteService.createOne(
       website,
-      domain,
+      startingUrl,
       entities,
       tags
     );
@@ -68,6 +68,7 @@ export class WebsiteController {
   async updateWebsite(@Request() req: any): Promise<any> {
     const websiteId = req.body.websiteId;
     const name = req.body.name;
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
     const declaration = req.body.declaration;
     const stamp = req.body.stamp;
     const declarationDate = req.body.declarationDate;
@@ -83,6 +84,7 @@ export class WebsiteController {
     const updateSuccess = await this.websiteService.update(
       websiteId,
       name,
+      startingUrl,
       declaration,
       stamp,
       declarationDate,
@@ -136,6 +138,20 @@ export class WebsiteController {
     }
 
     return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-monitor"))
+  @Get("myMonitor/url/:website")
+  async getMyMonitorUserWebsiteDomain(
+    @Request() req: any,
+    @Param("website") website: string
+  ): Promise<any> {
+    return success(
+      await this.websiteService.findMyMonitorUserWebsiteStartingUrl(
+        req.user.userId,
+        website
+      )
+    );
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -197,35 +213,17 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
-  @Get("currentDomain/:websiteId")
-  async getWebsiteCurrentDomain(
-    @Param("websiteId") websiteId: number
-  ): Promise<any> {
-    return success(await this.websiteService.findCurrentDomain(websiteId));
-  }
-
-  @UseGuards(AuthGuard("jwt-admin"))
-  @Get(":website/user/:user/domains")
+  @Get(":website/user/:user/pages")
   async getAllWebsiteDomains(
     @Param("website") website: string,
     @Param("user") user: string
   ): Promise<any> {
-    const type = await this.websiteService.findUserType(user);
-    let flags: string;
-    switch (type) {
-      case "nimda":
-        flags = "1__";
-        break;
-      case "monitor":
-        flags = "_1_";
-        break;
-      default:
-        flags = "%";
-        break;
-    }
-    return success(
-      await this.websiteService.findAllDomains(user, type, website, flags)
+    const websiteId = await this.websiteService.getIdFromUserAndName(
+      user,
+      website
     );
+
+    return success(await this.websiteService.findAllPages(websiteId));
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
@@ -276,6 +274,14 @@ export class WebsiteController {
   @Get("exists/:name")
   async checkIfWebsiteExists(@Param("name") name: string): Promise<any> {
     return success(!!(await this.websiteService.findByOfficialName(name)));
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("exists/url/:url")
+  async checkIfWebsiteUrlExists(@Param("url") url: string): Promise<any> {
+    return success(
+      !!(await this.websiteService.existsUrl(decodeURIComponent(url)))
+    );
   }
 
   @UseGuards(AuthGuard("jwt-monitor"))
@@ -382,18 +388,18 @@ export class WebsiteController {
   }
 
   @UseGuards(AuthGuard("jwt-study"))
-  @Get("studyMonitor/tag/:tag/website/domainExists/:domain")
-  async checkIfStudyMonitorUserTagWebsiteDomainExists(
+  @Get("studyMonitor/tag/:tag/websiteExists/:startingUrl")
+  async checkIfStudyMonitorUserTagWebsiteExists(
     @Request() req: any,
     @Param("tag") tag: string,
-    @Param("domain") domain: string
+    @Param("startingUrl") startingUrl: string
   ): Promise<any> {
     const userId = req.user.userId;
     return success(
-      !!(await this.websiteService.findStudyMonitorUserTagWebsiteByDomain(
+      !!(await this.websiteService.findStudyMonitorUserTagWebsiteByStartingUrl(
         userId,
         tag,
-        domain
+        startingUrl
       ))
     );
   }
@@ -426,7 +432,7 @@ export class WebsiteController {
     const userId = req.user.userId;
     const tag = req.body.tag;
     const websiteName = req.body.name;
-    const domain = decodeURIComponent(req.body.domain);
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
     const pages = JSON.parse(req.body.pages).map((page: string) =>
       decodeURIComponent(page)
     );
@@ -436,7 +442,7 @@ export class WebsiteController {
         userId,
         tag,
         websiteName,
-        domain,
+        startingUrl,
         pages
       );
     if (!createSuccess) {

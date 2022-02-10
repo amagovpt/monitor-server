@@ -189,10 +189,10 @@ export class TagController {
         website.WebsiteId
       );
 
-      const websiteAdmin = await this.tagService.domainExistsInAdmin(
+      const websiteAdmin = await this.tagService.websiteExistsInAdmin(
         website.WebsiteId
       );
-      website["hasDomain"] = websiteAdmin.length === 1;
+      website["hasWebsite"] = websiteAdmin.length === 1;
       website["webName"] = undefined;
 
       if (websiteAdmin.length === 1) {

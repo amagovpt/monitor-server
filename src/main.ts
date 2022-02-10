@@ -11,6 +11,6 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(compression());
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 3001);
 }
 bootstrap();

@@ -38,7 +38,7 @@ export class PageController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluateMulti")
   async reEvaluatePages(@Request() req: any): Promise<any> {
-    const pages = decodeURIComponent(req.body.pages)?.split(",");
+    const pages = decodeURIComponent(req.body.pages)?.split(",") ?? [];
     return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
@@ -139,13 +139,14 @@ export class PageController {
   @Post("myMonitor/create")
   async createMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
     const website = req.body.website;
-    const domain = req.body.domain;
+    const startingUrl = req.body.startingUrl;
     const uris = JSON.parse(req.body.pages);
+
     return success(
       await this.pageService.createMyMonitorUserWebsitePages(
         req.user.userId,
         website,
-        domain,
+        startingUrl,
         uris
       )
     );
@@ -184,7 +185,7 @@ export class PageController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("add")
   async addPages(@Request() req: any): Promise<any> {
-    const domainId = req.body.domainId;
+    const websiteId = req.body.websiteId;
     const uris = JSON.parse(req.body.uris).map((uri: string) =>
       decodeURIComponent(uri)
     );
@@ -192,7 +193,7 @@ export class PageController {
       decodeURIComponent(uri)
     );
     return success(
-      await this.pageService.addPages(domainId, uris, observatory)
+      await this.pageService.addPages(websiteId, uris, observatory)
     );
   }
 
@@ -263,7 +264,7 @@ export class PageController {
   ): Promise<any> {
     const tag = req.body.tag;
     const website = req.body.website;
-    const domain = req.body.domain;
+    const startingUrl = req.body.startingUrl;
     const uris = JSON.parse(req.body.pages).map((page) =>
       decodeURIComponent(page)
     );
@@ -272,7 +273,7 @@ export class PageController {
         req.user.userId,
         tag,
         website,
-        domain,
+        startingUrl,
         uris
       )
     );

@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Connection, Repository, getManager, IsNull, In } from "typeorm";
 import { Tag } from "./tag.entity";
 import { Website } from "../website/website.entity";
-import { Domain } from "../domain/domain.entity";
 
 @Injectable()
 export class TagService {
@@ -22,16 +21,13 @@ export class TagService {
       FROM
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
       WHERE
         tw.TagId IN (?) AND
         w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ?
     `,
       [tagsId, option === "all" ? "1__" : "1_1"]
@@ -116,16 +112,13 @@ export class TagService {
       );
 
       tag.websites = await this.tagRepository.query(
-        `SELECT w.*, d.Url
+        `SELECT w.*
         FROM
           TagWebsite as tw,
-          Website as w,
-          Domain as d
+          Website as w
         WHERE
           tw.TagId = ? AND 
-          w.WebsiteId = tw.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND 
-          d.Active = 1`,
+          w.WebsiteId = tw.WebsiteId`,
         [tagId]
       );
 
@@ -187,12 +180,11 @@ export class TagService {
       `SELECT 
         distinct t.*, 
         COUNT(distinct tw.WebsiteId) as Websites,
-        COUNT(distinct dp.PageId) as Pages 
+        COUNT(distinct wp.PageId) as Pages 
       FROM 
         Tag as t
         LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = tw.WebsiteId
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = tw.WebsiteId
       WHERE 
         t.UserId = ?
       GROUP BY t.TagId`,
@@ -208,7 +200,7 @@ export class TagService {
       `SELECT
         w.WebsiteId,
         w.Name,
-        d.Url,
+        w.StartingUrl,
         p.Uri,
         e.Score,
         e.Tot,
@@ -222,8 +214,7 @@ export class TagService {
         Tag as t,
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Evaluation as e
       WHERE
         t.Name = ? AND
@@ -231,9 +222,8 @@ export class TagService {
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
         w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
       [tag, userId, userId]
@@ -263,8 +253,7 @@ export class TagService {
         Tag as t,
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Evaluation as e
       WHERE
         t.Name = ? AND
@@ -273,9 +262,8 @@ export class TagService {
         w.WebsiteId = tw.WebsiteId AND
         w.Name = ? AND
         w.UserId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         e.PageId = p.PageId AND
         e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND StudyUserId = w.UserId);`,
       [tag, userId, website, userId]
@@ -321,8 +309,7 @@ export class TagService {
             Tag as t,
             TagWebsite as tw,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Evaluation as e
           WHERE
             t.Name = ? AND
@@ -331,9 +318,8 @@ export class TagService {
             w.WebsiteId = tw.WebsiteId AND
             w.Name = ? AND
             w.UserId = ? AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
             e.PageId = p.PageId AND
             e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
           [tag, userId, website, userId]
@@ -355,15 +341,13 @@ export class TagService {
           FROM 
             Page as p,
             Website as w,
-            Domain as d,
-            DomainPage as dp,
+            WebsitePage as wp,
             Evaluation as e
           WHERE
             w.Name = ? AND
             w.UserId = ? AND
-            d.WebsiteId = w.WebsiteId AND
-            dp.DomainId = d.DomainId AND
-            p.PageId = dp.PageId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
             e.PageId = p.PageId AND
             p.Show_In LIKE '_1_' AND
             e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
@@ -394,8 +378,7 @@ export class TagService {
         Tag as t,
         TagWebsite as tw,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
@@ -407,10 +390,8 @@ export class TagService {
         t.UserId IS NULL AND
         tw.TagId = t.TagId AND
         w.WebsiteId = tw.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
       [tag]
@@ -543,30 +524,28 @@ export class TagService {
           let websites = null;
           if (tagsId.length > 1) {
             websites = await queryRunner.manager.query(
-              `SELECT w.Name, d.DomainId, d.Url, d.Start_Date
+              `SELECT w.Name, w.WebsiteId, w.StartingUrl
               FROM 
                 TagWebsite as tw
                 LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
-                LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
               WHERE 
                 tw.TagId IN (?)
               GROUP BY
-                w.Name, d.DomainId, d.Url, d.Start_Date
+                w.Name, w.WebsiteId, w.StartingUrl
               HAVING
                 COUNT(tw.WebsiteId) = ?`,
               [tagsId, tagsId.length]
             );
           } else {
             websites = await queryRunner.manager.query(
-              `SELECT w.Name, d.DomainId, d.Url, d.Start_Date
+              `SELECT w.Name, w.WebsiteId, w.StartingUrl
               FROM 
                 TagWebsite as tw
                 LEFT OUTER JOIN Website as w ON w.WebsiteId = tw.WebsiteId
-                LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId AND d.Active = 1
               WHERE 
                 tw.TagId = ?
               GROUP BY
-                w.Name, d.DomainId, d.Url, d.Start_Date`,
+                w.Name, w.WebsiteId, w.StartingUrl`,
               [tagsId[0]]
             );
           }
@@ -574,26 +553,20 @@ export class TagService {
           for (const website of websites || []) {
             const newWebsite = new Website();
             newWebsite.Name = website.Name;
+            newWebsite.StartingUrl = website.StartingUrl;
             newWebsite.UserId = tag.UserId;
             newWebsite.Creation_Date = tag.Creation_Date;
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
-            const newDomain = new Domain();
-            newDomain.WebsiteId = insertWebsite.WebsiteId;
-            newDomain.Url = website.Url;
-            newDomain.Start_Date = website.Start_Date;
-            newDomain.Active = 1;
-            const insertDomain = await queryRunner.manager.save(newDomain);
-
             const pages = await queryRunner.manager.query(
-              `SELECT dp.* FROM DomainPage as dp, Page as p WHERE dp.DomainId = ? AND p.PageId = dp.PageId AND p.Show_In LIKE "1_1"`,
-              [website.DomainId]
+              `SELECT wp.* FROM WebsitePage as wp, Page as p WHERE wp.WebsiteId = ? AND p.PageId = wp.PageId AND p.Show_In LIKE "1_1"`,
+              [website.WebsiteId]
             );
 
             for (const page of pages || []) {
               await queryRunner.manager.query(
-                `INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`,
-                [insertDomain.DomainId, page.PageId]
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
+                [insertWebsite.WebsiteId, page.PageId]
               );
             }
 
@@ -750,13 +723,11 @@ export class TagService {
       const pages = await queryRunner.manager.query(
         `
         SELECT
-          dp.PageId 
+          PageId 
         FROM 
-          Domain as d, 
-          DomainPage as dp
+          WebsitePage
         WHERE
-          d.WebsiteId IN (?) AND
-          dp.DomainId = d.DomainId
+          WebsiteId IN (?)
       `,
         [websites.map((w) => w.WebsiteId)]
       );
@@ -827,12 +798,11 @@ export class TagService {
 
     if (user === "admin") {
       const websites = await manager.query(
-        `SELECT w.*, d.Url as Domain, d.DomainId, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
+        `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
-          LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
-          LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-          LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+          LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+          LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
           LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId
           LEFT OUTER JOIN User as u ON u.UserId = w.UserId,
           Tag as t,
@@ -849,22 +819,20 @@ export class TagService {
       return websites;
     } else {
       const websites = await manager.query(
-        `SELECT w.*, d.Url, e.Long_Name as Entity, u.Username as User 
+        `SELECT w.*, e.Long_Name as Entity, u.Username as User 
       FROM 
         Website as w
         LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
         User as u,
         Tag as t,
-        TagWebsite as tw,
-        Domain as d
+        TagWebsite as tw
       WHERE
         t.Name = ? AND
         u.Username = ? AND
         t.UserId = u.UserId AND
         tw.TagId = t.TagId AND
-        w.WebsiteId = tw.WebsiteId AND 
-        d.WebsiteId = w.WebsiteId
-      GROUP BY w.WebsiteId, d.Url`,
+        w.WebsiteId = tw.WebsiteId 
+      GROUP BY w.WebsiteId, w.StartingUrl`,
         [tag, user]
       );
 
@@ -879,14 +847,12 @@ export class TagService {
       `SELECT p.PageId
       FROM  
         Page as p, 
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Website as w
       WHERE 
         w.WebsiteId = ? AND
-        d.WebsiteId = w.WebsiteId AND
-        dp.DomainId = d.DomainId AND
-        dp.PageId = p.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        wp.PageId = p.PageId AND
         p.Show_In LIKE '0%'`,
       [websiteId]
     );
@@ -894,23 +860,19 @@ export class TagService {
     return studyP.length === 0;
   }
 
-  async domainExistsInAdmin(websiteId: number): Promise<any> {
+  async websiteExistsInAdmin(websiteId: number): Promise<any> {
     const manager = getManager();
 
     const websites = await manager.query(
       `SELECT
         w2.*
       FROM
-        Domain as d,
-        Domain as d2,
         Website as w,
         Website as w2
       WHERE
         w.WebsiteId = ? AND
-        d.WebsiteId = w.WebsiteId AND 
-        d2.WebsiteId = w2.WebsiteId AND 
-        d2.Url = d.Url AND
-        d2.DomainId != d.DomainId`,
+        w2.StartingUrl = w.StartingUrl AND
+        w2.WebsiteId != w.WebsiteId`,
       [websiteId]
     );
 
@@ -975,105 +937,81 @@ export class TagService {
   ): Promise<any> {
     let returnWebsiteId = websiteId;
 
-    const webDomain = await queryRunner.manager.query(
-      `SELECT distinct w.*, d.*
-      FROM 
-        Page as p, 
-        Domain as d, 
-        Website as w,
-        DomainPage as dp 
+    const website = await queryRunner.manager.query(
+      `SELECT distinct w.*
+      FROM  
+        Website as w
       WHERE 
-        w.WebsiteId = ? AND
-        d.WebsiteId = w.WebsiteId AND 
-        d.Active = "1"`,
+        w.WebsiteId = ?`,
       [websiteId]
     );
 
-    const domDate = webDomain[0].Start_Date.toISOString()
-      .replace(/T/, " ")
-      .replace(/\..+/, "");
-    const webDate = webDomain[0].Creation_Date.toISOString()
+    const webDate = website[0].Creation_Date.toISOString()
       .replace(/T/, " ")
       .replace(/\..+/, "");
 
     const pages = await queryRunner.manager.query(
       `SELECT p.*
       FROM 
-        Page as p, 
-        Domain as d, 
+        Page as p,  
         Website as w,
-        DomainPage as dp 
+        WebsitePage as wp 
       WHERE 
         w.WebsiteId = ? AND
-        d.WebsiteId = w.WebsiteId AND 
-        dp.domainId = d.DomainId AND
-        dp.PageId = p.PageId`,
+        wp.WebsiteId = w.WebsiteId AND
+        wp.PageId = p.PageId`,
       [websiteId]
     );
 
-    const domainP = (
+    const websiteP = (
       await queryRunner.manager.query(
-        `SELECT distinct d.DomainId, w.*
+        `SELECT distinct w.*
       FROM  
-        Domain as d,
         Website as w,
         User as u
       WHERE 
-        d.Url = ? AND
-        w.WebsiteId = d.WebsiteId AND
+        w.StartingUrl = ? AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type = "monitor"))
       LIMIT 1
       `,
-        [webDomain[0].Url]
+        [website[0].StartingUrl]
       )
     )[0];
 
-    const domainUrl = webDomain[0].Url;
+    const websiteUrl = website[0].StartingUrl;
 
-    if (webDomain.length > 0) {
-      if (domainP) {
+    if (website.length > 0) {
+      if (websiteP) {
         for (const page of pages || []) {
           if (page.Show_In[0] === "0") {
             await this.importPage(queryRunner, page.PageId);
             try {
               await queryRunner.manager.query(
-                `INSERT INTO DomainPage (DomainId, PageId) VALUES (?, ?)`,
-                [domainP.DomainId, page.PageId]
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
+                [websiteP.WebsiteId, page.PageId]
               );
             } catch (err) {
               // ignore - don't know why
             }
           }
         }
-        if (domainP.Deleted === 1) {
-          await queryRunner.manager.query(
-            `UPDATE Website SET Name = ?, Creation_Date = ?, Deleted = "0" WHERE WebsiteId = ?`,
-            [websiteName || domainP.Name, webDate, domainP.WebsiteId]
-          );
-        } else {
-          await queryRunner.manager.query(
-            `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
-            [webDate, domainP.DomainId]
-          );
-        }
+        await queryRunner.manager.query(
+          `UPDATE Website SET Creation_Date = ? WHERE WebsiteId = ?`,
+          [webDate, websiteP.WebsiteId]
+        );
       } else {
         const insertWebsite = await queryRunner.manager.query(
-          `INSERT INTO Website (Name, Creation_Date) VALUES (?, ?)`,
-          [websiteName, webDate]
+          `INSERT INTO Website (Name, StartingUrl, Creation_Date) VALUES (?, ?)`,
+          [websiteName, websiteUrl, webDate]
         );
         returnWebsiteId = insertWebsite.insertId;
-
-        const domain = await queryRunner.manager.query(
-          `INSERT INTO Domain ( WebsiteId,Url, Start_Date, Active) VALUES (?, ?, ?, "1")`,
-          [insertWebsite.websiteId, domainUrl, domDate]
-        );
 
         for (const page of pages || []) {
           if (page.Show_In[0] === "0") {
             await this.importPage(queryRunner, page.PageId);
             await queryRunner.manager.query(
-              `INSERT INTO DomainPage (DomainId, PageId) VALUES ("${domain.insertId}", "${page.PageId}")`,
-              [domain.DomainId, page.PageId]
+              `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES ("${website.insertId}", "${page.PageId}")`,
+              [website.WebsiteId, page.PageId]
             );
           }
         }
