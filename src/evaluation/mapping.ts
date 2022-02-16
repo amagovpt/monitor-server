@@ -6,12 +6,30 @@ const act_mapping = {
   "QW-ACT-R5": QW_ACT_R5,
   "QW-ACT-R6": QW_ACT_R6,
   "QW-ACT-R9": QW_ACT_R9,
+  "QW-ACT-R10": QW_ACT_R10,
+  "QW-ACT-R11": QW_ACT_R11,
+  "QW-ACT-R13": QW_ACT_R13,
+  "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
+  "QW-ACT-R18": QW_ACT_R18,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R22": QW_ACT_R22,
+  "QW-ACT-R24": QW_ACT_R24,
+  "QW-ACT-R25": QW_ACT_R25,
+  "QW-ACT-R27": QW_ACT_R27,
+  "QW-ACT-R28": QW_ACT_R28,
+  "QW-ACT-R33": QW_ACT_R33,
+  "QW-ACT-R34": QW_ACT_R34,
   "QW-ACT-R35": QW_ACT_R35,
+  "QW-ACT-R36": QW_ACT_R36,
   "QW-ACT-R37": QW_ACT_R37,
+  "QW-ACT-R38": QW_ACT_R38,
+  "QW-ACT-R48": QW_ACT_R48,
+  "QW-ACT-R62": QW_ACT_R62,
+  "QW-ACT-R65": QW_ACT_R65,
   "QW-ACT-R68": QW_ACT_R68,
+  "QW-ACT-R70": QW_ACT_R70,
 };
 
 const wcag_mapping = {
@@ -183,6 +201,82 @@ function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R10(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "iframeSameAName", rule.metadata.passed);
+    addToResults(results, "iframe_02");
+    addToNodes(
+      nodes,
+      "iframeSameAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "iframeSameANameDiferent", rule.metadata.failed);
+    addToResults(results, "iframe_03");
+    addToNodes(
+      nodes,
+      "iframeSameANameDiferent",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "buttonAname", rule.metadata.passed);
+    addToResults(results, "button_01");
+    addToNodes(
+      nodes,
+      "buttonAname",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "buttonNotAname", rule.metadata.failed);
+    addToResults(results, "button_02");
+    addToNodes(
+      nodes,
+      "buttonNotAname",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R13(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementDec", rule.metadata.passed);
+    addToResults(results, "element_02");
+    addToNodes(
+      nodes,
+      "elementDec",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotDec", rule.metadata.failed);
+    addToResults(results, "element_03");
+    addToNodes(
+      nodes,
+      "elementNotDec",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R15(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "audioAvoidsAutoPlay", undefined);
+    addToResults(results, "audio_video_01");
+    addToNodes(
+      nodes,
+      "audioAvoidsAutoPlay",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "audioAutoPlay", rule.metadata.failed);
+    addToResults(results, "audio_video_02");
+    addToNodes(
+      nodes,
+      "audioAutoPlay",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 
 function QW_ACT_R16(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
@@ -232,6 +326,26 @@ function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 
+function QW_ACT_R18(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "idAtt", rule.metadata.passed);
+    addToResults(results, "id_01");
+    addToNodes(
+      nodes,
+      "idAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "idAttNot", rule.metadata.failed);
+    addToResults(results, "id_02");
+    addToNodes(
+      nodes,
+      "idAttNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+
 function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "failed") {
     addToElements(elements, "iframeTitleNo", rule.metadata.failed);
@@ -239,6 +353,123 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "iframeTitleNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R22(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementLang", rule.metadata.passed);
+    addToResults(results, "element_06");
+    addToNodes(
+      nodes,
+      "elementLang",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotLang", rule.metadata.failed);
+    addToResults(results, "element_07");
+    addToNodes(
+      nodes,
+      "elementNotLang",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R24(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "autoCmpltValid", rule.metadata.passed);
+    addToResults(results, "autocomplete_01");
+    addToNodes(
+      nodes,
+      "autoCmpltValid",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "autoCmpltNotValid", rule.metadata.failed);
+    addToResults(results, "autocomplete_02");
+    addToNodes(
+      nodes,
+      "autoCmpltNotValid",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R25(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaStPermitted", rule.metadata.passed);
+    addToResults(results, "aria_05");
+    addToNodes(
+      nodes,
+      "ariaStPermitted",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaStNotPermitted", rule.metadata.failed);
+    addToResults(results, "aria_06");
+    addToNodes(
+      nodes,
+      "ariaStNotPermitted",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R27(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaAtribDefined", rule.metadata.passed);
+    addToResults(results, "aria_07");
+    addToNodes(
+      nodes,
+      "ariaAtribDefined",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaAtribNotDefined", rule.metadata.failed);
+    addToResults(results, "aria_08");
+    addToNodes(
+      nodes,
+      "ariaAtribNotDefined",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R28(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementRole", rule.metadata.passed);
+    addToResults(results, "element_10");
+    addToNodes(
+      nodes,
+      "elementRole",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaCntxRole", rule.metadata.passed);
+    addToResults(results, "aria_01");
+    addToNodes(
+      nodes,
+      "ariaCntxRole",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } 
+}
+function QW_ACT_R34(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaStValid", rule.metadata.passed);
+    addToResults(results, "aria_03");
+    addToNodes(
+      nodes,
+      "ariaStValid",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "ariaStNotValid", rule.metadata.failed);
+    addToResults(results, "aria_04");
+    addToNodes(
+      nodes,
+      "ariaStNotValid",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
@@ -263,6 +494,25 @@ function QW_ACT_R35(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R36(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "headerAtt", rule.metadata.passed);
+    addToResults(results, "headers_01");
+    addToNodes(
+      nodes,
+      "headerAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "headerAttNot", rule.metadata.failed);
+    addToResults(results, "headers_02");
+    addToNodes(
+      nodes,
+      "headerAttNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 
 function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "failed") {
@@ -276,6 +526,75 @@ function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 
+function QW_ACT_R38(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "ariaReqElem", rule.metadata.passed);
+    addToResults(results, "aria_02");
+    addToNodes(
+      nodes,
+      "ariaReqElem",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R48(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "elementHiddenFocus", rule.metadata.passed);
+    addToResults(results, "element_04");
+    addToNodes(
+      nodes,
+      "elementHiddenFocus",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "elementNotHiddenFocus", rule.metadata.failed);
+    addToResults(results, "element_05");
+    addToNodes(
+      nodes,
+      "elementNotHiddenFocus",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R62(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "seqFocus", rule.metadata.passed);
+    addToResults(results, "element_01");
+    addToNodes(
+      nodes,
+      "seqFocus",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R65(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(
+      elements,
+      "elementPresentChildrenNoFocus",
+      rule.metadata.passed
+    );
+    addToResults(results, "element_08");
+    addToNodes(
+      nodes,
+      "elementPresentChildrenNoFocus",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(
+      elements,
+      "elementPresentChildrenFocus",
+      rule.metadata.failed
+    );
+    addToResults(results, "element_09");
+    addToNodes(
+      nodes,
+      "elementPresentChildrenFocus",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+
 function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "failed") {
     addToElements(elements, "lineHeightNo", rule.metadata.failed);
@@ -283,6 +602,25 @@ function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "lineHeightNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R70(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "iframeNegTabIndex", rule.metadata.passed);
+    addToResults(results, "iframe_04");
+    addToNodes(
+      nodes,
+      "iframeNegTabIndex",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "iframeNegTabIndexNot", rule.metadata.failed);
+    addToResults(results, "iframe_05");
+    addToNodes(
+      nodes,
+      "iframeNegTabIndexNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
