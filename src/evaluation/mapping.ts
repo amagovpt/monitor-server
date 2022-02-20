@@ -5,34 +5,49 @@ const act_mapping = {
   "QW-ACT-R4": QW_ACT_R4,
   "QW-ACT-R5": QW_ACT_R5,
   "QW-ACT-R6": QW_ACT_R6,
+  "QW-ACT-R7": QW_ACT_R7,
   "QW-ACT-R9": QW_ACT_R9,
   "QW-ACT-R10": QW_ACT_R10,
   "QW-ACT-R11": QW_ACT_R11,
   "QW-ACT-R12": QW_ACT_R12,
   "QW-ACT-R13": QW_ACT_R13,
+  "QW-ACT-R14": QW_ACT_R14,
   "QW-ACT-R15": QW_ACT_R15,
   "QW-ACT-R16": QW_ACT_R16,
   "QW-ACT-R17": QW_ACT_R17,
   "QW-ACT-R18": QW_ACT_R18,
   "QW-ACT-R19": QW_ACT_R19,
+  "QW-ACT-R20": QW_ACT_R20,
+  "QW-ACT-R21": QW_ACT_R21,
   "QW-ACT-R22": QW_ACT_R22,
+  "QW-ACT-R23": QW_ACT_R23,
   "QW-ACT-R24": QW_ACT_R24,
   "QW-ACT-R25": QW_ACT_R25,
+  "QW-ACT-R26": QW_ACT_R26,
   "QW-ACT-R27": QW_ACT_R27,
   "QW-ACT-R28": QW_ACT_R28,
+  "QW-ACT-R30": QW_ACT_R30,
   "QW-ACT-R33": QW_ACT_R33,
   "QW-ACT-R34": QW_ACT_R34,
   "QW-ACT-R35": QW_ACT_R35,
   "QW-ACT-R36": QW_ACT_R36,
   "QW-ACT-R37": QW_ACT_R37,
   "QW-ACT-R38": QW_ACT_R38,
+  "QW-ACT-R39": QW_ACT_R39,
+  "QW-ACT-R40": QW_ACT_R40,
+  "QW-ACT-R42": QW_ACT_R42,
+  "QW-ACT-R43": QW_ACT_R43,
   "QW-ACT-R44": QW_ACT_R44,
   "QW-ACT-R48": QW_ACT_R48,
   "QW-ACT-R62": QW_ACT_R62,
   "QW-ACT-R65": QW_ACT_R65,
+  "QW-ACT-R66": QW_ACT_R66,
   "QW-ACT-R67": QW_ACT_R67,
   "QW-ACT-R68": QW_ACT_R68,
+  "QW-ACT-R69": QW_ACT_R69,
   "QW-ACT-R70": QW_ACT_R70,
+  "QW-ACT-R71": QW_ACT_R71,
+  "QW-ACT-R76": QW_ACT_R76,
 };
 
 const wcag_mapping = {
@@ -192,6 +207,25 @@ function QW_ACT_R6(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R7(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "orientationCSS", rule.metadata.passed);
+    addToResults(results, "orientation_01");
+    addToNodes(
+      nodes,
+      "orientationCSS",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "orientationCSSNot", rule.metadata.failed);
+    addToResults(results, "orientation_02");
+    addToNodes(
+      nodes,
+      "orientationCSSNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 
 function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "warning") {
@@ -242,6 +276,25 @@ function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R12(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "linkAName", rule.metadata.passed);
+    addToResults(results, "a_10");
+    addToNodes(
+      nodes,
+      "linkAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "linkAName", rule.metadata.failed);
+    addToResults(results, "a_11");
+    addToNodes(
+      nodes,
+      "linkAName",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R13(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "elementDec", rule.metadata.passed);
@@ -258,6 +311,17 @@ function QW_ACT_R13(elements: any, results: any, nodes: any, rule: any): void {
       nodes,
       "elementNotDec",
       rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R14(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "metaViewport", rule.metadata.passed);
+    addToResults(results, "meta_05");
+    addToNodes(
+      nodes,
+      "metaViewport",
+      rule.results.filter((r: any) => r.verdict === "passed")
     );
   }
 }
@@ -360,6 +424,44 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R21(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "svgAName", rule.metadata.passed);
+    addToResults(results, "svg_01");
+    addToNodes(
+      nodes,
+      "svgAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "svgNotAName", rule.metadata.failed);
+    addToResults(results, "svg_02");
+    addToNodes(
+      nodes,
+      "svgNotAName",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R20(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "roleValid", rule.metadata.passed);
+    addToResults(results, "role_01");
+    addToNodes(
+      nodes,
+      "roleValid",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "roleValidNot", rule.metadata.failed);
+    addToResults(results, "role_02");
+    addToNodes(
+      nodes,
+      "roleValidNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R22(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "elementLang", rule.metadata.passed);
@@ -376,6 +478,17 @@ function QW_ACT_R22(elements: any, results: any, nodes: any, rule: any): void {
       nodes,
       "elementNotLang",
       rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R23(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "videoVisual", rule.metadata.passed);
+    addToResults(results, "video_02");
+    addToNodes(
+      nodes,
+      "videoVisual",
+      rule.results.filter((r: any) => r.verdict === "passed")
     );
   }
 }
@@ -417,6 +530,17 @@ function QW_ACT_R25(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R26(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "videoAudit", rule.metadata.passed);
+    addToResults(results, "video_01");
+    addToNodes(
+      nodes,
+      "videoAudit",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
 function QW_ACT_R27(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "ariaAtribDefined", rule.metadata.passed);
@@ -447,6 +571,25 @@ function QW_ACT_R28(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R30(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "labelAName", rule.metadata.passed);
+    addToResults(results, "label_01");
+    addToNodes(
+      nodes,
+      "labelAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "labelANameNot", rule.metadata.failed);
+    addToResults(results, "label_03");
+    addToNodes(
+      nodes,
+      "labelANameNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "ariaCntxRole", rule.metadata.passed);
@@ -456,7 +599,7 @@ function QW_ACT_R33(elements: any, results: any, nodes: any, rule: any): void {
       "ariaCntxRole",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
-  } 
+  }
 }
 function QW_ACT_R34(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
@@ -540,6 +683,93 @@ function QW_ACT_R38(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R39(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "tableHdr", rule.metadata.passed);
+    addToResults(results, "table_07");
+    addToNodes(
+      nodes,
+      "tableHdr",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "tableHdrNot", rule.metadata.failed);
+    addToResults(results, "table_08");
+    addToNodes(
+      nodes,
+      "tableHdrNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R40(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "overflow", rule.metadata.passed);
+    addToResults(results, "css_02");
+    addToNodes(
+      nodes,
+      "overflow",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  }
+}
+function QW_ACT_R42(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "objectAName", rule.metadata.passed);
+    addToResults(results, "object_01");
+    addToNodes(
+      nodes,
+      "objectAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "objectANameNot", rule.metadata.failed);
+    addToResults(results, "object_02");
+    addToNodes(
+      nodes,
+      "objectANameNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R43(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "scrollableAccess", rule.metadata.passed);
+    addToResults(results, "scrollable_01");
+    addToNodes(
+      nodes,
+      "scrollableAccess",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "scrollableAccessNot", rule.metadata.failed);
+    addToResults(results, "scrollable_02");
+    addToNodes(
+      nodes,
+      "scrollableAccessNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R44(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "linkIdentAName", rule.metadata.passed);
+    addToResults(results, "a_12");
+    addToNodes(
+      nodes,
+      "linkIdentAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "linkIdentANameNot", rule.metadata.failed);
+    addToResults(results, "a_13");
+    addToNodes(
+      nodes,
+      "linkIdentANameNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 function QW_ACT_R48(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "elementHiddenFocus", rule.metadata.passed);
@@ -597,6 +827,44 @@ function QW_ACT_R65(elements: any, results: any, nodes: any, rule: any): void {
     );
   }
 }
+function QW_ACT_R66(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "menuItemAName", rule.metadata.passed);
+    addToResults(results, "menuItem_01");
+    addToNodes(
+      nodes,
+      "menuItemAName",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "menuItemANameNot", rule.metadata.failed);
+    addToResults(results, "menuItem_02");
+    addToNodes(
+      nodes,
+      "menuItemANameNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R67(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "letterSpacing", rule.metadata.passed);
+    addToResults(results, "letter_01");
+    addToNodes(
+      nodes,
+      "letterSpacing",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "letterSpacingNot", rule.metadata.failed);
+    addToResults(results, "letter_02");
+    addToNodes(
+      nodes,
+      "letterSpacingNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
 
 function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "failed") {
@@ -605,6 +873,25 @@ function QW_ACT_R68(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "lineHeightNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R69(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "wordSpacing", rule.metadata.passed);
+    addToResults(results, "word_01");
+    addToNodes(
+      nodes,
+      "wordSpacing",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "wordSpacingNot", rule.metadata.failed);
+    addToResults(results, "word_02");
+    addToNodes(
+      nodes,
+      "wordSpacingNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
@@ -624,6 +911,44 @@ function QW_ACT_R70(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "iframeNegTabIndexNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R71(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "metaRefresh", rule.metadata.passed);
+    addToResults(results, "meta_03");
+    addToNodes(
+      nodes,
+      "metaRefresh",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "metaRefreshNot", rule.metadata.failed);
+    addToResults(results, "meta_04");
+    addToNodes(
+      nodes,
+      "metaRefreshNot",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+function QW_ACT_R76(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "textContrastH", rule.metadata.passed);
+    addToResults(results, "textC_01");
+    addToNodes(
+      nodes,
+      "textContrastH",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "textContrastHNot", rule.metadata.failed);
+    addToResults(results, "textC_02");
+    addToNodes(
+      nodes,
+      "textContrastHNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
