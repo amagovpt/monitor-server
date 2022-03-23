@@ -34,7 +34,6 @@ export class WebsiteService {
         p.Show_In LIKE ?`,
       [websitesId, option === "all" ? "1__" : "1_1"]
     );
-
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -210,6 +209,8 @@ export class WebsiteService {
       FROM 
         Website as w
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
+        LEFT OUTER JOIN EntityWebsite as ew ON ew.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Entity as e ON e.EntityId = ew.EntityId
         LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
       WHERE 
         w.WebsiteId = ?

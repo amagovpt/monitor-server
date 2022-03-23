@@ -61,7 +61,11 @@ export class EvaluationService {
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
       }
-
+      //FIXME hammer
+      pages = pages.map((page) => {
+        if (page.Url) page.Url = page.Url.replace("'", "").replace("'", "");
+        return page;
+      });
       await this.evaluateInBackground(pages);
 
       this.isEvaluatingAdminInstance = false;
