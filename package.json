@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "caller-id":"0.1.0",
     "@nestjs/common": "^8.2.3",
     "@nestjs/core": "^8.2.3",
     "@nestjs/jwt": "^8.0.0",
@@ -28,7 +29,7 @@
     "@nestjs/schedule": "^1.0.2",
     "@nestjs/serve-static": "^2.2.2",
     "@nestjs/typeorm": "^8.0.2",
-    "@qualweb/core": "0.7.16",
+    "@qualweb/core": "0.7.19",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
