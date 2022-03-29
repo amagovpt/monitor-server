@@ -95,7 +95,7 @@ export async function evaluate(params: any): Promise<any> {
 
   const qualweb = new QualWeb({ stealth: true });
   await qualweb.start(
-    { maxConcurrency: 2, timeout: 1000 * 60 * 2 },
+    { maxConcurrency: 2, timeout: 1000 * 240 * 2 },
     {
       args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"],
     }
