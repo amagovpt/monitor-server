@@ -490,9 +490,10 @@ export class UserService {
     const websites = await manager.query(
       `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
-          Website as w
-          LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
-          User as u
+          User as u,
+          EntityWebsite as ew
+          LEFT OUTER JOIN Website as w ON w.WebsiteId =  ew.WebsiteId
+          LEFT OUTER JOIN Entity as e ON e.EntityId = ew.EntityId
         WHERE
           u.Username = ? AND
           w.UserId = u.UserId

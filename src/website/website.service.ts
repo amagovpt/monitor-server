@@ -340,10 +340,11 @@ export class WebsiteService {
     const manager = getManager();
     const websites = await manager.query(`SELECT distinct w.* 
       FROM 
-        Website as w, 
-        User as u 
+        User as u ,
+        EntityWebsite as ew
+        LEFT OUTER JOIN Website as ew ON w.WebsiteId = ew.WebsiteId
       WHERE 
-        w.EntityId IS NULL AND
+        ew.EntityId IS NULL AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))`);
     return websites; //TODO: fix
   }
