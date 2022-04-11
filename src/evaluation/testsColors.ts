@@ -34,6 +34,8 @@ export default {
   form_01b: "R",
   frame_01: "R",
   frame_02: "R",
+  heading_01:"G",
+  heading_02: "R",
   hx_01a: "R",
   hx_01b: "Y",
   hx_01c: "R",

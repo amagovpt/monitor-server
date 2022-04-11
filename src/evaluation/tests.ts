@@ -1005,7 +1005,7 @@ export default {
   },
   heading_01: {
     type: "true",
-    elem: "all",
+    elem: "hx",
     test: "hxHasAName",
     score: 10,
     level: "A",
@@ -1017,7 +1017,7 @@ export default {
   },
   heading_02: {
     type: "prop",
-    elem: "all",
+    elem: "hx",
     test: "hxWithoutAName",
     score: 3,
     level: "A",
