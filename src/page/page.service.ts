@@ -619,7 +619,8 @@ export class PageService {
 
     let hasError = false;
     try {
-      for (const uri of uris || []) {
+      for (let uri of uris || []) {
+        uri = "'"+uri+"'";//adding '
         const page = await this.pageRepository.findOne({
           select: ["PageId", "Show_In"],
           where: { Uri: uri },
