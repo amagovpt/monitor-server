@@ -156,6 +156,7 @@ export class PageService {
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -208,7 +209,7 @@ export class PageService {
         `,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
-
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -619,7 +620,8 @@ export class PageService {
 
     let hasError = false;
     try {
-      for (const uri of uris || []) {
+      for (let uri of uris || []) {
+        uri = "'" + uri + "'";//adding '
         const page = await this.pageRepository.findOne({
           select: ["PageId", "Show_In"],
           where: { Uri: uri },

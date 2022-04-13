@@ -821,11 +821,12 @@ export class TagService {
       const websites = await manager.query(
         `SELECT w.*, e.Long_Name as Entity, u.Username as User 
       FROM 
-        Website as w
-        LEFT OUTER JOIN Entity as e ON e.EntityId = w.EntityId,
         User as u,
         Tag as t,
-        TagWebsite as tw
+        TagWebsite as tw,
+        EntityWebsite as ew
+        LEFT OUTER JOIN Website as w ON w.WebsiteId =  ew.WebsiteId
+        LEFT OUTER JOIN Entity as e ON e.EntityId = ew.EntityId
       WHERE
         t.Name = ? AND
         u.Username = ? AND

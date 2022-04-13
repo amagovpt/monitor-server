@@ -14,7 +14,7 @@ export class WebsiteService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
-  ) {}
+  ) { }
 
   async addPagesToEvaluate(
     websitesId: number[],
@@ -59,7 +59,7 @@ export class WebsiteService {
               [page.PageId, -1, page.Uri, "10", new Date()]
             );
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -335,15 +335,26 @@ export class WebsiteService {
     );
     return websites;
   }
-
+  /**
+ * 
+ * SELECT distinct w.* 
+      FROM 
+        User as u ,
+        EntityWebsite as ew
+        LEFT OUTER JOIN Website as ew ON w.WebsiteId = ew.WebsiteId
+      WHERE 
+        ew.EntityId IS NULL AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+ */
   async findAllWithoutEntity(): Promise<any> {
     const manager = getManager();
     const websites = await manager.query(`SELECT distinct w.* 
       FROM 
-        Website as w, 
-        User as u 
+        User as u ,
+        EntityWebsite as ew
+        LEFT OUTER JOIN Website as ew ON w.WebsiteId = ew.WebsiteId
       WHERE 
-        w.EntityId IS NULL AND
+        ew.EntityId IS NULL AND
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))`);
     return websites; //TODO: fix
   }
@@ -513,7 +524,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "01", new Date()]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -584,7 +595,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "00", new Date(), userId]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -998,7 +1009,20 @@ export class WebsiteService {
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
-
+    const dataPrint = await manager.query(
+      `SELECT 
+        COUNT(distinct w.WebsiteId) as Websites 
+      FROM
+        Directory as d,
+        DirectoryTag as dt,
+        TagWebsite as tw,
+        Website as w 
+      WHERE 
+        d.Show_in_Observatory = 1 AND
+        dt.DirectoryId = d.DirectoryId AND
+        tw.TagId = dt.TagId AND 
+        w.WebsiteId = tw.WebsiteId`);
+    console.log(dataPrint[0].Websites);
     const parsedData = JSON.parse(data);
     return parsedData.nWebsites;
   }
