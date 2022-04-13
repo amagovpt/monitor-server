@@ -9,6 +9,7 @@ import {
   executeUrlsEvaluation,
   executeHtmlEvaluation,
 } from "./middleware";
+import { UsabilityDeclarationService } from "src/usability/declaration/usability-declaration.service";
 
 @Injectable()
 export class EvaluationService {
@@ -16,7 +17,8 @@ export class EvaluationService {
   private isEvaluatingUserInstance: boolean;
   private SKIP = 20;
 
-  constructor(private readonly connection: Connection) {
+  constructor(private readonly connection: Connection,
+    private readonly usabilityDeclarationService: UsabilityDeclarationService) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
   }
@@ -389,7 +391,9 @@ export class EvaluationService {
       evaluation.data.tot.info.roles
     );
     newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
-    await queryRunner.manager.save(newEvaluation);
+    const savedEvaluation =  await queryRunner.manager.save(newEvaluation);
+    console.log("new evaluation saved with page code: " + savedEvaluation.Pagecode.length)
+    await this.usabilityDeclarationService.findDeclarationsFromNewEvaluations(savedEvaluation);
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
