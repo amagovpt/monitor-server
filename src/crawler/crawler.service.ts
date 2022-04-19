@@ -67,10 +67,14 @@ export class CrawlerService {
             const urls = crawler.getResults();
             if (website[0].Tag !== 1) {
               for (const url of urls || []) {
-                const newCrawlPage = new CrawlPage();
-                newCrawlPage.Uri = decodeURIComponent(url);
-                newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
-                await queryRunner.manager.save(newCrawlPage);
+                try {
+                  const newCrawlPage = new CrawlPage();
+                  newCrawlPage.Uri = decodeURIComponent(url);
+                  newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
+                  await queryRunner.manager.save(newCrawlPage);
+                } catch (e) {
+                  console.log(e);
+                }
               }
 
               await queryRunner.manager.query(
@@ -138,10 +142,14 @@ export class CrawlerService {
 
             const urls = crawler.getResults();
             for (const url of urls || []) {
+              try{
               const newCrawlPage = new CrawlPage();
               newCrawlPage.Uri = decodeURIComponent(url);
               newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
-              await queryRunner.manager.save(newCrawlPage);
+                await queryRunner.manager.save(newCrawlPage);
+              }catch (e) {
+                console.log(e);
+              }
             }
 
             await queryRunner.manager.query(

@@ -18,6 +18,7 @@ export class PageService {
     const pages = await this.pageRepository.find();
     return Promise.all(pages.map(async (page) => {
       const uri = page.Uri;
+      console.log(page.PageId);
       if (page.Uri?.includes("'")) {
         page.Uri = uri.replace("'", "");
         await this.pageRepository.save(page);
