@@ -68,7 +68,7 @@ export class CrawlerService {
             if (website[0].Tag !== 1) {
               for (const url of urls || []) {
                 const newCrawlPage = new CrawlPage();
-                newCrawlPage.Uri = "'" + url + "'";
+                newCrawlPage.Uri =url;
                 newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
                 await queryRunner.manager.save(newCrawlPage);
               }
@@ -139,7 +139,7 @@ export class CrawlerService {
             const urls = crawler.getResults();
             for (const url of urls || []) {
               const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = "'" + url + "'";
+              newCrawlPage.Uri = url;
               newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
               await queryRunner.manager.save(newCrawlPage);
             }
