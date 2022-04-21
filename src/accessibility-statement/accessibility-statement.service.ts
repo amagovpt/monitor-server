@@ -20,7 +20,8 @@ export class AccessibilityStatementService {
   }
 
   create(createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
-      console.log('This action adds a new accessibilityStatement');
+    const aStatement = this.accessibilityStatementRepository.create(createAccessibilityStatementDto);
+    return this.accessibilityStatementRepository.save(aStatement);
   }
 
   findAll() {
