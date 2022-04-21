@@ -13,8 +13,23 @@ export class PageService {
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     private readonly connection: Connection
-  ) {}
-
+  ) { }
+  async deletePlicas(): Promise<any> {
+    const pages = await this.pageRepository.find();
+    for (const page of pages) {
+      try {
+        const uri = page.Uri;
+        console.log(uri);
+        if (page.Uri?.includes("'")) {
+          page.Uri = uri.replace("'", "").replace("'", "");
+          await this.pageRepository.save(page);
+        }
+      }
+      catch (e) {
+        console.log(e);
+      }
+    }
+  }
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {
       return "nimda";
@@ -620,7 +635,7 @@ export class PageService {
     let hasError = false;
     try {
       for (let uri of uris || []) {
-        uri = "'"+uri+"'";//adding '
+        uri = uri;
         const page = await this.pageRepository.findOne({
           select: ["PageId", "Show_In"],
           where: { Uri: uri },
