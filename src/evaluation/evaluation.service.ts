@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Connection, getManager } from "typeorm";
+import { Connection, getManager, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
 import fs from "fs";
@@ -10,6 +10,7 @@ import {
   executeHtmlEvaluation,
 } from "./middleware";
 import { AccessibilityStatementService } from "src/accessibility-statement/accessibility-statement.service";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class EvaluationService {
@@ -18,9 +19,15 @@ export class EvaluationService {
   private SKIP = 20;
 
   constructor(private readonly connection: Connection,
-    private readonly accessibilityStatementService: AccessibilityStatementService) {
+    @InjectRepository(Evaluation)
+    private readonly evaluationRepository: Repository<Evaluation>,) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
+  }
+  //FIXME confirmar se as paginas têm sempre avaliação
+  async getLastEvaluationByPage(pageId: number): Promise<Evaluation> {
+    const evaluationList = await this.evaluationRepository.find({ where: { PageId: pageId},take:1,order: { Evaluation_Date:"ASC"}});
+    return evaluationList[0];
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -386,10 +393,8 @@ export class EvaluationService {
       evaluation.data.tot.info.roles
     );
     newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
-    const savedEvaluation =  await queryRunner.manager.save(newEvaluation);
-    console.log("new evaluation saved with page code: " + savedEvaluation.Pagecode.length)
-    const rawHtml = Buffer.from(savedEvaluation.Pagecode, "base64").toString();
-    await this.accessibilityStatementService.createIfExist(rawHtml,{});
+    const savedEvaluation = await queryRunner.manager.save(newEvaluation);
+
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {

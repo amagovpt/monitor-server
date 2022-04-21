@@ -11,11 +11,11 @@ async function bootstrap() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(compression());
-  await deletePlicas(app);
+  await findAccessiblityStatements(app);
   await app.listen(3001);
 }
-async function deletePlicas(app){
+async function findAccessiblityStatements(app){
   const pageService = app.get(PageService);
-  await pageService.deletePlicas();
+  await pageService.findAccessiblityStatements();
 }
 bootstrap();

@@ -1,9 +1,9 @@
-import htmlparser2 from 'htmlparser2';
+const htmlparser2 = require("htmlparser2");
 const CSSselect = require("css-select");
 export class PageParser {
     public urls = new Array<string>();
-    private dom: any;//fixme
-    private static readonly SELECTORS = ['.mr-manual-summary', '. mr-date', '.mr', '.mr-conformance-status', '.mr-t-type'];
+    private dom: any;
+    private static readonly SELECTORS = ['.mr-manual-summary', '.mr-date', '.mr', '.mr-conformance-status', '.mr-t-type'];
 
     constructor(html: string) {
         this.dom = htmlparser2.parseDocument(html);

@@ -14,13 +14,14 @@ export class AccessibilityStatementService {
   }
   createIfExist(html: string, createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     const pageParser = new PageParser(html);
-    if (pageParser.verifyAccessiblityStatement())
+    if (!pageParser.verifyAccessiblityStatement())
       return;
     return this.create(createAccessibilityStatementDto);
   }
 
   create(createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
-      console.log('This action adds a new accessibilityStatement');
+    const aStatement = this.accessibilityStatementRepository.create(createAccessibilityStatementDto);
+    return this.accessibilityStatementRepository.save(aStatement);
   }
 
   findAll() {
