@@ -12,7 +12,7 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(compression());
   await findAccessiblityStatements(app);
-  await app.listen(3001);
+  await app.listen(process.env.PORT || 3000);
 }
 async function findAccessiblityStatements(app){
   const pageService = app.get(PageService);
