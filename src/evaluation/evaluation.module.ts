@@ -5,10 +5,10 @@ import { Evaluation } from './evaluation.entity';
 import { EvaluationController } from './evaluation.controller';
 
 import { Page } from '../page/page.entity';
-import { UsabilityModule } from 'src/usability/usability.module';
+import { AccessibilityStatementModule } from 'src/accessibility-statement/accessibility-statement.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Page, Evaluation]), UsabilityModule],
+  imports: [TypeOrmModule.forFeature([Page, Evaluation]), AccessibilityStatementModule],
   exports: [EvaluationService],
   providers: [EvaluationService],
   controllers: [EvaluationController]
