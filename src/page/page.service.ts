@@ -37,11 +37,12 @@ export class PageService {
   async findAccessiblityStatements(): Promise<any> {
     const pages = await this.pageRepository.find();
     for (const page of pages) {
-        const id = page.PageId;
+      const id = page.PageId;
       console.log(id);
       const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
+      if(evaluation){
       const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
-      await this.accessibilityStatementService.createIfExist(rawHtml, {PageId:id});
+      await this.accessibilityStatementService.createIfExist(rawHtml, {Page:page,url:page.Uri});}
       }
     }
 

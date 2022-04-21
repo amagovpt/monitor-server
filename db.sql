@@ -227,6 +227,7 @@ CREATE TABLE `Accessibility_Statement` (
     `PageId`                        INT(11)         NOT NULL,
     `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `UpdatedAt`                     DATETIME        DEFAULT NULL,
+     `url` varchar(255) NOT NULL,
     PRIMARY KEY (`Accessibility_StatementId`),
     UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Accessibility_StatementId`),
     CONSTRAINT `Accessibility_Statement_PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE

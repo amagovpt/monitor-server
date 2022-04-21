@@ -3,7 +3,7 @@ import { Page } from "../../page/page.entity";
 @Entity("Accessibility_Statement")
 export class AccessibilityStatement {
     @PrimaryGeneratedColumn()
-    AccessibilityStatementId: number;
+    Accessibility_StatementId: number;
 
     @CreateDateColumn()
     CreatedAt: Date;
@@ -18,4 +18,11 @@ export class AccessibilityStatement {
     @ManyToOne(type => Page)
     @JoinColumn({ name: "PageId", referencedColumnName: "PageId" })
     Page: Page;
+
+    @Column({
+        type: "varchar",
+        length: 255,
+        nullable: false,
+    })
+    url:string;
 }

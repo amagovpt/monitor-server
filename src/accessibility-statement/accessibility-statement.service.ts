@@ -21,6 +21,7 @@ export class AccessibilityStatementService {
 
   create(createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     const aStatement = this.accessibilityStatementRepository.create(createAccessibilityStatementDto);
+    console.log({ aStatement, createAccessibilityStatementDto});
     return this.accessibilityStatementRepository.save(aStatement);
   }
 
