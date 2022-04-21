@@ -14,7 +14,7 @@ export class AccessibilityStatementService {
   }
   createIfExist(html: string, createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     const pageParser = new PageParser(html);
-    if (pageParser.verifyAccessiblityStatement())
+    if (!pageParser.verifyAccessiblityStatement())
       return;
     return this.create(createAccessibilityStatementDto);
   }
