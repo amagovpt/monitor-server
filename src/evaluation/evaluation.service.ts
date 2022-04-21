@@ -9,7 +9,7 @@ import {
   executeUrlsEvaluation,
   executeHtmlEvaluation,
 } from "./middleware";
-import { UsabilityDeclarationService } from "src/usability/declaration/usability-declaration.service";
+import { AccessibilityStatementService } from "src/accessibility-statement/accessibility-statement.service";
 
 @Injectable()
 export class EvaluationService {
@@ -18,7 +18,7 @@ export class EvaluationService {
   private SKIP = 20;
 
   constructor(private readonly connection: Connection,
-    private readonly usabilityDeclarationService: UsabilityDeclarationService) {
+    private readonly accessibilityStatementService: AccessibilityStatementService) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
   }
@@ -388,7 +388,8 @@ export class EvaluationService {
     newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
     const savedEvaluation =  await queryRunner.manager.save(newEvaluation);
     console.log("new evaluation saved with page code: " + savedEvaluation.Pagecode.length)
-    await this.usabilityDeclarationService.findDeclarationsFromNewEvaluations(savedEvaluation);
+    const rawHtml = Buffer.from(savedEvaluation.Pagecode, "base64").toString();
+    await this.accessibilityStatementService.createIfExist(rawHtml,{});
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {

@@ -21,6 +21,7 @@ import { AmpModule } from "./amp/amp.module";
 import { StampModule } from "./stamp/stamp.module";
 import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
+import { AccessibilityStatementModule } from './accessibility-statement/accessibility-statement.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -57,6 +58,7 @@ const databaseConfig = JSON.parse(
     StampModule,
     CrawlerModule,
     DirectoryModule,
+    AccessibilityStatementModule,
   ],
   controllers: [AppController],
   providers: [

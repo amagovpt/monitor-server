@@ -221,4 +221,15 @@ CREATE TABLE `WebsitePage` (
   CONSTRAINT `WPPageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Accessibility_Statement`;
+CREATE TABLE `Accessibility_Statement` (
+    `Accessibility_StatementId`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `PageId`                        INT(11)         NOT NULL,
+    `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `UpdatedAt`                     DATETIME        DEFAULT NULL,
+    PRIMARY KEY (`Accessibility_StatementId`),
+    UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Accessibility_StatementId`),
+    CONSTRAINT `Accessibility_Statement_PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;
