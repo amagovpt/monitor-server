@@ -16,7 +16,7 @@ export class AccessibilityStatementService {
     const pageParser = new PageParser(html);
     if (!pageParser.verifyAccessiblityStatement())
       return;
-    return this.create(createAccessibilityStatementDto);
+    console.log(pageParser.getConformance());
   }
 
   create(createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
