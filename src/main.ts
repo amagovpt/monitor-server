@@ -11,7 +11,6 @@ async function bootstrap() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(compression());
-  await deletePlicas(app);
   await app.listen(process.env.PORT || 3000);
 }
 async function deletePlicas(app){
