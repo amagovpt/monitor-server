@@ -25,4 +25,17 @@ export class AccessibilityStatement {
         nullable: false,
     })
     url:string;
+
+    @Column({
+        type: "varchar",
+        length: 255,
+        nullable: false,
+    })
+    conformance: string;
+
+    @Column({
+        type: 'datetime',
+        nullable: true,
+    })
+    statementDate: any;
 }
