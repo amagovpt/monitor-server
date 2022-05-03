@@ -12,6 +12,26 @@ export class PageParser {
         this.dom = htmlparser2.parseDocument(html);
     }
 
+    public verifyAccessiblityPossibleStatement(url:string): boolean {
+        return url.includes("/acessibilidade") || this.verifyAccessiblityPossibleStatementTitle()
+    }
+
+    public verifyAccessiblityPossibleStatementTitle(): boolean {
+        const title = CSSselect.selectOne('title', this.dom);
+        const h1 = CSSselect.selectOne('h1', this.dom);
+        let result = false;
+        if (h1){
+            const text = h1.data.toLowerCase();
+            result = text.includes("acessibilidade") && text.includes("declaração");
+        }
+        if (!result && title) {
+            const text = title.data.toLowerCase();
+            result = text.includes("acessibilidade") && text.includes("declaração");
+        }
+        return result;
+    }
+
+
     public verifyAccessiblityStatement(): boolean {
         return PageParser.SELECTORS.reduce((result, selector) => {
             const list = CSSselect.selectAll(selector, this.dom);
