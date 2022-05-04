@@ -1,12 +1,10 @@
+import { CONFORMANCE_OUTPUT, DATE, EVIDENCE, SEAL, SELECTORS } from "./contants";
+
 const htmlparser2 = require("htmlparser2");
 const CSSselect = require("css-select");
 export class PageParser {
     public urls = new Array<string>();
     private dom: any;
-    private static readonly SELECTORS = ['.mr-manual-summary', '.mr-date', '.mr', '.mr-conformance-status', '.mr-t-type'];
-    private static readonly CONFORMANCE_OUTPUT = '.conformance-output';
-    private static readonly DATE = '.mr-date';
-
 
     constructor(html: string) {
         this.dom = htmlparser2.parseDocument(html);
@@ -21,11 +19,11 @@ export class PageParser {
         const h1 = CSSselect.selectOne('h1', this.dom);
         let result = false;
         if (h1){
-            const text = h1.data.toLowerCase();
+            const text = this.getText(h1).toLowerCase();
             result = text.includes("acessibilidade") && text.includes("declaração");
         }
-        if (!result && title) {
-            const text = title.data.toLowerCase();
+        if (!result && title && title.data) {
+            const text = this.getText(title).toLowerCase();
             result = text.includes("acessibilidade") && text.includes("declaração");
         }
         return result;
@@ -33,27 +31,46 @@ export class PageParser {
 
 
     public verifyAccessiblityStatement(): boolean {
-        return PageParser.SELECTORS.reduce((result, selector) => {
+        return SELECTORS.reduce((result, selector) => {
             const list = CSSselect.selectAll(selector, this.dom);
             return result && list.length > 0;
         }, true);
     }
     public getConformance(): string {
-        const conformanceSpan = CSSselect.selectOne(PageParser.CONFORMANCE_OUTPUT, this.dom);
-        if(!conformanceSpan)
-            return null;
-        else{
-            return this.getText(conformanceSpan);} }
+        return this.getDataFromSelector(CONFORMANCE_OUTPUT)}
+
+    public getSeal(): string {
+        return this.getDataFromSelector(SEAL)
+    }
+
+    public getEvidence(): string {
+        return this.getDataFromSelector(EVIDENCE)
+    }
 
     public getDate(): Date {
-        const dateSpan = CSSselect.selectOne(PageParser.DATE, this.dom);
-
-        if (!dateSpan)
+        const dateString = this.getDataFromSelector(DATE);
+        if (!dateString)
             return null;
         else{
-            const dateString = this.getText(dateSpan);
-            console.log(dateString);
             return new Date(dateString)}
+    }
+
+    public getAccessiblityStatementData(){
+        return {
+            date: this.getDate(),
+            evidence : this.getEvidence(),
+            seal: this.getSeal(),
+            conformance: this.getConformance(),
+        }
+    }
+
+    private getDataFromSelector(select:string){
+        const element = CSSselect.selectOne(select, this.dom);
+        if (!element)
+            return null;
+        else {
+            return this.getText(element);
+        }
     }
 
     private getText(element:any): string {
