@@ -1,5 +1,8 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Page } from "../../page/page.entity";
+import { AutomaticEvaluation } from "./automatic-evaluation.entity";
+import { ManualEvaluation } from "./manual-evaluation.entity";
+import { UserEvaluation } from "./user-evaluation.entity";
 @Entity("Accessibility_Statement")
 export class AccessibilityStatement {
     @PrimaryGeneratedColumn()
@@ -38,4 +41,15 @@ export class AccessibilityStatement {
         nullable: true,
     })
     statementDate: any;
+
+    @OneToMany(type => ManualEvaluation, (evaluation) => evaluation.accessibilityStatement)
+    ManualEvaluation: ManualEvaluation;
+
+
+    @OneToMany(type => AutomaticEvaluation, (evaluation) => evaluation.accessibilityStatement)
+    AutomaticEvaluation: AutomaticEvaluation;
+
+
+    @OneToMany(type => UserEvaluation, (evaluation) => evaluation.accessibilityStatement)
+    UserEvaluation: UserEvaluation;
 }
