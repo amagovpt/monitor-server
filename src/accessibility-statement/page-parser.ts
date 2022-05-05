@@ -92,7 +92,9 @@ export class PageParser {
            const text = this.getText(li);
             const splittedText = text.split(":");
             const attName = splittedText[0];
-            const content = splittedText[1].trim();
+            let content = splittedText[1].trim();
+            if (attName === 'Amostra')
+                content = content.replace(/[^\d]/g, '');
             result[data[attName]] = content;
         });
         return result;
