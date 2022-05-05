@@ -1,4 +1,4 @@
-import { CONFORMANCE_OUTPUT, DATE, EVIDENCE, SEAL, SELECTORS } from "./contants";
+import { CONFORMANCE_OUTPUT, DATE, EVIDENCE, PROCEDURE, SEAL, SELECTORS } from "./contants";
 
 const htmlparser2 = require("htmlparser2");
 const CSSselect = require("css-select");
@@ -63,6 +63,48 @@ export class PageParser {
             conformance: this.getConformance(),
         }
     }
+
+    public processProcedure(procedure){
+        const procedureJson = PROCEDURE[procedure];
+        const selector = procedureJson.selector;
+        const element = CSSselect.selectOne(selector, this.dom);
+        const list = CSSselect.selectOne('ol', element);
+        const listElements = list.children;
+        const data = procedureJson.data;
+        return listElements.map((li)=>{
+            return this.processProcedureElement(data, li);
+        });
+    }
+    private processProcedureElement(data,element) {
+        const date = this.getDateProcedure(element);
+        const link = CSSselect.selectOne('a', element);
+        const url = link.attribs.href;
+        const title = this.getText(link);
+        const otherData = this.getOtherProcedureData(element,data);
+        return { date, url, title, ...otherData};
+    }
+
+    private getOtherProcedureData(element, data) {
+        const list = CSSselect.selectOne('ul', element);
+        const listElements = list.children;
+        const result = {};
+        listElements.map((li) => {
+           const text = this.getText(li);
+            const splittedText = text.split(":");
+            const attName = splittedText[0];
+            const content = splittedText[1].trim();
+            result[data[attName]] = content;
+        });
+        return result;
+    }
+
+
+    private getDateProcedure(element){
+        const text = this.getText(element);
+        const splittedText = text.split(/[()]/);
+        return splittedText[1];
+    }
+
 
     private getDataFromSelector(select:string){
         const element = CSSselect.selectOne(select, this.dom);

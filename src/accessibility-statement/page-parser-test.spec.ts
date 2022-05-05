@@ -1,7 +1,6 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { HTML } from './contantsTest';
 import { PageParser } from './page-parser';
-import { Test, TestingModule } from '@nestjs/testing';
-
 
 describe('PageParser', () => {
   let parser: PageParser;
@@ -14,5 +13,9 @@ describe('PageParser', () => {
     expect(parser).toBeDefined();
     const result = parser.getAccessiblityStatementData();
     console.log(result);
+    const automatic = parser.processProcedure("automatic");
+    const manual = parser.processProcedure("manual");
+    const user = parser.processProcedure("user");
+    console.log({automatic, manual, user});
   });
 });
