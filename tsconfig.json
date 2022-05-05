@@ -12,8 +12,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "typeRoots": ["../node_modules/@qualweb/types"],
-    "types": ["./node_modules/@qualweb/types"]
+    "types": ["./node_modules/@qualweb/types","jest", "node"]
   },
   "exclude": ["node_modules", "dist"]
 }
