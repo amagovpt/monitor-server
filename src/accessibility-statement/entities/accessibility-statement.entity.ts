@@ -45,10 +45,8 @@ export class AccessibilityStatement {
     @OneToMany(type => ManualEvaluation, (evaluation) => evaluation.accessibilityStatement)
     ManualEvaluation: ManualEvaluation;
 
-
     @OneToMany(type => AutomaticEvaluation, (evaluation) => evaluation.accessibilityStatement)
     AutomaticEvaluation: AutomaticEvaluation;
-
 
     @OneToMany(type => UserEvaluation, (evaluation) => evaluation.accessibilityStatement)
     UserEvaluation: UserEvaluation;

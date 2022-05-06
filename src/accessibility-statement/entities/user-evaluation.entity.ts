@@ -1,6 +1,6 @@
 import { Column,  Entity,JoinColumn,ManyToOne,PrimaryGeneratedColumn } from "typeorm";
 import { AccessibilityStatement } from "./accessibility-statement.entity";
-@Entity("Automatic_Evaluation")
+@Entity("User_Evaluation")
 export class UserEvaluation {
     @PrimaryGeneratedColumn()
     Id: number;
