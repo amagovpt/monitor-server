@@ -42,7 +42,7 @@ export class PageService {
       const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
       if(evaluation){
       const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
-      await this.accessibilityStatementService.createIfExist(rawHtml, {Page:page,url:page.Uri});}
+      await this.accessibilityStatementService.createIfExist(rawHtml, page,page.Uri);}
       }
     }
 

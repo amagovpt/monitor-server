@@ -1,7 +1,8 @@
+import { AutomaticEvaluation } from "src/accessibility-statement-module/automatic-evaluation/entities/automatic-evaluation.entity";
+import { ManualEvaluation } from "src/accessibility-statement-module/manual-evaluation/entities/manual-evaluation.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Page } from "../../../page/page.entity";
-import { AutomaticEvaluation } from "./automatic-evaluation.entity";
-import { ManualEvaluation } from "./manual-evaluation.entity";
+
 import { UserEvaluation } from "../../user-evaluation/entities/user-evaluation.entity";
 @Entity("Accessibility_Statement")
 export class AccessibilityStatement {

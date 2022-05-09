@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AutomaticEvaluationService } from './automatic-evaluation.service';
-import { AutomaticEvaluationController } from './automatic-evaluation.controller';
+import { AutomaticEvaluation } from './entities/automatic-evaluation.entity';
 
 @Module({
-  controllers: [AutomaticEvaluationController],
-  providers: [AutomaticEvaluationService]
+  imports:[ TypeOrmModule.forFeature([AutomaticEvaluation])],
+  providers: [AutomaticEvaluationService],
+  exports: [AutomaticEvaluationService]
 })
 export class AutomaticEvaluationModule {}
