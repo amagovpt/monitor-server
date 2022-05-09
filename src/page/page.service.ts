@@ -5,7 +5,7 @@ import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
 import { EvaluationService } from "src/evaluation/evaluation.service";
-import { AccessibilityStatementService } from "src/accessibility-statement/accessibility-statement.service";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Injectable()
 export class PageService {

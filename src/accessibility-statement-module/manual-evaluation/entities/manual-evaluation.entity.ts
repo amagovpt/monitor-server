@@ -1,5 +1,5 @@
+import { AccessibilityStatement } from "src/accessibility-statement-module/accessibility-statement/entities/accessibility-statement.entity";
 import { Column, Entity,JoinColumn,ManyToOne,PrimaryGeneratedColumn } from "typeorm";
-import { AccessibilityStatement } from "./accessibility-statement.entity";
 @Entity("Manual_Evaluation")
 export class ManualEvaluation {
     @PrimaryGeneratedColumn()
@@ -40,7 +40,7 @@ export class ManualEvaluation {
     })
     Summary: string;
     
-    @ManyToOne((type => AccessibilityStatement))
+    @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.manualEvaluationList)
     @JoinColumn({ name: "AccessibilityStatementId" })
     accessibilityStatement: AccessibilityStatement;
 }

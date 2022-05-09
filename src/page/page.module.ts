@@ -7,7 +7,7 @@ import { AuthModule } from "../auth/auth.module";
 import { EvaluationModule } from "../evaluation/evaluation.module";
 import { Website } from "../website/website.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
-import { AccessibilityStatementModule } from "src/accessibility-statement/accessibility-statement.module";
+import { AccessibilityStatementModule } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.module";
 
 @Module({
   imports: [

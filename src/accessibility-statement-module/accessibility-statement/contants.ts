@@ -31,10 +31,13 @@ const USER_EVALUATION_ATTRIBUTES = {
     "Tarefas/Processos": "process",
     "Principais resultados (sumário)": "summary"
 }
+const AUTOMATIC = 'automatic';
+const MANUAL = 'manual';
+const USER = 'user';
 const PROCEDURE = {
     automatic: { selector: AUTOMATIC_EVALUATION, data: AUTOMATIC_EVALUATION_ATTRIBUTES},
     manual: { selector: MANUAL_EVALUATION, data: MANUAL_EVALUATION_ATTRIBUTES },
     user: { selector: USER_EVALUATION, data: USER_EVALUATION_ATTRIBUTES }
 }
 
-export { SELECTORS, CONFORMANCE_OUTPUT, DATE, TARGET_SELECTOR, SEAL, EVIDENCE, PROCEDURE}
+export { SELECTORS, CONFORMANCE_OUTPUT, DATE, TARGET_SELECTOR, SEAL, EVIDENCE, PROCEDURE, AUTOMATIC, MANUAL, USER}

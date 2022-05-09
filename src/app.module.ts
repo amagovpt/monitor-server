@@ -21,7 +21,10 @@ import { AmpModule } from "./amp/amp.module";
 import { StampModule } from "./stamp/stamp.module";
 import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
-import { AccessibilityStatementModule } from './accessibility-statement/accessibility-statement.module';
+import { AccessibilityStatementModule } from './accessibility-statement-module/accessibility-statement/accessibility-statement.module';
+import { AutomaticEvaluationModule } from './accessibility-statement-module/automatic-evaluation/automatic-evaluation.module';
+import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
+import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -59,6 +62,7 @@ const databaseConfig = JSON.parse(
     CrawlerModule,
     DirectoryModule,
     AccessibilityStatementModule,
+     AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule,
   ],
   controllers: [AppController],
   providers: [

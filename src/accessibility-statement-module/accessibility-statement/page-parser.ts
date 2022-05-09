@@ -1,4 +1,4 @@
-import { CONFORMANCE_OUTPUT, DATE, EVIDENCE, PROCEDURE, SEAL, SELECTORS } from "./contants";
+import { AUTOMATIC, CONFORMANCE_OUTPUT, DATE, EVIDENCE, MANUAL, PROCEDURE, SEAL, SELECTORS, USER } from "./contants";
 
 const htmlparser2 = require("htmlparser2");
 const CSSselect = require("css-select");
@@ -55,13 +55,26 @@ export class PageParser {
             return new Date(dateString)}
     }
 
-    public getAccessiblityStatementData(){
+    public getAccessiblityStatementData(url:string){
         return {
             date: this.getDate(),
             evidence : this.getEvidence(),
             seal: this.getSeal(),
             conformance: this.getConformance(),
+            url
         }
+    }
+
+    public getUserEvaluationData() {
+        return this.processProcedure(USER);
+    }
+
+    public getAutomaticEvaluationData() {
+        return this.processProcedure(AUTOMATIC);
+    }
+
+    public getManualEvaluationData() {
+        return this.processProcedure(MANUAL);
     }
 
     public processProcedure(procedure){

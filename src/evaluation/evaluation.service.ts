@@ -9,7 +9,7 @@ import {
   executeUrlsEvaluation,
   executeHtmlEvaluation,
 } from "./middleware";
-import { AccessibilityStatementService } from "src/accessibility-statement/accessibility-statement.service";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()

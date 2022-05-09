@@ -5,7 +5,7 @@ import { Evaluation } from './evaluation.entity';
 import { EvaluationController } from './evaluation.controller';
 
 import { Page } from '../page/page.entity';
-import { AccessibilityStatementModule } from 'src/accessibility-statement/accessibility-statement.module';
+import { AccessibilityStatementModule } from 'src/accessibility-statement-module/accessibility-statement/accessibility-statement.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Page, Evaluation]), AccessibilityStatementModule],
