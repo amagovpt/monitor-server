@@ -230,15 +230,15 @@ CREATE TABLE `Accessibility_Statement` (
     `url` varchar(255) NOT NULL,
     `conformance` varchar(255) DEFAULT NULL,
     `statementDate` datetime DEFAULT NULL,
-    PRIMARY KEY (`Accessibility_StatementId`),
-    UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Accessibility_StatementId`),
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Id`),
     CONSTRAINT `Accessibility_Statement_PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Automatic_Evaluation`;
 CREATE TABLE `Automatic_Evaluation` (
     `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
-    `Accessibility_StatementId`                        INT(11)         NOT NULL,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
     `Title` varchar(255) DEFAULT NULL,
     `Url` varchar(255) DEFAULT NULL,
     `Sample` varchar(255) DEFAULT NULL,
@@ -246,13 +246,13 @@ CREATE TABLE `Automatic_Evaluation` (
     `Summary` text(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Automatic_EvaluationId_UNIQUE` (`Id`),
-    CONSTRAINT `Automatic_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_StatementId`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+    CONSTRAINT `Automatic_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Manual_Evaluation`;
 CREATE TABLE `Manual_Evaluation` (
     `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
-    `Accessibility_StatementId`                        INT(11)         NOT NULL,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
     `Title` varchar(255) DEFAULT NULL,
     `Url` varchar(255) DEFAULT NULL,
     `Sample` varchar(255) DEFAULT NULL,
@@ -260,13 +260,13 @@ CREATE TABLE `Manual_Evaluation` (
     `Summary` text(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Manual_EvaluationId_UNIQUE` (`Id`),
-    CONSTRAINT `Manual_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_StatementId`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+    CONSTRAINT `Manual_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `User_Evaluation`;
 CREATE TABLE `User_Evaluation` (
     `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
-    `Accessibility_StatementId`                        INT(11)         NOT NULL,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
     `Title` varchar(255) DEFAULT NULL,
     `Url` varchar(255) DEFAULT NULL,
     `Sample` varchar(255) DEFAULT NULL,
@@ -275,7 +275,7 @@ CREATE TABLE `User_Evaluation` (
     `Summary` text(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
-    CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_StatementId`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+    CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
