@@ -10,7 +10,7 @@ export class PageParser {
         this.dom = htmlparser2.parseDocument(html);
     }
 
-    public verifyAccessiblityPossibleStatement(url:string): boolean {
+    public verifyAccessiblityPossibleStatement(url: string): boolean {
         return url.includes("/acessibilidade") || this.verifyAccessiblityPossibleStatementTitle()
     }
 
@@ -18,7 +18,7 @@ export class PageParser {
         const title = CSSselect.selectOne('title', this.dom);
         const h1 = CSSselect.selectOne('h1', this.dom);
         let result = false;
-        if (h1){
+        if (h1) {
             const text = this.getText(h1).toLowerCase();
             result = text.includes("acessibilidade") && text.includes("declaração");
         }
@@ -37,7 +37,8 @@ export class PageParser {
         }, true);
     }
     public getConformance(): string {
-        return this.getDataFromSelector(CONFORMANCE_OUTPUT)}
+        return this.getDataFromSelector(CONFORMANCE_OUTPUT)
+    }
 
     public getSeal(): string {
         return this.getDataFromSelector(SEAL)
@@ -51,14 +52,15 @@ export class PageParser {
         const dateString = this.getDataFromSelector(DATE);
         if (!dateString)
             return null;
-        else{
-            return new Date(dateString)}
+        else {
+            return new Date(dateString)
+        }
     }
 
-    public getAccessiblityStatementData(url:string){
+    public getAccessiblityStatementData(url: string) {
         return {
             date: this.getDate(),
-            evidence : this.getEvidence(),
+            evidence: this.getEvidence(),
             seal: this.getSeal(),
             conformance: this.getConformance(),
             url
@@ -66,35 +68,53 @@ export class PageParser {
     }
 
     public getUserEvaluationData() {
-        return this.processProcedure(USER);
+        try {
+            return this.processProcedure(USER);
+        }
+        catch (e) {
+        } finally {
+            return [];
+        }
     }
 
     public getAutomaticEvaluationData() {
-        return this.processProcedure(AUTOMATIC);
+        try {
+            return this.processProcedure(AUTOMATIC);
+        }
+        catch (e) {
+        } finally {
+            return [];
+        }
     }
 
     public getManualEvaluationData() {
-        return this.processProcedure(MANUAL);
+        try {
+            return this.processProcedure(MANUAL);
+        }
+        catch (e) {
+        } finally {
+            return [];
+        }
     }
 
-    public processProcedure(procedure){
+    public processProcedure(procedure) {
         const procedureJson = PROCEDURE[procedure];
         const selector = procedureJson.selector;
         const element = CSSselect.selectOne(selector, this.dom);
         const list = CSSselect.selectOne('ol', element);
         const listElements = list.children;
         const data = procedureJson.data;
-        return listElements.map((li)=>{
+        return listElements.map((li) => {
             return this.processProcedureElement(data, li);
         });
     }
-    private processProcedureElement(data,element) {
+    private processProcedureElement(data, element) {
         const date = this.getDateProcedure(element);
         const link = CSSselect.selectOne('a', element);
         const url = link.attribs.href;
         const title = this.getText(link);
-        const otherData = this.getOtherProcedureData(element,data);
-        return { date, url, title, ...otherData};
+        const otherData = this.getOtherProcedureData(element, data);
+        return { date, url, title, ...otherData };
     }
 
     private getOtherProcedureData(element, data) {
@@ -102,7 +122,7 @@ export class PageParser {
         const listElements = list.children;
         const result = {};
         listElements.map((li) => {
-           const text = this.getText(li);
+            const text = this.getText(li);
             const splittedText = text.split(":");
             const attName = splittedText[0];
             let content = splittedText[1].trim();
@@ -114,14 +134,14 @@ export class PageParser {
     }
 
 
-    private getDateProcedure(element){
+    private getDateProcedure(element) {
         const text = this.getText(element);
         const splittedText = text.split(/[()]/);
         return splittedText[1];
     }
 
 
-    private getDataFromSelector(select:string){
+    private getDataFromSelector(select: string) {
         const element = CSSselect.selectOne(select, this.dom);
         if (!element)
             return null;
@@ -130,13 +150,14 @@ export class PageParser {
         }
     }
 
-    private getText(element:any): string {
+    private getText(element: any): string {
         const children = element.children;
         let text = "";
-        if(element.type === 'text')
+        if (element.type === 'text')
             text = text + element.data;
-        children?.map((child)=>{
-            text = text + this.getTextRecursion(child)});
+        children?.map((child) => {
+            text = text + this.getTextRecursion(child)
+        });
         return text;
     }
     private getTextAux(element: any): string {
@@ -145,8 +166,9 @@ export class PageParser {
         children?.map((child) => {
             text = text + this.getTextRecursion(child)
         });
-        return text;}
-    private getTextRecursion(child){
+        return text;
+    }
+    private getTextRecursion(child) {
         let text = "";
         if (child.type === 'text')
             text = text + child.data;

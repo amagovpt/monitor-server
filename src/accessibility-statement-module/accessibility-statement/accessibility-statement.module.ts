@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { AccessibilityStatementService } from './accessibility-statement.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessibilityStatement } from './entities/accessibility-statement.entity';
-import { AutomaticEvaluationService } from '../automatic-evaluation/automatic-evaluation.service';
-import { ManualEvaluationService } from '../manual-evaluation/manual-evaluation.service';
-import { UserEvaluationService } from '../user-evaluation/user-evaluation.service';
+import { AutomaticEvaluationModule } from '../automatic-evaluation/automatic-evaluation.module';
+import { ManualEvaluationModule } from '../manual-evaluation/manual-evaluation.module';
+import { UserEvaluationModule } from '../user-evaluation/user-evaluation.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AccessibilityStatement]),AutomaticEvaluationService,ManualEvaluationService,UserEvaluationService],
+    TypeOrmModule.forFeature([AccessibilityStatement]),AutomaticEvaluationModule,ManualEvaluationModule,UserEvaluationModule],
   providers: [AccessibilityStatementService],
   exports:[AccessibilityStatementService]
 })

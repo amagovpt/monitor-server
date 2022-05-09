@@ -35,7 +35,6 @@ export class ManualEvaluation {
 
     @Column({
         type: 'text',
-        length: 255,
         nullable: true
     })
     Summary: string;
