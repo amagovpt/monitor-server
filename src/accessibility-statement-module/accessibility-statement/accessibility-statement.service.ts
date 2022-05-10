@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CreateAccessibilityStatementDto } from './dto/create-accessibility-statement.dto';
-import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-statement.dto';
 import { AccessibilityStatement } from './entities/accessibility-statement.entity';
 import { InjectRepository } from "@nestjs/typeorm";
 import { PageParser } from './page-parser';
@@ -31,6 +30,7 @@ export class AccessibilityStatementService {
     const autoList = pageParser.getAutomaticEvaluationData();
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
+    console.log({ aStatement, autoList, userList, manualList, page});
     return this.create(aStatement, autoList, userList, manualList, page);
   }
 

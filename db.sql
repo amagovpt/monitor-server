@@ -229,6 +229,8 @@ CREATE TABLE `Accessibility_Statement` (
     `UpdatedAt`                     DATETIME        DEFAULT NULL,
     `url` varchar(255) NOT NULL,
     `conformance` varchar(255) DEFAULT NULL,
+    `evidence` varchar(255) DEFAULT NULL,
+    `seal` varchar(255) DEFAULT NULL,
     `statementDate` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Id`),

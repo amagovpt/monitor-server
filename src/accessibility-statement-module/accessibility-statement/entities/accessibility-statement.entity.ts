@@ -38,6 +38,20 @@ export class AccessibilityStatement {
     conformance: string;
 
     @Column({
+        type: "varchar",
+        length: 255,
+        nullable: false,
+    })
+    evidence: string;
+
+    @Column({
+        type: "varchar",
+        length: 255,
+        nullable: false,
+    })
+    seal: string;
+
+    @Column({
         type: 'datetime',
         nullable: true,
     })
