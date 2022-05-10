@@ -50,7 +50,7 @@ export class ObservatoryService {
   async generateData(manual = false): Promise<any> {
     if (
       (process.env.NAMESPACE === undefined ||
-      parseInt(process.env.AMSID) === 0)||manual) {
+      parseInt(process.env.AMSID) === 0) || manual) {
       const data = await this.getData();
 
       const directories = new Array<Directory>();
