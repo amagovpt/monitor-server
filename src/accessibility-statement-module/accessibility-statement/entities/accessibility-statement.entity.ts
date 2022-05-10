@@ -7,7 +7,7 @@ import { UserEvaluation } from "../../user-evaluation/entities/user-evaluation.e
 @Entity("Accessibility_Statement")
 export class AccessibilityStatement {
     @PrimaryGeneratedColumn()
-    Accessibility_StatementId: number;
+    Id: number;
 
     @CreateDateColumn()
     CreatedAt: Date;
