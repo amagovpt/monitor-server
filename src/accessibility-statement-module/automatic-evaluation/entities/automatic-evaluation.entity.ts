@@ -40,7 +40,7 @@ export class AutomaticEvaluation {
     Summary: string;
 
     @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.automaticEvaluationList)
-    @JoinColumn({ name: "AccessibilityStatementId"})
+    @JoinColumn({ name: "Accessibility_Statement_Id"})
     accessibilityStatement: AccessibilityStatement;
 
     

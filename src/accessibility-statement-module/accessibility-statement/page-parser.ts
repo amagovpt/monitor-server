@@ -59,7 +59,7 @@ export class PageParser {
 
     public getAccessiblityStatementData(url: string) {
         return {
-            date: this.getDate(),
+            statementDate: this.getDate(),
             evidence: this.getEvidence(),
             seal: this.getSeal(),
             conformance: this.getConformance(),
@@ -72,7 +72,7 @@ export class PageParser {
             return this.processProcedure(USER);
         }
         catch (e) {
-        } finally {
+            console.log(e);
             return [];
         }
     }
@@ -82,7 +82,7 @@ export class PageParser {
             return this.processProcedure(AUTOMATIC);
         }
         catch (e) {
-        } finally {
+            console.log(e);
             return [];
         }
     }
@@ -92,7 +92,7 @@ export class PageParser {
             return this.processProcedure(MANUAL);
         }
         catch (e) {
-        } finally {
+            console.log(e);
             return [];
         }
     }
@@ -104,31 +104,38 @@ export class PageParser {
         const list = CSSselect.selectOne('ol', element);
         const listElements = list.children;
         const data = procedureJson.data;
-        return listElements.map((li) => {
-            return this.processProcedureElement(data, li);
+        return listElements.flatMap((li) => {
+            if (li.name === 'li')
+                return this.processProcedureElement(data, li);
+            else
+                return [];
         });
     }
     private processProcedureElement(data, element) {
-        const date = this.getDateProcedure(element);
+        const Date = this.getDateProcedure(element);
         const link = CSSselect.selectOne('a', element);
-        const url = link.attribs.href;
-        const title = this.getText(link);
+        const Url = link.attribs.href;
+        const Title = this.getText(link);
         const otherData = this.getOtherProcedureData(element, data);
-        return { date, url, title, ...otherData };
+        return { Date, Url, Title, ...otherData };
     }
 
     private getOtherProcedureData(element, data) {
         const list = CSSselect.selectOne('ul', element);
         const listElements = list.children;
         const result = {};
-        listElements.map((li) => {
+        listElements.flatMap((li) => {
             const text = this.getText(li);
-            const splittedText = text.split(":");
-            const attName = splittedText[0];
-            let content = splittedText[1].trim();
-            if (attName === 'Amostra')
-                content = content.replace(/[^\d]/g, '');
-            result[data[attName]] = content;
+            if (text&&text.trim()) {
+                const splittedText = text.split(":");
+                const attName = splittedText[0];
+                let content = splittedText[1];
+                if (attName === 'Amostra')
+                    content = content.replace(/[^\d]/g, '');
+                result[data[attName]] = content;
+            }
+            else
+                return [];
         });
         return result;
     }

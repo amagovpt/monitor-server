@@ -24,14 +24,14 @@ export class AccessibilityStatementService {
   }
   createIfExist(html: string, page: Page, url: string) {
     const pageParser = new PageParser(html);
-    if (!pageParser.verifyAccessiblityStatement() && !pageParser.verifyAccessiblityPossibleStatement(url))
+    if (!pageParser.verifyAccessiblityStatement())// && !pageParser.verifyAccessiblityPossibleStatement(url))
       return;
     const aStatement = pageParser.getAccessiblityStatementData(url);
     const autoList = pageParser.getAutomaticEvaluationData();
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
     console.log({ aStatement, autoList, userList, manualList, page});
-    return this.create(aStatement, autoList, userList, manualList, page);
+    return this.create(aStatement, autoList, manualList, userList, page);
   }
 
   async create(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[], page: Page) {
