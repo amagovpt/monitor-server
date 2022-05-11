@@ -38,8 +38,7 @@ export class AccessibilityStatement {
     conformance: string;
 
     @Column({
-        type: "varchar",
-        length: 255,
+        type: "text",
         nullable: false,
     })
     evidence: string;

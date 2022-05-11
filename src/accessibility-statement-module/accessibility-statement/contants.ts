@@ -11,25 +11,25 @@ const AUTOMATIC_EVALUATION_ATTRIBUTES = {
     //title conteudo a
     //url link a
     //date inicio entre parenteses
-    "Ferramenta utilizada": "tool",
-    "Amostra": "sample",
-    "Principais resultados (sumário)": "summary"
+    "Ferramenta utilizada": "Tool",
+    "Amostra": "Sample",
+    "Principais resultados (sumário)": "Summary"
 }
 const MANUAL_EVALUATION_ATTRIBUTES = {
     //title conteudo a
     //url link a
     //date inicio entre parenteses
-    "Ferramenta utilizada": "tool",
-    "Amostra": "sample",
-    "Principais resultados (heurísticas satisfeitas/total heurísticas aplicadas)": "heuristics_score"
+    "Ferramenta utilizada": "Tool",
+    "Amostra": "Sample",
+    "Principais resultados (heurísticas satisfeitas/total heurísticas aplicadas)": "Heuristics"
 }
 const USER_EVALUATION_ATTRIBUTES = {
     //title conteudo a
     //url link a
     //date inicio entre parenteses
-    "Caraterização dos participantes": "participants",
-    "Tarefas/Processos": "process",
-    "Principais resultados (sumário)": "summary"
+    "Caraterização dos participantes": "Participants",
+    "Tarefas/Processos": "Process",
+    "Principais resultados (sumário)": "Summary"
 }
 const AUTOMATIC = 'automatic';
 const MANUAL = 'manual';

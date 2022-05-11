@@ -40,6 +40,6 @@ export class UserEvaluation {
     Summary: string;
     
     @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.userEvaluationList)
-    @JoinColumn({ name: "AccessibilityStatementId" })
+    @JoinColumn({ name: "Accessibility_Statement_Id" })
     accessibilityStatement: AccessibilityStatement;
 }

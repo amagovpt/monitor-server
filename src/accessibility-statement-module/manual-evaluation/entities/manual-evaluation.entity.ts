@@ -27,11 +27,16 @@ export class ManualEvaluation {
     Sample: string;
 
     @Column({
-        type: 'varchar',
-        length: 255,
+        type: 'int',
         nullable: true
     })
-    Heuristics: string;
+    HeuristicsPassed: number;
+
+    @Column({
+        type: 'int',
+        nullable: true
+    })
+    HeuristicsTotal: number;
 
     @Column({
         type: 'text',
@@ -40,6 +45,6 @@ export class ManualEvaluation {
     Summary: string;
     
     @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.manualEvaluationList)
-    @JoinColumn({ name: "AccessibilityStatementId" })
+    @JoinColumn({ name: "Accessibility_Statement_Id" })
     accessibilityStatement: AccessibilityStatement;
 }
