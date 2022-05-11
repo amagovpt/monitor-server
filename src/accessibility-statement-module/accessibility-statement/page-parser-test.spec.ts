@@ -13,9 +13,9 @@ describe('PageParser', () => {
     expect(parser).toBeDefined();
     const result = parser.getAccessiblityStatementData("https://www.acessibilidade.gov.pt/acessibilidade/");
     console.log(result);
-    const automatic = parser.processProcedure("automatic");
-    const manual = parser.processProcedure("manual");
-    const user = parser.processProcedure("user");
+    const automatic = parser.getAutomaticEvaluationData();
+    const manual = parser.getManualEvaluationData();
+    const user = parser.getUserEvaluationData();
     console.log({automatic, manual, user});
   });
 });
