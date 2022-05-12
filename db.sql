@@ -274,7 +274,7 @@ CREATE TABLE `User_Evaluation` (
     `Url` varchar(255) DEFAULT NULL,
     `Sample` varchar(255) DEFAULT NULL,
     `Participants` varchar(255) DEFAULT NULL,
-    `Process` varchar(255) DEFAULT NULL,
+    `Process` text DEFAULT NULL,
     `Summary` text(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
