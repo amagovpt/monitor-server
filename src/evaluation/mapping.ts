@@ -297,7 +297,7 @@ function QW_ACT_R12(elements: any, results: any, nodes: any, rule: any): void {
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (rule.metadata.outcome === "failed") {
-    addToElements(elements, "linkAName", rule.metadata.failed);
+    addToElements(elements, "linkNotAName", rule.metadata.failed);
     addToResults(results, "a_11");
     addToNodes(
       nodes,
@@ -1790,7 +1790,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "bannerTopLevel", technique.metadata.fail);
+    addToElements(elements, "bannerTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_02");
     addToNodes(nodes, "bannerTopLevel", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1807,7 +1807,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "duplicateBanner", technique.metadata.fail);
+    addToElements(elements, "duplicateBanner", technique.metadata.failed);
     addToResults(results, "landmark_10");
     addToNodes(nodes, "duplicateBanner", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1824,7 +1824,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "duplicateContentinfo", technique.metadata.fail);
+    addToElements(elements, "duplicateContentinfo", technique.metadata.failed);
     addToResults(results, "landmark_12");
     addToNodes(nodes, "duplicateContentinfo", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1841,7 +1841,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "duplicateMain", technique.metadata.fail);
+    addToElements(elements, "duplicateMain", technique.metadata.failed);
     addToResults(results, "landmark_14");
     addToNodes(nodes, "duplicateMain", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1858,7 +1858,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "liNotSemantically", technique.metadata.fail);
+    addToElements(elements, "liNotSemantically", technique.metadata.failed);
     addToResults(results, "listitem_02");
     addToNodes(nodes, "liNotSemantically", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1875,7 +1875,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "listNotCorrectly", technique.metadata.fail);
+    addToElements(elements, "listNotCorrectly", technique.metadata.failed);
     addToResults(results, "list_03");
     addToNodes(nodes, "listNotCorrectly", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1892,7 +1892,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "complementaryNotTopLevel", technique.metadata.fail);
+    addToElements(elements, "complementaryNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_04");
     addToNodes(nodes, "complementaryNotTopLevel", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1909,7 +1909,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "contentinfoNotTopLevel", technique.metadata.fail);
+    addToElements(elements, "contentinfoNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_06");
     addToNodes(nodes, "contentinfoNotTopLevel", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1926,7 +1926,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "mainNotTopLevel", technique.metadata.fail);
+    addToElements(elements, "mainNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_08");
     addToNodes(nodes, "mainNotTopLevel", [
       JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
@@ -1954,11 +1954,10 @@ function addToNodes(nodes: any, key: string, elements: any[]): void {
   nodes[key] = elements;
 }
 
-export function getElementsMapping(evaluation: any): any {
+export function  getElementsMapping(evaluation: any): any {
   const elements = {};
   const results = {};
   const nodes = {};
-
   for (const rule of Object.keys(evaluation.modules["act-rules"].assertions) ||
     []) {
     if (act_mapping[rule] !== undefined) {

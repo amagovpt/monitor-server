@@ -1437,7 +1437,7 @@ export default {
   },
   a_10: {
     type: "true",
-    elem: "all",
+    elem: "a",
     test: "linkAName",
     score: 10,
     level: "A",
@@ -1449,8 +1449,8 @@ export default {
   },
   a_11: {
     type: "prop",
-    elem: "all",
-    test: "c",
+    elem: "a",
+    test: "linkNotAName",
     score: 10,
     level: "A",
     trust: "1",
@@ -1545,7 +1545,7 @@ export default {
   },
   object_01: {
     type: "true",
-    elem: "all",
+    elem: "object",
     test: "objectAName",
     score: 10,
     level: "A",
@@ -1557,7 +1557,7 @@ export default {
   },
   object_02: {
     type: "prop",
-    elem: "all",
+    elem: "object",
     test: "objectANameNot",
     score: 10,
     level: "A",
@@ -2049,7 +2049,7 @@ export default {
   },
   list_07: {
     type: "prop",
-    elem: "d",
+    elem: "dl",
     test: "notDescList",
     score: 10,
     level: "AAA",
