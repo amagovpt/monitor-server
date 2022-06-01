@@ -46,12 +46,11 @@ export class ObservatoryService {
     private readonly observatoryRepository: Repository<Observatory>
   ) {}
 
-  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async generateData(manual = false): Promise<any> {
     if (
-      process.env.NAMESPACE === undefined ||
-      parseInt(process.env.AMSID) === 0
-    ) {
+      (process.env.NAMESPACE === undefined ||
+      parseInt(process.env.AMSID) === 0) || manual) {
       const data = await this.getData();
 
       const directories = new Array<Directory>();
@@ -131,161 +130,152 @@ export class ObservatoryService {
         `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
         [directory.DirectoryId]
       );
-      if (tags.length > 0) {
-        const tagsId = tags.map((t) => t.TagId);
+      const tagsId = tags.map((t) => t.TagId);
 
-        let pages = null;
-        if (parseInt(directory.Method) === 0 && tags.length > 1) {
-          const websites = await manager.query(
+      let pages = null;
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        const websites = await manager.query(
+          `
+        SELECT * FROM TagWebsite WHERE TagId IN (?)
+      `,
+          [tagsId]
+        );
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+
+        pages = await manager.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            w.WebsiteId IN (?) AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          [websitesToFetch]
+        );
+      } else {
+        pages = await manager.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            TagWebsite as tw,
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            tw.TagId IN (?) AND
+            w.WebsiteId = tw.WebsiteId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          [tagsId]
+        );
+      }
+      if (pages) {
+        pages = pages.filter((p) => p.Score !== null);
+
+        for (const p of pages || []) {
+          p.DirectoryId = directory.DirectoryId;
+          p.Directory_Name = directory.Name;
+          p.Show_in_Observatory = directory.Show_in_Observatory;
+          p.Directory_Creation_Date = directory.Creation_Date;
+          p.Entity_Name = null;
+
+          const entities = await manager.query(
             `
-            SELECT * FROM TagWebsite WHERE TagId IN (?)
+            SELECT e.Long_Name
+            FROM
+              EntityWebsite as ew,
+              Entity as e
+            WHERE
+              ew.WebsiteId = ? AND
+              e.EntityId = ew.EntityId
           `,
-            [tagsId]
+            [p.WebsiteId]
           );
 
-          const counts = {};
-          for (const w of websites ?? []) {
-            if (counts[w.WebsiteId]) {
-              counts[w.WebsiteId]++;
+          if (entities.length > 0) {
+            if (entities.length === 1) {
+              p.Entity_Name = entities[0].Long_Name;
             } else {
-              counts[w.WebsiteId] = 1;
+              p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
             }
           }
-
-          const websitesToFetch = new Array<Number>();
-          for (const id of Object.keys(counts) ?? []) {
-            if (counts[id] === tags.length) {
-              websitesToFetch.push(parseInt(id));
-            }
-          }
-
-          pages = await manager.query(
-            `
-            SELECT
-              e.EvaluationId,
-              e.Title,
-              e.Score,
-              e.Errors,
-              e.Tot,
-              e.A,
-              e.AA,
-              e.AAA,
-              e.Evaluation_Date,
-              p.PageId,
-              p.Uri,
-              p.Creation_Date as Page_Creation_Date,
-              d.Url,
-              w.WebsiteId,
-              w.Name as Website_Name,
-              w.Declaration as Website_Declaration,
-              w.Declaration_Update_Date as Declaration_Date,
-              w.Stamp as Website_Stamp,
-              w.Stamp_Update_Date as Stamp_Date,
-              w.Creation_Date as Website_Creation_Date
-            FROM
-              Website as w,
-              Domain as d,
-              DomainPage as dp,
-              Page as p
-              LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
-                SELECT Evaluation_Date FROM Evaluation 
-                WHERE PageId = p.PageId AND Show_To LIKE "1_"
-                ORDER BY Evaluation_Date DESC LIMIT 1
-              )
-            WHERE
-              w.WebsiteId IN (?) AND
-              d.WebsiteId = w.WebsiteId AND
-              d.Active = 1 AND
-              dp.DomainId = d.DomainId AND
-              p.PageId = dp.PageId AND
-              p.Show_In LIKE "__1"
-            GROUP BY
-              w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-            [websitesToFetch]
-          );
-        } else {
-          pages = await manager.query(
-            `
-            SELECT
-              e.EvaluationId,
-              e.Title,
-              e.Score,
-              e.Errors,
-              e.Tot,
-              e.A,
-              e.AA,
-              e.AAA,
-              e.Evaluation_Date,
-              p.PageId,
-              p.Uri,
-              p.Creation_Date as Page_Creation_Date,
-              d.Url,
-              w.WebsiteId,
-              w.Name as Website_Name,
-              w.Declaration as Website_Declaration,
-              w.Declaration_Update_Date as Declaration_Date,
-              w.Stamp as Website_Stamp,
-              w.Stamp_Update_Date as Stamp_Date,
-              w.Creation_Date as Website_Creation_Date
-            FROM
-              TagWebsite as tw,
-              Website as w,
-              Domain as d,
-              DomainPage as dp,
-              Page as p
-              LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
-                SELECT Evaluation_Date FROM Evaluation 
-                WHERE PageId = p.PageId AND Show_To LIKE "1_"
-                ORDER BY Evaluation_Date DESC LIMIT 1
-              )
-            WHERE
-              tw.TagId IN (?) AND
-              w.WebsiteId = tw.WebsiteId AND
-              d.WebsiteId = w.WebsiteId AND
-              d.Active = 1 AND
-              dp.DomainId = d.DomainId AND
-              p.PageId = dp.PageId AND
-              p.Show_In LIKE "__1"
-            GROUP BY
-              w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
-            [tagsId]
-          );
         }
 
-        if (pages) {
-          pages = pages.filter((p) => p.Score !== null);
-
-          for (const p of pages || []) {
-            p.DirectoryId = directory.DirectoryId;
-            p.Directory_Name = directory.Name;
-            p.Show_in_Observatory = directory.Show_in_Observatory;
-            p.Directory_Creation_Date = directory.Creation_Date;
-            p.Entity_Name = null;
-
-            const entities = await manager.query(
-              `
-              SELECT e.Long_Name
-              FROM
-                EntityWebsite as ew,
-                Entity as e
-              WHERE
-                ew.WebsiteId = ? AND
-                e.EntityId = ew.EntityId
-            `,
-              [p.WebsiteId]
-            );
-
-            if (entities.length > 0) {
-              if (entities.length === 1) {
-                p.Entity_Name = entities[0].Long_Name;
-              } else {
-                p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
-              }
-            }
-          }
-
-          data = [...data, ...pages];
-        }
+        data = [...data, ...pages];
       }
     }
 
@@ -331,7 +321,7 @@ export class ObservatoryService {
           declarationDate: wb.Declaration_Date,
           stamp: wb.Website_Stamp,
           stampDate: wb.Stamp_Date,
-          domain: wb.Url,
+          startingUrl: wb.StartingUrl,
           creation_date: wb.Website_Creation_Date,
         });
       }
@@ -354,7 +344,7 @@ export class ObservatoryService {
       website.declarationDate,
       website.stamp,
       website.stampDate,
-      website.domain,
+      website.startingUrl,
       website.creation_date
     );
 
@@ -842,7 +832,7 @@ export class ObservatoryService {
       websites[website.id] = {
         id: website.id,
         name: website.name,
-        domain: website.domain,
+        startingUrl: website.startingUrl,
         oldestPage: website.oldestPage,
         recentPage: website.recentPage,
         score: website.getScore(),

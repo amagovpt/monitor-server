@@ -23,15 +23,12 @@ export class EntityService {
         p.Uri
       FROM
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
       WHERE
         w.EntityId IN (?) AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE ?
     `,
       [entitiesId, option === "all" ? "1__" : "1_1"]
@@ -196,16 +193,13 @@ export class EntityService {
 
     if (entity) {
       entity["websites"] = await this.entityRepository.query(
-        `SELECT w.*, d.Url 
+        `SELECT w.*
         FROM 
           EntityWebsite as ew, 
-          Website as w,
-          Domain as d
+          Website as w
         WHERE 
           ew.EntityId = ? AND 
-          w.WebsiteId = ew.WebsiteId AND
-          d.WebsiteId = w.WebsiteId AND
-          d.Active = 1`,
+          w.WebsiteId = ew.WebsiteId`,
         [entityId]
       );
       return entity;
@@ -226,14 +220,13 @@ export class EntityService {
     const manager = getManager();
 
     const websites = await manager.query(
-      `SELECT w.*, d.Url, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
+      `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
       FROM
         Entity as e
         LEFT OUTER JOIN EntityWebsite as ew ON ew.EntityId = e.EntityId
         LEFT OUTER JOIN Website as w ON w.WebsiteId = ew.WebsiteId
-        LEFT OUTER JOIN Domain as d ON d.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN DomainPage as dp ON dp.DomainId = d.DomainId
-        LEFT OUTER JOIN Page as p ON p.PageId = dp.PageId AND p.Show_In LIKE "1__"
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+        LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
         LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId
         LEFT OUTER JOIN User as u ON u.UserId = w.UserId
       WHERE
@@ -264,8 +257,7 @@ export class EntityService {
         Entity as en,
         EntityWebsite as ew,
         Website as w,
-        Domain as d,
-        DomainPage as dp,
+        WebsitePage as wp,
         Page as p
         LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
           SELECT Evaluation_Date FROM Evaluation 
@@ -276,10 +268,8 @@ export class EntityService {
         en.Long_Name = ? AND
         ew.EntityId = en.EntityId AND
         w.WebsiteId = ew.WebsiteId AND
-        d.WebsiteId = w.WebsiteId AND
-        d.Active = 1 AND
-        dp.DomainId = d.DomainId AND
-        p.PageId = dp.PageId AND
+        wp.WebsiteId = w.WebsiteId AND
+        p.PageId = wp.PageId AND
         p.Show_In LIKE "1__"
       GROUP BY w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
       [entity]
@@ -377,11 +367,11 @@ export class EntityService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(
+      /*await queryRunner.manager.update(
         Website,
         { EntityId: entityId },
         { EntityId: null }
-      );
+      );*/
 
       await queryRunner.manager.delete(EntityTable, { EntityId: entityId });
 
@@ -441,13 +431,11 @@ export class EntityService {
       const pages = await queryRunner.manager.query(
         `
         SELECT
-          dp.PageId 
+          PageId 
         FROM 
-          Domain as d, 
-          DomainPage as dp
+          WebsitePage
         WHERE
-          d.WebsiteId IN (?) AND
-          dp.DomainId = d.DomainId
+          WebsiteId IN (?)
       `,
         [websites.map((w) => w.WebsiteId)]
       );
