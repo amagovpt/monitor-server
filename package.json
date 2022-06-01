@@ -29,9 +29,10 @@
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.2.3",
     "@nestjs/schedule": "^1.0.2",
+    "@nestjs/mapped-types": "*",
     "@nestjs/serve-static": "^2.2.2",
-    "@nestjs/typeorm": "^8.0.2",
-    "@qualweb/core": "0.7.21",
+    "@nestjs/typeorm": "8.0.2",
+    "@qualweb/core": "0.7.26",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -47,7 +48,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "puppeteer": "^13.5.2",
+    "puppeteer": "13.5.1",
     "puppeteer-extra": "^3.2.3",
     "puppeteer-extra-plugin-stealth": "^2.9.0",
     "reflect-metadata": "^0.1.13",
@@ -61,7 +62,7 @@
     "@nestjs/cli": "^8.1.5",
     "@nestjs/schematics": "^8.0.5",
     "@nestjs/testing": "^8.2.3",
-    "@qualweb/types": "0.7.16",
+    "@qualweb/types": "0.7.19",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.5.0",
     "@types/lodash.clone": "^4.5.6",
@@ -84,7 +85,8 @@
     "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.12.0",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "typeorm": "^0.2.41"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -11,7 +11,7 @@ async function bootstrap() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(compression());
-  await findAccessiblityStatements(app);
+  //await findAccessiblityStatements(app);
   await app.listen(3001);
 }
 async function findAccessiblityStatements(app){

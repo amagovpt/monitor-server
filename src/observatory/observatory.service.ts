@@ -46,15 +46,13 @@ export class ObservatoryService {
     private readonly observatoryRepository: Repository<Observatory>
   ) {}
 
-  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async generateData(manual = false): Promise<any> {
     console.log("generating data");
     console.log({ nameSpace: process.env.NAMESPACE, amsid: process.env.AMSID, intParse: parseInt(process.env.AMSID) });
     if (
-      process.env.NAMESPACE === undefined ||
-      parseInt(process.env.AMSID) === 0
-    ) {
-      console.log("Starting");
+      (process.env.NAMESPACE === undefined ||
+      parseInt(process.env.AMSID) === 0) || manual) {
       const data = await this.getData();
 
       const directories = new Array<Directory>();
