@@ -25,7 +25,7 @@ export class WebsiteService {
       const id = website.WebsiteId;
       console.log(id);
       const pages = website.Pages;
-     
+      await this.findAccessiblityStatementsInPageList(pages, website);
     }
   }
   async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
