@@ -11,13 +11,16 @@ export class ManualEvaluationService {
     @InjectRepository(ManualEvaluation)
     private readonly manualEvaluationRepository: Repository<ManualEvaluation>) { }
   create(createManualEvaluationDto: CreateManualEvaluationDto, accessibilityStatement: AccessibilityStatement) {
-    console.log(createManualEvaluationDto);
-    const heuristics = createManualEvaluationDto.Heuristics;
-    const splittedText = heuristics.split('/');
-    const HeuristicsPassed = parseInt(splittedText[0]);
-    const HeuristicsTotal = parseInt(splittedText[1]);
+    let heuristics = {};
+    if (createManualEvaluationDto.Heuristics) {
+      const heuristicsValue = createManualEvaluationDto.Heuristics;
+      const splittedText = heuristicsValue.split('/');
+      const HeuristicsPassed = parseInt(splittedText[0]);
+      const HeuristicsTotal = parseInt(splittedText[1]);
+      heuristics = { HeuristicsPassed, HeuristicsTotal }
+    }
     const evaluation = this.manualEvaluationRepository.create({
-      ...createManualEvaluationDto, accessibilityStatement,HeuristicsPassed,HeuristicsTotal
+      ...createManualEvaluationDto, accessibilityStatement, ...heuristics
     });
     return this.manualEvaluationRepository.save(evaluation);
   }

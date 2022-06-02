@@ -1,5 +1,6 @@
 import { AutomaticEvaluation } from "src/accessibility-statement-module/automatic-evaluation/entities/automatic-evaluation.entity";
 import { ManualEvaluation } from "src/accessibility-statement-module/manual-evaluation/entities/manual-evaluation.entity";
+import { Website } from "src/website/website.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Page } from "../../../page/page.entity";
 
@@ -19,9 +20,9 @@ export class AccessibilityStatement {
     })
     UpdatedAt: Date;
 
-    @ManyToOne(type => Page)
-    @JoinColumn({ name: "PageId", referencedColumnName: "PageId" })
-    Page: Page;
+    @ManyToOne(type => Website)
+    @JoinColumn({ name: "WebsiteId", referencedColumnName: "WebsiteId" })
+    Website: Website;
 
     @Column({
         type: "varchar",
