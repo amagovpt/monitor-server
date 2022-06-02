@@ -5,16 +5,40 @@ import { Website } from "./website.entity";
 import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
 import { EvaluationService } from "../evaluation/evaluation.service";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Injectable()
 export class WebsiteService {
   constructor(
     @InjectRepository(Website)
     private readonly websiteRepository: Repository<Website>,
+    private evaluationService: EvaluationService,
+    private readonly accessibilityStatementService: AccessibilityStatementService,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
   ) { }
+
+  async findAccessiblityStatements(): Promise<any> {
+    const websites = await this.websiteRepository.find({relations:["Pages"]});
+    for (const website of websites) {
+      const id = website.WebsiteId;
+      console.log(id);
+      const pages = website.Pages;
+     
+    }
+  }
+  async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
+    for(const page of pages){
+      const id = page.PageId;
+    const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
+    if (evaluation) {
+      const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
+      await this.accessibilityStatementService.createIfExist(rawHtml, website, page.Uri);
+    }
+  }
+}
+
 
   async addPagesToEvaluate(
     websitesId: number[],

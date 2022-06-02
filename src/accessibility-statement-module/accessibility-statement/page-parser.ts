@@ -63,8 +63,7 @@ export class PageParser {
             evidence: this.getEvidence(),
             seal: this.getSeal(),
             conformance: this.getConformance(),
-            url
-        }
+            url,        }
     }
 
     public getUserEvaluationData() {

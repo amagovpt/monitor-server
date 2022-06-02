@@ -10,7 +10,8 @@ import { UserEvaluationService } from '../user-evaluation/user-evaluation.servic
 import { CreateAutomaticEvaluationDto } from '../automatic-evaluation/dto/create-automatic-evaluation.dto';
 import { CreateManualEvaluationDto } from '../manual-evaluation/dto/create-manual-evaluation.dto';
 import { CreateUserEvaluationDto } from '../user-evaluation/dto/create-user-evaluation.dto';
-import { Page } from 'src/page/page.entity';
+import { State } from './state';
+import { Website } from 'src/website/website.entity';
 
 @Injectable()
 export class AccessibilityStatementService {
@@ -22,20 +23,21 @@ export class AccessibilityStatementService {
     private userEvaluationService: UserEvaluationService,
   ) {
   }
-  createIfExist(html: string, page: Page, url: string) {
+  createIfExist(html: string, website: Website, url: string) {
     const pageParser = new PageParser(html);
-    if (!pageParser.verifyAccessiblityStatement())// && !pageParser.verifyAccessiblityPossibleStatement(url))
+    if (!pageParser.verifyAccessiblityStatement() /*&& !pageParser.verifyAccessiblityPossibleStatement(url)*/)
       return;
     const aStatement = pageParser.getAccessiblityStatementData(url);
     const autoList = pageParser.getAutomaticEvaluationData();
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
-    console.log({ aStatement, autoList, userList, manualList, page});
-    return this.create(aStatement, autoList, manualList, userList, page);
+    const state = this.calculateFlag(aStatement, autoList, manualList);
+    console.log({ aStatement, autoList, userList, manualList, website });
+    return this.create({ ...aStatement, state }, autoList, manualList, userList, website);
   }
 
-  async create(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[], page: Page) {
-    const aStatement = await this.createDB(createAccessibilityStatementDto, page);
+  async create(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[], website: Website) {
+    const aStatement = await this.createDB(createAccessibilityStatementDto, website);
     aStatement.automaticEvaluationList = await Promise.all(createAutomaticEvaluationList.map(async (evalu) => {
       return await this.automaticEvaluationService.create(evalu, aStatement);
     }));
@@ -49,11 +51,27 @@ export class AccessibilityStatementService {
     return aStatement;
   }
 
-  createDB(createAccessibilityStatementDto: CreateAccessibilityStatementDto, Page: Page) {
+  createDB(createAccessibilityStatementDto: CreateAccessibilityStatementDto, Website: Website) {
     const aStatement = this.accessibilityStatementRepository.create({
-      ...createAccessibilityStatementDto, Page
+      ...createAccessibilityStatementDto, Website
     });
     console.log({ aStatement, createAccessibilityStatementDto });
     return this.accessibilityStatementRepository.save(aStatement);
+  }
+
+  calculateFlag(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[]) {
+    const conformance = createAccessibilityStatementDto.conformance;
+    const date = createAccessibilityStatementDto.statementDate;
+    const hasAutoEval = createAutomaticEvaluationList.length > 0;
+    const hasManualEval = createManualEvaluationDto.length > 0;
+    let result;
+    if (conformance && date && hasAutoEval && hasManualEval) {
+      result = State.completeStatement
+    } else if (!conformance && !date && !hasAutoEval && !hasManualEval) {
+      result = State.possibleStatement;
+    } else {
+      result = State.incompleteStatement;
+    }
+    return result;
   }
 }

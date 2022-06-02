@@ -14,8 +14,6 @@ export class PageService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
-    private evaluationService:EvaluationService,
-    private readonly accessibilityStatementService: AccessibilityStatementService,
     private readonly connection: Connection
   ) { }
   async deletePlicas(): Promise<any> {
@@ -34,17 +32,6 @@ export class PageService {
       }
     }
   }
-  async findAccessiblityStatements(): Promise<any> {
-    const pages = await this.pageRepository.find();
-    for (const page of pages) {
-      const id = page.PageId;
-      console.log(id);
-      const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
-      if(evaluation){
-      const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
-      await this.accessibilityStatementService.createIfExist(rawHtml, page,page.Uri);}
-      }
-    }
 
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {

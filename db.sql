@@ -224,7 +224,7 @@ CREATE TABLE `WebsitePage` (
 DROP TABLE IF EXISTS `Accessibility_Statement`;
 CREATE TABLE `Accessibility_Statement` (
     `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
-    `PageId`                        INT(11)         NOT NULL,
+    `WebsiteId`                        INT(11)         NOT NULL,
     `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `UpdatedAt`                     DATETIME        DEFAULT NULL,
     `url` varchar(255) NOT NULL,
@@ -234,7 +234,7 @@ CREATE TABLE `Accessibility_Statement` (
     `statementDate` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Id`),
-    CONSTRAINT `Accessibility_Statement_PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
+    CONSTRAINT `Accessibility_Statement_WebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Automatic_Evaluation`;
@@ -274,7 +274,7 @@ CREATE TABLE `User_Evaluation` (
     `Url` varchar(255) DEFAULT NULL,
     `Sample` varchar(255) DEFAULT NULL,
     `Participants` varchar(255) DEFAULT NULL,
-    `Process` varchar(255) DEFAULT NULL,
+    `Process` text DEFAULT NULL,
     `Summary` text(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
