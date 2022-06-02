@@ -6,7 +6,7 @@ import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-stat
 @Controller('accessibility-statement')
 export class AccessibilityStatementController {
   constructor(private readonly accessibilityStatementService: AccessibilityStatementService) {}
-
+/*
   @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
@@ -30,5 +30,5 @@ export class AccessibilityStatementController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.accessibilityStatementService.remove(+id);
-  }
+  }*/
 }

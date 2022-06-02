@@ -6,7 +6,7 @@ import { UpdateUserEvaluationDto } from './dto/update-user-evaluation.dto';
 @Controller('user-evaluation')
 export class UserEvaluationController {
   constructor(private readonly userEvaluationService: UserEvaluationService) {}
-
+/*
   @Post()
   create(@Body() createUserEvaluationDto: CreateUserEvaluationDto) {
     return this.userEvaluationService.create(createUserEvaluationDto);
@@ -30,5 +30,5 @@ export class UserEvaluationController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userEvaluationService.remove(+id);
-  }
+  }*/
 }

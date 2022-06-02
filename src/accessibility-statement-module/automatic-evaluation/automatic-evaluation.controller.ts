@@ -6,7 +6,7 @@ import { UpdateAutomaticEvaluationDto } from './dto/update-automatic-evaluation.
 @Controller('automatic-evaluation')
 export class AutomaticEvaluationController {
   constructor(private readonly automaticEvaluationService: AutomaticEvaluationService) {}
-
+/*
   @Post()
   create(@Body() createAutomaticEvaluationDto: CreateAutomaticEvaluationDto) {
     return this.automaticEvaluationService.create(createAutomaticEvaluationDto);
@@ -30,5 +30,5 @@ export class AutomaticEvaluationController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.automaticEvaluationService.remove(+id);
-  }
+  }*/
 }
