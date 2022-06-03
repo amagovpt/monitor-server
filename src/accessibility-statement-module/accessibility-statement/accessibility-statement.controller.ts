@@ -7,7 +7,12 @@ import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-stat
 export class AccessibilityStatementController {
   constructor(private readonly accessibilityStatementService: AccessibilityStatementService) {}
 
-  @Post()
+  @Get('/website/:id')
+  findOne(@Param('id') id: string) {
+    return this.accessibilityStatementService.findByWebsiteId(+id);
+  }
+
+ /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
   }
@@ -30,5 +35,5 @@ export class AccessibilityStatementController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.accessibilityStatementService.remove(+id);
-  }
+  }*/
 }

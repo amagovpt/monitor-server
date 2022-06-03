@@ -74,4 +74,7 @@ export class AccessibilityStatementService {
     }
     return result;
   }
+  findByWebsiteId(id:number){
+    return this.accessibilityStatementRepository.findOne({where:{Website:{id}}});
+  }
 }
