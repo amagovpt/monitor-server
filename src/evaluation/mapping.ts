@@ -436,6 +436,7 @@ function QW_ACT_R19(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R21(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "svg", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "svgAName", rule.metadata.passed);
     addToResults(results, "svg_01");
@@ -1157,6 +1158,7 @@ function QW_WCAG_T16(
   nodes: any,
   technique: any
 ): void {
+  console.log(technique.results);
   if (technique.metadata.outcome === "failed") {
     addToElements(elements, "w3cValidator", "true");
     addToElements(elements, "w3cValidatorErrors", technique.metadata.failed);
@@ -1485,8 +1487,10 @@ function QW_WCAG_T33(
   nodes: any,
   technique: any
 ): void {
+  addToElements(elements, "dd, dt", technique.results.length);
+
   if (technique.metadata.outcome === "passed") {
-    addToElements(elements, "descListElement", technique.metadata.warning);
+    addToElements(elements, "descListElement", technique.metadata.passed);
     addToResults(results, "list_04");
     addToNodes(
       nodes,
@@ -1510,8 +1514,9 @@ function QW_WCAG_T34(
   nodes: any,
   technique: any
 ): void {
+  addToElements(elements, "dl", technique.results.length);
   if (technique.metadata.outcome === "passed") {
-    addToElements(elements, "descList", technique.metadata.warning);
+    addToElements(elements, "descList", technique.metadata.passed);
     addToResults(results, "list_06");
     addToNodes(
       nodes,
@@ -1848,6 +1853,7 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     ]);
   }
 } function QW_BP23(elements: any, results: any, nodes: any, technique: any) {
+  addToElements(elements, "li", technique.results.length);
   if (technique.metadata.outcome === "passed") {
     addToElements(elements, "liSemantically", technique.metadata.passed);
     addToResults(results, "listitem_01");
@@ -1954,7 +1960,7 @@ function addToNodes(nodes: any, key: string, elements: any[]): void {
   nodes[key] = elements;
 }
 
-export function  getElementsMapping(evaluation: any): any {
+export function getElementsMapping(evaluation: any): any {
   const elements = {};
   const results = {};
   const nodes = {};
