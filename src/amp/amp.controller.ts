@@ -37,7 +37,7 @@ export class AmpController {
     }
 
     await this.evaluationService.increaseAccessMonitorRequestCounter();
-
+    console.log("Starting eval")
     return success(
       await this.evaluationService.evaluateUrl(decodeURIComponent(url))
     );

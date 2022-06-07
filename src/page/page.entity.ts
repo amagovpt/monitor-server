@@ -30,6 +30,6 @@ export class Page {
   })
   Creation_Date: any;
 
-  @ManyToMany((type) => Website)
+  @ManyToMany((type) => Website, (website) => website.Pages)
   Pages: Website[];
 }

@@ -5,6 +5,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { Page } from "../../../page/page.entity";
 
 import { UserEvaluation } from "../../user-evaluation/entities/user-evaluation.entity";
+import { State } from "../state";
 @Entity("Accessibility_Statement")
 export class AccessibilityStatement {
     @PrimaryGeneratedColumn()
@@ -56,6 +57,9 @@ export class AccessibilityStatement {
         nullable: true,
     })
     statementDate: any;
+
+    @Column({ type: 'enum', enum: State })
+    state: State;
 
     @OneToMany(type => ManualEvaluation, (evaluation) => evaluation.accessibilityStatement)
     manualEvaluationList: ManualEvaluation[];

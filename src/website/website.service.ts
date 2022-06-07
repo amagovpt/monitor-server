@@ -20,24 +20,31 @@ export class WebsiteService {
   ) { }
 
   async findAccessiblityStatements(): Promise<any> {
-    const websites = await this.websiteRepository.find({relations:["Pages"]});
+    const websites = await this.websiteRepository.find();
     for (const website of websites) {
       const id = website.WebsiteId;
       console.log(id);
-      const pages = website.Pages;
+      const pages = await this.websiteRepository.query(
+        `Select 
+            * 
+          from 
+            Page 
+            JOIN WebsitePage on WebsitePage.PageId = Page.PageId 
+          WHERE 
+            WebsitePage.WebsiteId = ?`, [id]);
       await this.findAccessiblityStatementsInPageList(pages, website);
     }
   }
-  async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
-    for(const page of pages){
+  async findAccessiblityStatementsInPageList(pages: Page[], website: Website): Promise<any> {
+    for (const page of pages) {
       const id = page.PageId;
-    const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
-    if (evaluation) {
-      const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
-      await this.accessibilityStatementService.createIfExist(rawHtml, website, page.Uri);
+      const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
+      if (evaluation) {
+        const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
+        await this.accessibilityStatementService.createIfExist(rawHtml, website, page.Uri);
+      }
     }
   }
-}
 
 
   async addPagesToEvaluate(

@@ -75,6 +75,6 @@ export class Website {
   Entities: EntityTable[];
 
   @JoinTable({ name: 'WebsitePage' })
-  @ManyToMany((type) => Page)
+  @ManyToMany((type) => Page, (page) => page.Pages)
   Pages: Page[];
 }
