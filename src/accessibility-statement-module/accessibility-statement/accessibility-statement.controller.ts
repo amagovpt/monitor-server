@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { success } from 'src/lib/response';
 import { AccessibilityStatementService } from './accessibility-statement.service';
 import { CreateAccessibilityStatementDto } from './dto/create-accessibility-statement.dto';
 import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-statement.dto';
@@ -7,9 +8,9 @@ import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-stat
 export class AccessibilityStatementController {
   constructor(private readonly accessibilityStatementService: AccessibilityStatementService) {}
 
-  @Get('/website/:name')
-  findOne(@Param('name') name: string) {
-    return this.accessibilityStatementService.findByWebsiteName(name);
+  @Get('website/:name')
+  async findOne(@Param('name') name: string) {
+    return success(await this.accessibilityStatementService.findByWebsiteName(name));
   }
 
  /* @Post()
