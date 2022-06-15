@@ -74,4 +74,7 @@ export class AccessibilityStatementService {
     }
     return result;
   }
+  findByWebsiteName(Name:string){
+    return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["AutomaticEvaluation", "UserEvaluation","ManualEvaluation"]});
+  }
 }

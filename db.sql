@@ -228,6 +228,7 @@ CREATE TABLE `Accessibility_Statement` (
     `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `UpdatedAt`                     DATETIME        DEFAULT NULL,
     `url` varchar(255) NOT NULL,
+    `state` ENUM('completeStatement', 'incompleteStatement', 'possibleStatement'),
     `conformance` varchar(255) DEFAULT NULL,
     `evidence` text(255) DEFAULT NULL,
     `seal` varchar(255) DEFAULT NULL,
