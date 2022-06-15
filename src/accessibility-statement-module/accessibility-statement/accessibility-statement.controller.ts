@@ -7,9 +7,9 @@ import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-stat
 export class AccessibilityStatementController {
   constructor(private readonly accessibilityStatementService: AccessibilityStatementService) {}
 
-  @Get('/website/:id')
-  findOne(@Param('id') id: string) {
-    return this.accessibilityStatementService.findByWebsiteId(+id);
+  @Get('/website/:name')
+  findOne(@Param('name') name: string) {
+    return this.accessibilityStatementService.findByWebsiteName(name);
   }
 
  /* @Post()
