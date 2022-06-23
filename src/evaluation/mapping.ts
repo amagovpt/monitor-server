@@ -250,6 +250,7 @@ function QW_ACT_R9(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R10(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "iframeSame", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "iframeSameAName", rule.metadata.passed);
     addToResults(results, "iframe_02");
@@ -269,6 +270,7 @@ function QW_ACT_R10(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "button", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "buttonAname", rule.metadata.passed);
     addToResults(results, "button_01");
@@ -653,6 +655,7 @@ function QW_ACT_R35(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R36(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "headers", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "headerAtt", rule.metadata.passed);
     addToResults(results, "headers_01");
@@ -673,6 +676,7 @@ function QW_ACT_R36(elements: any, results: any, nodes: any, rule: any): void {
 }
 
 function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "id", rule.results.length);
   if (rule.metadata.outcome === "failed") {
     addToElements(elements, "colorContrast", rule.metadata.failed);
     addToResults(results, "color_02");
@@ -745,6 +749,7 @@ function QW_ACT_R42(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R43(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "scrollable", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "scrollableAccess", rule.metadata.passed);
     addToResults(results, "scrollable_01");
@@ -840,6 +845,7 @@ function QW_ACT_R65(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R66(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "menuItem", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "menuItemAName", rule.metadata.passed);
     addToResults(results, "menuItem_01");
@@ -1458,7 +1464,7 @@ function QW_WCAG_T30(
     addToElements(elements, "cssBlink", technique.metadata.failed);
     addToResults(results, "blink_02");
     addToNodes(nodes, "cssBlink", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
+      technique.results.filter((r) => r.verdict === "failed"),
     ]);
   }
 }
@@ -1779,7 +1785,7 @@ function QW_BP18(elements: any, results: any, nodes: any, technique: any) {
     addToElements(elements, "valueRelCss", technique.metadata.passed);
     addToResults(results, "values_02b");
     addToNodes(nodes, "valueRelCss", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "passed")),
+      technique.results.filter((r) => r.verdict === "passed"),
     ]);
   }
 }
@@ -1795,11 +1801,10 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
     );
   }
   else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "bannerTopLevel", technique.metadata.failed);
+    addToElements(elements, "bannerNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_02");
-    addToNodes(nodes, "bannerTopLevel", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "bannerNotTopLevel",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP20(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1814,9 +1819,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "duplicateBanner", technique.metadata.failed);
     addToResults(results, "landmark_10");
-    addToNodes(nodes, "duplicateBanner", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "duplicateBanner",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP21(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1831,9 +1835,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "duplicateContentinfo", technique.metadata.failed);
     addToResults(results, "landmark_12");
-    addToNodes(nodes, "duplicateContentinfo", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "duplicateContentinfo",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP22(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1848,9 +1851,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "duplicateMain", technique.metadata.failed);
     addToResults(results, "landmark_14");
-    addToNodes(nodes, "duplicateMain", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "duplicateMain",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP23(elements: any, results: any, nodes: any, technique: any) {
   addToElements(elements, "li", technique.results.length);
@@ -1866,9 +1868,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "liNotSemantically", technique.metadata.failed);
     addToResults(results, "listitem_02");
-    addToNodes(nodes, "liNotSemantically", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "liNotSemantically",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP24(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1883,9 +1884,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "listNotCorrectly", technique.metadata.failed);
     addToResults(results, "list_03");
-    addToNodes(nodes, "listNotCorrectly", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "listNotCorrectly",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP25(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1900,9 +1900,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "complementaryNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_04");
-    addToNodes(nodes, "complementaryNotTopLevel", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "complementaryNotTopLevel",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP26(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1917,9 +1916,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "contentinfoNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_06");
-    addToNodes(nodes, "contentinfoNotTopLevel", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "contentinfoNotTopLevel",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 } function QW_BP27(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
@@ -1934,9 +1932,8 @@ function QW_BP19(elements: any, results: any, nodes: any, technique: any) {
   else if (technique.metadata.outcome === "failed") {
     addToElements(elements, "mainNotTopLevel", technique.metadata.failed);
     addToResults(results, "landmark_08");
-    addToNodes(nodes, "mainNotTopLevel", [
-      JSON.stringify(technique.results.filter((r) => r.verdict === "failed")),
-    ]);
+    addToNodes(nodes, "mainNotTopLevel",
+      technique.results.filter((r) => r.verdict === "failed"));
   }
 }
 
@@ -1960,7 +1957,7 @@ function addToNodes(nodes: any, key: string, elements: any[]): void {
   nodes[key] = elements;
 }
 
-export function  getElementsMapping(evaluation: any): any {
+export function getElementsMapping(evaluation: any): any {
   const elements = {};
   const results = {};
   const nodes = {};

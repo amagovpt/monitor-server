@@ -127,8 +127,6 @@ function generateScore(report: any): string {
         }
         break;
     }
-    if (value["test"]==="liNotSemantically")
-      console.log({ calc, value, elems: report.data["elems"]})
 
     if (calc) {
       let temp = null;
