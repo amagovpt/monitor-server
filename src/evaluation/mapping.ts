@@ -303,7 +303,7 @@ function QW_ACT_R12(elements: any, results: any, nodes: any, rule: any): void {
     addToResults(results, "a_11");
     addToNodes(
       nodes,
-      "linkAName",
+      "linkNotAName",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
