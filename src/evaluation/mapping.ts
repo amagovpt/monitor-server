@@ -379,12 +379,13 @@ function QW_ACT_R16(elements: any, results: any, nodes: any, rule: any): void {
 }
 
 function QW_ACT_R17(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "img", rule.results.length);
   if (rule.metadata.outcome === "passed") {
-    addToElements(elements, "imgAltNo", undefined);
+    addToElements(elements, "imgAlt", undefined);
     addToResults(results, "img_01a");
     addToNodes(
       nodes,
-      "img",
+      "imgAlt",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (rule.metadata.outcome === "failed") {
