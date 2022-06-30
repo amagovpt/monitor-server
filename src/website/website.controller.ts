@@ -225,6 +225,11 @@ export class WebsiteController {
 
     return success(await this.websiteService.findAllPages(websiteId));
   }
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("csv")
+  async getAllWebsiteCSVData(): Promise<any> {  
+    return success(await this.websiteService.getAllWebsiteDataCSV());
+  }
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("pages/:websiteId")
