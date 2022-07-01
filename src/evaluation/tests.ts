@@ -782,7 +782,7 @@ export default {
   w3c_validator_01a: {
     type: "fals",
     elem: "w3cValidator",
-    test: "w3cValidatorErrors",
+    test: "w3cValidatorErrorsNo",
     score: 10,
     level: "a",
     trust: "1",
