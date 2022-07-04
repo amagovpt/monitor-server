@@ -196,11 +196,11 @@ function QW_ACT_R5(elements: any, results: any, nodes: any, rule: any): void {
 
 function QW_ACT_R6(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
-    addToElements(elements, "inpImgAltNo", undefined);
+    addToElements(elements, "inpImgAltYes", undefined);
     addToResults(results, "inp_img_01a");
     addToNodes(
       nodes,
-      "inpImgAltNo",
+      "inpImgAltYes",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (rule.metadata.outcome === "failed") {
@@ -360,11 +360,11 @@ function QW_ACT_R15(elements: any, results: any, nodes: any, rule: any): void {
 
 function QW_ACT_R16(elements: any, results: any, nodes: any, rule: any): void {
   if (rule.metadata.outcome === "passed") {
-    addToElements(elements, "inputLabelNo", undefined);
+    addToElements(elements, "inputLabel", undefined);
     addToResults(results, "input_02b");
     addToNodes(
       nodes,
-      "inputLabelNo",
+      "inputLabel",
       rule.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (rule.metadata.outcome === "failed") {
@@ -991,11 +991,11 @@ function QW_WCAG_T1(
     technique.metadata.outcome === "passed" ||
     technique.metadata.outcome === "warning"
   ) {
-    addToElements(elements, "areaAltNo", undefined);
+    addToElements(elements, "areaAltYes", undefined);
     addToResults(results, "area_01a");
     addToNodes(
       nodes,
-      "areaAltNo",
+      "areaAltYes",
       technique.results.filter(
         (r: any) => r.verdict === "passed" || r.verdict === "warning"
       )
@@ -1180,11 +1180,11 @@ function QW_WCAG_T16(
     technique.metadata.outcome === "warning"
   ) {
     addToElements(elements, "w3cValidator", "true");
-    addToElements(elements, "w3cValidatorErrors", 0);
+    addToElements(elements, "w3cValidatorErrorsNo", 0);
     addToResults(results, "w3c_validator_01a");
     addToNodes(
       nodes,
-      "w3cValidatorErrors",
+      "w3cValidatorErrorsNo",
       technique.results.filter(
         (r: any) => r.verdict === "passed" || r.verdict === "warning"
       )
@@ -1249,11 +1249,11 @@ function QW_WCAG_T19(
   technique: any
 ): void {
   if (technique.metadata.outcome === "passed") {
-    addToElements(elements, "formSubmitNo", undefined);
+    addToElements(elements, "formSubmit", undefined);
     addToResults(results, "form_01a");
     addToNodes(
       nodes,
-      "formSubmitNo",
+      "formSubmit",
       technique.results.filter((r: any) => r.verdict === "passed")
     );
   } else if (technique.metadata.outcome === "failed") {
@@ -1344,11 +1344,11 @@ function QW_WCAG_T23(
       technique.results.filter((r: any) => r.verdict === "warning")
     );
   } else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "aSkipFirst", undefined);
+    addToElements(elements, "aSkipFirstNo", undefined);
     addToResults(results, "a_01b");
     addToNodes(
       nodes,
-      "aSkipFirst",
+      "aSkipFirstNo",
       technique.results.filter((r: any) => r.verdict === "failed")
     );
   }
@@ -1543,9 +1543,9 @@ function QW_WCAG_T34(
 
 function QW_BP1(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "hx", undefined);
+    addToElements(elements, "hxNone", undefined);
     addToResults(results, "hx_01a");
-    addToNodes(nodes, "hx", undefined);
+    addToNodes(nodes, "hxNone", undefined);
   } else if (technique.metadata.outcome === "warning") {
     addToElements(elements, "hx", technique.metadata.warning);
     addToResults(results, "hx_01b");
@@ -1656,9 +1656,9 @@ function QW_BP10(
       technique.results.filter((r: any) => r.verdict === "failed")
     );
   } else if (technique.metadata.outcome === "passed") {
-    addToElements(elements, "layoutElem", undefined);
+    addToElements(elements, "layoutElemNo", undefined);
     addToResults(results, "layout_01a");
-    addToNodes(nodes, "layoutElem", undefined);
+    addToNodes(nodes, "layoutElemNo", undefined);
   }
 }
 
@@ -1762,11 +1762,11 @@ function QW_BP17(
       technique.results.filter((r: any) => r.verdict === "warning")
     );
   } else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "aSkip", undefined);
+    addToElements(elements, "aSkipNo", undefined);
     addToResults(results, "a_02a");
     addToNodes(
       nodes,
-      "aSkip",
+      "aSkipNo",
       technique.results.filter((r: any) => r.verdict === "failed")
     );
   }
