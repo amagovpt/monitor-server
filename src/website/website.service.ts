@@ -21,17 +21,16 @@ export class WebsiteService {
 
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
-    websites.map(async (website) => {
+    return await Promise.all(websites.map(async (website) => {
       const id = website.WebsiteId;
       const pages = await this.findAllPages(id);
       website["numberOfPages"] = pages.length;
       website["averagePoints"] = this.averagePointsPageEvaluation(pages);
       return website;
-    })
-
+    }));
   }
   private averagePointsPageEvaluation(pages) {
-    const totalPoints = pages.reduce((page, total) => { return total + page.Score });
+    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) },0);
     return totalPoints / pages.length;
   }
 

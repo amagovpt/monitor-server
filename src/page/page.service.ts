@@ -859,8 +859,7 @@ export class PageService {
       for (const uri of uris || []) {
         const pageExists = await queryRunner.manager.findOne(
           Page,
-          { Uri: uri },
-          { select: ["PageId", "Uri", "Creation_Date"] }
+          {where: {Uri: uri} , select: ["PageId", "Uri", "Creation_Date"] }
         );
         if (pageExists) {
           const websitePage = await queryRunner.manager.query(

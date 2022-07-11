@@ -38,7 +38,11 @@ export class Tag {
   @JoinTable()
   Directories: Directory[];
 
-  @ManyToMany((type) => Website)
-  @JoinTable()
+  @ManyToMany((type) => Website, website => website.Tags)
+  @JoinTable({
+    name: "TagWebsite",
+    joinColumns: [{ name: "TagId" }],
+    inverseJoinColumns: [{ name: "WebsiteId" }]
+  })
   Websites: Website[];
 }
