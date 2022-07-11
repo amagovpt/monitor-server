@@ -18,7 +18,7 @@ export class UserService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
-  ) {}
+  ) { }
 
   async changePassword(
     userId: number,
@@ -335,7 +335,7 @@ export class UserService {
   }
 
   findById(id: string): Promise<User> {
-    return this.userRepository.findOne(id);
+    return this.userRepository.findOne({ where: { UserId: +id } });
   }
 
   findByUsername(username: string): Promise<User | undefined> {
@@ -343,11 +343,11 @@ export class UserService {
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "studies" });
+    return this.userRepository.countBy({ Type: "studies" });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "monitor" });
+    return this.userRepository.countBy({ Type: "monitor" });
   }
 
   async findStudyMonitorUserTagByName(
