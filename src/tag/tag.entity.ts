@@ -35,7 +35,6 @@ export class Tag {
   Creation_Date: any;
 
   @ManyToMany((type) => Directory)
-  @JoinTable()
   Directories: Directory[];
 
   @ManyToMany((type) => Website, website => website.Tags)
