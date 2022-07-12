@@ -12,12 +12,12 @@ import * as SqlString from "sqlstring";
 import { WebsiteService } from "./website.service";
 import { Website } from "./website.entity";
 import { success } from "../lib/response";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Controller("website")
 export class WebsiteController {
   constructor(private readonly websiteService: WebsiteService) {}
   
-
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
