@@ -12,10 +12,16 @@ import * as SqlString from "sqlstring";
 import { WebsiteService } from "./website.service";
 import { Website } from "./website.entity";
 import { success } from "../lib/response";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Controller("website")
 export class WebsiteController {
-  constructor(private readonly websiteService: WebsiteService) {}
+  constructor(private readonly websiteService: WebsiteService, private readonly accessibilityStatementService: AccessibilityStatementService) {}
+
+  @Get('website/:name')
+  findOne(@Param('name') name: string) {
+    return this.accessibilityStatementService.findByWebsiteName(name);
+  }
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
