@@ -12,11 +12,18 @@ import * as SqlString from "sqlstring";
 import { WebsiteService } from "./website.service";
 import { Website } from "./website.entity";
 import { success } from "../lib/response";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Controller("website")
 export class WebsiteController {
-  constructor(private readonly websiteService: WebsiteService) {}
-  
+  constructor(private readonly websiteService: WebsiteService, private readonly accessibilityStatementService: AccessibilityStatementService) { }
+
+  @Get('website/:name')
+ async  findOne(@Param('name') name: string) {
+    console.log(name);
+    return success(
+      await this.accessibilityStatementService.findByWebsiteName(name));
+  }
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
@@ -228,7 +235,7 @@ export class WebsiteController {
   }
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("csv")
-  async getAllWebsiteCSVData(): Promise<any> {  
+  async getAllWebsiteCSVData(): Promise<any> {
     return success(await this.websiteService.getAllWebsiteDataCSV());
   }
 
