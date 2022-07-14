@@ -27,7 +27,7 @@
     "@nestjs/platform-express": "^8.2.3",
     "@nestjs/schedule": "^1.0.2",
     "@nestjs/serve-static": "^2.2.2",
-    "@nestjs/typeorm": "^9.0.0",
+    "@nestjs/typeorm": "8.0.4",
     "@qualweb/core": "0.7.21",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
@@ -51,8 +51,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.1",
     "sqlstring": "^2.3.2",
-    "svg-builder": "^1.0.0",
-    "typeorm": "^0.3.7"
+    "svg-builder": "^1.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.1.5",
