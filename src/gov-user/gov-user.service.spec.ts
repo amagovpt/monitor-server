@@ -26,8 +26,5 @@ describe('GovUserService', () => {
     const userRemoved = await service.remove( user.id);
     const finalList = await service.findAll();
     expect(finalList.length).toEqual(initialList.length)
-
-
-
   });
 });

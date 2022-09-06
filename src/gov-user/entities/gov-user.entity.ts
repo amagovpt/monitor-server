@@ -2,7 +2,6 @@ import { User } from 'src/user/user.entity';
 import {
     Column,
     Entity,
-    JoinColumn,
     ManyToMany,
     PrimaryGeneratedColumn,
 } from 'typeorm';
