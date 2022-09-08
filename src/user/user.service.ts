@@ -343,11 +343,11 @@ export class UserService {
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.countBy({ Type: "studies" });
+    return this.userRepository.count({ Type: "studies" });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.countBy({ Type: "monitor" });
+    return this.userRepository.count({ Type: "monitor" });
   }
 
   async findStudyMonitorUserTagByName(

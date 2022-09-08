@@ -25,6 +25,7 @@ import { AccessibilityStatementModule } from './accessibility-statement-module/a
 import { AutomaticEvaluationModule } from './accessibility-statement-module/automatic-evaluation/automatic-evaluation.module';
 import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
 import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
+import { GovUserModule } from './gov-user/gov-user.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -63,6 +64,7 @@ const databaseConfig = JSON.parse(
     DirectoryModule,
     AccessibilityStatementModule,
      AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule,
+    GovUserModule,
   ],
   controllers: [AppController],
   providers: [

@@ -284,4 +284,13 @@ CREATE TABLE `User_Evaluation` (
 
 
 
+DROP TABLE IF EXISTS `GovUser`;
+CREATE TABLE `GovUser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `ccNumber` varchar(255) NOT NULL,
+  PRIMARY KEY (`UserId`),
+  UNIQUE KEY `UserId_UNIQUE` (`UserId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;

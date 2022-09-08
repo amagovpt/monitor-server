@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { GovUser } from 'src/gov-user/entities/gov-user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
 
 @Entity('User')
 export class User {
@@ -62,4 +63,7 @@ export class User {
     nullable: false
   })
   Unique_Hash: string;
+
+  @ManyToMany((type) => GovUser, (govUser) => govUser.entities)
+  govUsers: User[];
 }
