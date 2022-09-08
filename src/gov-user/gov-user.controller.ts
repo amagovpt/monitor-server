@@ -7,12 +7,12 @@ import { UpdateGovUserDto } from './dto/update-gov-user.dto';
 export class GovUserController {
   constructor(private readonly govUserService: GovUserService) { }
 
-  @Post()
+  @Post("create")
   create(@Body() createGovUserDto: CreateGovUserDto) {
     return this.govUserService.create(createGovUserDto);
   }
 
-  @Get()
+  @Get("all")
   findAll() {
     return this.govUserService.findAll();
   }
@@ -22,13 +22,13 @@ export class GovUserController {
     return this.govUserService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGovUserDto: UpdateGovUserDto) {
-    return this.govUserService.update({ id, ...updateGovUserDto});
-}
+  @Post("update")
+  update(@Body() updateGovUserDto: UpdateGovUserDto) {
+    return this.govUserService.update(updateGovUserDto);
+  }
 
-@Delete(':id')
-remove(@Param('id') id: string) {
-  return this.govUserService.remove(+id);
-}
+  @Post('delete')
+  remove(@Body() updateGovUserDto: UpdateGovUserDto) {
+    return this.govUserService.remove(updateGovUserDto.id);
+  }
 }

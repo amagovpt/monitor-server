@@ -16,14 +16,14 @@ describe('GovUserService', () => {
     const JOSE = "Teste José";
     expect(service).toBeDefined();
     const initialList = await service.findAll();
-    const user = await  service.create({CCNumber:"12343444",name: "Teste Manel"});
+    const user = await service.create({ ccNumber: "12343444", name: "Teste Manel" });
     expect(user).toBeDefined();
     const found = service.findOne(user.id);
     console.log(found);
     expect(found).toBeDefined();
     const userUpdated = await service.update({ id: user.id, name: JOSE });
     expect(userUpdated.name).toEqual(JOSE)
-    const userRemoved = await service.remove( user.id);
+    const userRemoved = await service.remove(user.id);
     const finalList = await service.findAll();
     expect(finalList.length).toEqual(initialList.length)
   });
