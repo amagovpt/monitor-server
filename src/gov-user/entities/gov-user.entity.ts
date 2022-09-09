@@ -5,7 +5,7 @@ import {
     ManyToMany,
     PrimaryGeneratedColumn
 } from 'typeorm';
-@Entity()
+@Entity({ name: "GovUser" })
 export class GovUser {
 
     @PrimaryGeneratedColumn()

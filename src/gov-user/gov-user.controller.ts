@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { GovUserService } from './gov-user.service';
 import { CreateGovUserDto } from './dto/create-gov-user.dto';
 import { UpdateGovUserDto } from './dto/update-gov-user.dto';
+import { success } from 'src/lib/response';
 
 @Controller('gov-user')
 export class GovUserController {
@@ -9,7 +10,7 @@ export class GovUserController {
 
   @Post("create")
   create(@Body() createGovUserDto: CreateGovUserDto) {
-    return this.govUserService.create(createGovUserDto);
+    return success(this.govUserService.create(createGovUserDto));
   }
 
   @Get("all")
@@ -19,16 +20,16 @@ export class GovUserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.govUserService.findOne(+id);
+    return success(this.govUserService.findOne(+id));
   }
 
   @Post("update")
   update(@Body() updateGovUserDto: UpdateGovUserDto) {
-    return this.govUserService.update(updateGovUserDto);
+    return success(this.govUserService.update(updateGovUserDto));
   }
 
   @Post('delete')
   remove(@Body() updateGovUserDto: UpdateGovUserDto) {
-    return this.govUserService.remove(updateGovUserDto.id);
+    return success(this.govUserService.remove(updateGovUserDto.id));
   }
 }
