@@ -15,7 +15,7 @@ export class GovUserController {
 
   @Get("all")
   findAll() {
-    return this.govUserService.findAll();
+    return success(this.govUserService.findAll());
   }
 
   @Get(':id')
