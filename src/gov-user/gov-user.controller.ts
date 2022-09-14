@@ -9,27 +9,27 @@ export class GovUserController {
   constructor(private readonly govUserService: GovUserService) { }
 
   @Post("create")
-  create(@Body() createGovUserDto: CreateGovUserDto) {
-    return success(this.govUserService.create(createGovUserDto));
+  async create(@Body() createGovUserDto: CreateGovUserDto) {
+    return success(await this.govUserService.create(createGovUserDto));
   }
 
   @Get("all")
-  findAll() {
-    return success(this.govUserService.findAll());
+  async findAll() {
+    return success(await this.govUserService.findAll());
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return success(this.govUserService.findOne(+id));
+  async findOne(@Param('id') id: string) {
+    return success(await this.govUserService.findOne(+id));
   }
 
   @Post("update")
-  update(@Body() updateGovUserDto: UpdateGovUserDto) {
-    return success(this.govUserService.update(updateGovUserDto));
+  async update(@Body() updateGovUserDto: UpdateGovUserDto) {
+    return success(await this.govUserService.update(updateGovUserDto));
   }
 
   @Post('delete')
-  remove(@Body() updateGovUserDto: UpdateGovUserDto) {
-    return success(this.govUserService.remove(updateGovUserDto.id));
+  async remove(@Body() updateGovUserDto: UpdateGovUserDto) {
+    return success(await this.govUserService.remove(updateGovUserDto.id));
   }
 }
