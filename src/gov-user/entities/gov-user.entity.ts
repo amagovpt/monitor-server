@@ -21,8 +21,8 @@ export class GovUser {
     @ManyToMany((type) => User, (user) => user.govUsers)
     @JoinTable({
         name: "UserGovUser",
-        joinColumn: { name: 'UserId' },
-        inverseJoinColumn: { name: 'GovUserId' },
+        inverseJoinColumn: { name: 'UserId' },
+        joinColumn: { name: 'GovUserId' },
     })
     entities: User[];
 }
