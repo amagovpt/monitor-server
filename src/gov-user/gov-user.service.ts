@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreateGovUserDto } from './dto/create-gov-user.dto';
 import { UpdateGovUserDto } from './dto/update-gov-user.dto';
@@ -10,7 +11,8 @@ import { GovUser } from './entities/gov-user.entity';
 export class GovUserService {
   constructor(
     @InjectRepository(GovUser)
-    private govUserRepository: Repository<GovUser>,){}
+    private govUserRepository: Repository<GovUser>,
+    private userService:UserService){}
 
   create(createGovUserDto: CreateGovUserDto) {
     return this.addToDB(createGovUserDto);
@@ -35,7 +37,13 @@ export class GovUserService {
   }
 
   async update(updateGovUserDto: UpdateGovUserDto) {
-    return this.govUserRepository.save(updateGovUserDto);
+    const users = updateGovUserDto.entities;
+    const entities = await Promise.all(
+      users.map(async (user) => {
+        return this.userService.findById(user.UserId+"");
+      }),
+    );
+    return this.govUserRepository.save({entities, ... updateGovUserDto});
   }
 
   remove(id: number) {
