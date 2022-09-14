@@ -3,6 +3,7 @@ import {
     Column,
     Entity,
     ManyToMany,
+    JoinTable,
     PrimaryGeneratedColumn
 } from 'typeorm';
 @Entity({ name: "GovUser" })
@@ -17,6 +18,7 @@ export class GovUser {
     @Column({ type: 'varchar', nullable: true })
     ccNumber: string;
 
+    @JoinTable({name:"UserGovUser"})
     @ManyToMany((type) => User, (user) => user.govUsers)
     entities: User[];
 }
