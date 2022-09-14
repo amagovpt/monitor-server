@@ -27,11 +27,11 @@ export class GovUserService {
   }
 
   findAll() {
-    return this.govUserRepository.find();
+    return this.govUserRepository.find({ relations: ["entities"] });
   }
 
   findOne(id: number) {
-    return this.govUserRepository.findOne(id);
+    return this.govUserRepository.findOne(id, { relations: ["entities"]});
   }
 
   async update(updateGovUserDto: UpdateGovUserDto) {
