@@ -18,7 +18,11 @@ export class GovUser {
     @Column({ type: 'varchar', nullable: true })
     ccNumber: string;
 
-    @JoinTable({name:"UserGovUser"})
     @ManyToMany((type) => User, (user) => user.govUsers)
+    @JoinTable({
+        name: "UserGovUser",
+        joinColumn: { name: 'UserId' },
+        inverseJoinColumn: { name: 'GovUserId' },
+    })
     entities: User[];
 }
