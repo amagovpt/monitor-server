@@ -5,14 +5,18 @@ import {
   Request,
   Post,
   UseGuards,
+  Get,
+  Param,
+  Query,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { success } from "../lib/response";
+import { response } from "express";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @UseGuards(AuthGuard("local"))
   @Post("login")
@@ -42,5 +46,20 @@ export class AuthController {
   async logout(@Request() req: any): Promise<any> {
     const token = req.headers.authorization.split(" ")[1];
     return success(await this.authService.logout(token));
+  }
+
+  //@UseGuards()
+  @Get("login")
+  async loginGov(): Promise<any> {
+    const REDIRECT_URI = "http:/mymonitor.acessibilidade.gov.pt/loginRedirect";
+    const CLIENT_ID = "id";
+    response.redirect(`https://autenticacao.gov.pt/oauth/askauthorization?redirect_uri = ${REDIRECT_URI}&client_id = ${CLIENT_ID} & response_type = token & scope=http://interop.gov.pt/MDC/Cidadao/NIC`);
+  }
+  @Get("loginRedirect")
+  async verifyToken(@Query() query): Promise<any> {
+    const token = query.token;
+    const atributes = this.authService.getAtributes(token);
+
+
   }
 }

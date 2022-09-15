@@ -6,6 +6,7 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "../user/user.entity";
 import { InvalidToken } from "./invalid-token.entity";
 import { comparePasswordHash } from "../lib/security";
+import axios from "axios";
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
     private readonly invalidTokenRepository: Repository<InvalidToken>,
     private readonly connection: Connection,
     private readonly jwtService: JwtService
-  ) {}
+  ) { }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanInvalidSessionTokens(): Promise<void> {
@@ -140,5 +141,13 @@ export class AuthService {
     }
 
     return !error;
+  }
+
+  async getAtributes(token: string) {
+    const responseStart = await axios.post("https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token });//{token, authenticationContextId }
+    const authenticationContextId = responseStart.data.authenticationContextId;
+    const responseAtributes = axios.get(`https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
+    console.log(responseAtributes);
+    return responseAtributes;
   }
 }
