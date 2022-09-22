@@ -38,6 +38,12 @@ export class UserEvaluation {
         nullable: true
     })
     Summary: string;
+
+    @Column({
+        type: 'datetime',
+        nullable: true,
+    })
+    Date: any;
     
     @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.userEvaluationList)
     @JoinColumn({ name: "Accessibility_Statement_Id" })

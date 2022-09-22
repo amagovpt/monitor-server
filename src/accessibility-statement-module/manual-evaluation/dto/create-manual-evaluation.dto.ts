@@ -4,4 +4,5 @@ export class CreateManualEvaluationDto {
     Sample: string;
     Heuristics: string;
     Summary: string;
+    Date: Date;
 }

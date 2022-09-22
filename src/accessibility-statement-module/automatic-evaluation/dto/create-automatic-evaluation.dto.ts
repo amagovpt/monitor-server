@@ -4,4 +4,5 @@ export class CreateAutomaticEvaluationDto {
     Sample: string;
     Tool: string;
     Summary: string;
+    Date: Date;
 }

@@ -39,6 +39,12 @@ export class AutomaticEvaluation {
     })
     Summary: string;
 
+    @Column({
+        type: 'datetime',
+        nullable: true,
+    })
+    Date: any;
+
     @ManyToOne((type => AccessibilityStatement), (accessibilityStatement) => accessibilityStatement.automaticEvaluationList)
     @JoinColumn({ name: "Accessibility_Statement_Id"})
     accessibilityStatement: AccessibilityStatement;
