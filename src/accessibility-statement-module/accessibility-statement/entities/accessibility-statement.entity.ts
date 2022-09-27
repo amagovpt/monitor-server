@@ -1,4 +1,5 @@
 import { AutomaticEvaluation } from "src/accessibility-statement-module/automatic-evaluation/entities/automatic-evaluation.entity";
+import { Contact } from "src/accessibility-statement-module/contact/entities/contact.entity";
 import { ManualEvaluation } from "src/accessibility-statement-module/manual-evaluation/entities/manual-evaluation.entity";
 import { Website } from "src/website/website.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -69,4 +70,7 @@ export class AccessibilityStatement {
 
     @OneToMany(type => UserEvaluation, (evaluation) => evaluation.accessibilityStatement)
     userEvaluationList: UserEvaluation[];
+
+    @OneToMany(type => Contact, (contact) => contact.acessiblityStatement)
+    contacts: Contact[];
 }

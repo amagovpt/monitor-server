@@ -12,6 +12,8 @@ import { CreateManualEvaluationDto } from '../manual-evaluation/dto/create-manua
 import { CreateUserEvaluationDto } from '../user-evaluation/dto/create-user-evaluation.dto';
 import { State } from './state';
 import { Website } from 'src/website/website.entity';
+import { CreateContactDto } from '../contact/dto/create-contact.dto';
+import { ContactService } from '../contact/contact.service';
 
 @Injectable()
 export class AccessibilityStatementService {
@@ -21,23 +23,27 @@ export class AccessibilityStatementService {
     private automaticEvaluationService: AutomaticEvaluationService,
     private manualEvaluationService: ManualEvaluationService,
     private userEvaluationService: UserEvaluationService,
+    private contactService:ContactService,
   ) {
   }
-  createIfExist(html: string, website: Website, url: string) {
+  async createIfExist(html: string, website: Website, url: string) {
     const pageParser = new PageParser(html);
     if (!pageParser.verifyAccessiblityStatement() /*&& !pageParser.verifyAccessiblityPossibleStatement(url)*/)
       return;
-    const aStatement = pageParser.getAccessiblityStatementData(url);
+    const aStatementDto = pageParser.getAccessiblityStatementData(url);
     const autoList = pageParser.getAutomaticEvaluationData();
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
-    const state = this.calculateFlag(aStatement, autoList, manualList);
-    console.log({ aStatement, autoList, userList, manualList, website });
-    return this.create({ ...aStatement, state }, autoList, manualList, userList, website);
+    const contacts = pageParser.getContacts();
+    const state = this.calculateFlag(aStatementDto, autoList, manualList);
+    let aStatement = await this.createDB({ ...aStatementDto, state }, website);
+    aStatement = await this.createLists(aStatement, autoList, manualList, userList);
+    aStatement = await this.createContacts(aStatement, contacts);
+    return aStatement;
   }
 
-  async create(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[], website: Website) {
-    const aStatement = await this.createDB(createAccessibilityStatementDto, website);
+
+  async createLists(aStatement: AccessibilityStatement, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[]) {
     aStatement.automaticEvaluationList = await Promise.all(createAutomaticEvaluationList.map(async (evalu) => {
       return await this.automaticEvaluationService.create(evalu, aStatement);
     }));
@@ -50,6 +56,13 @@ export class AccessibilityStatementService {
 
     return aStatement;
   }
+
+  async createContacts(aStatement: AccessibilityStatement,createContactList:CreateContactDto[]){
+    await Promise.all(createContactList.map(async (contact)=>{
+      return this.contactService.create(contact, aStatement)
+    }));
+    return aStatement;
+  } 
 
   createDB(createAccessibilityStatementDto: CreateAccessibilityStatementDto, Website: Website) {
     const aStatement = this.accessibilityStatementRepository.create({

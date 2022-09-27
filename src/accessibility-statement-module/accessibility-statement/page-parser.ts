@@ -185,14 +185,14 @@ export class PageParser {
     public getContacts() {
         const dl = CSSselect.selectOne(CONTACTS, this.dom);
         const children = dl?.children;
-        const contacts = {};
+        const contacts = [];
         children?.map((element, index) => {
             const name = element.name;
             if (name === 'dd') {
                 const previousElement = children[index - 1];
                 const previousElementText = this.getText(previousElement);
                 const elementText = this.getText(element);
-                contacts[previousElementText] = elementText;
+                contacts.push({ contactType:previousElementText,contact:elementText});
             }
         })
         return contacts;
