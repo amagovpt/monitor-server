@@ -1427,6 +1427,7 @@ function QW_WCAG_T28(
   nodes: any,
   technique: any
 ): void {
+  addToElements(elements, "fontValues", technique.results.length);
   if (technique.metadata.outcome === "failed") {
     addToElements(elements, "fontAbsVal", technique.metadata.failed);
     addToResults(results, "font_02");
@@ -1494,7 +1495,7 @@ function QW_WCAG_T33(
   nodes: any,
   technique: any
 ): void {
-  addToElements(elements, "dd, dt", technique.results.length);
+  addToElements(elements, "dd,dt", technique.results.length);
 
   if (technique.metadata.outcome === "passed") {
     addToElements(elements, "descListElement", technique.metadata.passed);
