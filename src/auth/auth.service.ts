@@ -144,9 +144,9 @@ export class AuthService {
   }
 
   async getAtributes(token: string) {
-    const responseStart = await axios.post("https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token });//{token, authenticationContextId }
+    const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token });//{token, authenticationContextId }
     const authenticationContextId = responseStart.data.authenticationContextId;
-    const responseAtributes = axios.get(`https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
+    const responseAtributes = axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
     console.log(responseAtributes);
     return responseAtributes;
   }

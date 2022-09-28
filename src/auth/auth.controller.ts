@@ -52,8 +52,8 @@ export class AuthController {
   @Get("login")
   async loginGov(): Promise<any> {
     const REDIRECT_URI = "http:/mymonitor.acessibilidade.gov.pt/loginRedirect";
-    const CLIENT_ID = "id";
-    response.redirect(`https://autenticacao.gov.pt/oauth/askauthorization?redirect_uri = ${REDIRECT_URI}&client_id = ${CLIENT_ID} & response_type = token & scope=http://interop.gov.pt/MDC/Cidadao/NIC`);
+    const CLIENT_ID = "5679267266509668091";
+    response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri = ${REDIRECT_URI}&client_id = ${CLIENT_ID} & response_type = token & scope=http://interop.gov.pt/MDC/Cidadao/NIC`);
   }
   @Get("loginRedirect")
   async verifyToken(@Query() query): Promise<any> {
