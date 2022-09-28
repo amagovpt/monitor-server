@@ -1455,7 +1455,7 @@ export class WebsiteService {
       const website = await queryRunner.manager.query(
         `SELECT *
         FROM 
-          Website
+          Website as w
         WHERE 
           w.WebsiteId = ?`,
         [websiteId]
@@ -1472,9 +1472,9 @@ export class WebsiteService {
           Website as w,
           WebsitePage as wp 
         WHERE 
-          w.WebsiteId = ? AND
           wp.WebsiteId = w.WebsiteId AND
-          wp.PageId = p.PageId`,
+          wp.PageId = p.PageId
+          w.WebsiteId = ? AND`,
         [websiteId]
       );
 
