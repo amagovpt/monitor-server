@@ -25,4 +25,10 @@ export class GovUser {
         joinColumn: { name: 'GovUserId' },
     })
     entities: User[];
+
+    @Column({
+        type: 'datetime',
+        nullable: false
+    })
+    registerDate: Date;
 }

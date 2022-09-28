@@ -3,13 +3,13 @@ import { GovUserService } from './gov-user.service';
 import { GovUserController } from './gov-user.controller';
 import { GovUser } from './entities/gov-user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserService } from 'src/user/user.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   controllers: [GovUserController],
   providers: [GovUserService],
   imports: [
     TypeOrmModule.forFeature([GovUser]),
-    UserService],
+    UserModule],
 })
 export class GovUserModule { }

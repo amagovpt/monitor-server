@@ -289,6 +289,7 @@ CREATE TABLE `GovUser` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `ccNumber` varchar(255) NOT NULL,
+  `registerDate` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UserId_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
