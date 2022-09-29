@@ -154,3 +154,17 @@ export class AuthService {
     return responseAtributes;
   }
 }
+/**
+ * > [                                                                                                                            │
+   {                                                                                                                          │
+ name: 'http://interop.gov.pt/MDC/Cidadao/NIC',                                                                           │
+  value: '15366302',                                                                                                       │
+  state: 'Available'                                                                                                       │
+},                                                                                                                         │
+{                                                                                                                          │
+  name: 'http://interop.gov.pt/MDC/Cidadao/NomeCompleto',                                                                  │
+  value: 'ANTÓNIO MANUEL SANTOS ESTRIGA',                                                                                  │
+  state: 'Available'                                                                                                       │
+}                                                                                                                          │
+│                                                         ]
+ */
