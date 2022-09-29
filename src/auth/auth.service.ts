@@ -144,10 +144,13 @@ export class AuthService {
   }
 
   async getAtributes(token: string) {
-    const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token });//{token, authenticationContextId }
+    console.log(token);
+    const atributesName = ["http://interop.gov.pt/MDC/Cidadao/NIC", "http://interop.gov.pt/MDC/Cidadao/NomeCompleto"]
+    const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName })
     const authenticationContextId = responseStart.data.authenticationContextId;
-    const responseAtributes = axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
-    console.log(responseAtributes);
+    console.log(responseStart.data)
+    const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
+    console.log(responseAtributes.data);
     return responseAtributes;
   }
 }

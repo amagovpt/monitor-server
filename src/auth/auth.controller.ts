@@ -60,7 +60,5 @@ export class AuthController {
   async verifyToken(@Query() query): Promise<any> {
     const token = query.token;
     const atributes = this.authService.getAtributes(token);
-
-
   }
 }
