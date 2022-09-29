@@ -8,11 +8,12 @@ import {
   Get,
   Param,
   Query,
+  Res,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { success } from "../lib/response";
-import { response } from "express";
+import { Response } from 'express';
 
 @Controller("auth")
 export class AuthController {
@@ -50,7 +51,7 @@ export class AuthController {
 
   //@UseGuards()
   @Get("login")
-  async loginGov(): Promise<any> {
+  async loginGov( @Res() response: Response): Promise<any> {
     const REDIRECT_URI = "http:/mymonitor.acessibilidade.gov.pt/loginRedirect";
     const CLIENT_ID = "5679267266509668091";
     response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri = ${REDIRECT_URI}&client_id = ${CLIENT_ID} & response_type = token & scope=http://interop.gov.pt/MDC/Cidadao/NIC`);
