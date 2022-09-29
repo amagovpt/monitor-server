@@ -58,8 +58,8 @@ export class AuthController {
   }
   @Get("loginRedirect")
   async verifyToken(@Query() query): Promise<any> {
-    const token = query.token;
-    console.log(query);
+    const token = query.access_token;
+    console.log(token);
     const atributes = await this.authService.getAtributes(token);
     console.log(atributes);
 
