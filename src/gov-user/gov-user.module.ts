@@ -8,6 +8,7 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   controllers: [GovUserController],
   providers: [GovUserService],
+  exports: [GovUserService],
   imports: [
     TypeOrmModule.forFeature([GovUser]),
     UserModule],

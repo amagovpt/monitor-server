@@ -147,6 +147,7 @@ export class AuthService {
   }
   async verifyLoginUser(token: string) {
     const atributes = await this.getAtributes(token);
+    console.log(atributes);
     const ccNumber = atributes.cc;
    return this.govUserService.findOneByCC(ccNumber);
   }
@@ -157,10 +158,11 @@ export class AuthService {
     const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName })
     const authenticationContextId = responseStart.data.authenticationContextId;
     const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
-    return this.parseAtributes(responseAtributes);
+    return this.parseAtributes(responseAtributes.data);
   }
   private parseAtributes(atributes:any){
     let result = {cc:null,name:""};
+    console.log(atributes);
     atributes.map((atribute)=>{
       const name = atribute.name;
       const realName = NAME_CONVERTER[name];
