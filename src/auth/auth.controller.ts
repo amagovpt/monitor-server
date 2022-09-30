@@ -51,14 +51,16 @@ export class AuthController {
 
   //@UseGuards()
   @Get("login")
-  async loginGov( @Res() response: Response): Promise<any> {
-    const REDIRECT_URI = "http:/mymonitor.acessibilidade.gov.pt/loginRedirect";
+  async loginGov(@Res() response: Response): Promise<any> {
+    const REDIRECT_URI = "http://10.55.37.16/api2/auth/loginRedirect";
     const CLIENT_ID = "5679267266509668091";
-    response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri = ${REDIRECT_URI}&client_id = ${CLIENT_ID} & response_type = token & scope=http://interop.gov.pt/MDC/Cidadao/NIC`);
+    response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=${REDIRECT_URI}&client_id=${CLIENT_ID}&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NIC%20http://interop.gov.pt/MDC/Cidadao/NomeCompleto`);
   }
   @Get("loginRedirect")
   async verifyToken(@Query() query): Promise<any> {
-    const token = query.token;
-    const atributes = this.authService.getAtributes(token);
+    console.log(query);
+    const token = query.access_token;
+    console.log(token);
+    const atributes = await this.authService.getAtributes(token);
   }
 }
