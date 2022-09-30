@@ -11,10 +11,12 @@ import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { JwtMonitorStrategy } from './jwt-monitor.strategy';
 import { JwtStudyStrategy } from './jwt-study.strategy';
 import { jwtConstants } from './constants';
+import { GovUserModule } from 'src/gov-user/gov-user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, InvalidToken]),
+    GovUserModule,
     JwtModule.register({
       publicKey: jwtConstants.publicKey,
       privateKey: jwtConstants.privateKey,
