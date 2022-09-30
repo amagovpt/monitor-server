@@ -76,7 +76,7 @@ export class AuthController {
       if (!updatedLogin) {
         throw new InternalServerErrorException();
       }
-
+      console.log(token);
       return success(token);
     }
   }
