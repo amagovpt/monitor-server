@@ -15,13 +15,15 @@ export class GovAuthGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const token = request.access_token;
+        const token = request.query.access_token;
         console.log(token);
         const user = await this.authService.verifyLoginUser(token);
+        console.log(user);
         const validUser = user?.entities.length > 0
-        if(validUser){
+        if (validUser) {
             request.user = user.entities[0]
         }
+        console.log(validUser);
         return validUser;
     }
 }
