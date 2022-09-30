@@ -7,12 +7,15 @@ import { User } from "../user/user.entity";
 import { InvalidToken } from "./invalid-token.entity";
 import { comparePasswordHash } from "../lib/security";
 import axios from "axios";
+import { NAME_CONVERTER, NIC } from "./constants";
+import { GovUserService } from "src/gov-user/gov-user.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly govUserService: GovUserService,
     @InjectRepository(InvalidToken)
     private readonly invalidTokenRepository: Repository<InvalidToken>,
     private readonly connection: Connection,
@@ -142,16 +145,41 @@ export class AuthService {
 
     return !error;
   }
+  async verifyLoginUser(token: string) {
+    const atributes = await this.getAtributes(token);
+    const ccNumber = atributes.cc;
+   return this.govUserService.findOneByCC(ccNumber);
+  }
+
 
   async getAtributes(token: string) {
-    console.log(token);
-    const atributesName = ["http://interop.gov.pt/MDC/Cidadao/NIC","http://interop.gov.pt/MDC/Cidadao/NomeCompleto"]
-    //axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName }).catch((e) => { console.log(e) });//{token, authenticationContextId }
+    const atributesName = ["http://interop.gov.pt/MDC/Cidadao/NIC", "http://interop.gov.pt/MDC/Cidadao/NomeCompleto"]
     const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName })
     const authenticationContextId = responseStart.data.authenticationContextId;
-    console.log(responseStart.data)
     const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
-    console.log(responseAtributes.data);
-    return responseAtributes;
+    return this.parseAtributes(responseAtributes);
+  }
+  private parseAtributes(atributes:any){
+    let result = {cc:null,name:""};
+    atributes.map((atribute)=>{
+      const name = atribute.name;
+      const realName = NAME_CONVERTER[name];
+      result[realName] = atribute.value;
+    })
+    return result;
   }
 }
+/**
+ * > [                                                                                                                            │
+   {                                                                                                                          │
+ name: 'http://interop.gov.pt/MDC/Cidadao/NIC',                                                                           │
+  value: '15366302',                                                                                                       │
+  state: 'Available'                                                                                                       │
+},                                                                                                                         │
+{                                                                                                                          │
+  name: 'http://interop.gov.pt/MDC/Cidadao/NomeCompleto',                                                                  │
+  value: 'ANTÓNIO MANUEL SANTOS ESTRIGA',                                                                                  │
+  state: 'Available'                                                                                                       │
+}                                                                                                                          │
+│                                                         ]
+ */
