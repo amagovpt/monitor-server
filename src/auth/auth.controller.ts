@@ -53,7 +53,7 @@ export class AuthController {
   //@UseGuards()
   @Get("login")
   async loginGov(@Res() response: Response): Promise<any> {
-    const REDIRECT_URI = "http://10.55.37.16/api2/auth/loginRedirect";
+    const REDIRECT_URI = "http://10.55.37.16/mm2/loginRedirect";
     const CLIENT_ID = "5679267266509668091";
     response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=${REDIRECT_URI}&client_id=${CLIENT_ID}&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NIC%20http://interop.gov.pt/MDC/Cidadao/NomeCompleto`);
   }
