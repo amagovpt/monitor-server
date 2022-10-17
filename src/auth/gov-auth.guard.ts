@@ -20,7 +20,7 @@ export class GovAuthGuard implements CanActivate {
         const user = await this.authService.verifyLoginUser(token);
         console.log(user);
         const validUser = user?.entities.length > 0
-        if(validUser){
+        if (validUser) {
             request.user = user.entities[0]
         }
         console.log(validUser);

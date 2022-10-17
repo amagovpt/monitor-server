@@ -160,6 +160,7 @@ export class AuthService {
     const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
     return this.parseAtributes(responseAtributes.data);
   }
+  
   private parseAtributes(atributes:any){
     let result = {cc:null,name:""};
     console.log(atributes);
