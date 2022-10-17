@@ -14,6 +14,8 @@ module.exports = {
         NODE_ENV: "development",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "AMP",
@@ -22,6 +24,8 @@ module.exports = {
         NODE_ENV: "production",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
     },
     {
@@ -38,6 +42,8 @@ module.exports = {
         NODE_ENV: "development",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "ADMIN",
@@ -46,6 +52,8 @@ module.exports = {
         NODE_ENV: "production",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
     },
     {
@@ -62,6 +70,8 @@ module.exports = {
         NODE_ENV: "development",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "USER",
@@ -70,6 +80,8 @@ module.exports = {
         NODE_ENV: "production",
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
+        CLIENT_ID: 5679267266509668091,
+        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
       },
     },
   ],
