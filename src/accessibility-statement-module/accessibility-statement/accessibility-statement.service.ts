@@ -17,6 +17,7 @@ import { ContactService } from '../contact/contact.service';
 
 @Injectable()
 export class AccessibilityStatementService {
+
   constructor(
     @InjectRepository(AccessibilityStatement)
     private readonly accessibilityStatementRepository: Repository<AccessibilityStatement>,
@@ -89,6 +90,10 @@ export class AccessibilityStatementService {
   }
   findByWebsiteName(Name: string) {
     return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+  }
+
+  findById(Id: number): any {
+    return this.accessibilityStatementRepository.findOne({ where: { Id }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
   }
 
   async getASList() {

@@ -18,6 +18,11 @@ export class AccessibilityStatementController {
     return await this.accessibilityStatementService.getASList();
   }
 
+  @Get(':id')
+  async findOneById(@Param('id') id: number) {
+    return success(await this.accessibilityStatementService.findById(id));
+  }
+
  /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
