@@ -23,7 +23,7 @@ export class AccessibilityStatementService {
     private automaticEvaluationService: AutomaticEvaluationService,
     private manualEvaluationService: ManualEvaluationService,
     private userEvaluationService: UserEvaluationService,
-    private contactService:ContactService,
+    private contactService: ContactService,
   ) {
   }
   async createIfExist(html: string, website: Website, url: string) {
@@ -57,12 +57,12 @@ export class AccessibilityStatementService {
     return aStatement;
   }
 
-  async createContacts(aStatement: AccessibilityStatement,createContactList:CreateContactDto[]){
-    await Promise.all(createContactList.map(async (contact)=>{
+  async createContacts(aStatement: AccessibilityStatement, createContactList: CreateContactDto[]) {
+    await Promise.all(createContactList.map(async (contact) => {
       return this.contactService.create(contact, aStatement)
     }));
     return aStatement;
-  } 
+  }
 
   createDB(createAccessibilityStatementDto: CreateAccessibilityStatementDto, Website: Website) {
     const aStatement = this.accessibilityStatementRepository.create({
@@ -87,7 +87,19 @@ export class AccessibilityStatementService {
     }
     return result;
   }
-  findByWebsiteName(Name:string){
-    return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList","Website"]});
+  findByWebsiteName(Name: string) {
+    return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+  }
+
+  async getASList() {
+    const list = await this.accessibilityStatementRepository.find({ relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+    const convertList = list.map((elem:any) => {
+      elem.Website = elem.Website.Name;
+      elem.manualEvaluationList = elem.manualEvaluationList.length;
+      elem.automaticEvaluationList = elem.automaticEvaluationList.length;
+      elem.userEvaluationList = elem.userEvaluationList.length;
+      return elem;
+    });
+    return convertList;
   }
 }
