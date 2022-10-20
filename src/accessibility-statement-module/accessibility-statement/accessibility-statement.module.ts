@@ -5,11 +5,12 @@ import { AccessibilityStatement } from './entities/accessibility-statement.entit
 import { AutomaticEvaluationModule } from '../automatic-evaluation/automatic-evaluation.module';
 import { ManualEvaluationModule } from '../manual-evaluation/manual-evaluation.module';
 import { UserEvaluationModule } from '../user-evaluation/user-evaluation.module';
+import { ContactModule } from '../contact/contact.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AccessibilityStatement]),AutomaticEvaluationModule,ManualEvaluationModule,UserEvaluationModule],
+    TypeOrmModule.forFeature([AccessibilityStatement]), AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule, ContactModule],
   providers: [AccessibilityStatementService],
-  exports:[AccessibilityStatementService]
+  exports: [AccessibilityStatementService]
 })
 export class AccessibilityStatementModule { }

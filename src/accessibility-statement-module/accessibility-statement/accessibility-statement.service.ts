@@ -12,32 +12,39 @@ import { CreateManualEvaluationDto } from '../manual-evaluation/dto/create-manua
 import { CreateUserEvaluationDto } from '../user-evaluation/dto/create-user-evaluation.dto';
 import { State } from './state';
 import { Website } from 'src/website/website.entity';
+import { CreateContactDto } from '../contact/dto/create-contact.dto';
+import { ContactService } from '../contact/contact.service';
 
 @Injectable()
 export class AccessibilityStatementService {
+
   constructor(
     @InjectRepository(AccessibilityStatement)
     private readonly accessibilityStatementRepository: Repository<AccessibilityStatement>,
     private automaticEvaluationService: AutomaticEvaluationService,
     private manualEvaluationService: ManualEvaluationService,
     private userEvaluationService: UserEvaluationService,
+    private contactService: ContactService,
   ) {
   }
-  createIfExist(html: string, website: Website, url: string) {
+  async createIfExist(html: string, website: Website, url: string) {
     const pageParser = new PageParser(html);
     if (!pageParser.verifyAccessiblityStatement() /*&& !pageParser.verifyAccessiblityPossibleStatement(url)*/)
       return;
-    const aStatement = pageParser.getAccessiblityStatementData(url);
+    const aStatementDto = pageParser.getAccessiblityStatementData(url);
     const autoList = pageParser.getAutomaticEvaluationData();
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
-    const state = this.calculateFlag(aStatement, autoList, manualList);
-    console.log({ aStatement, autoList, userList, manualList, website });
-    return this.create({ ...aStatement, state }, autoList, manualList, userList, website);
+    const contacts = pageParser.getContacts();
+    const state = this.calculateFlag(aStatementDto, autoList, manualList);
+    let aStatement = await this.createDB({ ...aStatementDto, state }, website);
+    aStatement = await this.createLists(aStatement, autoList, manualList, userList);
+    aStatement = await this.createContacts(aStatement, contacts);
+    return aStatement;
   }
 
-  async create(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[], website: Website) {
-    const aStatement = await this.createDB(createAccessibilityStatementDto, website);
+
+  async createLists(aStatement: AccessibilityStatement, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[], createUserEvaluationDto: CreateUserEvaluationDto[]) {
     aStatement.automaticEvaluationList = await Promise.all(createAutomaticEvaluationList.map(async (evalu) => {
       return await this.automaticEvaluationService.create(evalu, aStatement);
     }));
@@ -48,6 +55,13 @@ export class AccessibilityStatementService {
       return await this.userEvaluationService.create(evalu, aStatement);
     }));
 
+    return aStatement;
+  }
+
+  async createContacts(aStatement: AccessibilityStatement, createContactList: CreateContactDto[]) {
+    await Promise.all(createContactList.map(async (contact) => {
+      return this.contactService.create(contact, aStatement)
+    }));
     return aStatement;
   }
 
@@ -74,7 +88,23 @@ export class AccessibilityStatementService {
     }
     return result;
   }
-  findByWebsiteName(Name:string){
-    return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList","Website"]});
+  findByWebsiteName(Name: string) {
+    return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+  }
+
+  findById(Id: number): any {
+    return this.accessibilityStatementRepository.findOne({ where: { Id }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+  }
+
+  async getASList() {
+    const list = await this.accessibilityStatementRepository.find({ relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
+    const convertList = list.map((elem:any) => {
+      elem.Website = elem.Website.Name;
+      elem.manualEvaluationList = elem.manualEvaluationList.length;
+      elem.automaticEvaluationList = elem.automaticEvaluationList.length;
+      elem.userEvaluationList = elem.userEvaluationList.length;
+      return elem;
+    });
+    return convertList;
   }
 }

@@ -247,6 +247,7 @@ CREATE TABLE `Automatic_Evaluation` (
     `Sample` varchar(255) DEFAULT NULL,
     `Tool` varchar(255) DEFAULT NULL,
     `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Automatic_EvaluationId_UNIQUE` (`Id`),
     CONSTRAINT `Automatic_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
@@ -262,6 +263,7 @@ CREATE TABLE `Manual_Evaluation` (
     `HeuristicsPassed` INT(11)   DEFAULT NULL,
     `HeuristicsTotal` INT(11)   DEFAULT NULL,
     `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Manual_EvaluationId_UNIQUE` (`Id`),
     CONSTRAINT `Manual_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
@@ -277,12 +279,22 @@ CREATE TABLE `User_Evaluation` (
     `Participants` varchar(255) DEFAULT NULL,
     `Process` text DEFAULT NULL,
     `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
     CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
+DROP TABLE IF EXISTS `Contact`;
+CREATE TABLE `Contact` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
+    `Contact` varchar(255) DEFAULT NULL,
+    `ContactType` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
+    CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `GovUser`;
 CREATE TABLE `GovUser` (

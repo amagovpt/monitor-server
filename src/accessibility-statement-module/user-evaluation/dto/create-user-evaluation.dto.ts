@@ -4,4 +4,5 @@ export class CreateUserEvaluationDto {
     Participants: string;
     Process: string;
     Summary: string;
+    Date: Date;
 }

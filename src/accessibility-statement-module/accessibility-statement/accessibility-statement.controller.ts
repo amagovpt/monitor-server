@@ -13,15 +13,22 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.findByWebsiteName(name));
   }
 
+  @Get()
+  async findAll() {
+    return await this.accessibilityStatementService.getASList();
+  }
+
+  @Get(':id')
+  async findOneById(@Param('id') id: number) {
+    return success(await this.accessibilityStatementService.findById(id));
+  }
+
  /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
   }
 
-  @Get()
-  findAll() {
-    return this.accessibilityStatementService.findAll();
-  }
+ 
 
   @Get(':id')
   findOne(@Param('id') id: string) {

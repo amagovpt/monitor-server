@@ -1,4 +1,4 @@
-import { AUTOMATIC, CONFORMANCE_OUTPUT, DATE, EVIDENCE, MANUAL, PROCEDURE, SEAL, SELECTORS, USER } from "./contants";
+import { AUTOMATIC, CONFORMANCE_OUTPUT, CONTACTS, DATE, EVIDENCE, MANUAL, PROCEDURE, SEAL, SELECTORS, USER } from "./contants";
 
 const htmlparser2 = require("htmlparser2");
 const CSSselect = require("css-select");
@@ -63,7 +63,8 @@ export class PageParser {
             evidence: this.getEvidence(),
             seal: this.getSeal(),
             conformance: this.getConformance(),
-            url,        }
+            url,
+        }
     }
 
     public getUserEvaluationData() {
@@ -125,7 +126,7 @@ export class PageParser {
         const result = {};
         listElements.flatMap((li) => {
             const text = this.getText(li);
-            if (text&&text.trim()) {
+            if (text && text.trim()) {
                 const splittedText = text.split(":");
                 const attName = splittedText[0];
                 let content = splittedText[1];
@@ -180,5 +181,22 @@ export class PageParser {
             text = text + child.data;
         text = text + this.getTextAux(child);
         return text;
+    }
+    public getContacts() {
+        const dl = CSSselect.selectOne(CONTACTS, this.dom);
+        const children = dl?.children;
+        const contacts = [];
+        children?.map((element, index) => {
+            const name = element.name;
+            if (name === 'dd') {
+                const previousElement = children[index - 1];
+                const previousElementText = this.getText(previousElement);
+                const elementText = this.getText(element);
+                contacts.push({ contactType:previousElementText,contact:elementText});
+            }
+        })
+        return contacts;
+
+
     }
 }

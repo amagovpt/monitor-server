@@ -16,6 +16,7 @@ describe('PageParser', () => {
     const automatic = parser.getAutomaticEvaluationData();
     const manual = parser.getManualEvaluationData();
     const user = parser.getUserEvaluationData();
-    console.log({automatic, manual, user});
+    const contacts = parser.getContacts();
+    console.log({automatic, manual, user,contacts});
   });
 });
