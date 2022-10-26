@@ -96,6 +96,11 @@ export class AccessibilityStatementService {
     }
     return result;
   }
+
+  findLatestByWebsiteID(WebsiteId: number) {
+    return this.accessibilityStatementRepository.findOne({ where: { Website: { WebsiteId } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"],order:{statementDate:"ASC"} });
+  }
+
   findByWebsiteName(Name: string) {
     return this.accessibilityStatementRepository.findOne({ where: { Website: { Name } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
   }
