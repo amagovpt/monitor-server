@@ -44,6 +44,7 @@
     "lodash.orderby": "^4.6.0",
     "mysql": "^2.18.1",
     "nestjs-rate-limiter": "^3.1.0",
+    "object-hash": "^3.0.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

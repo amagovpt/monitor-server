@@ -14,6 +14,7 @@ import { State } from './state';
 import { Website } from 'src/website/website.entity';
 import { CreateContactDto } from '../contact/dto/create-contact.dto';
 import { ContactService } from '../contact/contact.service';
+var hash = require('object-hash');
 
 @Injectable()
 export class AccessibilityStatementService {
@@ -40,6 +41,8 @@ export class AccessibilityStatementService {
     let aStatement = await this.createDB({ ...aStatementDto, state }, website);
     aStatement = await this.createLists(aStatement, autoList, manualList, userList);
     aStatement = await this.createContacts(aStatement, contacts);
+    const hashResult = hash(aStatement);
+    this.updateHash(hashResult,aStatement.Id);
     return aStatement;
   }
 
@@ -63,6 +66,11 @@ export class AccessibilityStatementService {
       return this.contactService.create(contact, aStatement)
     }));
     return aStatement;
+  }
+  async updateHash(hash:string,id:number){
+    const aStatement = await this.accessibilityStatementRepository.findOne(id);
+    aStatement.hash = hash;
+    return this.accessibilityStatementRepository.save(aStatement);
   }
 
   createDB(createAccessibilityStatementDto: CreateAccessibilityStatementDto, Website: Website) {
