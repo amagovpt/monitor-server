@@ -291,7 +291,7 @@ export class UserService {
     return !hasError;
   }
 
-  async findAllNonAdmin(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     const manager = getManager();
     const users = await manager.query(`
       SELECT 
@@ -299,7 +299,6 @@ export class UserService {
         COUNT(distinct w.WebsiteId) as Websites
       FROM User as u
       LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
-      WHERE u.Type != "nimda"
       GROUP BY u.UserId`);
 
     return users;

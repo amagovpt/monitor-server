@@ -178,7 +178,7 @@ export class UserController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all")
   async getAllNonAdminUsers(): Promise<any> {
-    return success(await this.userService.findAllNonAdmin());
+    return success(await this.userService.findAll());
   }
 
   @UseGuards(AuthGuard("jwt-admin"))
