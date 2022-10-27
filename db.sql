@@ -293,8 +293,8 @@ CREATE TABLE `Contact` (
     `Contact` varchar(255) DEFAULT NULL,
     `ContactType` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`Id`),
-    UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
-    CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+    UNIQUE KEY `ContactId_UNIQUE` (`Id`),
+    CONSTRAINT `Contact_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `GovUser`;
