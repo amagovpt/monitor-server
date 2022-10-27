@@ -1,5 +1,5 @@
 import { AccessibilityStatement } from "src/accessibility-statement-module/accessibility-statement/entities/accessibility-statement.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("Contact")
 export class Contact {
@@ -19,6 +19,7 @@ export class Contact {
     })
     Contact:string;
     
-    @OneToMany(type => AccessibilityStatement, (statement) => statement.contacts)
+    @ManyToOne(type => AccessibilityStatement, (statement) => statement.contacts)
+    @JoinColumn({ name: "Accessibility_Statement_Id" })
     acessiblityStatement:AccessibilityStatement;
 }
