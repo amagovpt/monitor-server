@@ -14,6 +14,7 @@ import { State } from './state';
 import { Website } from 'src/website/website.entity';
 import { CreateContactDto } from '../contact/dto/create-contact.dto';
 import { ContactService } from '../contact/contact.service';
+import { AccessibilityStatementDto } from './dto/accessibility-statement.dto';
 var hash = require('object-hash');
 
 @Injectable()
@@ -28,7 +29,27 @@ export class AccessibilityStatementService {
     private contactService: ContactService,
   ) {
   }
+
   async createIfExist(html: string, website: Website, url: string) {
+    const currentAS = await this.findLatestByWebsiteID(website.WebsiteId);
+    const aStatementParsed = await this.parseAStatement(html, website, url);
+    let aStatement;
+    if(currentAS){
+      const currentHash = currentAS.hash;
+      const currentDate = currentAS.statementDate;
+      const { autoList, userList, manualList, contacts, ...aStatementDto } = aStatementParsed;
+      const newhash = hash({ aStatementDto, autoList, userList, manualList, contacts });
+
+      if (currentDate === aStatementDto.statementDate && currentHash !== newhash){
+        this.deleteById(currentAS.Id);
+      } 
+    }
+    if(aStatementParsed)
+      aStatement = this.createAStatement(aStatementParsed, website);
+      
+    return aStatement
+  }
+  async parseAStatement(html: string, website: Website, url: string): Promise<AccessibilityStatementDto>{
     const pageParser = new PageParser(html);
     if (!pageParser.verifyAccessiblityStatement() /*&& !pageParser.verifyAccessiblityPossibleStatement(url)*/)
       return;
@@ -37,12 +58,18 @@ export class AccessibilityStatementService {
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
     const contacts = pageParser.getContacts();
-    const state = this.calculateFlag(aStatementDto, autoList, manualList);
+    return {...aStatementDto, autoList, userList, manualList,contacts};
+
+  }
+
+  async createAStatement(aStatementParser:AccessibilityStatementDto, website:Website) {
+    const { autoList, userList, manualList, contacts, ...aStatementDto } = aStatementParser;
+    const hashResult = hash(aStatementParser);
+    const state = this.calculateFlag(aStatementParser);
     let aStatement = await this.createDB({ ...aStatementDto, state }, website);
     aStatement = await this.createLists(aStatement, autoList, manualList, userList);
     aStatement = await this.createContacts(aStatement, contacts);
-    const hashResult = hash(aStatement);
-    this.updateHash(hashResult,aStatement.Id);
+    this.updateHash(hashResult, aStatement.Id);
     return aStatement;
   }
 
@@ -67,7 +94,7 @@ export class AccessibilityStatementService {
     }));
     return aStatement;
   }
-  async updateHash(hash:string,id:number){
+  async updateHash(hash: string, id: number) {
     const aStatement = await this.accessibilityStatementRepository.findOne(id);
     aStatement.hash = hash;
     return this.accessibilityStatementRepository.save(aStatement);
@@ -81,11 +108,11 @@ export class AccessibilityStatementService {
     return this.accessibilityStatementRepository.save(aStatement);
   }
 
-  calculateFlag(createAccessibilityStatementDto: CreateAccessibilityStatementDto, createAutomaticEvaluationList: CreateAutomaticEvaluationDto[], createManualEvaluationDto: CreateManualEvaluationDto[]) {
-    const conformance = createAccessibilityStatementDto.conformance;
-    const date = createAccessibilityStatementDto.statementDate;
-    const hasAutoEval = createAutomaticEvaluationList.length > 0;
-    const hasManualEval = createManualEvaluationDto.length > 0;
+  calculateFlag(acessibilityStatementDto: AccessibilityStatementDto) {
+    const conformance = acessibilityStatementDto.conformance;
+    const date = acessibilityStatementDto.statementDate;
+    const hasAutoEval = acessibilityStatementDto.autoList.length > 0;
+    const hasManualEval = acessibilityStatementDto.manualList.length > 0;
     let result;
     if (conformance && date && hasAutoEval && hasManualEval) {
       result = State.completeStatement
@@ -98,7 +125,7 @@ export class AccessibilityStatementService {
   }
 
   findLatestByWebsiteID(WebsiteId: number) {
-    return this.accessibilityStatementRepository.findOne({ where: { Website: { WebsiteId } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"],order:{statementDate:"ASC"} });
+    return this.accessibilityStatementRepository.findOne({ where: { Website: { WebsiteId } }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"], order: { statementDate: "ASC" } });
   }
 
   findByWebsiteName(Name: string) {
@@ -108,10 +135,13 @@ export class AccessibilityStatementService {
   findById(Id: number): any {
     return this.accessibilityStatementRepository.findOne({ where: { Id }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
   }
+  deleteById(Id:number){
+    return this.accessibilityStatementRepository.delete({Id});
+  }
 
   async getASList() {
     const list = await this.accessibilityStatementRepository.find({ relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
-    const convertList = list.map((elem:any) => {
+    const convertList = list.map((elem: any) => {
       elem.Website = elem.Website.Name;
       elem.manualEvaluationList = elem.manualEvaluationList.length;
       elem.automaticEvaluationList = elem.automaticEvaluationList.length;
