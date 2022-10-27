@@ -62,6 +62,9 @@ export class AccessibilityStatement {
     @Column({ type: 'enum', enum: State })
     state: State;
 
+    @Column({ type: 'varchar', length: 255})
+    hash:string;
+
     @OneToMany(type => ManualEvaluation, (evaluation) => evaluation.accessibilityStatement)
     manualEvaluationList: ManualEvaluation[];
 

@@ -232,6 +232,7 @@ CREATE TABLE `Accessibility_Statement` (
     `conformance` varchar(255) DEFAULT NULL,
     `evidence` text(255) DEFAULT NULL,
     `seal` varchar(255) DEFAULT NULL,
+    `hash` varchar(255) DEFAULT NULL,
     `statementDate` datetime DEFAULT NULL,
     PRIMARY KEY (`Id`),
     UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Id`),
