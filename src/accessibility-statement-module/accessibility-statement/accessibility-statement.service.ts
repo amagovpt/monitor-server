@@ -37,10 +37,9 @@ export class AccessibilityStatementService {
     if(currentAS){
       const currentHash = currentAS.hash;
       const currentDate = currentAS.statementDate;
-      const { autoList, userList, manualList, contacts, ...aStatementDto } = aStatementParsed;
-      const newhash = hash({ aStatementDto, autoList, userList, manualList, contacts });
+      const newhash = hash(aStatementParsed);
 
-      if (currentDate === aStatementDto.statementDate && currentHash !== newhash){
+      if (currentDate === aStatementParsed.statementDate && currentHash !== newhash){
         this.deleteById(currentAS.Id);
       } 
     }
