@@ -34,7 +34,7 @@ export class AccessibilityStatementService {
     const currentAS = await this.findLatestByWebsiteID(website.WebsiteId);
     const aStatementParsed = await this.parseAStatement(html, website, url);
     let aStatement;
-    if(currentAS){
+    if (currentAS && aStatementParsed){
       const currentHash = currentAS.hash;
       const currentDate = currentAS.statementDate;
       const newhash = hash(aStatementParsed);
