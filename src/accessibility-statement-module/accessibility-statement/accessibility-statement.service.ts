@@ -34,18 +34,19 @@ export class AccessibilityStatementService {
     const currentAS = await this.findLatestByWebsiteID(website.WebsiteId);
     const aStatementParsed = await this.parseAStatement(html, website, url);
     let aStatement;
-    if (currentAS && aStatementParsed){
+    if (currentAS && aStatementParsed) {
       const currentHash = currentAS.hash;
       const currentDate = currentAS.statementDate;
       const newhash = hash(aStatementParsed);
 
-      if (currentDate === aStatementParsed.statementDate && currentHash !== newhash){
+      if (currentDate === aStatementParsed.statementDate && currentHash !== newhash) {
         this.deleteById(currentAS.Id);
-      } 
+        aStatement = this.createAStatement(aStatementParsed, website);
+      }
     }
-    if(aStatementParsed)
+    else if (aStatementParsed)
       aStatement = this.createAStatement(aStatementParsed, website);
-      
+
     return aStatement
   }
   async parseAStatement(html: string, website: Website, url: string): Promise<AccessibilityStatementDto>{
