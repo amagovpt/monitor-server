@@ -1,8 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { success } from 'src/lib/response';
 import { AccessibilityStatementService } from './accessibility-statement.service';
-import { CreateAccessibilityStatementDto } from './dto/create-accessibility-statement.dto';
-import { UpdateAccessibilityStatementDto } from './dto/update-accessibility-statement.dto';
 
 @Controller('accessibility-statement')
 export class AccessibilityStatementController {
@@ -15,7 +13,7 @@ export class AccessibilityStatementController {
 
   @Get()
   async findAll() {
-    return await this.accessibilityStatementService.getASList();
+    return success(await this.accessibilityStatementService.getASList());
   }
 
   @Get(':id')
