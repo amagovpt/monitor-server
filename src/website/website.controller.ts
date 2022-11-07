@@ -18,6 +18,13 @@ export class WebsiteController {
   constructor(private readonly websiteService: WebsiteService) {}
 
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("accessibility-statement/update")
+  async accessibilityStatementUpdate(): Promise<any> {
+    return success(
+      await this.websiteService.findAccessiblityStatements());
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
     const websitesId = JSON.parse(req.body.websitesId);
