@@ -21,6 +21,21 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.findById(id));
   }
 
+  @Get('conformance')
+  async findAllByConformance() {
+    return success(await this.accessibilityStatementService.getByConformance());
+  }
+
+  @Get('state')
+  async findAllByState() {
+    return success(await this.accessibilityStatementService.getByState());
+  }
+
+  @Get('directory')
+  async findAllByDirectory() {
+    return success(await this.accessibilityStatementService.getByDirectory());
+  }
+
  /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
