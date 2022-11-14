@@ -16,11 +16,10 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.getASList());
   }
 
-  @Get(':id')
+  @Get('id/:id')
   async findOneById(@Param('id') id: number) {
     return success(await this.accessibilityStatementService.findById(id));
   }
-
 
   @Get('year')
   async findAllByYear() {

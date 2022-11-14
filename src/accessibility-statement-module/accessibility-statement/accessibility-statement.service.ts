@@ -158,7 +158,8 @@ export class AccessibilityStatementService {
     list.map((elem) => {
       const date = elem.statementDate;
       const year = date.getFullYear();
-      result[year] ? result[year]++ : 1;
+      console.log({date,year});
+      result[year] = result[year] ? ++result[year] : 1;
     });
     return result;
   }
