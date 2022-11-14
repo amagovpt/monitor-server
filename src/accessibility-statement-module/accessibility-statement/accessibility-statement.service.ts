@@ -283,4 +283,13 @@ export class AccessibilityStatementService {
           d.Name`, [PLENAMENTE_CONFORME, PARCIALMENTE_CONFORME, NAO_CONFORME]
     );
   }
+  async getNumberOfEvaluationByType(){
+    return {
+      user: await this.userEvaluationService.getLength(),
+      manual: await this.manualEvaluationService.getLength(),
+      automatic: await this.automaticEvaluationService.getLength()
+    }
+  }
+
+
 }
