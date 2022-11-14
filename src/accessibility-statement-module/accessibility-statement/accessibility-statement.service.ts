@@ -15,6 +15,7 @@ import { Website } from 'src/website/website.entity';
 import { CreateContactDto } from '../contact/dto/create-contact.dto';
 import { ContactService } from '../contact/contact.service';
 import { AccessibilityStatementDto } from './dto/accessibility-statement.dto';
+import { NAO_CONFORME, PARCIALMENTE_CONFORME, PLENAMENTE_CONFORME } from './contants';
 var hash = require('object-hash');
 
 @Injectable()
@@ -164,28 +165,58 @@ export class AccessibilityStatementService {
 
   async getByState(){
     return this.accessibilityStatementRepository.query(
-      `SELECT *, COUNT(*) as AccessibilityStatements FROM Accessibility_Statement GROUP BY Accessibility_Statement.state`,
+      `SELECT 
+          sum(
+            case when ast.state = 'completeStatement' then 1 else 0 end
+          ) as completeStatement, 
+          sum(
+            case when ast.state = 'incompleteStatement' then 1 else 0 end
+          ) as incompleteStatement, 
+          sum(
+            case when ast.state = 'possibleStatement' then 1 else 0 end
+          ) as possibleStatement 
+        FROM 
+          Accessibility_Statement as ast`,
     );
   }
 
   async getByConformance() {
     return this.accessibilityStatementRepository.query(
-      `SELECT *, COUNT(*) as AccessibilityStatements FROM Accessibility_Statement GROUP BY Accessibility_Statement.conformance`,
+      `SELECT 
+          sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as plenamenteConforme, 
+          sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as parcialmenteConforme, 
+          sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as naoConforme 
+        FROM 
+          Accessibility_Statement as ast`,[PLENAMENTE_CONFORME,PARCIALMENTE_CONFORME,NAO_CONFORME]
     );
   }
 
   async getByDirectory() {
     return this.accessibilityStatementRepository.query(
-      `SELECT
-      d.Name,
-      sum(case when Accessibility_Statement.state = 'completeStatement' then 1 else 0 end) as completeStatement,
-      sum(case when Accessibility_Statement.state = 'incompleteStatement' then 1 else 0 end) as incompleteStatement,
-      sum(case when Accessibility_Statement.state = 'possibleStatement' then 1 else 0 end) as possibleStatement,
-      FROM Accessibility_Statement as as
-      JOIN TagWebsite as tw ON tw.WebsiteId = as.WebsiteId
-      JOIN Directory_Tag as dt on dt.TagId = t.TagId
-      JOIN Directory as d on d.DirectoryId = dt.DirectoryId
-      GROUP BY d.Name`,
+      `SELECT 
+          d.Name, 
+          sum(
+            case when ast.state = 'completeStatement' then 1 else 0 end
+          ) as completeStatement, 
+          sum(
+            case when ast.state = 'incompleteStatement' then 1 else 0 end
+          ) as incompleteStatement, 
+          sum(
+            case when ast.state = 'possibleStatement' then 1 else 0 end
+          ) as possibleStatement 
+        FROM 
+          Accessibility_Statement as ast 
+          JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
+          JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
+          JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
+        GROUP BY 
+          d.Name`,
     );
   }
 }
