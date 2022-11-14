@@ -150,4 +150,42 @@ export class AccessibilityStatementService {
     });
     return convertList;
   }
+
+  async getASByAge(){
+    const list = await this.accessibilityStatementRepository.find();
+    const result = {};
+    list.map((elem) => {
+      const date = elem.statementDate;
+      const year = date.getFullYear();
+      result[year] ? result[year]++ : 1;
+    });
+    return result;
+  }
+
+  async getByState(){
+    return this.accessibilityStatementRepository.query(
+      `SELECT *, COUNT(*) as AccessibilityStatements FROM Accessibility_Statement GROUP BY Accessibility_Statement.state`,
+    );
+  }
+
+  async getByConformance() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT *, COUNT(*) as AccessibilityStatements FROM Accessibility_Statement GROUP BY Accessibility_Statement.conformance`,
+    );
+  }
+
+  async getByDirectory() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT
+      d.Name,
+      sum(case when Accessibility_Statement.state = 'completeStatement' then 1 else 0 end) as completeStatement,
+      sum(case when Accessibility_Statement.state = 'incompleteStatement' then 1 else 0 end) as incompleteStatement,
+      sum(case when Accessibility_Statement.state = 'possibleStatement' then 1 else 0 end) as possibleStatement,
+      FROM Accessibility_Statement as as
+      JOIN TagWebsite as tw ON tw.WebsiteId = as.WebsiteId
+      JOIN Directory_Tag as dt on dt.TagId = t.TagId
+      JOIN Directory as d on d.DirectoryId = dt.DirectoryId
+      GROUP BY d.Name`,
+    );
+  }
 }

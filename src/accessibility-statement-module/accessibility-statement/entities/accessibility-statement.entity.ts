@@ -57,7 +57,7 @@ export class AccessibilityStatement {
         type: 'datetime',
         nullable: true,
     })
-    statementDate: any;
+    statementDate: Date;
 
     @Column({ type: 'enum', enum: State })
     state: State;
