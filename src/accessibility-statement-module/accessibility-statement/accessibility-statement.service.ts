@@ -15,7 +15,7 @@ import { Website } from 'src/website/website.entity';
 import { CreateContactDto } from '../contact/dto/create-contact.dto';
 import { ContactService } from '../contact/contact.service';
 import { AccessibilityStatementDto } from './dto/accessibility-statement.dto';
-import { NAO_CONFORME, PARCIALMENTE_CONFORME, PLENAMENTE_CONFORME } from './contants';
+import { BRONZE, NAO_CONFORME, OURO, PARCIALMENTE_CONFORME, PLENAMENTE_CONFORME, PRATA } from './contants';
 var hash = require('object-hash');
 
 @Injectable()
@@ -152,7 +152,7 @@ export class AccessibilityStatementService {
     return convertList;
   }
 
-  async getASByAge(){
+  async getByAge(){
     const list = await this.accessibilityStatementRepository.find();
     const result = {};
     list.map((elem) => {
@@ -167,16 +167,16 @@ export class AccessibilityStatementService {
     return this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
-            case when ast.state = 'completeStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as completeStatement, 
           sum(
-            case when ast.state = 'incompleteStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as incompleteStatement, 
           sum(
-            case when ast.state = 'possibleStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as possibleStatement 
         FROM 
-          Accessibility_Statement as ast`,
+          Accessibility_Statement as ast`, [State.completeStatement, State.incompleteStatement, State.possibleStatement]
     );
   }
 
@@ -197,18 +197,35 @@ export class AccessibilityStatementService {
     );
   }
 
-  async getByDirectory() {
+  async getBySeal() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as bronze, 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as prata, 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as ouro 
+        FROM 
+          Accessibility_Statement as ast`, [OURO, PRATA, BRONZE]
+    );
+  }
+
+  async getByDirectoryState() {
     return this.accessibilityStatementRepository.query(
       `SELECT 
           d.Name, 
           sum(
-            case when ast.state = 'completeStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as completeStatement, 
           sum(
-            case when ast.state = 'incompleteStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as incompleteStatement, 
           sum(
-            case when ast.state = 'possibleStatement' then 1 else 0 end
+            case when ast.state = ? then 1 else 0 end
           ) as possibleStatement 
         FROM 
           Accessibility_Statement as ast 
@@ -216,7 +233,53 @@ export class AccessibilityStatementService {
           JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
           JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
         GROUP BY 
-          d.Name`,
+          d.Name`, [State.completeStatement, State.incompleteStatement, State.possibleStatement]
+    );
+  }
+
+  async getByDirectorySeal() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT 
+          d.Name, 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as bronze, 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as prata, 
+          sum(
+            case when ast.seal = ? then 1 else 0 end
+          ) as ouro 
+        FROM 
+          Accessibility_Statement as ast 
+          JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
+          JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
+          JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
+        GROUP BY 
+          d.Name`, [OURO, PRATA, BRONZE]
+    );
+  }
+
+  async getByDirectoryConformity() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT 
+          d.Name, 
+           sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as plenamenteConforme, 
+          sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as parcialmenteConforme, 
+          sum(
+            case when ast.conformance = ? then 1 else 0 end
+          ) as naoConforme 
+        FROM 
+          Accessibility_Statement as ast 
+          JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
+          JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
+          JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
+        GROUP BY 
+          d.Name`, [PLENAMENTE_CONFORME, PARCIALMENTE_CONFORME, NAO_CONFORME]
     );
   }
 }
