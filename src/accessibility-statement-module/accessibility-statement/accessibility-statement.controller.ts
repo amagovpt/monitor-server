@@ -46,6 +46,22 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.getByDirectorySeal());
   }
 
+  @Get('directory/conformance')
+  async findAllByDirectoryConformity() {
+    return success(await this.accessibilityStatementService.getByDirectoryConformity());
+  }
+
+
+  @Get('directory/OPAW')
+  async findAllByDirectoryWebsite() {
+    return success(await this.accessibilityStatementService.getOPAWTable());
+  }
+
+  @Get('evaluations')
+  async findNumberOfEvaluationByType() {
+    return success(await this.accessibilityStatementService.getNumberOfEvaluationByType());
+  }
+
  /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
