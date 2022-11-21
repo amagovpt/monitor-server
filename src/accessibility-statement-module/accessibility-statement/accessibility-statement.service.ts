@@ -161,16 +161,21 @@ export class AccessibilityStatementService {
       console.log({date,year});
       result[year] = result[year] ? ++result[year] : 1;
     });
+    return this.convertToAngularTable("year",result);
+  }
+
+  private convertToAngularTable(atributeName:string,result){
     const keys = Object.keys(result);
-    const yearList = [];
-    for(let key of keys){
-      yearList.push({year:key,declarationNumber:result[key]})
+    const list = [];
+    for (let key of keys) {
+      list.push({ [atributeName]: key, declarationNumber: result[key] })
     }
-    return yearList;
+    return list;
+
   }
 
   async getByState(){
-    return this.accessibilityStatementRepository.query(
+    const result = this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.state = ? then 1 else 0 end
@@ -184,10 +189,12 @@ export class AccessibilityStatementService {
         FROM 
           Accessibility_Statement as ast`, [State.completeStatement, State.incompleteStatement, State.possibleStatement]
     );
+    return this.convertToAngularTable("state", result);
+
   }
 
   async getByConformance() {
-    return this.accessibilityStatementRepository.query(
+    const result = this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.conformance = ? then 1 else 0 end
@@ -201,10 +208,13 @@ export class AccessibilityStatementService {
         FROM 
           Accessibility_Statement as ast`,[PLENAMENTE_CONFORME,PARCIALMENTE_CONFORME,NAO_CONFORME]
     );
+
+    //conversion to Angular table form
+  return this.convertToAngularTable("conformance", result);
   }
 
   async getBySeal() {
-    return this.accessibilityStatementRepository.query(
+    const result = this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.seal = ? then 1 else 0 end
@@ -218,6 +228,8 @@ export class AccessibilityStatementService {
         FROM 
           Accessibility_Statement as ast`, [OURO, PRATA, BRONZE]
     );
+
+    return this.convertToAngularTable("seal", result);
   }
 
   async getByDirectoryState() {
