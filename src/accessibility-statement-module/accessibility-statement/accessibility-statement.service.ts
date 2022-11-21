@@ -161,7 +161,12 @@ export class AccessibilityStatementService {
       console.log({date,year});
       result[year] = result[year] ? ++result[year] : 1;
     });
-    return result;
+    const keys = Object.keys(result);
+    const yearList = [];
+    for(let key of keys){
+      yearList.push({year:key,declarationNumber:result[key]})
+    }
+    return yearList;
   }
 
   async getByState(){
