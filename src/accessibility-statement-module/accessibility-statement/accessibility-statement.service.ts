@@ -164,18 +164,17 @@ export class AccessibilityStatementService {
     return this.convertToAngularTable("year",result);
   }
 
-  private convertToAngularTable(atributeName:string,result){
+  private convertToAngularTable(atributeName:string, result){
     const keys = Object.keys(result);
     const list = [];
     for (let key of keys) {
       list.push({ [atributeName]: key, declarationNumber: result[key] })
     }
     return list;
-
   }
 
   async getByState(){
-    const result = this.accessibilityStatementRepository.query(
+    const result = await this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.state = ? then 1 else 0 end
@@ -189,12 +188,12 @@ export class AccessibilityStatementService {
         FROM 
           Accessibility_Statement as ast`, [State.completeStatement, State.incompleteStatement, State.possibleStatement]
     );
-    return this.convertToAngularTable("state", result);
+    return this.convertToAngularTable("state", result[0]);
 
   }
 
   async getByConformance() {
-    const result = this.accessibilityStatementRepository.query(
+    const result = await this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.conformance = ? then 1 else 0 end
@@ -210,11 +209,11 @@ export class AccessibilityStatementService {
     );
 
     //conversion to Angular table form
-  return this.convertToAngularTable("conformance", result);
+  return this.convertToAngularTable("conformance", result[0]);
   }
 
   async getBySeal() {
-    const result = this.accessibilityStatementRepository.query(
+    const result = await this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
             case when ast.seal = ? then 1 else 0 end
@@ -229,7 +228,7 @@ export class AccessibilityStatementService {
           Accessibility_Statement as ast`, [OURO, PRATA, BRONZE]
     );
 
-    return this.convertToAngularTable("seal", result);
+    return this.convertToAngularTable("seal", result[0]);
   }
 
   async getByDirectoryState() {
