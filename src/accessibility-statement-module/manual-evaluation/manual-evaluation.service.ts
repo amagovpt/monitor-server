@@ -24,4 +24,8 @@ export class ManualEvaluationService {
     });
     return this.manualEvaluationRepository.save(evaluation);
   }
+
+  getLength() {
+    return this.manualEvaluationRepository.query(`SELECT COUNT(*) FROM Manual_Evaluation`);
+  }
 }

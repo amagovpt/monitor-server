@@ -16,11 +16,10 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.getASList());
   }
 
-  @Get(':id')
+  @Get('id/:id')
   async findOneById(@Param('id') id: number) {
     return success(await this.accessibilityStatementService.findById(id));
   }
-
 
   @Get('year')
   async findAllByYear() {
@@ -45,6 +44,22 @@ export class AccessibilityStatementController {
   @Get('directory/seal')
   async findAllByDirectorySeal() {
     return success(await this.accessibilityStatementService.getByDirectorySeal());
+  }
+
+  @Get('directory/conformance')
+  async findAllByDirectoryConformity() {
+    return success(await this.accessibilityStatementService.getByDirectoryConformity());
+  }
+
+
+  @Get('directory/OPAW')
+  async findAllByDirectoryWebsite() {
+    return success(await this.accessibilityStatementService.getOPAWTable());
+  }
+
+  @Get('evaluations')
+  async findNumberOfEvaluationByType() {
+    return success(await this.accessibilityStatementService.getNumberOfEvaluationByType());
   }
 
  /* @Post()

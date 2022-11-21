@@ -16,4 +16,8 @@ export class UserEvaluationService {
     });
     return this.userEvaluationRepository.save(evaluation);
   }
+
+  getLength() {
+    return this.userEvaluationRepository.query(`SELECT COUNT(*) FROM User_Evaluation`);
+  }
 }

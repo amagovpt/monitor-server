@@ -158,9 +158,15 @@ export class AccessibilityStatementService {
     list.map((elem) => {
       const date = elem.statementDate;
       const year = date.getFullYear();
-      result[year] ? result[year]++ : 1;
+      console.log({date,year});
+      result[year] = result[year] ? ++result[year] : 1;
     });
-    return result;
+    const keys = Object.keys(result);
+    const yearList = [];
+    for(let key of keys){
+      yearList.push({year:key,declarationNumber:result[key]})
+    }
+    return yearList;
   }
 
   async getByState(){
@@ -282,4 +288,48 @@ export class AccessibilityStatementService {
           d.Name`, [PLENAMENTE_CONFORME, PARCIALMENTE_CONFORME, NAO_CONFORME]
     );
   }
+  private async getByDirectoryWebsiteLength() {
+    return this.accessibilityStatementRepository.query(`
+      SELECT 
+        d.Name, 
+        count(ast.WebsiteId) as Total 
+      FROM 
+        Website as ast 
+        JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
+        JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
+        JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
+      GROUP BY 
+        d.Name`);
+  }
+
+  private async getByDirectoryA11yLength() {
+    return this.accessibilityStatementRepository.query(
+      `SELECT 
+          d.Name, 
+          count(ast.Id) as A11yStatements
+          t.Total
+        FROM 
+          Accessibility_Statement as ast 
+          JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
+          JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
+          JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
+        GROUP BY 
+          d.Name`);
+  }
+  async getOPAWTable(){
+    const directoryA11y = await this.getByDirectoryA11yLength();
+    const directoryLenght = await this.getByDirectoryWebsiteLength();
+    return directoryA11y.map((elem)=>{
+      elem["Total"] = directoryLenght[elem.Name];
+    });
+  }
+  async getNumberOfEvaluationByType(){
+    return {
+      user: await this.userEvaluationService.getLength(),
+      manual: await this.manualEvaluationService.getLength(),
+      automatic: await this.automaticEvaluationService.getLength()
+    }
+  }
+
+
 }
