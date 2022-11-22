@@ -215,6 +215,7 @@ export class AccessibilityStatementService {
   async getBySeal() {
     const result = await this.accessibilityStatementRepository.query(
       `SELECT 
+          d.Name as name, 
           sum(
             case when ast.seal = ? then 1 else 0 end
           ) as bronze, 
@@ -234,7 +235,7 @@ export class AccessibilityStatementService {
   async getByDirectoryState() {
     return this.accessibilityStatementRepository.query(
       `SELECT 
-          d.Name, 
+          d.Name as name, 
           sum(
             case when ast.state = ? then 1 else 0 end
           ) as completeStatement, 
@@ -257,7 +258,7 @@ export class AccessibilityStatementService {
   async getByDirectorySeal() {
     return this.accessibilityStatementRepository.query(
       `SELECT 
-          d.Name, 
+          d.Name as name, 
           sum(
             case when ast.seal = ? then 1 else 0 end
           ) as bronze, 
@@ -302,7 +303,7 @@ export class AccessibilityStatementService {
   private async getByDirectoryWebsiteLength() {
     return this.accessibilityStatementRepository.query(`
       SELECT 
-        d.Name, 
+        d.Name as name, 
         count(ast.WebsiteId) as Total 
       FROM 
         Website as ast 
