@@ -31,6 +31,11 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.getByConformance());
   }
 
+  @Get('seal')
+  async findAllBySeal() {
+    return success(await this.accessibilityStatementService.getBySeal());
+  }
+
   @Get('state')
   async findAllByState() {
     return success(await this.accessibilityStatementService.getByState());
