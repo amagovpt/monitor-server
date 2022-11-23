@@ -342,11 +342,11 @@ export class AccessibilityStatementService {
   }
 
   async getNumberOfEvaluationByType(){
-    return {
-      user: await this.userEvaluationService.getLength(),
-      manual: await this.manualEvaluationService.getLength(),
-      automatic: await this.automaticEvaluationService.getLength()
-    }
+    return [
+      {type:"user",  numberOfEvaluations: await this.userEvaluationService.getLength()},
+      {type: "manual", numberOfEvaluations: await this.manualEvaluationService.getLength()},
+      { type: "automatic", numberOfEvaluations: await this.automaticEvaluationService.getLength()}
+    ]
   }
 
 
