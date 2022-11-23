@@ -19,7 +19,7 @@ export class AutomaticEvaluationService {
   }
 
   async getLength(){
-    return await this.automaticEvaluationRepository.query(`SELECT COUNT(*) as length FROM Automatic_Evaluation`)[0].length;
+    return (await this.automaticEvaluationRepository.query(`SELECT COUNT(*) as length FROM Automatic_Evaluation`))[0].length;
   }
 
 }

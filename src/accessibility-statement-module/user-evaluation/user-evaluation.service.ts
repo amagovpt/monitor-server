@@ -18,6 +18,6 @@ export class UserEvaluationService {
   }
 
   async getLength() {
-    return await this.userEvaluationRepository.query(`SELECT COUNT(*) as length FROM User_Evaluation`)[0].length;
+    return (await this.userEvaluationRepository.query(`SELECT COUNT(*) as length FROM User_Evaluation`))[0].length;
   }
 }
