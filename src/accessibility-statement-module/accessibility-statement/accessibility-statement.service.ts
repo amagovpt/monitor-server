@@ -334,7 +334,7 @@ export class AccessibilityStatementService {
   async getOPAWTable(){
     const directoryA11y = await this.getByDirectoryA11yLength();
     const directoryLenght = await this.getByDirectoryWebsiteLength();
-    for(let i = 0;i < directoryA11y; i++){
+    for(let i = 0;i < directoryA11y.length; i++){
       directoryA11y[i]["total"] = directoryLenght[i].total;
     }
     return directoryA11y;
