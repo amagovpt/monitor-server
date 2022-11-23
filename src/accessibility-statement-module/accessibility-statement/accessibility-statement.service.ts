@@ -320,7 +320,6 @@ export class AccessibilityStatementService {
       `SELECT 
           d.Name as name, 
           count(ast.Id) as a11yStatements
-          t.Total as total
         FROM 
           Accessibility_Statement as ast 
           JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
@@ -336,7 +335,7 @@ export class AccessibilityStatementService {
     const directoryA11y = await this.getByDirectoryA11yLength();
     const directoryLenght = await this.getByDirectoryWebsiteLength();
     for(let i = 0;i < directoryA11y; i++){
-      directoryA11y[i]["total"] = directoryLenght[i].Total;
+      directoryA11y[i]["total"] = directoryLenght[i].total;
     }
     return directoryA11y;
   }
