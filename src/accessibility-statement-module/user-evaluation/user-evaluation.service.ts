@@ -17,7 +17,7 @@ export class UserEvaluationService {
     return this.userEvaluationRepository.save(evaluation);
   }
 
-  getLength() {
-    return this.userEvaluationRepository.query(`SELECT COUNT(*) FROM User_Evaluation`);
+  async getLength() {
+    return await this.userEvaluationRepository.query(`SELECT COUNT(*) as length FROM User_Evaluation`)[0].length;
   }
 }
