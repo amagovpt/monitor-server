@@ -215,7 +215,6 @@ export class AccessibilityStatementService {
   async getBySeal() {
     const result = await this.accessibilityStatementRepository.query(
       `SELECT 
-          d.Name as name, 
           sum(
             case when ast.seal = ? then 1 else 0 end
           ) as bronze, 
@@ -281,7 +280,7 @@ export class AccessibilityStatementService {
   async getByDirectoryConformity() {
     return this.accessibilityStatementRepository.query(
       `SELECT 
-          d.Name, 
+          d.Name as name, 
            sum(
             case when ast.conformance = ? then 1 else 0 end
           ) as plenamenteConforme, 
@@ -311,13 +310,15 @@ export class AccessibilityStatementService {
         JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
         JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
       GROUP BY 
+        d.Name
+      ORDER BY
         d.Name`);
   }
 
   private async getByDirectoryA11yLength() {
     return this.accessibilityStatementRepository.query(
       `SELECT 
-          d.Name, 
+          d.Name as name, 
           count(ast.Id) as A11yStatements
           t.Total
         FROM 
@@ -326,15 +327,20 @@ export class AccessibilityStatementService {
           JOIN DirectoryTag as dt on dt.TagId = tw.TagId 
           JOIN Directory as d on d.DirectoryId = dt.DirectoryId 
         GROUP BY 
+          d.Name
+        ORDER BY
           d.Name`);
   }
+  
   async getOPAWTable(){
     const directoryA11y = await this.getByDirectoryA11yLength();
     const directoryLenght = await this.getByDirectoryWebsiteLength();
-    return directoryA11y.map((elem)=>{
-      elem["Total"] = directoryLenght[elem.Name];
-    });
+    for(let i = 0;i < directoryA11y; i++){
+      directoryA11y[i]["Total"] = directoryLenght[i].Total;
+    }
+    return directoryA11y;
   }
+
   async getNumberOfEvaluationByType(){
     return {
       user: await this.userEvaluationService.getLength(),
