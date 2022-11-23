@@ -25,7 +25,7 @@ export class ManualEvaluationService {
     return this.manualEvaluationRepository.save(evaluation);
   }
 
-  getLength() {
-    return this.manualEvaluationRepository.query(`SELECT COUNT(*) FROM Manual_Evaluation`);
+  async getLength() {
+    return await this.manualEvaluationRepository.query(`SELECT COUNT(*) as length FROM Manual_Evaluation`)[0].length;
   }
 }

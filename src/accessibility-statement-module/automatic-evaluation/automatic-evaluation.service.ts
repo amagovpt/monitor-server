@@ -18,8 +18,8 @@ export class AutomaticEvaluationService {
     return this.automaticEvaluationRepository.save(evaluation);
   }
 
-  getLength(){
-    return this.automaticEvaluationRepository.query(`SELECT COUNT(*) FROM Automatic_Evaluation`);
+  async getLength(){
+    return await this.automaticEvaluationRepository.query(`SELECT COUNT(*) as length FROM Automatic_Evaluation`)[0].length;
   }
 
 }
