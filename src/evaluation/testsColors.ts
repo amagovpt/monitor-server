@@ -95,6 +95,6 @@ export default {
   values_02a: "Y",
   values_02b: "G",
   w3c_validator_01a: "G",
-  w3c_validator_01b: "R",
+  w3c_validator_01b: "Y",
   win_01: "Y",
 };
