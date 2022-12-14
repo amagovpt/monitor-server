@@ -6,7 +6,7 @@ import { Directory } from "./models/directory";
 import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
-import _tests from "./models/tests";
+import _tests from "src/evaluation/tests";
 import { Observatory } from "./observatory.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";

@@ -19,7 +19,7 @@ export class GovUserController {
   }
 
   @Get("exists/:cc")
-  async exists(@Param('cc') id: string) {
+  async exists(@Param('cc') cc: string) {
     return success(await this.govUserService.checkIfExists(cc));
   }
 
