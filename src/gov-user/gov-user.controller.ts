@@ -18,6 +18,11 @@ export class GovUserController {
     return success(await this.govUserService.findAll());
   }
 
+  @Get("exists/:cc")
+  async exists(@Param('cc') cc: string) {
+    return success(await this.govUserService.checkIfExists(cc));
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return success(await this.govUserService.findOne(+id));
