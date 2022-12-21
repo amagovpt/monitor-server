@@ -227,7 +227,7 @@ export class AccessibilityStatementService {
             case when ast.seal = ? then 1 else 0 end
           ) as ouro 
         FROM 
-          Accessibility_Statement as ast`, [OURO, PRATA, BRONZE]
+          Accessibility_Statement as ast`, [BRONZE, PRATA, OURO]
     );
 
     return this.convertToAngularTable("seal", result[0]);
