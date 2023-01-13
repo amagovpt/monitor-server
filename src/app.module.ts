@@ -22,6 +22,8 @@ import { StampModule } from "./stamp/stamp.module";
 import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
 import { GovUserModule } from './gov-user/gov-user.module';
+import winston from "winston";
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db.json").toString()
@@ -29,6 +31,21 @@ const databaseConfig = JSON.parse(
 
 @Module({
   imports: [
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('monitor-server', {
+              // options
+            })
+          ),
+        }),
+      ],
+      // options
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "mysql",
@@ -69,4 +86,4 @@ const databaseConfig = JSON.parse(
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

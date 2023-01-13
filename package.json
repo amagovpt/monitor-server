@@ -44,6 +44,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.orderby": "^4.6.0",
     "mysql": "^2.18.1",
+    "nest-winston": "^1.8.0",
     "nestjs-rate-limiter": "^3.1.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
@@ -55,7 +56,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.1",
     "sqlstring": "^2.3.2",
-    "svg-builder": "^1.0.0"
+    "svg-builder": "^1.0.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.1.5",
