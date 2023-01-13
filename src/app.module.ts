@@ -26,6 +26,8 @@ import { AutomaticEvaluationModule } from './accessibility-statement-module/auto
 import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
 import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
 import { GovUserModule } from './gov-user/gov-user.module';
+import winston from "winston";
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -33,6 +35,21 @@ const databaseConfig = JSON.parse(
 
 @Module({
   imports: [
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('monitor-server', {
+              // options
+            })
+          ),
+        }),
+      ],
+      // options
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "mysql",
@@ -75,4 +92,4 @@ const databaseConfig = JSON.parse(
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

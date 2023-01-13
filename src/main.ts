@@ -4,6 +4,8 @@ import express from "express";
 import helmet from "helmet";
 import compression from "compression";
 import { WebsiteService } from "./website/website.service";
+import { PageService } from "./page/page.service";
+import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -17,5 +19,11 @@ async function bootstrap() {
 async function findAccessiblityStatements(app){
   const pageService = app.get(WebsiteService);
   await pageService.findAccessiblityStatements();
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  await app.listen(process.env.PORT || 3000);
+}
+async function deletePlicas(app){
+  const pageService = app.get(PageService);
+  await pageService.deletePlicas();
 }
 bootstrap();
