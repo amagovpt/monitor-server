@@ -23,7 +23,9 @@ import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
 import { GovUserModule } from './gov-user/gov-user.module';
 import winston from "winston";
+import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
+import { LogModule } from './log/log.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db.json").toString()
@@ -33,7 +35,11 @@ const databaseConfig = JSON.parse(
   imports: [
     WinstonModule.forRoot({
       transports: [
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.DailyRotateFile({
+          filename: 'error-log/monitor-server-%DATE%.log',
+          datePattern: 'YYYY-MM-DD-HH',
+          zippedArchive: true,
+          maxSize: '20m', }),
         new winston.transports.Console({
           format: winston.format.combine(
             winston.format.timestamp(),
@@ -76,6 +82,7 @@ const databaseConfig = JSON.parse(
     CrawlerModule,
     DirectoryModule,
     GovUserModule,
+    LogModule,
   ],
   controllers: [AppController],
   providers: [
