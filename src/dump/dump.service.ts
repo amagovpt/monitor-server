@@ -8,6 +8,7 @@ export class DumpService {
    databaseConfig = JSON.parse(
     readFileSync("../../monitor_db.json").toString()
   );
+  path = './dump.sql.gz';
   createDump() {
     mysqldump({
       connection: {
@@ -16,7 +17,7 @@ export class DumpService {
         password: this.databaseConfig.password,
         database: this.databaseConfig.database,
       },
-      dumpToFile: './dump.sql.gz',
+      dumpToFile: this.path,
       compressFile: true,
     });
   }

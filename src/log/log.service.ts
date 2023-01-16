@@ -1,26 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateLogDto } from './dto/create-log.dto';
 import { UpdateLogDto } from './dto/update-log.dto';
+var fs = require('fs');
 
 @Injectable()
 export class LogService {
-  create(createLogDto: CreateLogDto) {
-    return 'This action adds a new log';
+
+  listErrorLog() {
+    return fs.readdirSync('/error-log/');
   }
 
-  findAll() {
-    return `This action returns all log`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} log`;
-  }
-
-  update(id: number, updateLogDto: UpdateLogDto) {
-    return `This action updates a #${id} log`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} log`;
+  listActionLog() {
+    return fs.readdirSync('/action-log/');
   }
 }

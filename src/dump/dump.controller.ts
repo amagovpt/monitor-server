@@ -1,14 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 import { DumpService } from './dump.service';
+import { Response } from 'express';
+
 
 
 @Controller('dump')
 export class DumpController {
   constructor(private readonly dumpService: DumpService) {}
-  
+
   @Get()
   createDump() {
     return this.dumpService.createDump();
+  }
+
+  @Get('file')
+  async getLog(@Res() res: Response,) {
+    const path = this.dumpService.path;
+    if (path) {
+      const file = createReadStream(join(process.cwd(), path));
+      file.pipe(res);
+    }
   }
 
 
