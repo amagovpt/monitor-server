@@ -26,6 +26,7 @@ import winston from "winston";
 import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import { LogModule } from './log/log.module';
+import { DumpModule } from './dump/dump.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db.json").toString()
@@ -91,6 +92,7 @@ const databaseConfig = JSON.parse(
     DirectoryModule,
     GovUserModule,
     LogModule,
+    DumpModule,
   ],
   controllers: [AppController],
   providers: [
