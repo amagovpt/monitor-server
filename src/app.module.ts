@@ -37,10 +37,17 @@ const databaseConfig = JSON.parse(
       transports: [
         new winston.transports.DailyRotateFile({
           filename: 'error-log/monitor-server-%DATE%.log',
-          datePattern: 'YYYY-MM-DD-HH',
+          datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
           maxSize: '20m', 
           level: "error"}),
+        new winston.transports.DailyRotateFile({
+          filename: 'action-log/monitor-server-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          level: "http"
+        }),
         new winston.transports.Console({
           format: winston.format.combine(
             winston.format.timestamp(),
