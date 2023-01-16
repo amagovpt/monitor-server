@@ -39,7 +39,8 @@ const databaseConfig = JSON.parse(
           filename: 'error-log/monitor-server-%DATE%.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true,
-          maxSize: '20m', }),
+          maxSize: '20m', 
+          level: "error"}),
         new winston.transports.Console({
           format: winston.format.combine(
             winston.format.timestamp(),
