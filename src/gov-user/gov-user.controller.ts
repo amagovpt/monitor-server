@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { GovUserService } from './gov-user.service';
 import { CreateGovUserDto } from './dto/create-gov-user.dto';
 import { UpdateGovUserDto } from './dto/update-gov-user.dto';
 import { success } from 'src/lib/response';
+import { LoggingInterceptor } from 'src/log/log.interceptor';
 
 @Controller('gov-user')
+@UseInterceptors(LoggingInterceptor)
 export class GovUserController {
   constructor(private readonly govUserService: GovUserService) { }
 

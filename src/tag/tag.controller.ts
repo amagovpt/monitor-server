@@ -6,13 +6,16 @@ import {
   Request,
   Param,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { TagService } from "./tag.service";
 import { Tag } from "./tag.entity";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("tag")
+@UseInterceptors(LoggingInterceptor)
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 

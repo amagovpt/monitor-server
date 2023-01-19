@@ -6,13 +6,16 @@ import {
   Request,
   Param,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EntityService } from "./entity.service";
 import { EntityTable } from "./entity.entity";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("entity")
+@UseInterceptors(LoggingInterceptor)
 export class EntityController {
   constructor(private readonly entityService: EntityService) {}
 

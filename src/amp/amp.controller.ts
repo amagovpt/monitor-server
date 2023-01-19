@@ -1,14 +1,16 @@
-import { Controller, Get, Post, Param, Request } from "@nestjs/common";
+import { Controller, Get, Post, Param, Request, UseInterceptors } from "@nestjs/common";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { success, accessDenied } from "../lib/response";
 import { readFileSync } from "fs";
 import dns from "dns";
 import ipRangeCheck from "ip-range-check";
 import { RateLimit } from "nestjs-rate-limiter";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 const blackList = readFileSync("../black-list.txt").toString().split("\n");
 
 @Controller("amp")
+@UseInterceptors(LoggingInterceptor)
 export class AmpController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
