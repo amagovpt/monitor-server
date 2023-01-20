@@ -5,12 +5,15 @@ import {
   Get,
   Post,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { CrawlerService } from "./crawler.service";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("crawler")
+@UseInterceptors(LoggingInterceptor)
 export class CrawlerController {
   constructor(private readonly crawlerService: CrawlerService) {}
 

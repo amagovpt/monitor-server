@@ -6,6 +6,7 @@ import {
   Post,
   UseGuards,
   Param,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as SqlString from "sqlstring";
@@ -13,8 +14,10 @@ import { WebsiteService } from "./website.service";
 import { Website } from "./website.entity";
 import { success } from "../lib/response";
 import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("website")
+@UseInterceptors(LoggingInterceptor)
 export class WebsiteController {
   constructor(private readonly websiteService: WebsiteService, private readonly accessibilityStatementService: AccessibilityStatementService) { }
 

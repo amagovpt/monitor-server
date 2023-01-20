@@ -9,14 +9,17 @@ import {
   Param,
   Query,
   Res,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { success } from "../lib/response";
 import { Response } from 'express';
 import { GovAuthGuard } from "./gov-auth.guard";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("auth")
+@UseInterceptors(LoggingInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 

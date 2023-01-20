@@ -5,12 +5,15 @@ import {
   Request,
   UseGuards,
   Param,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EvaluationService } from "./evaluation.service";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("evaluation")
+@UseInterceptors(LoggingInterceptor)
 export class EvaluationController {
   constructor(private readonly evaluationService: EvaluationService) {}
 

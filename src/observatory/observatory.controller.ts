@@ -1,9 +1,11 @@
-import { Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ObservatoryService } from "./observatory.service";
 import { success, error } from "../lib/response";
 import { AuthGuard } from "@nestjs/passport";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("observatory")
+@UseInterceptors(LoggingInterceptor)
 export class ObservatoryController {
   constructor(private readonly observatoryService: ObservatoryService) {}
 

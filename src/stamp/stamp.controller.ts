@@ -1,10 +1,12 @@
-import { Controller, Post, Request, UseGuards } from "@nestjs/common";
+import { Controller, Post, Request, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as SqlString from "sqlstring";
 import { StampService } from "./stamp.service";
 import { success, error } from "src/lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("stamp")
+@UseInterceptors(LoggingInterceptor)
 export class StampController {
   constructor(private readonly stampService: StampService) {}
 

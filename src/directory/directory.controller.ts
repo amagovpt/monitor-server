@@ -6,13 +6,16 @@ import {
   Request,
   Param,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { DirectoryService } from "./directory.service";
 import { Directory } from "./directory.entity";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("directory")
+@UseInterceptors(LoggingInterceptor)
 export class DirectoryController {
   constructor(private readonly directoryService: DirectoryService) {}
 

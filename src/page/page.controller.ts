@@ -6,13 +6,16 @@ import {
   UseGuards,
   Param,
   UnauthorizedException,
+  UseInterceptors,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { PageService } from "./page.service";
 import { success } from "../lib/response";
 import { EvaluationService } from "../evaluation/evaluation.service";
+import { LoggingInterceptor } from "src/log/log.interceptor";
 
 @Controller("page")
+@UseInterceptors(LoggingInterceptor)
 export class PageController {
   constructor(
     private readonly pageService: PageService,
