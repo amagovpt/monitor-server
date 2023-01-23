@@ -1,13 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } from '@nestjs/common';
 import { LogService } from './log.service';
-import { CreateLogDto } from './dto/create-log.dto';
-import { UpdateLogDto } from './dto/update-log.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Response } from 'express';
 import { success } from 'src/lib/response';
+import { AuthGuard } from '@nestjs/passport';
 
-
+@UseGuards(AuthGuard("jwt-admin"))
 @Controller('log')
 export class LogController {
   constructor(private readonly logService: LogService) {}

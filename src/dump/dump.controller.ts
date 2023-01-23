@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { DumpService } from './dump.service';
 import { Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 
-
+@UseGuards(AuthGuard("jwt-admin"))
 @Controller('dump')
 export class DumpController {
   constructor(private readonly dumpService: DumpService) {}
