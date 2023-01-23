@@ -7,10 +7,10 @@ var fs = require('fs');
 export class LogService {
 
   listErrorLog() {
-    return fs.readdirSync('/error-log/');
+    return fs.readdirSync('./error-log/');
   }
 
   listActionLog() {
-    return fs.readdirSync('/action-log/');
+    return fs.readdirSync('./action-log/');
   }
 }
