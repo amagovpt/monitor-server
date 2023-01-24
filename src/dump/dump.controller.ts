@@ -26,7 +26,7 @@ export class DumpController {
     }
   }
 
-  @Post("deleteFile")
+  @Post("delete-file")
   async deleteFile(@Body() body:any ){
     return success(this.dumpService.deleteDump(body.file));
   }
@@ -35,5 +35,4 @@ export class DumpController {
   async getActionLogList() {
     return success(this.dumpService.listDumps());
   }
-
 }
