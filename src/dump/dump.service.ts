@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync, unlinkSync } from 'fs';
 import mysqldump from 'mysqldump';
 
 
 @Injectable()
 export class DumpService {
    databaseConfig = JSON.parse(
-    readFileSync("../../monitor_db.json").toString()
+    readFileSync("../monitor_db.json").toString()
   );
-  path = './dump.sql.gz';
   createDump() {
+    const date = new Date()
     mysqldump({
       connection: {
         host: this.databaseConfig.host,
@@ -17,9 +17,17 @@ export class DumpService {
         password: this.databaseConfig.password,
         database: this.databaseConfig.database,
       },
-      dumpToFile: this.path,
+      dumpToFile: "./dump"+date.toISOString(),
       compressFile: true,
     });
+  }
+
+  listDumps() {
+    return readdirSync('./').filter(e => e.includes("dump"));
+  }
+
+  async deleteDump(fileName: string) {
+    unlinkSync(fileName);
   }
 
 }
