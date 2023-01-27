@@ -246,7 +246,7 @@ DROP TABLE IF EXISTS `Dump`;
 CREATE TABLE `Dump` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fileName` varchar(255) NOT NULL,
-   `ended` tinyint(1) NOT NULL DEFAULT '0',
+  `ended` tinyint(1) NOT NULL DEFAULT '0',
   `date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UserId_UNIQUE` (`id`)
