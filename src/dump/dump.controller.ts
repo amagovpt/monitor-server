@@ -28,11 +28,11 @@ export class DumpController {
 
   @Post("delete-file")
   async deleteFile(@Body() body:any ){
-    return success(this.dumpService.deleteDump(body.file));
+    return success(await this.dumpService.deleteDump(body.file));
   }
 
   @Get('file-list')
   async getActionLogList() {
-    return success(this.dumpService.listDumps());
+    return success(await this.dumpService.listDumps());
   }
 }

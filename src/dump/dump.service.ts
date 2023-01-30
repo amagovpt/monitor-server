@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { readFileSync, readdirSync, unlinkSync } from 'fs';
+import { readFileSync, unlinkSync } from 'fs';
 import mysqldump from 'mysqldump';
 import { Directory } from 'src/directory/directory.entity';
 import { Dump } from './entities/dump.entity';
@@ -11,7 +11,7 @@ import { Repository} from "typeorm";
 @Injectable()
 export class DumpService {
   constructor(
-    @InjectRepository(Directory)
+    @InjectRepository(Dump)
     private readonly dumpRepository: Repository<Dump>) {}
 
   create(fileName: string, date:Date){
@@ -21,10 +21,10 @@ export class DumpService {
   databaseConfig = JSON.parse(
     readFileSync("../monitor_db.json").toString()
   );
-  createDump() {
+  async createDump() {
     const date = new Date();
     const fileName = "./dump" + date.toISOString();
-    this.create(fileName,date);
+    const dump = await this.create(fileName, date);
     mysqldump({
       connection: {
         host: this.databaseConfig.host,
@@ -35,6 +35,7 @@ export class DumpService {
       dumpToFile: fileName,
       compressFile: true,
     });
+    return await this.updateState(dump);
   }
 
   updateState(dump:Dump){
