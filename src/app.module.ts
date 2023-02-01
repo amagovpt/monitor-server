@@ -29,7 +29,7 @@ import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
+  readFileSync("../monitor_db2.json").toString()
 );
 
 @Module({
