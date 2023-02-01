@@ -28,7 +28,7 @@ export class DumpController {
 
   @Post("delete-file")
   async deleteFile(@Body() body:any ){
-    return success(await this.dumpService.deleteDump(body.file));
+    return success(await this.dumpService.deleteDump(body.fileName));
   }
 
   @Get('file-list')

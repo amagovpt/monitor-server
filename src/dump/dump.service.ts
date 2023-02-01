@@ -25,7 +25,7 @@ export class DumpService {
     const date = new Date();
     const fileName = "./dump" + date.toISOString();
     const dump = await this.create(fileName, date);
-    mysqldump({
+    await mysqldump({
       connection: {
         host: this.databaseConfig.host,
         user: this.databaseConfig.user,
