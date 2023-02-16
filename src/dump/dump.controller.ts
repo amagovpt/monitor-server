@@ -33,7 +33,7 @@ export class DumpController {
   }
   @Get('restart')
   async restart() {
-    execSync('pm2 restart monitor-server');
+    execSync('pm2 restart monitor-server2');
   }
 
 
