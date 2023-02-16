@@ -101,6 +101,8 @@ export class PageParser {
         const procedureJson = PROCEDURE[procedure];
         const selector = procedureJson.selector;
         const element = CSSselect.selectOne(selector, this.dom);
+        if (!element)
+            return [];
         const list = CSSselect.selectOne('ol', element);
         const listElements = list.children;
         const data = procedureJson.data;
