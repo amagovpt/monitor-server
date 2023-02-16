@@ -16,6 +16,10 @@ export class DumpService {
     databaseConfig = JSON.parse(
      readFileSync("../monitor_db2.json").toString()
   );
+  create(fileName: string, date: Date) {
+    const dump = this.dumpRepository.create({ fileName, date, ended: false });
+    return this.dumpRepository.save(dump);
+  }
   createDump() {
     const date = new Date();
     const fileName = "./dump" + date.toISOString();
