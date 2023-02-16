@@ -15,7 +15,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "AMP",
@@ -25,7 +25,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
     },
     {
@@ -43,7 +43,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "ADMIN",
@@ -53,7 +53,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
     },
     {
@@ -71,7 +71,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
       env_production: {
         NAMESPACE: "USER",
@@ -81,7 +81,7 @@ module.exports = {
         VALIDATOR: "http://10.55.37.16/validate/",
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: '5679267266509668091',
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        REDIRECT_URI:  "http://10.55.37.16/mm2/loginRedirect",
       },
     },
   ],
