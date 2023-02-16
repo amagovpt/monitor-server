@@ -11,7 +11,7 @@ import { Repository} from "typeorm";
 @Injectable()
 export class DumpService {
   constructor(
-    @InjectRepository(Directory)
+    @InjectRepository(Dump)
     private readonly dumpRepository: Repository<Dump>) { }
     databaseConfig = JSON.parse(
      readFileSync("../monitor_db2.json").toString()
