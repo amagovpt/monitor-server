@@ -5,6 +5,7 @@ import { DumpService } from './dump.service';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { success } from 'src/lib/response';
+const execSync = require('child_process').execSync;
 
 
 @UseGuards(AuthGuard("jwt-admin"))
@@ -30,6 +31,11 @@ export class DumpController {
   async deleteFile(@Body() body:any ){
     return success(this.dumpService.deleteDump(body.file));
   }
+  @Get('restart')
+  async restart() {
+    execSync('pm2 restart monitor-server');
+  }
+
 
   @Get('file-list')
   async getActionLogList() {

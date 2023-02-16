@@ -23,10 +23,14 @@ export class LoggingInterceptor implements NestInterceptor {
         const date = new Date();
         return next.handle().pipe(
             tap((data) => {
+                let body = JSON.stringify(request.body);
+                if (body.length > 200) {
+                    body = body.substring(0, 200);
+                }
                 const logData = {
                     path: request.route.path,
                     origin: request.headers.origin,
-                    body: JSON.stringify(request.body),
+                    body,
                     date: date.toISOString(),
                     user,
                     response: JSON.stringify(data),

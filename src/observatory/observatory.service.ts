@@ -95,7 +95,7 @@ export class ObservatoryService {
       const manager = getManager();
 
       if (manual) {
-        this.observatoryRepository.delete({
+        await this.observatoryRepository.delete({
           Type: "manual",
         });
       }
