@@ -31,4 +31,10 @@ export class GovUser {
         nullable: false
     })
     registerDate: Date;
+
+    @Column({
+        type: 'datetime',
+        nullable: false
+    })
+    lastLogin: Date;
 }

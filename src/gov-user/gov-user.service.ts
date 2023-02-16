@@ -41,6 +41,10 @@ export class GovUserService {
     return this.govUserRepository.findOne({ where: { ccNumber }, relations: ["entities"] });
   }
 
+  updateLogin(ccNumber: string) {
+    return this.govUserRepository.update({ ccNumber},{lastLogin:new Date()})
+  }
+
   async checkIfExists(ccNumber: string) {
     const user = await this.findOneByCC(ccNumber);
     return user;
