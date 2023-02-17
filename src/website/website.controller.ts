@@ -35,6 +35,14 @@ export class WebsiteController {
       await this.websiteService.findAccessiblityStatements());
   }
 
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("accessibility-statement/update/:id")
+  async accessibilityStatementUpdateById(@Param('id') id: number): Promise<any> {
+    await this.websiteService.updateAStatement(id);
+    return success(true);
+  }
+
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {

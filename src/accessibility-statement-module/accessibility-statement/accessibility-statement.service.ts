@@ -50,7 +50,7 @@ export class AccessibilityStatementService {
 
     return aStatement
   }
-  async parseAStatement(html: string, website: Website, url: string): Promise<AccessibilityStatementDto>{
+  async parseAStatement(html: string, website: Website, url: string): Promise<AccessibilityStatementDto> {
     const pageParser = new PageParser(html);
     if (!pageParser.verifyAccessiblityStatement() /*&& !pageParser.verifyAccessiblityPossibleStatement(url)*/)
       return;
@@ -59,11 +59,11 @@ export class AccessibilityStatementService {
     const userList = pageParser.getUserEvaluationData();
     const manualList = pageParser.getManualEvaluationData();
     const contacts = pageParser.getContacts();
-    return {...aStatementDto, autoList, userList, manualList,contacts};
+    return { ...aStatementDto, autoList, userList, manualList, contacts };
 
   }
 
-  async createAStatement(aStatementParser:AccessibilityStatementDto, website:Website) {
+  async createAStatement(aStatementParser: AccessibilityStatementDto, website: Website) {
     const { autoList, userList, manualList, contacts, ...aStatementDto } = aStatementParser;
     const hashResult = hash(aStatementParser);
     const state = this.calculateFlag(aStatementParser);
@@ -136,8 +136,8 @@ export class AccessibilityStatementService {
   findById(Id: number): any {
     return this.accessibilityStatementRepository.findOne({ where: { Id }, relations: ["manualEvaluationList", "automaticEvaluationList", "userEvaluationList", "Website"] });
   }
-  deleteById(Id:number){
-    return this.accessibilityStatementRepository.delete({Id});
+  deleteById(Id: number) {
+    return this.accessibilityStatementRepository.delete({ Id });
   }
 
   async getASList() {
@@ -152,19 +152,21 @@ export class AccessibilityStatementService {
     return convertList;
   }
 
-  async getByAge(){
+  async getByAge() {
     const list = await this.accessibilityStatementRepository.find();
     const result = {};
     list.map((elem) => {
-      const date = elem.statementDate;
-      const year = date.getFullYear();
-      console.log({date,year});
-      result[year] = result[year] ? ++result[year] : 1;
+      if (elem.statementDate) {
+        const date = elem.statementDate;
+        const year = date.getFullYear();
+        console.log({ date, year });
+        result[year] = result[year] ? ++result[year] : 1;
+      }
     });
-    return this.convertToAngularTable("year",result);
+    return this.convertToAngularTable("year", result);
   }
 
-  private convertToAngularTable(atributeName:string, result){
+  private convertToAngularTable(atributeName: string, result) {
     const keys = Object.keys(result);
     const list = [];
     for (let key of keys) {
@@ -173,7 +175,7 @@ export class AccessibilityStatementService {
     return list;
   }
 
-  async getByState(){
+  async getByState() {
     const result = await this.accessibilityStatementRepository.query(
       `SELECT 
           sum(
@@ -205,11 +207,11 @@ export class AccessibilityStatementService {
             case when ast.conformance = ? then 1 else 0 end
           ) as naoConforme 
         FROM 
-          Accessibility_Statement as ast`,[PLENAMENTE_CONFORME,PARCIALMENTE_CONFORME,NAO_CONFORME]
+          Accessibility_Statement as ast`, [PLENAMENTE_CONFORME, PARCIALMENTE_CONFORME, NAO_CONFORME]
     );
 
     //conversion to Angular table form
-  return this.convertToAngularTable("conformance", result[0]);
+    return this.convertToAngularTable("conformance", result[0]);
   }
 
   async getBySeal() {
@@ -225,7 +227,7 @@ export class AccessibilityStatementService {
             case when ast.seal = ? then 1 else 0 end
           ) as ouro 
         FROM 
-          Accessibility_Statement as ast`, [OURO, PRATA, BRONZE]
+          Accessibility_Statement as ast`, [BRONZE, PRATA, OURO]
     );
 
     return this.convertToAngularTable("seal", result[0]);
@@ -320,7 +322,6 @@ export class AccessibilityStatementService {
       `SELECT 
           d.Name as name, 
           count(ast.Id) as a11yStatements
-          t.Total as total
         FROM 
           Accessibility_Statement as ast 
           JOIN TagWebsite as tw ON tw.WebsiteId = ast.WebsiteId 
@@ -331,21 +332,21 @@ export class AccessibilityStatementService {
         ORDER BY
           d.Name`);
   }
-  
-  async getOPAWTable(){
+
+  async getOPAWTable() {
     const directoryA11y = await this.getByDirectoryA11yLength();
     const directoryLenght = await this.getByDirectoryWebsiteLength();
-    for(let i = 0;i < directoryA11y; i++){
-      directoryA11y[i]["total"] = directoryLenght[i].Total;
+    for (let i = 0; i < directoryA11y.length; i++) {
+      directoryA11y[i]["total"] = directoryLenght[i].total;
     }
     return directoryA11y;
   }
 
-  async getNumberOfEvaluationByType(){
+  async getNumberOfEvaluationByType() {
     return [
-      {type:"user",  numberOfEvaluations: await this.userEvaluationService.getLength()},
-      {type: "manual", numberOfEvaluations: await this.manualEvaluationService.getLength()},
-      { type: "automatic", numberOfEvaluations: await this.automaticEvaluationService.getLength()}
+      { type: "user", numberOfEvaluations: await this.userEvaluationService.getLength() },
+      { type: "manual", numberOfEvaluations: await this.manualEvaluationService.getLength() },
+      { type: "automatic", numberOfEvaluations: await this.automaticEvaluationService.getLength() }
     ]
   }
 

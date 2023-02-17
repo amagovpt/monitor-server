@@ -50,8 +50,16 @@ export class WebsiteService {
       await this.findAccessiblityStatementsInPageList(pages, website);
     }
   }
-  async findAccessiblityStatementsInPageList(pages: Page[], website: Website): Promise<any> {
-    for (const page of pages) {
+
+  async updateAStatement(WebsiteId:number): Promise<void> {
+    const website = await this.websiteRepository.findOne({ where:{WebsiteId}, relations: ["Pages"] });
+    if(website){
+      const pages = website.Pages;
+      await this.findAccessiblityStatementsInPageList(pages, website);}
+    }
+
+  async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
+    for(const page of pages){
       const id = page.PageId;
       const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
       if (evaluation) {
