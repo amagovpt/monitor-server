@@ -72,7 +72,10 @@ export class Website {
   @ManyToMany((type) => EntityTable)
   Entities: EntityTable[];
 
-  @JoinTable({ name: 'WebsitePage' })
-  @ManyToMany((type) => Page, (page) => page.Pages)
+  @JoinTable({
+    name: 'WebsitePage',
+    joinColumn: { name: 'WebsiteId' },
+    inverseJoinColumn: { name: 'PageId' }
+  })  @ManyToMany((type) => Page, (page) => page.Pages)
   Pages: Page[];
 }
