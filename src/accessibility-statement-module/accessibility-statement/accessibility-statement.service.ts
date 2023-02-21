@@ -43,6 +43,8 @@ export class AccessibilityStatementService {
       if (currentDate === aStatementParsed.statementDate && currentHash !== newhash) {
         this.deleteById(currentAS.Id);
         aStatement = this.createAStatement(aStatementParsed, website);
+      } else if (currentDate !== aStatementParsed.statementDate) {
+        aStatement = this.createAStatement(aStatementParsed, website);
       }
     }
     else if (aStatementParsed)
