@@ -26,7 +26,7 @@ export class EvaluationService {
   }
   //FIXME confirmar se as paginas têm sempre avaliação
   async getLastEvaluationByPage(pageId: number): Promise<Evaluation> {
-    const evaluationList = await this.evaluationRepository.find({ where: { PageId: pageId},take:1,order: { Evaluation_Date:"ASC"}});
+    const evaluationList = await this.evaluationRepository.find({ where: { PageId: pageId},take:1,order: { Evaluation_Date:"DESC"}});
     return evaluationList[0];
   }
 
