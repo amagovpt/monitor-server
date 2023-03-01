@@ -149,6 +149,7 @@ export class AuthService {
     const atributes = await this.getAtributes(token);
     console.log(atributes);
     const ccNumber = atributes.cc;
+    await this.govUserService.updateLogin(ccNumber);
    return this.govUserService.findOneByCC(ccNumber);
   }
 
