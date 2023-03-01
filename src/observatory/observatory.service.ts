@@ -529,7 +529,7 @@ export class ObservatoryService {
   getTopFiveWebsites(listDirectories: ListDirectories): any {
     const websites = listDirectories
       .getWebsites()
-      .filter((value, index, array) => { array.indexOf(value) === index && value.A + value.AA + value.AAA > 10 })
+      .filter((value, index, array) => array.indexOf(value) === index && value.A + value.AA + value.AAA > 10 )
       .sort((a: Website, b: Website) => b.getScore() - a.getScore() || b.AAA - a.AAA || b.AA - a.AA | b.A - a.A)
       .slice(0, 5);
 
