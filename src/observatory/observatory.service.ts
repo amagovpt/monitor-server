@@ -528,7 +528,7 @@ export class ObservatoryService {
     const websites = listDirectories
       .getWebsites()
       .filter((value, index, array) =>  array.indexOf(value) === index && value.A + value.AA + value.AAA > 10 )
-      .sort((a: Website, b: Website) => b.getScore() - a.getScore() || b.AAA - a.AAA || b.AA - a.AA | b.A - a.A)
+      .sort((a: Website, b: Website) => b.getScore() - a.getScore() || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A)
       .slice(0, 5);
 
     const topFiveWebsites = new Array<any>();
@@ -638,7 +638,7 @@ export class ObservatoryService {
     let rank = 1;
     const directories = listDirectories.directories
       .slice()
-      .sort((a: Directory, b: Directory) => a.getScore() - b.getScore())
+      .sort((a: Directory, b: Directory) => b.getScore() - a.getScore() || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A|| b.nPages-a.nPages)
       .reverse()
       .map((d: Directory) => {
         d.rank = rank;
