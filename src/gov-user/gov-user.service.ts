@@ -33,7 +33,7 @@ export class GovUserService {
   }
 
   findOne(id: number) {
-    return this.govUserRepository.findOne(id, { relations: ["entities"]});
+    return this.govUserRepository.findOne({where:{id},  relations: ["entities"]});
   }
 
   findOneByCC(ccNumber: string) {
