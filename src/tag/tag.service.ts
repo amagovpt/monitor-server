@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, IsNull, In } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository, IsNull, In } from "typeorm";
 import { Tag } from "./tag.entity";
 import { Website } from "../website/website.entity";
 
@@ -9,8 +9,8 @@ export class TagService {
   constructor(
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
-    private readonly connection: Connection
-  ) {}
+    @InjectDataSource()
+    private readonly connection: DataSource  ) {}
 
   async addPagesToEvaluate(tagsId: number[], option: string): Promise<boolean> {
     const pages = await this.tagRepository.query(
@@ -129,8 +129,7 @@ export class TagService {
   }
 
   async findAll(): Promise<any> {
-    const manager = getManager();
-    const tags = await manager.query(`SELECT 
+    const tags = await this.tagRepository.query(`SELECT 
         t.*,
         COUNT(distinct tw.WebsiteId) as Websites 
       FROM 
@@ -148,18 +147,16 @@ export class TagService {
   }
 
   async findNumberOfStudyMonitor(): Promise<number> {
-    const manager = getManager();
     return (
-      await manager.query(
+      await this.tagRepository.query(
         `SELECT COUNT(t.TagId) as Tags FROM Tag as t, User as u WHERE u.Type = "studies" AND t.UserId = u.UserId`
       )
     )[0].Tags;
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    const manager = getManager();
     return (
-      await manager.query(`
+      await this.tagRepository.query(`
         SELECT 
           COUNT(distinct t.TagId) as Tags 
         FROM 
@@ -175,8 +172,7 @@ export class TagService {
   }
 
   async findAllFromStudyMonitorUser(userId: number): Promise<any> {
-    const manager = getManager();
-    const tags = await manager.query(
+    const tags = await this.tagRepository.query(
       `SELECT 
         distinct t.*, 
         COUNT(distinct tw.WebsiteId) as Websites,
@@ -195,8 +191,7 @@ export class TagService {
   }
 
   async findStudyMonitorUserTagData(userId: number, tag: string): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(
+    const pages = await this.tagRepository.query(
       `SELECT
         w.WebsiteId,
         w.Name,
@@ -237,8 +232,7 @@ export class TagService {
     tag: string,
     website: string
   ): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(
+    const pages = await this.tagRepository.query(
       `SELECT 
         distinct p.*,
         e.Score,
@@ -274,7 +268,7 @@ export class TagService {
 
   async getUserId(username: string): Promise<any> {
     return (
-      await getManager().query(
+      await this.tagRepository.query(
         "SELECT * FROM User WHERE Username = ? LIMIT 1",
         [username]
       )
@@ -287,16 +281,15 @@ export class TagService {
     user: string
   ): Promise<any> {
     const userId = await this.getUserId(user);
-    const manager = getManager();
 
-    const websiteExists = await manager.query(
+    const websiteExists = await this.tagRepository.query(
       `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
       [userId, website]
     );
 
     if (tag !== "null") {
       if (websiteExists) {
-        const pages = await manager.query(
+        const pages = await this.tagRepository.query(
           `SELECT 
             distinct p.*,
             e.Score,
@@ -329,7 +322,7 @@ export class TagService {
       }
     } else {
       if (websiteExists) {
-        const pages = await manager.query(
+        const pages = await this.tagRepository.query(
           `SELECT 
             distinct p.*,
             e.Score,
@@ -360,9 +353,8 @@ export class TagService {
   }
 
   async findAllWebsitePages(tag: string): Promise<any> {
-    const manager = getManager();
 
-    const websites = await manager.query(
+    const websites = await this.tagRepository.query(
       `
       SELECT 
         w.WebsiteId,
@@ -794,10 +786,9 @@ export class TagService {
   }
 
   async findAllUserTagWebsites(tag: string, user: string): Promise<any> {
-    const manager = getManager();
 
     if (user === "admin") {
-      const websites = await manager.query(
+      const websites = await this.tagRepository.query(
         `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
         FROM 
           Website as w
@@ -818,7 +809,7 @@ export class TagService {
 
       return websites;
     } else {
-      const websites = await manager.query(
+      const websites = await this.tagRepository.query(
         `SELECT w.*, e.Long_Name as Entity, u.Username as User 
       FROM 
         User as u,
@@ -842,9 +833,8 @@ export class TagService {
   }
 
   async verifyUpdateWebsiteAdmin(websiteId: number): Promise<any> {
-    const manager = getManager();
 
-    const studyP = await manager.query(
+    const studyP = await this.tagRepository.query(
       `SELECT p.PageId
       FROM  
         Page as p, 
@@ -862,9 +852,8 @@ export class TagService {
   }
 
   async websiteExistsInAdmin(websiteId: number): Promise<any> {
-    const manager = getManager();
 
-    const websites = await manager.query(
+    const websites = await this.tagRepository.query(
       `SELECT
         w2.*
       FROM

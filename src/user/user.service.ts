@@ -3,8 +3,8 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, In } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { Repository, In, DataSource } from "typeorm";
 import { User } from "./user.entity";
 import { Tag } from "../tag/tag.entity";
 import { Website } from "../website/website.entity";
@@ -17,8 +17,8 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
-    private readonly connection: Connection
-  ) { }
+    @InjectDataSource()
+    private readonly connection: DataSource  ) { }
 
   async changePassword(
     userId: number,
@@ -292,8 +292,7 @@ export class UserService {
   }
 
   async findAll(): Promise<User[]> {
-    const manager = getManager();
-    const users = await manager.query(`
+    const users = await this.userRepository.query(`
       SELECT 
         u.UserId, u.Username, u.Type, u.Register_Date, u.Last_Login, 
         COUNT(distinct w.WebsiteId) as Websites
@@ -484,9 +483,8 @@ export class UserService {
   }
 
   async findAllWebsites(user: string): Promise<any> {
-    const manager = getManager();
 
-    const websites = await manager.query(
+    const websites = await this.userRepository.query(
       `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           User as u,
@@ -504,9 +502,8 @@ export class UserService {
   }
 
   async findAllTags(user: string): Promise<any> {
-    const manager = getManager();
 
-    const tags = await manager.query(
+    const tags = await this.userRepository.query(
       `SELECT t.*, COUNT(distinct tw.WebsiteId) as Websites, u.Username as User 
       FROM 
         User as u,
