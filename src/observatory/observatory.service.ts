@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Connection, getManager, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ListDirectories } from "./models/list-directories";
 import { Directory } from "./models/directory";
@@ -92,7 +92,6 @@ export class ObservatoryService {
         directories: this.getDirectories(listDirectories),
       };
 
-      const manager = getManager();
 
       if (manual) {
         await this.observatoryRepository.delete({
@@ -100,7 +99,7 @@ export class ObservatoryService {
         });
       }
 
-      await manager.query(
+      await this.observatoryRepository.query(
         "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
@@ -108,10 +107,8 @@ export class ObservatoryService {
   }
 
   async getObservatoryData(): Promise<any> {
-    const manager = getManager();
-
     const data = (
-      await manager.query(
+      await this.observatoryRepository.query(
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
@@ -120,16 +117,14 @@ export class ObservatoryService {
   }
 
   async getData(): Promise<any> {
-    const manager = getManager();
-
     let data = new Array<any>();
 
-    const directories = await manager.query(
+    const directories = await this.observatoryRepository.query(
       `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
     );
 
     for (const directory of directories) {
-      const tags = await manager.query(
+      const tags = await this.observatoryRepository.query(
         `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
         [directory.DirectoryId]
       );
@@ -137,7 +132,7 @@ export class ObservatoryService {
 
       let pages = null;
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
-        const websites = await manager.query(
+        const websites = await this.observatoryRepository.query(
           `
         SELECT * FROM TagWebsite WHERE TagId IN (?)
       `,
@@ -160,7 +155,7 @@ export class ObservatoryService {
           }
         }
 
-        pages = await manager.query(
+        pages = await this.observatoryRepository.query(
           `
           SELECT
             e.EvaluationId,
@@ -202,7 +197,7 @@ export class ObservatoryService {
           [websitesToFetch]
         );
       } else {
-        pages = await manager.query(
+        pages = await this.observatoryRepository.query(
           `
           SELECT
             e.EvaluationId,
@@ -256,7 +251,7 @@ export class ObservatoryService {
           p.Directory_Creation_Date = directory.Creation_Date;
           p.Entity_Name = null;
 
-          const entities = await manager.query(
+          const entities = await this.observatoryRepository.query(
             `
             SELECT e.Long_Name
             FROM

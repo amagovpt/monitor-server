@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, IsNull } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { Repository, DataSource, IsNull } from "typeorm";
 import { Website } from "./website.entity";
 import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
@@ -16,9 +16,9 @@ export class WebsiteService {
     private readonly accessibilityStatementService: AccessibilityStatementService,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
-    private readonly connection: Connection
-  ) { }
-
+    @InjectDataSource()
+    private readonly connection: DataSource) {}
+  
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
     return await Promise.all(websites.map(async (website) => {
@@ -135,8 +135,7 @@ export class WebsiteService {
   }
 
   async adminCount(search: string): Promise<any> {
-    const manager = getManager();
-    const count = await manager.query(
+    const count = await this.websiteRepository.query(
       `SELECT COUNT(w.WebsiteId) as Count
       FROM 
         Website as w
@@ -151,8 +150,7 @@ export class WebsiteService {
   }
 
   async getIdFromUserAndName(user: string, name: string): Promise<number> {
-    const manager = getManager();
-    const website = await manager.query(
+    const website = await this.websiteRepository.query(
       `
       SELECT w.* FROM Website as w, User as u
       WHERE
@@ -174,8 +172,7 @@ export class WebsiteService {
     search: string
   ): Promise<any> {
     if (!direction.trim()) {
-      const manager = getManager();
-      const websites = await manager.query(
+      const websites = await this.websiteRepository.query(
         `
         SELECT 
           w.*, 
@@ -226,8 +223,7 @@ export class WebsiteService {
           break;
       }
 
-      const manager = getManager();
-      const websites = await manager.query(
+      const websites = await this.websiteRepository.query(
         `
         SELECT 
           w.*, 
@@ -296,7 +292,7 @@ export class WebsiteService {
       return "nimda";
     }
 
-    const user = await getManager().query(
+    const user = await this.websiteRepository.query(
       `SELECT * FROM User WHERE Username = ? LIMIT 1`,
       [username]
     );
@@ -309,9 +305,7 @@ export class WebsiteService {
   }
 
   async findAllPages(websiteId: number): Promise<any> {
-    const manager = getManager();
-
-    const pages = await manager.query(
+    const pages = await this.websiteRepository.query(
       `SELECT
         distinct p.*,
         e.Score,
@@ -342,8 +336,7 @@ export class WebsiteService {
   }
 
   async findAllOfficial(): Promise<any> {
-    const manager = getManager();
-    const websites = await manager.query(`SELECT distinct w.*
+    const websites = await this.websiteRepository.query(`SELECT distinct w.*
       FROM 
         Website as w,
         User as u 
@@ -383,8 +376,7 @@ export class WebsiteService {
   }
 
   async findAllWithoutUser(): Promise<any> {
-    const manager = getManager();
-    const websites = await manager.query(
+    const websites = await this.websiteRepository.query(
       `SELECT * FROM Website WHERE UserId IS NULL`
     );
     return websites;
@@ -401,8 +393,7 @@ export class WebsiteService {
         (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
  */
   async findAllWithoutEntity(): Promise<any> {
-    const manager = getManager();
-    const websites = await manager.query(`SELECT distinct w.* 
+    const websites = await this.websiteRepository.query(`SELECT distinct w.* 
       FROM 
         User as u ,
         EntityWebsite as ew
@@ -414,8 +405,7 @@ export class WebsiteService {
   }
 
   async findAllFromMyMonitorUser(userId: number): Promise<any> {
-    const manager = getManager();
-    const websites = await manager.query(
+    const websites = await this.websiteRepository.query(
       `SELECT w.*, COUNT(distinct p.PageId) as Pages
       FROM
         Website as w
@@ -430,9 +420,8 @@ export class WebsiteService {
   }
 
   async isInObservatory(userId: number, website: string): Promise<any> {
-    const manager = getManager();
-
-    const tags = await manager.query(
+  
+    const tags = await this.websiteRepository.query(
       `
       SELECT t.* 
       FROM
@@ -546,9 +535,8 @@ export class WebsiteService {
       throw new InternalServerErrorException();
     }
 
-    const manager = getManager();
 
-    const pages = await manager.query(
+    const pages = await this.websiteRepository.query(
       `SELECT 
         distinct p.*
       FROM 
@@ -604,8 +592,7 @@ export class WebsiteService {
     tag: string,
     website: string
   ): Promise<boolean> {
-    const manager = getManager();
-    const websiteExists = await manager.query(
+    const websiteExists = await this.websiteRepository.query(
       `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
       [userId, website]
     );
@@ -614,7 +601,7 @@ export class WebsiteService {
       throw new InternalServerErrorException();
     }
 
-    const pages = await manager.query(
+    const pages = await this.websiteRepository.query(
       `SELECT 
         distinct p.*
       FROM 
@@ -712,8 +699,7 @@ export class WebsiteService {
     userId: number,
     tagName: string
   ): Promise<any> {
-    const manager = getManager();
-    const websites = await manager.query(
+    const websites = await this.websiteRepository.query(
       `SELECT
         distinct w.*,
         t.Name as TagName
@@ -776,8 +762,7 @@ export class WebsiteService {
     tag: string,
     websiteName: string
   ): Promise<any> {
-    const manager = getManager();
-    const website = await manager.query(
+    const website = await this.websiteRepository.query(
       `SELECT * FROM 
         Tag as t,
         TagWebsite as tw,
@@ -801,8 +786,7 @@ export class WebsiteService {
     tag: string,
     startingUrl: string
   ): Promise<any> {
-    const manager = getManager();
-    const website = await manager.query(
+    const website = await this.websiteRepository.query(
       `SELECT * FROM 
         Tag as t,
         TagWebsite as tw,
@@ -1022,18 +1006,16 @@ export class WebsiteService {
   }
 
   async findNumberOfStudyMonitor(): Promise<number> {
-    const manager = getManager();
     return (
-      await manager.query(
+      await this.websiteRepository.query(
         `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "studies" AND w.UserId = u.UserId`
       )
     )[0].Websites;
   }
 
   async findNumberOfMyMonitor(): Promise<number> {
-    const manager = getManager();
     return (
-      await manager.query(
+      await this.websiteRepository.query(
         `SELECT COUNT(w.WebsiteId) as Websites FROM Website as w, User as u WHERE u.Type = "monitor" AND w.UserId = u.UserId`
       )
     )[0].Websites;
@@ -1056,14 +1038,13 @@ export class WebsiteService {
         tw.TagId = dt.TagId AND 
         w.WebsiteId = tw.WebsiteId`)
     )[0].Websites;*/
-    const manager = getManager();
 
     const data = (
-      await manager.query(
+      await this.websiteRepository.query(
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
-    const dataPrint = await manager.query(
+    const dataPrint = await this.websiteRepository.query(
       `SELECT 
         COUNT(distinct w.WebsiteId) as Websites 
       FROM
@@ -1297,8 +1278,7 @@ export class WebsiteService {
     userId: number,
     websiteName: string
   ): Promise<any> {
-    const manager = getManager();
-    const website = await manager.query(
+    const website = await this.websiteRepository.query(
       `SELECT w.StartingUrl FROM 
         Website as w
       WHERE
