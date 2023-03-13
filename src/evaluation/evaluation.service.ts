@@ -21,7 +21,7 @@ export class EvaluationService {
     @InjectDataSource()
     private readonly connection: DataSource,
     @InjectRepository(Evaluation)
-    private readonly entityRepository: Repository<Evaluation>,
+    private readonly evaluationRepository: Repository<Evaluation>,
   ) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
@@ -787,7 +787,7 @@ export class EvaluationService {
   async findEvaluationById(url: string, id: number): Promise<any> {
 
 
-    const evaluation = await this.entityRepository.findOne({
+    const evaluation = await this.evaluationRepository.findOne({
       where: { EvaluationId: id },
     });
 

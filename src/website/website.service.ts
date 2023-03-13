@@ -4,7 +4,6 @@ import { Repository, DataSource, IsNull } from "typeorm";
 import { Website } from "./website.entity";
 import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
-import { EvaluationService } from "../evaluation/evaluation.service";
 
 @Injectable()
 export class WebsiteService {
