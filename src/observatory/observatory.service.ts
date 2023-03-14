@@ -639,7 +639,6 @@ export class ObservatoryService {
     const directories = listDirectories.directories
       .slice()
       .sort((a: Directory, b: Directory) => b.getScore() - a.getScore() || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A|| b.nPages-a.nPages)
-      .reverse()
       .map((d: Directory) => {
         d.rank = rank;
         rank++;
