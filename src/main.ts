@@ -19,7 +19,7 @@ async function bootstrap() {
     .setTitle('Monitor server')
     .setDescription('The Monitor Server API description')
     .setVersion('1.0')
-    .addTag('a11y')
+    .addTag('website')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

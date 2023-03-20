@@ -4,6 +4,7 @@ import { Repository, DataSource, IsNull } from "typeorm";
 import { Website } from "./website.entity";
 import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
+import { CreateWebsiteDto } from "./dto/create-website.dto";
 
 @Injectable()
 export class WebsiteService {
@@ -1000,16 +1001,13 @@ export class WebsiteService {
   }
 
   async createOne(
-    website: Website,
-    startingUrl: string,
+    website: CreateWebsiteDto,
     entities: string[],
     tags: string[]
   ): Promise<boolean> {
-    if (startingUrl.endsWith("/")) {
-      startingUrl = startingUrl.substring(0, startingUrl.length - 1);
-    }
 
-    website.StartingUrl = startingUrl;
+    website.Creation_Date = new Date();
+    website.StartingUrl = decodeURIComponent(website.StartingUrl);
 
     const queryRunner = this.connection.createQueryRunner();
 
@@ -1018,7 +1016,7 @@ export class WebsiteService {
 
     let hasError = false;
     try {
-      const insertWebsite = await queryRunner.manager.save(website);
+      const insertWebsite = await queryRunner.manager.save({...website});
 
       for (const entity of entities || []) {
         await queryRunner.manager.query(
@@ -1479,14 +1477,10 @@ export class WebsiteService {
           for (const page of pages || []) {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
-              try {
                 await queryRunner.manager.query(
                   `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
                   [websiteP.WebsiteId, page.PageId]
                 );
-              } catch (err) {
-                // ignore - don't know why
-              }
             }
           }
 
@@ -1505,7 +1499,7 @@ export class WebsiteService {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
               await queryRunner.manager.query(
-                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES ("${website.insertId}", "${page.PageId}")`,
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?,?)`,
                 [website.WebsiteId, page.PageId]
               );
             }
