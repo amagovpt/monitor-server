@@ -18,6 +18,7 @@ import { LoggingInterceptor } from "src/log/log.interceptor";
 import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { WebsitesIdDto } from "./dto/websites-id.dto";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
+import { UpdateWebsiteDto } from "./dto/update-website.dto";
 
 @ApiBasicAuth()
 @ApiTags('website')
@@ -72,37 +73,10 @@ export class WebsiteController {
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async updateWebsite(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
-    const name = req.body.name;
-    const startingUrl = decodeURIComponent(req.body.startingUrl);
-    const declaration = req.body.declaration;
-    const stamp = req.body.stamp;
-    const declarationDate = req.body.declarationDate;
-    const stampDate = req.body.stampDate;
-    const userId = req.body.userId;
-    const oldUserId = req.body.olderUserId;
-    const transfer = !!req.body.transfer;
-    const defaultEntities = JSON.parse(req.body.defaultEntities);
-    const entities = JSON.parse(req.body.entities);
-    const defaultTags = JSON.parse(req.body.defaultTags);
-    const tags = JSON.parse(req.body.tags);
+  async updateWebsite(@Body() updateWebsiteDto: UpdateWebsiteDto): Promise<any> {
 
     const updateSuccess = await this.websiteService.update(
-      websiteId,
-      name,
-      startingUrl,
-      declaration,
-      stamp,
-      declarationDate,
-      stampDate,
-      userId,
-      oldUserId,
-      transfer,
-      defaultEntities,
-      entities,
-      defaultTags,
-      tags
+      updateWebsiteDto
     );
     if (!updateSuccess) {
       throw new InternalServerErrorException();

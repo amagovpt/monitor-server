@@ -17,15 +17,17 @@ export class UpdateWebsiteDto {
 
     Declaration: number;
 
-    Declaration_Update_Date: any;
-
     Stamp: number;
-
-    Stamp_Update_Date: any;
 
     Creation_Date: any;
 
-    entities:string[];
+    entities:number[];
 
-    tags: string[];
+    tags: number[];
+
+    transfer: boolean;
+
+    defaultEntities: number[];
+
+    defaultTags: number[];
 }
