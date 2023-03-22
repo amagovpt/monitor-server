@@ -6,6 +6,7 @@ import compression from "compression";
 import { WebsiteService } from "./website/website.service";
 import { PageService } from "./page/page.service";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -15,12 +16,19 @@ async function bootstrap() {
   app.use(compression());
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   //await findAccessiblityStatements(app);
+  const config = new DocumentBuilder()
+    .setTitle('Monitor server')
+    .setDescription('The Monitor Server API description')
+    .setVersion('1.0')
+    .addTag('website')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
   const server = await app.listen(3001);
   server.setTimeout(1800000);}
 async function findAccessiblityStatements(app){
   const pageService = app.get(WebsiteService);
   await pageService.findAccessiblityStatements();
-  await app.listen(process.env.PORT || 3000);
 }
 async function deletePlicas(app){
   const pageService = app.get(PageService);
