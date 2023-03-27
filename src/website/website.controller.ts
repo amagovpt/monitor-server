@@ -8,6 +8,7 @@ import {
   Param,
   UseInterceptors,
   Body,
+  Delete,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as SqlString from "sqlstring";
@@ -20,6 +21,7 @@ import { WebsitesIdDto } from "./dto/websites-id.dto";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
 import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
+import { DeleteBulkWebsiteDto } from "./dto/delete-bulk-website.dto";
 
 @ApiBasicAuth()
 @ApiTags('website')
@@ -100,18 +102,34 @@ export class WebsiteController {
     );
   }
 
-  @ApiOperation({ summary: 'Delete webstes' })
+  @ApiOperation({ summary: 'Delete websites' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list has been deleted',
+    type: Boolean,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("deleteBulk")
+  async deleteWebsites(@Body() deleteBulkWebsiteDto: DeleteBulkWebsiteDto): Promise<any> {
+    const deleteSuccess = await this.websiteService.deleteBulk(deleteBulkWebsiteDto.websitesId);
+    if (!deleteSuccess) {
+      throw new InternalServerErrorException();
+    }
+
+    return success(true);
+  }
+
+  @ApiOperation({ summary: 'Delete website' })
   @ApiResponse({
     status: 200,
     description: 'The website has been deleted',
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
-  @Post("deleteBulk")
-  async deleteWebsites(@Request() req: any): Promise<any> {
-    const websitesId = JSON.parse(req.body.websitesId);
+  @Delete(':id')
+  async deleteWebsite(@Param('id') id: number): Promise<any> {
 
-    const deleteSuccess = await this.websiteService.deleteBulk(websitesId);
+    const deleteSuccess = await this.websiteService.delete(id);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
@@ -119,19 +137,12 @@ export class WebsiteController {
     return success(true);
   }
 
-  @UseGuards(AuthGuard("jwt-admin"))
-  @Post("delete")
-  async deleteWebsite(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
-
-    const deleteSuccess = await this.websiteService.delete(websiteId);
-    if (!deleteSuccess) {
-      throw new InternalServerErrorException();
-    }
-
-    return success(true);
-  }
-
+  @ApiOperation({ summary: 'Finds a website, by the starting URL, from the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been found',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor/url/:website")
   async getMyMonitorUserWebsiteDomain(

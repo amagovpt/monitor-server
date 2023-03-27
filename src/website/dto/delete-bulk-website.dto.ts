@@ -1,5 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
-export class UpdateWebsiteDto {
+export class DeleteBulkWebsiteDto {
 
-    defaultTags: number[];
+    websitesId: number[];
 }
