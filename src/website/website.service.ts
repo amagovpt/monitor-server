@@ -4,6 +4,7 @@ import { DataSource, IsNull, Repository } from "typeorm";
 import { Page } from "../page/page.entity";
 import { Tag } from "../tag/tag.entity";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
+import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
 import { Website } from "./website.entity";
 
@@ -14,13 +15,14 @@ export class WebsiteService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
+    private readonly pageRepository: Repository<Page>,
     @InjectDataSource()
     private readonly connection: DataSource) { }
 
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
     return await Promise.all(websites.map(async (website) => {
-      const id = website.WebsiteId;
+      const id = website.websiteId;
       const pages = await this.findAllPages(id);
       website["numberOfPages"] = pages.length;
       website["averagePoints"] = this.averagePointsPageEvaluation(pages);
@@ -309,7 +311,7 @@ export class WebsiteService {
 
   async findByOfficialName(name: string): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: { Name: name, UserId: IsNull() },
+      where: {  name, userId: IsNull() },
     });
     return website;
     /*if (website && website.Name !== name) {
@@ -481,7 +483,7 @@ export class WebsiteService {
     websiteName: string
   ): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: { UserId: userId, Name: websiteName },
+      where: {  userId, name: websiteName },
     });
     if (!website) {
       throw new InternalServerErrorException();
@@ -501,7 +503,7 @@ export class WebsiteService {
         wp.WebsiteId = w.WebsiteId AND
         p.PageId = wp.PageId AND
         p.Show_In LIKE '_1_'`,
-      [website.Name, website.UserId]
+      [website.name, website.userId]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -806,16 +808,16 @@ export class WebsiteService {
     let hasError = false;
     try {
       const newWebsite = new Website();
-      newWebsite.UserId = userId;
-      newWebsite.Name = websiteName;
-      newWebsite.StartingUrl = startingUrl;
-      newWebsite.Creation_Date = new Date();
+      newWebsite.userId = userId;
+      newWebsite.name = websiteName;
+      newWebsite.startingUrl = startingUrl;
+      newWebsite.creationDate = new Date();
 
       const insertWebsite = await queryRunner.manager.save(newWebsite);
 
       await queryRunner.manager.query(
         `INSERT INTO TagWebsite (TagId, WebsiteId) SELECT TagId, ? FROM Tag WHERE Name = ?`,
-        [insertWebsite.WebsiteId, tag]
+        [insertWebsite.websiteId, tag]
       );
 
       for (const url of pages || []) {
@@ -825,7 +827,7 @@ export class WebsiteService {
         if (page) {
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.WebsiteId, page.PageId]
+            [insertWebsite.websiteId, page.PageId]
           );
           await queryRunner.manager.query(
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -837,7 +839,7 @@ export class WebsiteService {
           const newPage = new Page();
           newPage.Uri = url;
           newPage.Show_In = "000";
-          newPage.Creation_Date = newWebsite.Creation_Date;
+          newPage.Creation_Date = newWebsite.creationDate;
 
           const insertPage = await queryRunner.manager.save(newPage);
 
@@ -845,7 +847,7 @@ export class WebsiteService {
 
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.WebsiteId, insertPage.PageId]
+            [insertWebsite.websiteId, insertPage.PageId]
           );
 
           const existingWebsite = await queryRunner.manager.query(
@@ -1223,18 +1225,21 @@ export class WebsiteService {
     return website ? website[0].StartingUrl : null;
   }
 
-  async updatePagesObservatory(pages: any[], pagesId: number[]): Promise<any> {
+  async updatePagesObservatory(updateObservatoryPages: UpdateObservatoryPages): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+
     let hasError = false;
     try {
-      for (const page of pages || []) {
+      for (const observatoryPage of updateObservatoryPages.pages || []) {
         let show = null;
+        const id = observatoryPage.id;
+        const page = await this.pageRepository.findOne({where:{PageId:id}});
 
-        if (!pagesId.includes(page.PageId)) {
+        if (observatoryPage.inObservatory) {
           show = page.Show_In[0] + page.Show_In[2] + "0";
         } else {
           show = page.Show_In[0] + page.Show_In[2] + "1";

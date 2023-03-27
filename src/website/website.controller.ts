@@ -19,6 +19,7 @@ import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagge
 import { WebsitesIdDto } from "./dto/websites-id.dto";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
+import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
 
 @ApiBasicAuth()
 @ApiTags('website')
@@ -93,14 +94,18 @@ export class WebsiteController {
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/updateObservatory")
-  async updateWebsitePagesObservatory(@Request() req: any): Promise<any> {
-    const pages = JSON.parse(req.body.pages);
-    const pagesId = JSON.parse(req.body.pagesId);
+  async updateWebsitePagesObservatory(@Body() updateObservatoryPages: UpdateObservatoryPages): Promise<any> {
     return success(
-      await this.websiteService.updatePagesObservatory(pages, pagesId)
+      await this.websiteService.updatePagesObservatory(updateObservatoryPages)
     );
   }
 
+  @ApiOperation({ summary: 'Delete webstes' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
   async deleteWebsites(@Request() req: any): Promise<any> {
