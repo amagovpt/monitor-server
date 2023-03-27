@@ -6,9 +6,6 @@ import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
-import { CreateWebsiteDto } from "./dto/create-website.dto";
-import { UpdateWebsiteDto } from "./dto/update-website.dto";
-
 
 @Injectable()
 export class WebsiteService {
@@ -1066,13 +1063,16 @@ export class WebsiteService {
   }
 
   async createOne(
-    website: CreateWebsiteDto,
+    website: Website,
+    startingUrl: string,
     entities: string[],
     tags: string[]
   ): Promise<boolean> {
+    if (startingUrl.endsWith("/")) {
+      startingUrl = startingUrl.substring(0, startingUrl.length - 1);
+    }
 
-    website.Creation_Date = new Date();
-    website.StartingUrl = decodeURIComponent(website.StartingUrl);
+    website.StartingUrl = startingUrl;
 
     const queryRunner = this.connection.createQueryRunner();
 
@@ -1081,7 +1081,7 @@ export class WebsiteService {
 
     let hasError = false;
     try {
-      const insertWebsite = await queryRunner.manager.save({...website});
+      const insertWebsite = await queryRunner.manager.save(website);
 
       for (const entity of entities || []) {
         await queryRunner.manager.query(
@@ -1112,19 +1112,23 @@ export class WebsiteService {
   }
 
   async update(
-    updateWebsiteDto:UpdateWebsiteDto
+    websiteId: number,
+    name: string,
+    startingUrl: string,
+    declaration: number | null,
+    stamp: number | null,
+    declarationDate: any | null,
+    stampDate: any | null,
+    userId: number,
+    oldUserId: number,
+    transfer: boolean,
+    defaultEntities: number[],
+    entities: number[],
+    defaultTags: number[],
+    tags: number[]
   ): Promise<any> {
-    const oldUserId = updateWebsiteDto.oldUserId;
-    const userId = updateWebsiteDto.UserId;
-    const transfer = updateWebsiteDto.transfer;
-    const WebsiteId = updateWebsiteDto.WebsiteId;
-    const entities = updateWebsiteDto.entities;
-    const defaultEntities = updateWebsiteDto.defaultEntities;
-    const defaultTags = updateWebsiteDto.defaultTags;
-    const tags = updateWebsiteDto.tags;
-    updateWebsiteDto.StartingUrl = decodeURIComponent(updateWebsiteDto.StartingUrl);
-
     const queryRunner = this.connection.createQueryRunner();
+
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -1132,9 +1136,15 @@ export class WebsiteService {
     try {
       await queryRunner.manager.update(
         Website,
-        { WebsiteId },
+        { WebsiteId: websiteId },
         {
-          ...updateWebsiteDto
+          Name: name,
+          StartingUrl: startingUrl,
+          UserId: userId,
+          Declaration: declaration,
+          Declaration_Update_Date: declarationDate,
+          Stamp: stamp,
+          Stamp_Update_Date: stampDate,
         }
       );
       if (oldUserId === null && userId !== null) {
@@ -1153,7 +1163,7 @@ export class WebsiteService {
               p.PageId = wp.PageId AND
               p.Show_In LIKE "101" AND
               e.PageId = p.PageId`,
-            [WebsiteId]
+            [websiteId]
           );
         }
       } else if (
@@ -1175,7 +1185,7 @@ export class WebsiteService {
               p.PageId = wp.PageId AND
               p.Show_In = "111" AND
               e.PageId = p.PageId`,
-            [WebsiteId]
+            [websiteId]
           );
         }
 
@@ -1193,7 +1203,7 @@ export class WebsiteService {
             p.PageId = wp.PageId AND
             p.Show_In = "110" AND
             e.PageId = p.PageId`,
-          [WebsiteId]
+          [websiteId]
         );
 
         await queryRunner.manager.query(
@@ -1210,7 +1220,7 @@ export class WebsiteService {
             p.PageId = wp.PageId AND
             p.Show_In = "010" AND
             e.PageId = p.PageId`,
-          [WebsiteId]
+          [websiteId]
         );
       }
 
@@ -1218,7 +1228,7 @@ export class WebsiteService {
         if (!entities.includes(id)) {
           await queryRunner.manager.query(
             `DELETE FROM EntityWebsite WHERE EntityId = ? AND WebsiteId = ?`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1227,7 +1237,7 @@ export class WebsiteService {
         if (!defaultEntities.includes(id)) {
           await queryRunner.manager.query(
             `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1236,7 +1246,7 @@ export class WebsiteService {
         if (!tags.includes(id)) {
           await queryRunner.manager.query(
             `DELETE FROM TagWebsite WHERE TagId = ? AND WebsiteId = ?`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1245,7 +1255,7 @@ export class WebsiteService {
         if (!defaultTags.includes(id)) {
           await queryRunner.manager.query(
             `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1532,10 +1542,14 @@ export class WebsiteService {
           for (const page of pages || []) {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
+              try {
                 await queryRunner.manager.query(
                   `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
                   [websiteP.WebsiteId, page.PageId]
                 );
+              } catch (err) {
+                // ignore - don't know why
+              }
             }
           }
 
@@ -1554,7 +1568,7 @@ export class WebsiteService {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
               await queryRunner.manager.query(
-                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?,?)`,
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES ("${website.insertId}", "${page.PageId}")`,
                 [website.WebsiteId, page.PageId]
               );
             }

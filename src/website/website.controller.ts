@@ -7,7 +7,6 @@ import {
   UseGuards,
   Param,
   UseInterceptors,
-  Body,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import * as SqlString from "sqlstring";
@@ -16,14 +15,7 @@ import { Website } from "./website.entity";
 import { success } from "../lib/response";
 import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { WebsitesIdDto } from "./dto/websites-id.dto";
-import { CreateWebsiteDto } from "./dto/create-website.dto";
-import { UpdateWebsiteDto } from "./dto/update-website.dto";
 
-@ApiBasicAuth()
-@ApiTags('website')
-@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("website")
 @UseInterceptors(LoggingInterceptor)
 export class WebsiteController {
@@ -51,34 +43,44 @@ export class WebsiteController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Reevaluate all pages from website' })
-  @ApiResponse({
-    status: 200,
-    description: 'The evaluation request has been submited',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Body() websitesIdDto: WebsitesIdDto): Promise<Boolean> {
+  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
+    const websitesId = JSON.parse(req.body.websitesId);
+    const option = req.body.option;
+
     return success(
-      await this.websiteService.addPagesToEvaluate(websitesIdDto.websitesId, websitesIdDto.option)
+      await this.websiteService.addPagesToEvaluate(websitesId, option)
     );
   }
 
-  @ApiOperation({ summary: 'Create website' })
-  @ApiResponse({
-    status: 200,
-    description: 'The website has been created',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("create")
-  async createWebsite(@Body() websiteDto: CreateWebsiteDto): Promise<any> {
- 
+  async createWebsite(@Request() req: any): Promise<any> {
+    const website = new Website();
+    website.Name = req.body.name;
+    website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
+    website.Declaration = req.body.declaration;
+    website.Declaration_Update_Date = req.body.declarationDate;
+    website.Stamp = req.body.stamp;
+    website.Stamp_Update_Date = req.body.stampDate;
+    website.Creation_Date = new Date();
+
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
+
+    const entities = JSON.parse(req.body.entities).map((entity: string) =>
+      SqlString.escape(entity)
+    );
+
+    const tags = JSON.parse(req.body.tags).map((tag: string) =>
+      SqlString.escape(tag)
+    );
+
     const createSuccess = await this.websiteService.createOne(
-      websiteDto,
-      websiteDto.entities,
-      websiteDto.tags
+      website,
+      startingUrl,
+      entities,
+      tags
     );
     if (!createSuccess) {
       throw new InternalServerErrorException();
@@ -87,19 +89,39 @@ export class WebsiteController {
     return success(true);
   }
 
-
-  @ApiOperation({ summary: 'Update website' })
-  @ApiResponse({
-    status: 200,
-    description: 'The website has been updated',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async updateWebsite(@Body() updateWebsiteDto: UpdateWebsiteDto): Promise<any> {
+  async updateWebsite(@Request() req: any): Promise<any> {
+    const websiteId = req.body.websiteId;
+    const name = req.body.name;
+    const startingUrl = decodeURIComponent(req.body.startingUrl);
+    const declaration = req.body.declaration;
+    const stamp = req.body.stamp;
+    const declarationDate = req.body.declarationDate;
+    const stampDate = req.body.stampDate;
+    const userId = req.body.userId;
+    const oldUserId = req.body.olderUserId;
+    const transfer = !!req.body.transfer;
+    const defaultEntities = JSON.parse(req.body.defaultEntities);
+    const entities = JSON.parse(req.body.entities);
+    const defaultTags = JSON.parse(req.body.defaultTags);
+    const tags = JSON.parse(req.body.tags);
 
     const updateSuccess = await this.websiteService.update(
-      updateWebsiteDto
+      websiteId,
+      name,
+      startingUrl,
+      declaration,
+      stamp,
+      declarationDate,
+      stampDate,
+      userId,
+      oldUserId,
+      transfer,
+      defaultEntities,
+      entities,
+      defaultTags,
+      tags
     );
     if (!updateSuccess) {
       throw new InternalServerErrorException();
