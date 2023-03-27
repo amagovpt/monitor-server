@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { Repository, DataSource, IsNull } from "typeorm";
-import { Website } from "./website.entity";
-import { Tag } from "../tag/tag.entity";
+import { DataSource, IsNull, Repository } from "typeorm";
 import { Page } from "../page/page.entity";
+import { Tag } from "../tag/tag.entity";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
+import { Website } from "./website.entity";
 
 @Injectable()
 export class WebsiteService {
@@ -15,20 +15,20 @@ export class WebsiteService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     @InjectDataSource()
-    private readonly connection: DataSource) {}
-  
+    private readonly connection: DataSource) { }
+
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
     return await Promise.all(websites.map(async (website) => {
       const id = website.WebsiteId;
       const pages = await this.findAllPages(id);
-      website["numberOfPages"]= pages.length;
+      website["numberOfPages"] = pages.length;
       website["averagePoints"] = this.averagePointsPageEvaluation(pages);
       return website;
     }));
   }
   private averagePointsPageEvaluation(pages) {
-    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) },0);
+    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) }, 0);
     return totalPoints / pages.length;
   }
 
@@ -75,7 +75,7 @@ export class WebsiteService {
               [page.PageId, -1, page.Uri, "10", new Date()]
             );
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -372,7 +372,7 @@ export class WebsiteService {
   }
 
   async isInObservatory(userId: number, website: string): Promise<any> {
-  
+
     const tags = await this.websiteRepository.query(
       `
       SELECT t.* 
@@ -518,7 +518,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "01", new Date()]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -588,7 +588,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "00", new Date(), userId]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -1007,8 +1007,8 @@ export class WebsiteService {
     tags: string[]
   ): Promise<boolean> {
 
-    website.Creation_Date = new Date();
-    website.StartingUrl = decodeURIComponent(website.StartingUrl);
+    website.creation_Date = new Date();
+    website.startingUrl = decodeURIComponent(website.startingUrl);
 
     const queryRunner = this.connection.createQueryRunner();
 
@@ -1017,19 +1017,19 @@ export class WebsiteService {
 
     let hasError = false;
     try {
-      const insertWebsite = await queryRunner.manager.save({...website});
+      const insertWebsite = await queryRunner.manager.save({ ...website });
 
       for (const entity of entities || []) {
         await queryRunner.manager.query(
           `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
-          [entity, insertWebsite.WebsiteId]
+          [entity, insertWebsite.websiteId]
         );
       }
 
       for (const tag of tags || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-          [tag, insertWebsite.WebsiteId]
+          [tag, insertWebsite.websiteId]
         );
       }
 
@@ -1048,17 +1048,17 @@ export class WebsiteService {
   }
 
   async update(
-    updateWebsiteDto:UpdateWebsiteDto
+    updateWebsiteDto: UpdateWebsiteDto
   ): Promise<any> {
     const oldUserId = updateWebsiteDto.oldUserId;
-    const userId = updateWebsiteDto.UserId;
+    const userId = updateWebsiteDto.userId;
     const transfer = updateWebsiteDto.transfer;
-    const WebsiteId = updateWebsiteDto.WebsiteId;
+    const websiteId = updateWebsiteDto.websiteId;
     const entities = updateWebsiteDto.entities;
     const defaultEntities = updateWebsiteDto.defaultEntities;
     const defaultTags = updateWebsiteDto.defaultTags;
     const tags = updateWebsiteDto.tags;
-    updateWebsiteDto.StartingUrl = decodeURIComponent(updateWebsiteDto.StartingUrl);
+    updateWebsiteDto.startingUrl = decodeURIComponent(updateWebsiteDto.startingUrl);
 
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -1068,9 +1068,15 @@ export class WebsiteService {
     try {
       await queryRunner.manager.update(
         Website,
-        { WebsiteId },
+        { websiteId },
         {
-          ...updateWebsiteDto
+          userId,
+      name: updateWebsiteDto.name,
+      startingUrl: updateWebsiteDto.startingUrl,
+      declaration: updateWebsiteDto.declaration,
+      declarationUpdateDate: updateWebsiteDto.declarationUpdateDate,
+      stamp: updateWebsiteDto.stamp,
+      stampUpdateDate: updateWebsiteDto.stampUpdateDate,
         }
       );
       if (oldUserId === null && userId !== null) {
@@ -1089,7 +1095,7 @@ export class WebsiteService {
               p.PageId = wp.PageId AND
               p.Show_In LIKE "101" AND
               e.PageId = p.PageId`,
-            [WebsiteId]
+            [websiteId]
           );
         }
       } else if (
@@ -1111,7 +1117,7 @@ export class WebsiteService {
               p.PageId = wp.PageId AND
               p.Show_In = "111" AND
               e.PageId = p.PageId`,
-            [WebsiteId]
+            [websiteId]
           );
         }
 
@@ -1129,7 +1135,7 @@ export class WebsiteService {
             p.PageId = wp.PageId AND
             p.Show_In = "110" AND
             e.PageId = p.PageId`,
-          [WebsiteId]
+          [websiteId]
         );
 
         await queryRunner.manager.query(
@@ -1146,7 +1152,7 @@ export class WebsiteService {
             p.PageId = wp.PageId AND
             p.Show_In = "010" AND
             e.PageId = p.PageId`,
-          [WebsiteId]
+          [websiteId]
         );
       }
 
@@ -1154,7 +1160,7 @@ export class WebsiteService {
         if (!entities.includes(id)) {
           await queryRunner.manager.query(
             `DELETE FROM EntityWebsite WHERE EntityId = ? AND WebsiteId = ?`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1163,7 +1169,7 @@ export class WebsiteService {
         if (!defaultEntities.includes(id)) {
           await queryRunner.manager.query(
             `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1172,7 +1178,7 @@ export class WebsiteService {
         if (!tags.includes(id)) {
           await queryRunner.manager.query(
             `DELETE FROM TagWebsite WHERE TagId = ? AND WebsiteId = ?`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1181,7 +1187,7 @@ export class WebsiteService {
         if (!defaultTags.includes(id)) {
           await queryRunner.manager.query(
             `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-            [id, WebsiteId]
+            [id, websiteId]
           );
         }
       }
@@ -1468,10 +1474,10 @@ export class WebsiteService {
           for (const page of pages || []) {
             if (page.Show_In[0] === "0") {
               await this.importPage(queryRunner, page.PageId);
-                await queryRunner.manager.query(
-                  `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-                  [websiteP.WebsiteId, page.PageId]
-                );
+              await queryRunner.manager.query(
+                `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
+                [websiteP.WebsiteId, page.PageId]
+              );
             }
           }
 

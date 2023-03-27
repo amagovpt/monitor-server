@@ -1,27 +1,32 @@
 import { IsNotEmpty } from 'class-validator';
 export class UpdateWebsiteDto {
     @IsNotEmpty()
-    WebsiteId: number;
+    websiteId: number;
 
     @IsNotEmpty()
-    UserId: number;
+    userId: number;
 
     @IsNotEmpty()
     oldUserId: number;
 
     @IsNotEmpty()
-    Name: string;
+    name: string;
 
     @IsNotEmpty()
-    StartingUrl: string;
+    startingUrl: string;
 
-    Declaration: number;
+    declaration: number;
 
-    Stamp: number;
+    stamp: number;
 
-    Creation_Date: any;
+    declarationUpdateDate: any;
 
-    entities:number[];
+    stampUpdateDate: any;
+
+
+    creation_Date: any;
+
+    entities: number[];
 
     tags: number[];
 

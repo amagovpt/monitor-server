@@ -85,6 +85,12 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Update pages in the observatory' })
+  @ApiResponse({
+    status: 200,
+    description: 'The pages in the observatory have been updated',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/updateObservatory")
   async updateWebsitePagesObservatory(@Request() req: any): Promise<any> {
