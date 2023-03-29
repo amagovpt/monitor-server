@@ -22,6 +22,7 @@ import { CreateWebsiteDto } from "./dto/create-website.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
 import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
 import { DeleteBulkWebsiteDto } from "./dto/delete-bulk-website.dto";
+import { ImportWebsiteMyMonitorDto } from "./dto/import-website-mymonitor.dto";
 
 @ApiBasicAuth()
 @ApiTags('website')
@@ -39,7 +40,7 @@ export class WebsiteController {
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Body() websitesIdDto: WebsitesIdDto): Promise<Boolean> {
+  async reEvaluateWebsitePages(@Body() websitesIdDto: WebsitesIdDto): Promise<any> {
     return success(
       await this.websiteService.addPagesToEvaluate(websitesIdDto.websitesId, websitesIdDto.option)
     );
@@ -157,12 +158,16 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Deletes all pages from a list of websites' })
+  @ApiResponse({
+    status: 200,
+    description: 'The selected pages have been deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
-  async deleteWebsitesaPages(@Request() req: any): Promise<any> {
-    const websitesId = JSON.parse(req.body.websitesId);
-
-    const deleteSuccess = await this.websiteService.pagesDeleteBulk(websitesId);
+  async deleteWebsitesaPages(@Body() deleteBulkWebsiteDto: DeleteBulkWebsiteDto): Promise<any> {
+    const deleteSuccess = await this.websiteService.pagesDeleteBulk(deleteBulkWebsiteDto.websitesId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
@@ -170,15 +175,27 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Imports a website from MyMonitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The selected website has been imported',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("import")
-  async importWebsiteFromMyMonitor(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
-    const websiteName = req.body.websiteName;
+  async importWebsiteFromMyMonitor(@Body() importWebsiteMyMonitorDto: ImportWebsiteMyMonitorDto): Promise<any> {
+    const websiteId = importWebsiteMyMonitorDto.websiteId;
+    const websiteName = importWebsiteMyMonitorDto.newWebsiteName;
 
     return success(await this.websiteService.import(websiteId, websiteName));
   }
 
+  @ApiOperation({ summary: 'Calculates the number of websites in AMS filtered by search string' })
+  @ApiResponse({
+    status: 200,
+    description: ' The number of websites in AMS filtered by search string',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminWebsiteCount(@Param("search") search: string): Promise<any> {
@@ -189,6 +206,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Finds websites in AMS filtered by search string, size, sort and direction' })
+  @ApiResponse({
+    status: 200,
+    description: ' The websites in AMS filtered by search string, size, sort and direction',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/:size/:page/:sort/:direction/:search")
   async getAllWebsites(
@@ -209,12 +232,24 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find website information by id' })
+  @ApiResponse({
+    status: 200,
+    description: ' The specific website information',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("info/:websiteId")
   async getWebsiteInfo(@Param("websiteId") websiteId: number): Promise<any> {
     return success(await this.websiteService.findInfo(websiteId));
   }
 
+  @ApiOperation({ summary: 'Find website information by id' })
+  @ApiResponse({
+    status: 200,
+    description: ' The specific website information',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get(":website/user/:user/pages")
   async getAllWebsiteDomains(

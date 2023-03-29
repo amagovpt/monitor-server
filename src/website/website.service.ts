@@ -1422,7 +1422,7 @@ export class WebsiteService {
     return websitesId;
   }
 
-  async import(websiteId: number, websiteName: string): Promise<any> {
+  async import(websiteId: number, newWebsiteName: string): Promise<any> {
     let returnWebsiteId = websiteId;
     const queryRunner = this.connection.createQueryRunner();
 
@@ -1493,7 +1493,7 @@ export class WebsiteService {
         } else {
           const insertWebsite = await queryRunner.manager.query(
             `INSERT INTO Website (Name, StartingUrl, Creation_Date) VALUES (?, ?, ?)`,
-            [websiteName, websiteUrl, webDate]
+            [newWebsiteName, websiteUrl, webDate]
           );
           returnWebsiteId = insertWebsite.WebsiteId;
 
