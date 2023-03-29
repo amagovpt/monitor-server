@@ -244,10 +244,10 @@ export class WebsiteController {
     return success(await this.websiteService.findInfo(websiteId));
   }
 
-  @ApiOperation({ summary: 'Find website information by id' })
+  @ApiOperation({ summary: 'Find website by user and name' })
   @ApiResponse({
     status: 200,
-    description: ' The specific website information',
+    description: ' The specific website',
     type: Website,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -263,6 +263,13 @@ export class WebsiteController {
 
     return success(await this.websiteService.findAllPages(websiteId));
   }
+
+  @ApiOperation({ summary: 'Finds all website data to build a csv' })
+  @ApiResponse({
+    status: 200,
+    description: ' All the webiste data',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("csv")
   async getAllWebsiteCSVData(): Promise<any> {  
