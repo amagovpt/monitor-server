@@ -7,13 +7,19 @@ import {
   Param,
   UnauthorizedException,
   UseInterceptors,
+  Body,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { PageService } from "./page.service";
 import { success } from "../lib/response";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import { PageUrlDto } from "./dto/page-url.dto";
 
+@ApiBasicAuth()
+@ApiTags('page')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("page")
 @UseInterceptors(LoggingInterceptor)
 export class PageController {
@@ -22,19 +28,31 @@ export class PageController {
     private readonly evaluationService: EvaluationService
   ) {}
 
+  @ApiOperation({ summary: 'Reevaluate page' })
+  @ApiResponse({
+    status: 200,
+    description: 'The evaluation request has been submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluatePage(@Request() req: any): Promise<any> {
-    const page = decodeURIComponent(req.body.page);
+  async reEvaluatePage(@Body() pageUrlDto: PageUrlDto): Promise<any> {
+    const page = decodeURIComponent(pageUrlDto.page);
 
     await this.evaluationService.increaseAMSObservatoryRequestCounter();
 
     return success(await this.pageService.addPageToEvaluate(page, "10", -1));
   }
 
+  @ApiOperation({ summary: 'Find the number of pages in observatory' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages in observatory',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("observatory/total")
-  async getNumberOfObservatoryEntities(): Promise<any> {
+  async getNumberOfObservatoryPages(): Promise<any> {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
@@ -45,6 +63,12 @@ export class PageController {
     return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
+  @ApiOperation({ summary: 'Find the number of pages being evaluated by the admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages being evaluated',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/evaluating")
   async getNumberOfAdminPagesBeingEvaluated(): Promise<any> {
@@ -53,24 +77,48 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages waiting',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/waiting")
   async getNumberOfAdminPagesWaitingForEvaluation(): Promise<any> {
     return success(await this.pageService.findAdminWaitingInEvaluationList());
   }
 
+  @ApiOperation({ summary: 'Find the number of pages that failed the evaluation by the admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages that failed the evaluation',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/error")
   async getNumberOfAdminPagesWithError(): Promise<any> {
     return success(await this.pageService.findAdminWithErrorInEvaluationList());
   }
 
+  @ApiOperation({ summary: 'Find the number of pages being evaluated by the user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages being evaluated',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/user/evaluating")
   async getNumberOfUserPagesBeingEvaluated(): Promise<any> {
     return success(await this.pageService.findUserEvaluatingInEvaluationList());
   }
 
+  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of pages waiting',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/user/waiting")
   async getNumberOfUserPagesWaitingForEvaluation(): Promise<any> {
