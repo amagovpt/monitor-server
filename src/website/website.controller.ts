@@ -438,17 +438,29 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Reevalute all pages from a specific website in My Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The page evaluation was submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/reEvaluate")
-  async reEvaluateMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
-    const userId = req.user.userId;
-    const website = req.body.website;
+  async reEvaluateMyMonitorUserWebsitePages(websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
+    const userId = websiteMyMonitorDto.userId;
+    const website = websiteMyMonitorDto.website;
 
     return success(
       await this.websiteService.reEvaluateMyMonitorWebsite(userId, website)
     );
   }
 
+  @ApiOperation({ summary: 'Reevalute all pages from a specific website in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The page evaluation was submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/reEvaluate")
   async reEvaluateStudyMonitorUserTagWebsitePages(
@@ -467,6 +479,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag")
   async getStudyMonitorUserTagWebsites(
@@ -479,6 +497,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/otherTags/:tag")
   async getStudyMonitorUserOtherTagsWebsites(
@@ -494,6 +518,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/website/nameExists/:website")
   async checkIfStudyMonitorUserTagWebsiteNameExists(
@@ -511,6 +541,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Check if website exists in specific tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/websiteExists/:startingUrl")
   async checkIfStudyMonitorUserTagWebsiteExists(
@@ -528,6 +564,13 @@ export class WebsiteController {
     );
   }
 
+
+  @ApiOperation({ summary: 'Link a website to a tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/link")
   async linkStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
@@ -550,6 +593,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Create a website in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Website
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/create")
   async createStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
@@ -578,6 +627,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Remove a website to a tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/remove")
   async removeStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
