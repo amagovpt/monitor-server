@@ -677,7 +677,7 @@ export class PageService {
     website: string,
     startingUrl: string,
     uris: string[]
-  ): Promise<any> {
+  ): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
