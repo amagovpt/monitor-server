@@ -19,6 +19,8 @@ import { PageUrlDto } from "./dto/page-url.dto";
 import { PageListDto } from "./dto/page-list.dto";
 import { CreatePageMyMonitorDto } from "./dto/create-page-my-monitor.dto";
 import { DeletePageMyMonitorDto } from "./dto/delete-page-my-monitor.dto";
+import { Page } from "./page.entity";
+import { PageEvaluateDto } from "./dto/page-evaluate.dto";
 
 @ApiBasicAuth()
 @ApiTags('page')
@@ -268,6 +270,12 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of pages',
+    type: Array<Page>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/website/:website")
   async getStudyMonitorUserTagWebsitePages(
@@ -284,6 +292,12 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of pages',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("add")
   async addPages(@Request() req: any): Promise<any> {
@@ -299,10 +313,16 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Evaluate page' })
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluation added to evaluation queue',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("page/evaluate")
-  async evaluatePage(@Request() req: any): Promise<any> {
-    const url = decodeURIComponent(req.body.url);
+  async evaluatePage(@Body() pageEvaluateDto: PageEvaluateDto): Promise<any> {
+    const url = decodeURIComponent(pageEvaluateDto.url);
     const page = await this.pageService.findPageFromUrl(url);
 
     if (page) {
@@ -313,11 +333,17 @@ export class PageController {
     }
   }
 
+  @ApiOperation({ summary: 'Evaluate page in My Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluation added to evaluation queue',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/evaluate")
-  async evaluateMyMonitorWebsitePage(@Request() req: any): Promise<any> {
+  async evaluateMyMonitorWebsitePage(@Request() req: any, @Body() pageEvaluateDto: PageEvaluateDto): Promise<any> {
     const userId = req.user.userId;
-    const url = decodeURIComponent(req.body.url);
+    const url = decodeURIComponent(pageEvaluateDto.url);
     const page = await this.pageService.findPageFromUrl(url);
     const isUserPage = await this.pageService.isPageFromMyMonitorUser(
       userId,
@@ -334,6 +360,12 @@ export class PageController {
     }
   }
 
+  @ApiOperation({ summary: 'Evaluate page in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluation added to evaluation queue',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/evaluate")
   async evaluateStudyMonitorTagWebsitePage(@Request() req: any): Promise<any> {
