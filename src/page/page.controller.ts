@@ -21,6 +21,9 @@ import { CreatePageMyMonitorDto } from "./dto/create-page-my-monitor.dto";
 import { DeletePageMyMonitorDto } from "./dto/delete-page-my-monitor.dto";
 import { Page } from "./page.entity";
 import { PageEvaluateDto } from "./dto/page-evaluate.dto";
+import { PageEvaluateStudyMonitorDto } from "./dto/page-evaluate-study-monitor.dto";
+import { PageCreateStudyMonitorDto } from "./dto/page-create-study-monitor.dto";
+import { PageDeleteStudyMonitorDto } from "./dto/page-delete-study-monitor.dto";
 
 @ApiBasicAuth()
 @ApiTags('page')
@@ -368,11 +371,11 @@ export class PageController {
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/evaluate")
-  async evaluateStudyMonitorTagWebsitePage(@Request() req: any): Promise<any> {
+  async evaluateStudyMonitorTagWebsitePage(@Request() req: any, @Body() pageEvaluateStudyMonitorDto:PageEvaluateStudyMonitorDto): Promise<any> {
     const userId = req.user.userId;
-    const tag = req.body.tag;
-    const website = req.body.website;
-    const url = decodeURIComponent(req.body.url);
+    const tag = pageEvaluateStudyMonitorDto.tag;
+    const website = pageEvaluateStudyMonitorDto.website;
+    const url = decodeURIComponent(pageEvaluateStudyMonitorDto.url);
     const page = await this.pageService.findPageFromUrl(url);
     const isUserPage = await this.pageService.isPageFromStudyMonitorUser(
       userId,
@@ -391,17 +394,24 @@ export class PageController {
     }
   }
 
+  @ApiOperation({ summary: 'Create page in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page created',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/create")
   async createStudyMonitorUserTagWebsitePages(
-    @Request() req: any
+    @Request() req: any,
+    pageCreateStudyMonitorDto: PageCreateStudyMonitorDto
   ): Promise<any> {
-    const tag = req.body.tag;
-    const website = req.body.website;
-    const startingUrl = req.body.startingUrl;
-    const uris = JSON.parse(req.body.pages).map((page) =>
+    const tag = pageCreateStudyMonitorDto.tag;
+    const website = pageCreateStudyMonitorDto.website;
+    const startingUrl = pageCreateStudyMonitorDto.startingUrl;
+    const uris = JSON.parse(pageCreateStudyMonitorDto.pages).map((page) =>
       decodeURIComponent(page)
-    );
+    );//FIXME
     return success(
       await this.pageService.createStudyMonitorUserTagWebsitePages(
         req.user.userId,
@@ -413,14 +423,21 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Remove page in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page removed',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/remove")
   async removeStudyMonitorUserTagWebsitePages(
-    @Request() req: any
+    @Request() req: any,
+    pageDeleteStudyMonitorDto: PageDeleteStudyMonitorDto
   ): Promise<any> {
-    const tag = req.body.tag;
-    const website = req.body.website;
-    const pagesId = JSON.parse(req.body.pagesId);
+    const tag = pageDeleteStudyMonitorDto.tag;
+    const website = pageDeleteStudyMonitorDto.website;
+    const pagesId = pageDeleteStudyMonitorDto.pagesId;
     return success(
       await this.pageService.removeStudyMonitorUserTagWebsitePages(
         req.user.userId,
@@ -431,6 +448,12 @@ export class PageController {
     );
   }
 
+  @ApiOperation({ summary: 'Update page in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page updated',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
   async update(@Request() req: any): Promise<any> {
