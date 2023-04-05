@@ -7,19 +7,29 @@ import {
   Param,
   UseGuards,
   UseInterceptors,
+  Body,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { TagService } from "./tag.service";
 import { Tag } from "./tag.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import { TagReEvaluateDto } from "./dto/tag-reevalute.dto";
+import { CreateTagDto } from "./dto/create-tag.dto";
+import { UpdateTagDto } from "./dto/update-tag.dto";
+import { DeleteTagDto } from "./dto/delete-tag.dto";
+import { DeleteTagBulkDto } from "./dto/delete-tag-bulk.dto";
 
+@ApiBasicAuth()
+@ApiTags('tag')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("tag")
 @UseInterceptors(LoggingInterceptor)
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
-  @ApiOperation({ summary: 'Reevaluate all pages from website' })
+  @ApiOperation({ summary: 'Reevaluate all pages from a tag' })
   @ApiResponse({
     status: 200,
     description: 'The evaluation request has been submited',
@@ -27,22 +37,28 @@ export class TagController {
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const tagsId = JSON.parse(req.body.tagsId);
-    const option = req.body.option;
+  async reEvaluateWebsitePages(@Body() tagReEvaluateDto: TagReEvaluateDto): Promise<any> {
+    const tagsId = tagReEvaluateDto.tagsId;
+    const option = tagReEvaluateDto.option;
 
     return success(await this.tagService.addPagesToEvaluate(tagsId, option));
   }
 
+  @ApiOperation({ summary: 'Create a new tag' })
+  @ApiResponse({
+    status: 200,
+    description: 'The tag was created',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("create")
-  async createOfficialTag(@Request() req: any): Promise<any> {
+  async createOfficialTag(@Body() createTagDto: CreateTagDto): Promise<any> {
     const tag = new Tag();
-    tag.Name = req.body.name;
+    tag.Name = createTagDto.name;
     tag.Creation_Date = new Date();
 
-    const directories = JSON.parse(req.body.directories);
-    const websites = JSON.parse(req.body.websites);
+    const directories = createTagDto.directories;
+    const websites = createTagDto.websites;
 
     const createSuccess = await this.tagService.createOne(
       tag,
@@ -57,15 +73,21 @@ export class TagController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Update a specific tag' })
+  @ApiResponse({
+    status: 200,
+    description: 'The tag was updated',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async updateOfficialTag(@Request() req: any): Promise<any> {
-    const tagId = req.body.tagId;
-    const name = req.body.name;
-    const defaultDirectories = JSON.parse(req.body.defaultDirectories);
-    const directories = JSON.parse(req.body.directories);
-    const defaultWebsites = JSON.parse(req.body.defaultWebsites);
-    const websites = JSON.parse(req.body.websites);
+  async updateOfficialTag(@Body() updateTagDto: UpdateTagDto): Promise<any> {
+    const tagId = updateTagDto.tagId;
+    const name = updateTagDto.name;
+    const defaultDirectories = updateTagDto.defaultDirectories;
+    const directories = updateTagDto.directories;
+    const defaultWebsites = updateTagDto.defaultWebsites;
+    const websites = updateTagDto.websites;
 
     const updateSuccess = await this.tagService.update(
       tagId,
@@ -83,10 +105,16 @@ export class TagController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Delete a specific tag' })
+  @ApiResponse({
+    status: 200,
+    description: 'The tag was deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
-  async deleteOfficialTag(@Request() req: any): Promise<any> {
-    const tagId = req.body.tagId;
+  async deleteOfficialTag(@Body() deleteTagDto: DeleteTagDto): Promise<any> {
+    const tagId = deleteTagDto.tagId;
 
     const deleteSuccess = await this.tagService.delete(tagId);
     if (!deleteSuccess) {
@@ -96,10 +124,16 @@ export class TagController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Delete a list of tags' })
+  @ApiResponse({
+    status: 200,
+    description: 'The tags were deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteBulkOfficialTags(@Request() req: any): Promise<any> {
-    const tagsId = JSON.parse(req.body.tagsId);
+  async deleteBulkOfficialTags(@Body() deleteTagBulkDto: DeleteTagBulkDto): Promise<any> {
+    const tagsId = deleteTagBulkDto.tagsId;
 
     const deleteSuccess = await this.tagService.deleteBulk(tagsId);
     if (!deleteSuccess) {
