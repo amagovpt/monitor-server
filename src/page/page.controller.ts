@@ -24,6 +24,9 @@ import { PageEvaluateDto } from "./dto/page-evaluate.dto";
 import { PageEvaluateStudyMonitorDto } from "./dto/page-evaluate-study-monitor.dto";
 import { PageCreateStudyMonitorDto } from "./dto/page-create-study-monitor.dto";
 import { PageDeleteStudyMonitorDto } from "./dto/page-delete-study-monitor.dto";
+import { PageUpdateDto } from "./dto/page-update.dto";
+import { PageDeleteDto } from "./dto/page-delete.dto";
+import { PageImportDto } from "./dto/page-import.dto";
 
 @ApiBasicAuth()
 @ApiTags('page')
@@ -456,26 +459,38 @@ export class PageController {
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async update(@Request() req: any): Promise<any> {
-    const pageId = req.body.pageId;
-    const checked = req.body.checked;
+  async update(@Body() pageUpdateDto: PageUpdateDto): Promise<any> {
+    const pageId = pageUpdateDto.pageId;
+    const checked = pageUpdateDto.checked;
     return success(await this.pageService.update(pageId, checked));
   }
 
+  @ApiOperation({ summary: 'Delete page' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
-  async delete(@Request() req: any): Promise<any> {
-    const pages = req.body.pages;
+  async delete(@Body() pageDeleteDto: PageDeleteDto): Promise<any> {
+    const pages = pageDeleteDto.pages;
     return success(await this.pageService.delete(pages));
   }
 
+  @ApiOperation({ summary: 'Import page from a my monitor or study monitor user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page imported',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("import")
-  async importPage(@Request() req: any): Promise<any> {
-    const pageId = req.body.pageId;
-    const username = req.body.user;
-    const tag = req.body.tag;
-    const website = req.body.website;
+  async importPage(@Body() pageImportDto: PageImportDto): Promise<any> {
+    const pageId = pageImportDto.pageId;
+    const username = pageImportDto.user;
+    const tag = pageImportDto.tag;
+    const website = pageImportDto.website;
 
     const type = await this.pageService.findUserType(username);
 

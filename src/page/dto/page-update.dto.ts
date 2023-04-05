@@ -1,3 +1,4 @@
 export class PageUpdateDto {
-    page:string//URL
+    pageId:number;
+    checked:boolean;
 }
