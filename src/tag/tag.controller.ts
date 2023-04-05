@@ -19,6 +19,12 @@ import { LoggingInterceptor } from "src/log/log.interceptor";
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
+  @ApiOperation({ summary: 'Reevaluate all pages from website' })
+  @ApiResponse({
+    status: 200,
+    description: 'The evaluation request has been submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
