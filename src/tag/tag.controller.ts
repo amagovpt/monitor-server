@@ -143,6 +143,12 @@ export class TagController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Delete all pages from a specific tag' })
+  @ApiResponse({
+    status: 200,
+    description: 'The tags were deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
   async deleteBulkOfficialTagsPages(@Request() req: any): Promise<any> {
