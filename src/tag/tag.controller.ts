@@ -20,7 +20,7 @@ import { CreateTagDto } from "./dto/create-tag.dto";
 import { UpdateTagDto } from "./dto/update-tag.dto";
 import { DeleteTagDto } from "./dto/delete-tag.dto";
 import { DeleteTagBulkDto } from "./dto/delete-tag-bulk.dto";
-import { CreateTagStudyDto, CreateUserStudyDto } from "./dto/create-tag-study.dto";
+import { CreateTagStudyDto } from "./dto/create-tag-study.dto";
 import { DeleteTagStudyDto } from "./dto/delete-tag-study.dto";
 import { ImportTagDto } from "./dto/import-tag.dto";
 

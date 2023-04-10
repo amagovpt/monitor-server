@@ -15,12 +15,22 @@ import { User } from "./user.entity";
 import { generatePasswordHash, createRandomUniqueHash } from "../lib/security";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
 
+@ApiBasicAuth()
+@ApiTags('tag')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("user")
 @UseInterceptors(LoggingInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({
+    status: 200,
+    description: 'The evaluation request has been submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt"))
   @Post("changePassword")
   async changeUserPassword(@Request() req: any): Promise<any> {
