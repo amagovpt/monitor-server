@@ -869,7 +869,7 @@ export class TagService {
     return websites;
   }
 
-  async import(tagId: number, tagName: string): Promise<any> {
+  async import(tagId: number, tagName: string): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
