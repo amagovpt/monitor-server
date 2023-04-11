@@ -13,12 +13,23 @@ import { EntityService } from "./entity.service";
 import { EntityTable } from "./entity.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
+
+@ApiBasicAuth()
+@ApiTags('entity')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("entity")
 @UseInterceptors(LoggingInterceptor)
 export class EntityController {
   constructor(private readonly entityService: EntityService) {}
 
+  @ApiOperation({ summary: 'Find number of requests done to Observatory from the start date' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
