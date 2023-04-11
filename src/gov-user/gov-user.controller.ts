@@ -7,7 +7,9 @@ import { LoggingInterceptor } from 'src/log/log.interceptor';
 import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GovUser } from './entities/gov-user.entity';
 
-
+@ApiBasicAuth()
+@ApiTags('gov-user')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller('gov-user')
 @UseInterceptors(LoggingInterceptor)
 export class GovUserController {
