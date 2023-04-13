@@ -266,7 +266,7 @@ export class EntityController {
     return success(await this.entityService.findAllWebsites(entity));
   }
 
-  @ApiOperation({ summary: 'Find all theh pages in a specific entity' })
+  @ApiOperation({ summary: 'Find all the pages in a specific entity' })
   @ApiResponse({
     status: 200,
     description: 'Success',

@@ -13,12 +13,23 @@ import { DirectoryService } from "./directory.service";
 import { Directory } from "./directory.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
+
+@ApiBasicAuth()
+@ApiTags('directory')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("directory")
 @UseInterceptors(LoggingInterceptor)
 export class DirectoryController {
   constructor(private readonly directoryService: DirectoryService) {}
 
+  @ApiOperation({ summary: 'Reevaluate all pages from an entity list' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
@@ -30,6 +41,12 @@ export class DirectoryController {
     );
   }
 
+  @ApiOperation({ summary: 'Reevaluate all pages from an entity list' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all")
   async getAllTags(): Promise<any> {
