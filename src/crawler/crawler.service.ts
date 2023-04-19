@@ -305,7 +305,7 @@ export class CrawlerService {
 
   async crawlWebsite(
     userId: number,
-    websites: any,
+    websites: Array<any>,
     maxDepth: number,
     maxPages: number,
     waitJS: number,
