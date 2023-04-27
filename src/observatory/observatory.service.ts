@@ -93,7 +93,7 @@ export class ObservatoryService {
       const manager = getManager();
 
       if (manual) {
-        this.observatoryRepository.delete({
+        await this.observatoryRepository.delete({
           Type: "manual",
         });
       }
@@ -527,8 +527,8 @@ export class ObservatoryService {
   getTopFiveWebsites(listDirectories: ListDirectories): any {
     const websites = listDirectories
       .getWebsites()
-      .slice()
-      .sort((a: Website, b: Website) => b.getScore() - a.getScore())
+      .filter((value, index, array) =>  array.indexOf(value) === index && value.A + value.AA + value.AAA > 10 )
+      .sort((a: Website, b: Website) => (Math.round(b.getScore() * 10) / 10) - (Math.round(a.getScore() * 10) / 10) || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A)
       .slice(0, 5);
 
     const topFiveWebsites = new Array<any>();
@@ -638,8 +638,7 @@ export class ObservatoryService {
     let rank = 1;
     const directories = listDirectories.directories
       .slice()
-      .sort((a: Directory, b: Directory) => a.getScore() - b.getScore())
-      .reverse()
+      .sort((a: Directory, b: Directory) => (Math.round(b.getScore() * 10) / 10) - (Math.round(a.getScore() * 10) / 10) || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A || b.nPages - a.nPages)
       .map((d: Directory) => {
         d.rank = rank;
         rank++;

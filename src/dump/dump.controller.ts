@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { DumpService } from './dump.service';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+const execSync = require('child_process').execSync;
 
 
 @UseGuards(AuthGuard("jwt-admin"))
@@ -23,6 +24,11 @@ export class DumpController {
       const file = createReadStream(join(process.cwd(), path));
       file.pipe(res);
     }
+  }
+
+  @Get('restart')
+  async restart() {
+    execSync('pm2 restart monitor-server');
   }
 
 

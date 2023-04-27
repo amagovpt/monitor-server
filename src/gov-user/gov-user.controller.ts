@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseInterceptors } from '@nestjs/common';
 import { GovUserService } from './gov-user.service';
 import { CreateGovUserDto } from './dto/create-gov-user.dto';
 import { UpdateGovUserDto } from './dto/update-gov-user.dto';

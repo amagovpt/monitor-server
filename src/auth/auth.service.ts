@@ -148,6 +148,7 @@ export class AuthService {
   async verifyLoginUser(token: string) {
     const atributes = await this.getAtributes(token);
     const ccNumber = atributes.cc;
+    await this.govUserService.updateLogin(ccNumber);
    return this.govUserService.findOneByCC(ccNumber);
   }
 

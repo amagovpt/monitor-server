@@ -196,12 +196,12 @@ export class CrawlerService {
     const page = await this.crawlWebsiteRepository.findOne({
       where: { UserId: userId, WebsiteId: websiteId },
     });
-
-    if (page) {
+    return page && page.Done === 1;
+    /*if (page) {
       return page.Done === 1;
     } else {
       throw new InternalServerErrorException();
-    }
+    }*/
   }
 
   async getUserCrawlResults(
