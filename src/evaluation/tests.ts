@@ -641,7 +641,6 @@ export default {
     dis: "15222",
     result: "failed",
   },
-  /*
   values_02a: {
     type: "decr",
     elem: "all",
@@ -667,7 +666,7 @@ export default {
     scs: "1.4.8",
     dis: "15113",
     result: "passed",
-  },Unidades relativas e absolutas*/
+  },
   values_01a: {
     type: "decr",
     elem: "all",
