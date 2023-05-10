@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { AuthGuard } from '@nestjs/passport';
 
 describe('WebsiteController (e2e)', () => {
   let app: INestApplication;
@@ -24,16 +25,35 @@ describe('WebsiteController (e2e)', () => {
   const WITHOUT_USER_WEBSITE = "website/withoutUser"//get
   const WITHOUT_ENTITY_WEBSITE = "website/withoutEntity"//get
   const STUDY_MONITOR_TOTAL_WEBSITES = "website/studyMonitor/total";//get
-  
-
-
+  const MY_MONITOR_TOTAL_WEBSITES = "website/myMonitor/total";//get
+  const OBSERVATORY_TOTAL_WEBSITES = "website/observatory/total";//get
+  const WEBSITE_EXISTS_NAME = "website/exists";//get :name
+  const WEBSITE_EXISTS_URL = "website/exists/url";//get :url
+  const WEBSITE_IN_OBSERVATORY = "website/isInObservatory";//post
+  const WEBSITE_TRANSFER_OBSERVATORY = "website/tranferObservatoryPages";//post
+  const WEBSITE_MY_MONITOR = "website/myMonitor";//get
+  const WEBSITE_MY_MONITOR_REEVALUATE = "website/myMonitor/reEvalute";//post
+  const WEBSITE_STUDY_MONITOR_REEVALUATE = "website/studyMonitor/reEvalute";//post
+  const WEBSITE_TAG = "website/studyMonitor/tag/";//get :tag
+  const WEBSITE_OTHER_TAG = "website/studyMonitor/otherTags/";//get :tag
+  const WEBSITE_TAG_EXISTS_NAME = "website/studyMonitor/tag/";//get :tag/website/nameExists/:website
+  const WEBSITE_TAG_EXISTS_URL = "website/studyMonitor/tag/";//get :tag/websiteExists/:startingUrl
+  const WEBSITE_STUDY_MONITOR_LINK = "website/studyMonitor/link";//post
+  const WEBSITE_STUDY_MONITOR_CREATE = "website/studyMonitor/create";//post
+  const WEBSITE_STUDY_MONITOR_REMOVE = "website/studyMonitor/remove"//post
 
 
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    }).overrideGuard(AuthGuard("jwt-admin"))
+      .useValue({ canActivate: () => true })
+      .overrideGuard(AuthGuard("jwt-monitor"))
+      .useValue({ canActivate: () => true })
+      .overrideGuard(AuthGuard("jwt-study"))
+      .useValue({ canActivate: () => true }) 
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();

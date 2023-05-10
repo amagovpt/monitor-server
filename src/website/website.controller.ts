@@ -364,7 +364,7 @@ export class WebsiteController {
     return success(await this.websiteService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Finds a websites by name' })
+  @ApiOperation({ summary: 'Check if website exists by name' })
   @ApiResponse({
     status: 200,
     description: 'The specific website',
