@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { AuthGuard } from '@nestjs/passport';
+import { WebsiteModule } from 'src/website/website.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { readFileSync } from 'fs';
 
 describe('WebsiteController (e2e)', () => {
   let app: INestApplication;
@@ -42,11 +44,24 @@ describe('WebsiteController (e2e)', () => {
   const WEBSITE_STUDY_MONITOR_CREATE = "website/studyMonitor/create";//post
   const WEBSITE_STUDY_MONITOR_REMOVE = "website/studyMonitor/remove"//post
 
-
+  const databaseConfig = JSON.parse(
+    readFileSync("../monitor_db.json").toString()
+  );
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [WebsiteModule,
+        TypeOrmModule.forRoot({
+          type: "mysql",
+          host: databaseConfig.host,
+          port: 3306,
+          username: databaseConfig.user,
+          password: databaseConfig.password,
+          database: "testDB",
+          entities: [__dirname + "/**/*.entity{.ts,.js}"],
+          synchronize: true,
+        }),
+                ],
     }).overrideGuard(AuthGuard("jwt-admin"))
       .useValue({ canActivate: () => true })
       .overrideGuard(AuthGuard("jwt-monitor"))
@@ -54,6 +69,9 @@ describe('WebsiteController (e2e)', () => {
       .overrideGuard(AuthGuard("jwt-study"))
       .useValue({ canActivate: () => true }) 
       .compile();
+      /**
+       * https://medium.com/@salmon.3e/integration-testing-with-nestjs-and-typeorm-2ac3f77e7628
+       */
 
     app = moduleFixture.createNestApplication();
     await app.init();
