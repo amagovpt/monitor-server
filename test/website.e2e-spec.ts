@@ -77,10 +77,42 @@ describe('WebsiteController (e2e)', () => {
     await app.init();
   });
 
-  it('/POST'+CREATE_WEBSITE , () => {
-    return request(app.getHttpServer())
+
+  it('/POST'+CREATE_WEBSITE , async () => {
+    const createWebsiteDto =
+    {
+      userId: 1,
+      name: "Sapo",
+      startingUrl: "https://www.sapo.pt/",
+      entities: [],
+      tags: []
+    }
+    const website = await request(app.getHttpServer())
       .post(CREATE_WEBSITE)
+      .send(createWebsiteDto)
       .expect(200)
-      .expect('Hello World!');
+
+    const websiteInfo = await request(app.getHttpServer())
+      .get(WEBSITE_INFO+website.id)
+      .send(createWebsiteDto)
+      .expect(200)
+    
+    
+  });
+
+
+  it('/POST' + CREATE_WEBSITE, async () => {
+    const createWebsiteDto =
+    {
+      userId: 1,
+      name: "Acessibilidade",
+      startingUrl: "https://www.acessibilidade.gov.pt/",
+      entities: [],
+      tags: []
+    }
+    const website = await request(app.getHttpServer())
+      .post(CREATE_WEBSITE)
+      .send(createWebsiteDto)
+      .expect(200)
   });
 });
