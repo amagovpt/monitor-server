@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Connection, getManager } from "typeorm";
+import { Connection, getManager, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
 import fs from "fs";
@@ -9,6 +9,8 @@ import {
   executeUrlsEvaluation,
   executeHtmlEvaluation,
 } from "./middleware";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class EvaluationService {
@@ -16,9 +18,16 @@ export class EvaluationService {
   private isEvaluatingUserInstance: boolean;
   private SKIP = 20;
 
-  constructor(private readonly connection: Connection) {
+  constructor(private readonly connection: Connection,
+    @InjectRepository(Evaluation)
+    private readonly evaluationRepository: Repository<Evaluation>,) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
+  }
+  //FIXME confirmar se as paginas têm sempre avaliação
+  async getLastEvaluationByPage(pageId: number): Promise<Evaluation> {
+    const evaluationList = await this.evaluationRepository.find({ where: { PageId: pageId},take:1,order: { Evaluation_Date:"DESC"}});
+    return evaluationList[0];
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -384,7 +393,8 @@ export class EvaluationService {
       evaluation.data.tot.info.roles
     );
     newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
-    await queryRunner.manager.save(newEvaluation);
+    const savedEvaluation = await queryRunner.manager.save(newEvaluation);
+
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {

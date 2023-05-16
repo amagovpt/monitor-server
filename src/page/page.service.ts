@@ -4,6 +4,8 @@ import { Connection, Repository, getManager, Like, In } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
+import { EvaluationService } from "src/evaluation/evaluation.service";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Injectable()
 export class PageService {
@@ -30,6 +32,7 @@ export class PageService {
       }
     }
   }
+
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {
       return "nimda";
@@ -171,6 +174,7 @@ export class PageService {
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -223,7 +227,7 @@ export class PageService {
         `,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
-
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;

@@ -15,8 +15,8 @@ async function bootstrap() {
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   await app.listen(process.env.PORT || 3001);
 }
-async function deletePlicas(app){
+async function findAccessiblityStatements(app){
   const pageService = app.get(PageService);
-  await pageService.deletePlicas();
+  await pageService.findAccessiblityStatements();
 }
 bootstrap();

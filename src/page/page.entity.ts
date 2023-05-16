@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Website } from 'src/website/website.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
 
 @Entity('Page')
 export class Page {
@@ -28,4 +29,7 @@ export class Page {
     nullable: false
   })
   Creation_Date: any;
+
+  @ManyToMany((type) => Website,(website)=>website.Pages)
+  Pages: Website[];
 }

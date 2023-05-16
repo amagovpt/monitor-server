@@ -27,6 +27,10 @@ import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
+import { AccessibilityStatementModule } from './accessibility-statement-module/accessibility-statement/accessibility-statement.module';
+import { AutomaticEvaluationModule } from './accessibility-statement-module/automatic-evaluation/automatic-evaluation.module';
+import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
+import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -93,6 +97,8 @@ const databaseConfig = JSON.parse(
     GovUserModule,
     LogModule,
     DumpModule,
+    AccessibilityStatementModule,
+     AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule,
   ],
   controllers: [AppController],
   providers: [

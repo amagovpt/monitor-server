@@ -241,6 +241,80 @@ CREATE TABLE `UserGovUser` (
   KEY `UGUserId_idx` (`UserId`),
   CONSTRAINT `UGUserId_fk` FOREIGN KEY (`UserId`) REFERENCES `User` (`UserId`) ON DELETE CASCADE,
   CONSTRAINT `UGUGovUserId_fk` FOREIGN KEY (`GovUserId`) REFERENCES `GovUser` (`id`) ON DELETE CASCADE
+DROP TABLE IF EXISTS `Accessibility_Statement`;
+CREATE TABLE `Accessibility_Statement` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `WebsiteId`                        INT(11)         NOT NULL,
+    `CreatedAt`                     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `UpdatedAt`                     DATETIME        DEFAULT NULL,
+    `url` varchar(255) NOT NULL,
+    `state` ENUM('completeStatement', 'incompleteStatement', 'possibleStatement'),
+    `conformance` varchar(255) DEFAULT NULL,
+    `evidence` text(255) DEFAULT NULL,
+    `seal` varchar(255) DEFAULT NULL,
+    `hash` varchar(255) DEFAULT NULL,
+    `statementDate` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `Accessibility_StatementId_UNIQUE` (`Id`),
+    CONSTRAINT `Accessibility_Statement_WebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Automatic_Evaluation`;
+CREATE TABLE `Automatic_Evaluation` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
+    `Title` varchar(255) DEFAULT NULL,
+    `Url` varchar(255) DEFAULT NULL,
+    `Sample` varchar(255) DEFAULT NULL,
+    `Tool` varchar(255) DEFAULT NULL,
+    `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `Automatic_EvaluationId_UNIQUE` (`Id`),
+    CONSTRAINT `Automatic_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Manual_Evaluation`;
+CREATE TABLE `Manual_Evaluation` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
+    `Title` varchar(255) DEFAULT NULL,
+    `Url` varchar(255) DEFAULT NULL,
+    `Sample` varchar(255) DEFAULT NULL,
+    `HeuristicsPassed` INT(11)   DEFAULT NULL,
+    `HeuristicsTotal` INT(11)   DEFAULT NULL,
+    `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `Manual_EvaluationId_UNIQUE` (`Id`),
+    CONSTRAINT `Manual_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `User_Evaluation`;
+CREATE TABLE `User_Evaluation` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
+    `Title` varchar(255) DEFAULT NULL,
+    `Url` varchar(255) DEFAULT NULL,
+    `Sample` varchar(255) DEFAULT NULL,
+    `Participants` varchar(255) DEFAULT NULL,
+    `Process` text DEFAULT NULL,
+    `Summary` text(255) DEFAULT NULL,
+    `Date` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `User_EvaluationId_UNIQUE` (`Id`),
+    CONSTRAINT `User_Evaluation_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `Contact`;
+CREATE TABLE `Contact` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `Accessibility_Statement_Id`                        INT(11)         NOT NULL,
+    `Contact` varchar(255) DEFAULT NULL,
+    `ContactType` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `ContactId_UNIQUE` (`Id`),
+    CONSTRAINT `Contact_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -5,12 +5,15 @@ import { Website } from "./website.entity";
 import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
 import { EvaluationService } from "../evaluation/evaluation.service";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
 
 @Injectable()
 export class WebsiteService {
   constructor(
     @InjectRepository(Website)
     private readonly websiteRepository: Repository<Website>,
+    private evaluationService: EvaluationService,
+    private readonly accessibilityStatementService: AccessibilityStatementService,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
@@ -30,6 +33,35 @@ export class WebsiteService {
     const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) },0);
     return totalPoints / pages.length;
   }
+
+  async findAccessiblityStatements(): Promise<any> {
+    const websites = await this.websiteRepository.find({relations:["Pages"]});
+    for (const website of websites) {
+      const id = website.WebsiteId;
+      console.log(id);
+      const pages = website.Pages;
+      await this.findAccessiblityStatementsInPageList(pages, website);
+    }
+  }
+
+  async updateAStatement(WebsiteId:number): Promise<void> {
+    const website = await this.websiteRepository.findOne({ where:{WebsiteId}, relations: ["Pages"] });
+    if(website){
+      const pages = website.Pages;
+      await this.findAccessiblityStatementsInPageList(pages, website);}
+    }
+
+  async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
+    for(const page of pages){
+      const id = page.PageId;
+    const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
+    if (evaluation) {
+      const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
+      await this.accessibilityStatementService.createIfExist(rawHtml, website, page.Uri);
+    }
+  }
+}
+
 
   async addPagesToEvaluate(
     websitesId: number[],
@@ -74,7 +106,7 @@ export class WebsiteService {
               [page.PageId, -1, page.Uri, "10", new Date()]
             );
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -350,7 +382,17 @@ export class WebsiteService {
     );
     return websites;
   }
-
+  /**
+ * 
+ * SELECT distinct w.* 
+      FROM 
+        User as u ,
+        EntityWebsite as ew
+        LEFT OUTER JOIN Website as ew ON w.WebsiteId = ew.WebsiteId
+      WHERE 
+        ew.EntityId IS NULL AND
+        (w.UserId IS NULL OR (u.UserId = w.UserId AND u.Type != 'studies'))
+ */
   async findAllWithoutEntity(): Promise<any> {
     const manager = getManager();
     const websites = await manager.query(`SELECT distinct w.* 
@@ -529,7 +571,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "01", new Date()]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -600,7 +642,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "00", new Date(), userId]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -1014,7 +1056,20 @@ export class WebsiteService {
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
-
+    const dataPrint = await manager.query(
+      `SELECT 
+        COUNT(distinct w.WebsiteId) as Websites 
+      FROM
+        Directory as d,
+        DirectoryTag as dt,
+        TagWebsite as tw,
+        Website as w 
+      WHERE 
+        d.Show_in_Observatory = 1 AND
+        dt.DirectoryId = d.DirectoryId AND
+        tw.TagId = dt.TagId AND 
+        w.WebsiteId = tw.WebsiteId`);
+    console.log(dataPrint[0].Websites);
     const parsedData = JSON.parse(data);
     return parsedData.nWebsites;
   }
