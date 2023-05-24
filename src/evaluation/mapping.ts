@@ -1344,7 +1344,7 @@ function QW_WCAG_T23(
       technique.results.filter((r: any) => r.verdict === "warning")
     );
   } else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "aSkipFirstNo", undefined);
+    addToElements(elements, "aSkipFirstNo", technique.metadata.failed);
     addToResults(results, "a_01b");
     addToNodes(
       nodes,
@@ -1746,7 +1746,7 @@ function QW_BP17(
   technique: any
 ): void {
   if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "a", undefined);
+    addToElements(elements, "a", technique.results.length);
     addToResults(results, "a_04");
     addToNodes(nodes, "a", []);
   } else {
@@ -1763,7 +1763,7 @@ function QW_BP17(
       technique.results.filter((r: any) => r.verdict === "warning")
     );
   } else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "aSkipNo", undefined);
+    addToElements(elements, "aSkipNo", technique.metadata.failed);
     addToResults(results, "a_02a");
     addToNodes(
       nodes,
