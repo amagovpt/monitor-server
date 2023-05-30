@@ -30,7 +30,7 @@
     "@nestjs/schedule": "^1.0.2",
     "@nestjs/serve-static": "^2.2.2",
     "@nestjs/typeorm": "8.0.4",
-    "@qualweb/core": "0.7.33",
+    "@qualweb/core": "0.7.34",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
