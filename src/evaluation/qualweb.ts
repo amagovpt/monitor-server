@@ -83,7 +83,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-WCAG-T25",
         "QW-WCAG-T26",
         "QW-WCAG-T27",
-        "QW-WCAG-T28",
+      //  "QW-WCAG-T28",
         "QW-WCAG-T29",
         "QW-WCAG-T30",
         "QW-WCAG-T31",
