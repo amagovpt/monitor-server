@@ -6,13 +6,15 @@ import dns from "dns";
 import ipRangeCheck from "ip-range-check";
 import { RateLimit } from "nestjs-rate-limiter";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ConfigService } from "@nestjs/config";
 
 const blackList = readFileSync("../black-list.txt").toString().split("\n");
 
 @Controller("amp")
 @UseInterceptors(LoggingInterceptor)
 export class AmpController {
-  constructor(private readonly evaluationService: EvaluationService) {}
+  constructor(private readonly evaluationService: EvaluationService, 
+    private readonly configService: ConfigService) { }
 
   @RateLimit({
     keyPrefix: "amp",
@@ -26,8 +28,10 @@ export class AmpController {
     @Request() req: any,
     @Param("url") url: string
   ): Promise<any> {
-    if (process.env.NAMESPACE !== undefined && process.env.REFERER) {
-      if (!req.headers.referer?.startsWith(process.env.REFERER)) {
+    const referer = this.configService.get<string>("http.referer");
+    const namespace = this.configService.get<string>("http.namespace");
+    if (namespace !== undefined && referer) {
+      if (!req.headers.referer?.startsWith(referer)) {
         return accessDenied();
       }
     }

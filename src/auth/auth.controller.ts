@@ -17,11 +17,12 @@ import { success } from "../lib/response";
 import { Response } from 'express';
 import { GovAuthGuard } from "./gov-auth.guard";
 import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ConfigService } from "@nestjs/config";
 
 @Controller("auth")
 @UseInterceptors(LoggingInterceptor)
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService, private readonly configService: ConfigService) { }
 
   @UseGuards(AuthGuard("local"))
   @Post("login")
@@ -56,8 +57,8 @@ export class AuthController {
   //@UseGuards()
   @Get("login")
   async loginGov(@Res() response: Response): Promise<any> {
-    const REDIRECT_URI = process.env.REDIRECT_URI;
-    const CLIENT_ID = process.env.CLIENT_ID;
+    const REDIRECT_URI = this.configService.get<string>('gov.redirect_uri');
+    const CLIENT_ID = this.configService.get<string>('gov.client_id');
     response.redirect(`https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=${REDIRECT_URI}&client_id=${CLIENT_ID}&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NIC%20http://interop.gov.pt/MDC/Cidadao/NomeCompleto`);
   }
 

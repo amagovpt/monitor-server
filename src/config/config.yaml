@@ -2,7 +2,9 @@ http:
   port: 3000
   referer: "http://10.55.37.16/"
   validator: "http://10.55.37.16/validate/"
-  
+
+server:
+  type: "admin"
 
 blacklist:
   ip: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"

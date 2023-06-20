@@ -27,13 +27,15 @@ import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
-
-const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
-);
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import configurationYaml from "./config/configuration.yaml";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configurationYaml]
+    }),
     WinstonModule.forRoot({
       transports: [
         new winston.transports.DailyRotateFile({
@@ -62,15 +64,17 @@ const databaseConfig = JSON.parse(
       // options
     }),
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
       type: "mysql",
-      host: databaseConfig.host,
+      host: configService.get("host"),
       port: 3306,
-      username: databaseConfig.user,
-      password: databaseConfig.password,
-      database: databaseConfig.database,
+      username: configService.get("username"),
+      password: configService.get("password"),
+      database: configService.get("database"),
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: false,
+      synchronize: false,})
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "public"),

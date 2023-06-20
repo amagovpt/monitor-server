@@ -8,6 +8,7 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { PageService } from "src/page/page.service";
 import { Crawler } from "@qualweb/crawler";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class CrawlerService {
@@ -18,7 +19,8 @@ export class CrawlerService {
     @InjectRepository(CrawlWebsite)
     private readonly crawlWebsiteRepository: Repository<CrawlWebsite>,
     private readonly connection: Connection,
-    private readonly pageService: PageService
+    private readonly pageService: PageService,
+    private readonly configService: ConfigService
   ) {
     this.isAdminCrawling = false;
     this.isUserCrawling = false;
@@ -27,10 +29,9 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestAdminCrawl(): Promise<void> {
+    const type = this.configService.get<string>('server.type')
     if (
-      process.env.NAMESPACE === undefined ||
-      (process.env.NAMESPACE === "ADMIN" && process.env.AMSID === "0")
-    ) {
+      type === "all" || type === "admin") {
       if (!this.isAdminCrawling) {
         this.isAdminCrawling = true;
 
@@ -106,9 +107,10 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestUserCrawl(): Promise<void> {
+    const type = this.configService.get<string>('server.type')
     if (
-      process.env.NAMESPACE === undefined ||
-      (process.env.NAMESPACE === "USER" && process.env.USRID === "0")
+      type === undefined ||
+      type === "USER"
     ) {
       if (!this.isUserCrawling) {
         this.isUserCrawling = true;
@@ -142,12 +144,12 @@ export class CrawlerService {
 
             const urls = crawler.getResults();
             for (const url of urls || []) {
-              try{
-              const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = decodeURIComponent(url);
-              newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
+              try {
+                const newCrawlPage = new CrawlPage();
+                newCrawlPage.Uri = decodeURIComponent(url);
+                newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
                 await queryRunner.manager.save(newCrawlPage);
-              }catch (e) {
+              } catch (e) {
                 console.log(e);
               }
             }
