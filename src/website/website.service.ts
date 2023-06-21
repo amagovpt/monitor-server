@@ -14,20 +14,20 @@ export class WebsiteService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
-  ) {}
-  
+  ) { }
+
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
     return await Promise.all(websites.map(async (website) => {
       const id = website.WebsiteId;
       const pages = await this.findAllPages(id);
-      website["numberOfPages"]= pages.length;
+      website["numberOfPages"] = pages.length;
       website["averagePoints"] = this.averagePointsPageEvaluation(pages);
       return website;
     }));
   }
   private averagePointsPageEvaluation(pages) {
-    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) },0);
+    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) }, 0);
     return totalPoints / pages.length;
   }
 
@@ -74,7 +74,7 @@ export class WebsiteService {
               [page.PageId, -1, page.Uri, "10", new Date()]
             );
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -529,7 +529,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "01", new Date()]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -600,7 +600,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "00", new Date(), userId]
           );
-        } catch (_) {}
+        } catch (_) { }
       }
 
       await queryRunner.manager.query(
@@ -1368,16 +1368,17 @@ export class WebsiteService {
       `,
         [websitesId]
       );
-
-      await queryRunner.manager.query(
-        `
+      if (pages) {
+        await queryRunner.manager.query(
+          `
         DELETE FROM  
           Page
         WHERE
           PageId IN (?)
       `,
-        [pages.map((p) => p.PageId)]
-      );
+          [pages.map((p) => p.PageId)]
+        );
+      }
 
       await queryRunner.manager.query(
         //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
