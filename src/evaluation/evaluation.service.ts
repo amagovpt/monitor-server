@@ -14,7 +14,10 @@ import {
 export class EvaluationService {
   private isEvaluatingAdminInstance: boolean;
   private isEvaluatingUserInstance: boolean;
+  private isEvaluatingInstance: boolean;
   private SKIP = 20;
+  private const EVALUATING = 20;
+
 
   constructor(private readonly connection: Connection) {
     this.isEvaluatingAdminInstance = false;
@@ -36,6 +39,31 @@ export class EvaluationService {
         }
       }
     });
+  }
+  @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
+  async instanceEvaluatePageList(): Promise<void> {
+    if (!this.isEvaluatingInstance) {
+      this.isEvaluatingInstance = true;
+
+      let pages = [];
+      //LOCK
+            try {
+        pages = await getManager().query(
+          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT ?`, [this.EVALUATING]
+        );
+        await getManager().query(
+          `UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`,
+          [pages.map((p) => p.EvaluationListId)]
+        );
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+      //UNLOCK
+      await this.evaluateInBackground(pages);
+
+      this.isEvaluatingAdminInstance = false;
+    }
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
