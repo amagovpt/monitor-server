@@ -15,6 +15,7 @@ async function bootstrap() {
   app.use(compression());
   const configService = app.get(ConfigService);
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  console.log(process.env);
   await app.listen(configService.get<string>('http.port') || 3000);
 
 }

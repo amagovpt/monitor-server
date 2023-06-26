@@ -68,14 +68,15 @@ import configurationYaml from "./config/configuration.yaml";
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
       type: "mysql",
-      host: configService.get("host"),
+      host: configService.get<string>("host"),
       port: 3306,
-      username: configService.get("username"),
-      password: configService.get("password"),
-      database: configService.get("database"),
+      username: configService.get<string>("username"),
+      password: configService.get<string>("password"),
+      database: configService.get<string>("database"),
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: false,})
-    }),
+      synchronize: false,}),
+      inject: [ConfigService],
+}),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "public"),
     }),

@@ -16,7 +16,7 @@ export class EvaluationService {
   private isEvaluatingUserInstance: boolean;
   private isEvaluatingInstance: boolean;
   private SKIP = 20;
-  private const EVALUATING = 20;
+  private EVALUATING = 20;
 
 
   constructor(private readonly connection: Connection) {
@@ -65,7 +65,7 @@ export class EvaluationService {
       this.isEvaluatingAdminInstance = false;
     }
   }
-
+/*
   @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
   async instanceEvaluateAdminPageList(): Promise<void> {
     if (
@@ -123,7 +123,7 @@ export class EvaluationService {
 
       this.isEvaluatingUserInstance = false;
     }
-  }
+  }*/
 
   /*@Cron('0 0 * * 0')
   async evaluateOldPages(): Promise<void> {

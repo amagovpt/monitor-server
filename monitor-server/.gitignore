@@ -1,0 +1,9 @@
+node_modules
+
+public/stamps
+
+dist
+
+package-lock.json
+
+qualweb-errors-*.log

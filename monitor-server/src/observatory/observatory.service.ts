@@ -10,7 +10,6 @@ import _tests from "src/evaluation/tests";
 import { Observatory } from "./observatory.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";
-import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class ObservatoryService {
@@ -45,15 +44,14 @@ export class ObservatoryService {
 
   constructor(
     @InjectRepository(Observatory)
-    private readonly observatoryRepository: Repository<Observatory>,
-    private readonly configService: ConfigService
+    private readonly observatoryRepository: Repository<Observatory>
   ) { }
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async generateData(manual = false): Promise<any> {
-    const type = this.configService.get<string>('server.type')
-
-    if (type === 'admin'|| manual) {
+    if (
+      (process.env.NAMESPACE === undefined ||
+        parseInt(process.env.AMSID) === 0) || manual) {
       const data = await this.getData();
 
       const directories = new Array<Directory>();
