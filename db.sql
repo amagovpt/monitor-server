@@ -297,4 +297,12 @@ CREATE TABLE `Contact` (
     CONSTRAINT `Contact_Accessibility_Statement_fk` FOREIGN KEY (`Accessibility_Statement_Id`) REFERENCES `Accessibility_Statement` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `Collection_Date`;
+CREATE TABLE `Collection_Date` (
+    `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
+    `CreatedAt` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `ContactId_UNIQUE` (`Id`),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;

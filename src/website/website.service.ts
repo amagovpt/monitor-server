@@ -6,6 +6,7 @@ import { Tag } from "../tag/tag.entity";
 import { Page } from "../page/page.entity";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
+import { CollectionDateService } from "src/accessibility-statement-module/collection-date/collection-date.service";
 
 @Injectable()
 export class WebsiteService {
@@ -14,6 +15,7 @@ export class WebsiteService {
     private readonly websiteRepository: Repository<Website>,
     private evaluationService: EvaluationService,
     private readonly accessibilityStatementService: AccessibilityStatementService,
+    private readonly collectionDateService: CollectionDateService,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly connection: Connection
@@ -21,9 +23,9 @@ export class WebsiteService {
 
   async findAccessiblityStatements(): Promise<any> {
     const websites = await this.websiteRepository.find({relations:["Pages"]});
+    await this.collectionDateService.create();
     for (const website of websites) {
       const id = website.WebsiteId;
-      console.log(id);
       const pages = website.Pages;
       await this.findAccessiblityStatementsInPageList(pages, website);
     }
