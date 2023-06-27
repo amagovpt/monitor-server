@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Param, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseInterceptors, UseGuards } from '@nestjs/common';
 import { GovUserService } from './gov-user.service';
 import { CreateGovUserDto } from './dto/create-gov-user.dto';
 import { UpdateGovUserDto } from './dto/update-gov-user.dto';
 import { success } from 'src/lib/response';
 import { LoggingInterceptor } from 'src/log/log.interceptor';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('gov-user')
+@UseGuards(AuthGuard("jwt-monitor"))
 @UseInterceptors(LoggingInterceptor)
 export class GovUserController {
   constructor(private readonly govUserService: GovUserService) { }
