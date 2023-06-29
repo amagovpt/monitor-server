@@ -113,9 +113,9 @@ function generateScore(report: any): string {
           value["elem"] === "all" ||
           report.data["elems"][value["elem"]] !== undefined
         ) {
-          if (report.data["elems"][value["test"]] !== undefined) {
+          // if (report.data["elems"][value["test"]] !== undefined) {
             calc = true;
-          }
+          // }
         }
         break;
       case "prop":
@@ -127,8 +127,8 @@ function generateScore(report: any): string {
         }
         break;
     }
-    if (value["test"] === "liNotSemantically")
-      console.log({ calc, value, elems: report.data["elems"] })
+    // if (value["test"] === "liNotSemantically")
+    //   console.log({ calc, value, elems: report.data["elems"] })
 
     if (calc) {
       let temp = null;
