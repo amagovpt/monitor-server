@@ -7,10 +7,11 @@ import { Page } from "../page/page.entity";
 import { WebsiteController } from "./website.controller";
 import { EvaluationModule } from "../evaluation/evaluation.module";
 import { AccessibilityStatementModule } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.module";
+import { CollectionDateModule } from "src/accessibility-statement-module/collection-date/collection-date.module";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Tag, Website, Page]), EvaluationModule,
-    AccessibilityStatementModule],
+    AccessibilityStatementModule,CollectionDateModule],
   exports: [WebsiteService],
   providers: [WebsiteService],
   controllers: [WebsiteController],

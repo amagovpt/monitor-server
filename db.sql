@@ -300,9 +300,9 @@ CREATE TABLE `Contact` (
 DROP TABLE IF EXISTS `Collection_Date`;
 CREATE TABLE `Collection_Date` (
     `Id`        INT(11)         NOT NULL AUTO_INCREMENT,
-    `CreatedAt` datetime DEFAULT NULL,
+    `CreatedAt` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`Id`),
-    UNIQUE KEY `ContactId_UNIQUE` (`Id`),
+    UNIQUE KEY `ContactId_UNIQUE` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;
