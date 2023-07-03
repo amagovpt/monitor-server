@@ -7,7 +7,7 @@ import { LoggingInterceptor } from 'src/log/log.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('gov-user')
-@UseGuards(AuthGuard("jwt-monitor"))
+@UseGuards(AuthGuard("jwt-admin"))
 @UseInterceptors(LoggingInterceptor)
 export class GovUserController {
   constructor(private readonly govUserService: GovUserService) { }
