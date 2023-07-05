@@ -17,7 +17,7 @@ export class CollectionDateService {
   }
 
   findLatest() {
-    return this.collectionDateRepository.findOne({ order: { CreatedAt:'ASC'}});
+    return this.collectionDateRepository.findOne({ order: { createdAt:'ASC'}});
   }
 
 }
