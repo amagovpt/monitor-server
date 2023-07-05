@@ -761,7 +761,6 @@ export class TagService {
           `SELECT * FROM TagWebsite WHERE TagId = ? AND WebsiteId <> -1`,
           [id]
         );
-        console.log(relations);
         if (relations.length > 0) {
           const websitesId = relations.map((tw) => tw.WebsiteId);
           await queryRunner.manager.delete(Website, {

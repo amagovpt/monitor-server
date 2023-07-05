@@ -1347,16 +1347,17 @@ export class WebsiteService {
       `,
         [websitesId]
       );
-
-      await queryRunner.manager.query(
-        `
+      if (pages) {
+        await queryRunner.manager.query(
+          `
         DELETE FROM  
           Page
         WHERE
           PageId IN (?)
       `,
-        [pages.map((p) => p.PageId)]
-      );
+          [pages.map((p) => p.PageId)]
+        );
+      }
 
       await queryRunner.manager.query(
         //`UPDATE Website SET UserId = NULL, EntityId = NULL, Deleted = 1 WHERE WebsiteId = ?`,
