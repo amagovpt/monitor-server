@@ -3,8 +3,8 @@ import { Entity, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
 @Entity("Collection_Date")
 export class CollectionDate {
     @PrimaryGeneratedColumn()
-    Id: number;
+    id: number;
 
     @CreateDateColumn()
-    CreatedAt: Date;
+    createdAt: Date;
 }
