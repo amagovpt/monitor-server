@@ -2,9 +2,9 @@ import { Entity, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
 
 @Entity("Collection_Date")
 export class CollectionDate {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: "Id"})
     id: number;
 
-    @CreateDateColumn()
+    @CreateDateColumn({name:"CreatedAt"})
     createdAt: Date;
 }
