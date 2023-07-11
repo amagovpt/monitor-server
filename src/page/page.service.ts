@@ -354,7 +354,7 @@ export class PageService {
     websiteName: string
   ): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: { UserId: userId, Name: websiteName },
+      where: { userId: userId, name: websiteName },
     });
     if (!website) {
       throw new InternalServerErrorException();
@@ -383,7 +383,7 @@ export class PageService {
       e.PageId = p.PageId AND
       p.Show_In LIKE '_1_' AND
       e.Evaluation_Date IN (SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId)`,
-      [website.Name, website.UserId]
+      [website.name, website.userId]
     );
 
     return pages;

@@ -544,10 +544,10 @@ export class TagService {
 
           for (const website of websites || []) {
             const newWebsite = new Website();
-            newWebsite.Name = website.Name;
-            newWebsite.StartingUrl = website.StartingUrl;
-            newWebsite.UserId = tag.UserId;
-            newWebsite.Creation_Date = tag.Creation_Date;
+            newWebsite.name = website.Name;
+            newWebsite.startingUrl = website.StartingUrl;
+            newWebsite.userId = tag.UserId;
+            newWebsite.creationDate = tag.Creation_Date;
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
             const pages = await queryRunner.manager.query(
@@ -558,13 +558,13 @@ export class TagService {
             for (const page of pages || []) {
               await queryRunner.manager.query(
                 `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-                [insertWebsite.WebsiteId, page.PageId]
+                [insertWebsite.websiteId, page.PageId]
               );
             }
 
             await queryRunner.manager.query(
               `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-              [insertTag.TagId, insertWebsite.WebsiteId]
+              [insertTag.TagId, insertWebsite.websiteId]
             );
           }
         }
