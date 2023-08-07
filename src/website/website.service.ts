@@ -1239,7 +1239,7 @@ export class WebsiteService {
         const id = observatoryPage.id;
         const page = await this.pageRepository.findOne({where:{PageId:id}});
 
-        if (observatoryPage.inObservatory) {
+        if (!observatoryPage.inObservatory) {
           show = page.Show_In[0] + page.Show_In[2] + "0";
         } else {
           show = page.Show_In[0] + page.Show_In[2] + "1";

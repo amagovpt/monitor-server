@@ -67,6 +67,12 @@ export class PageController {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
+  @ApiOperation({ summary: 'Reevaluate multiple pages by url' })
+  @ApiResponse({
+    status: 200,
+    description: 'The evaluation request has been submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluateMulti")
   async reEvaluatePages(@Request() req: any): Promise<any> {
