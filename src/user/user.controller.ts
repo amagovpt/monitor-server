@@ -100,13 +100,13 @@ export class UserController {
     }
 
     const user = new User();
-    user.Username = createUserDto.username;
-    user.Password = await generatePasswordHash(createUserDto.password);
-    user.Names = createUserDto.names;
-    user.Emails = createUserDto.emails;
-    user.Type = createUserDto.type;
-    user.Register_Date = new Date();
-    user.Unique_Hash = createRandomUniqueHash();
+    user.username = createUserDto.username;
+    user.password = await generatePasswordHash(createUserDto.password);
+    user.names = createUserDto.names;
+    user.emails = createUserDto.emails;
+    user.type = createUserDto.type;
+    user.registerDate = new Date();
+    user.uniqueHash = createRandomUniqueHash();
 
     const tags = createUserDto.tags;
     const websites = createUserDto.websites;

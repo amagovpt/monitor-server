@@ -10,38 +10,43 @@ import { Tag } from "../tag/tag.entity";
 @Entity("Directory")
 export class Directory {
   @PrimaryGeneratedColumn({
+    name: "DirectoryId",
     type: "int",
   })
-  DirectoryId: number;
+  directoryId: number;
 
   @Column({
+    name: "Name",
     type: "varchar",
     length: 255,
     nullable: false,
   })
-  Name: string;
+  name: string;
 
   @Column({
+    name: "Show_in_Observatory",
     type: "tinyint",
     width: 1,
     nullable: false,
   })
-  Show_in_Observatory: number;
+  showInObservatory: number;
 
   @Column({
+    name: "Method",
     type: "tinyint",
     width: 1,
     nullable: false,
   })
-  Method: number;
+  method: number;
 
   @Column({
+    name: "Creation_Date",
     type: "datetime",
     nullable: false,
   })
-  Creation_Date: any;
+  creationDate: any;
 
   @ManyToMany((type) => Tag)
   @JoinTable()
-  Tags: Tag[];
+  tags: Tag[];
 }

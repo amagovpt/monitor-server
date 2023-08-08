@@ -57,8 +57,8 @@ export class TagController {
   @Post("create")
   async createOfficialTag(@Body() createTagDto: CreateTagDto): Promise<any> {
     const tag = new Tag();
-    tag.Name = createTagDto.name;
-    tag.Creation_Date = new Date();
+    tag.name = createTagDto.name;
+    tag.creationDate = new Date();
 
     const directories = createTagDto.directories;
     const websites = createTagDto.websites;
@@ -175,9 +175,9 @@ export class TagController {
   @Post("user/create")
   async createStudyMonitorUserTag(@Body() createTagStudyDto: CreateTagStudyDto): Promise<any> {
     const tag = new Tag();
-    tag.Name = createTagStudyDto.user_tag_name;
-    tag.UserId = createTagStudyDto.userId;
-    tag.Creation_Date = new Date();
+    tag.name = createTagStudyDto.user_tag_name;
+    tag.userId = createTagStudyDto.userId;
+    tag.creationDate = new Date();
 
     const type = createTagStudyDto.type;
     const tagsId = createTagStudyDto.tagsId;

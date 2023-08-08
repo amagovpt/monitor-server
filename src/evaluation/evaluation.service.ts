@@ -322,19 +322,19 @@ export class EvaluationService {
     const evaluation = await this.evaluateUrl(url);
 
     const newEvaluation = new Evaluation();
-    newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
-    newEvaluation.Score = evaluation.data.score;
-    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
+    newEvaluation.pageId = pageId;
+    newEvaluation.title = evaluation.data.title.replace(/"/g, "");
+    newEvaluation.score = evaluation.data.score;
+    newEvaluation.pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
     );
     newEvaluation.Tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
-    newEvaluation.Nodes = Buffer.from(
+    newEvaluation.nodes = Buffer.from(
       JSON.stringify(evaluation.data.nodes)
     ).toString("base64");
-    newEvaluation.Errors = Buffer.from(
+    newEvaluation.errors = Buffer.from(
       JSON.stringify(evaluation.data.elems)
     ).toString("base64");
 
@@ -343,8 +343,8 @@ export class EvaluationService {
     newEvaluation.A = conform[0];
     newEvaluation.AA = conform[1];
     newEvaluation.AAA = conform[2];
-    newEvaluation.Evaluation_Date = evaluation.data.date;
-    newEvaluation.Show_To = showTo;
+    newEvaluation.evaluationDate = evaluation.data.date;
+    newEvaluation.showTo = showTo;
 
     const saveSuccess = await this.createOne(newEvaluation);
 
@@ -363,19 +363,19 @@ export class EvaluationService {
     studyUserId: number | null = null
   ): Promise<any> {
     const newEvaluation = new Evaluation();
-    newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
-    newEvaluation.Score = evaluation.data.score;
-    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
+    newEvaluation.pageId = pageId;
+    newEvaluation.title = evaluation.data.title.replace(/"/g, "");
+    newEvaluation.score = evaluation.data.score;
+    newEvaluation.pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
     );
     newEvaluation.Tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
-    newEvaluation.Nodes = Buffer.from(
+    newEvaluation.nodes = Buffer.from(
       JSON.stringify(evaluation.data.nodes)
     ).toString("base64");
-    newEvaluation.Errors = Buffer.from(
+    newEvaluation.errors = Buffer.from(
       JSON.stringify(evaluation.data.elems)
     ).toString("base64");
 
@@ -383,13 +383,13 @@ export class EvaluationService {
     newEvaluation.A = conform[0];
     newEvaluation.AA = conform[1];
     newEvaluation.AAA = conform[2];
-    newEvaluation.Evaluation_Date = evaluation.data.date;
-    newEvaluation.Show_To = showTo;
-    newEvaluation.StudyUserId = studyUserId;
-    newEvaluation.Element_Count = JSON.stringify(
+    newEvaluation.evaluationDate = evaluation.data.date;
+    newEvaluation.showTo = showTo;
+    newEvaluation.studyUserId = studyUserId;
+    newEvaluation.elementCount = JSON.stringify(
       evaluation.data.tot.info.roles
     );
-    newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
+    newEvaluation.tagCount = JSON.stringify(evaluation.data.tot.info.cTags);
     await queryRunner.manager.save(newEvaluation);
   }
 
@@ -788,22 +788,22 @@ export class EvaluationService {
 
 
     const evaluation = await this.evaluationRepository.findOne({
-      where: { EvaluationId: id },
+      where: { evaluationId: id },
     });
 
     const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
 
     return {
-      pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
+      pagecode: Buffer.from(evaluation.pagecode, "base64").toString(),
       data: {
-        title: evaluation.Title,
-        score: evaluation.Score,
+        title: evaluation.title,
+        score: evaluation.score,
         rawUrl: url,
         tot: tot,
-        nodes: JSON.parse(Buffer.from(evaluation.Nodes, "base64").toString()),
+        nodes: JSON.parse(Buffer.from(evaluation.nodes, "base64").toString()),
         conform: `${evaluation.A}@${evaluation.AA}@${evaluation.AAA}`,
         elems: tot.elems,
-        date: evaluation.Evaluation_Date,
+        date: evaluation.evaluationDate,
       },
     };
   }

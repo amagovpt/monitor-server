@@ -5,64 +5,73 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
 export class User {
 
   @PrimaryGeneratedColumn({
+    name: "UserId",
     type: 'int'
   })
-  UserId: number;
+  userId: number;
 
   @Column({
+    name: "Username",
     type: 'varchar',
     length: 255,
     unique: true,
     nullable: false
   })
-  Username: string;
+  username: string;
 
   @Column({
+    name: "Password",
     type: 'varchar',
     length: 255,
     nullable: false
   })
-  Password: string;
+  password: string;
 
   @Column({
+    name: "Type",
     type: 'varchar',
     length: 45,
     nullable: false
   })
-  Type: string;
+  type: string;
 
   @Column({
+    name: "Names",
     type: 'varchar',
     length: 255,
     nullable: true
   })
-  Names: string;
+  names: string;
 
   @Column({
+    name: "Emails",
     type: 'varchar',
     length: 255,
     nullable: true
   })
-  Emails: string;
+  emails: string;
 
   @Column({
+    name: "Register_Date",
     type: 'datetime',
     nullable: false
   })
-  Register_Date: any;
+  registerDate: any;
 
   @Column({
+    name: "Last_Login",
     type: 'datetime',
     nullable: true
   })
-  Last_Login: any;
+  lastLogin: any;
 
   @Column({
+    name: "Unique_Hash",
     type: 'varchar',
     length: 255,
     nullable: false
   })
-  Unique_Hash: string;
+  uniqueHash: string;
 
   @ManyToMany((type) => GovUser, (govUser) => govUser.entities)
   govUsers: User[];

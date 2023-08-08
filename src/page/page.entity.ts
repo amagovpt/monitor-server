@@ -4,28 +4,32 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 export class Page {
 
   @PrimaryGeneratedColumn({
+    name: "PageId",
     type: 'int'
   })
-  PageId: number;
+  pageId: number;
 
   @Column({
+    name: "Uri",
     type: 'varchar',
     length: 255,
     nullable: false
   })
-  Uri: string;
+  uri: string;
 
   @Column({
+    name: "Show_In",
     type: 'varchar',
     length: 3,
     nullable: false,
     default: '000'
   })
-  Show_In: string;
+  showIn: string;
 
   @Column({
+    name: "Creation_Date",
     type: 'datetime',
     nullable: false
   })
-  Creation_Date: any;
+  creationDate: any;
 }

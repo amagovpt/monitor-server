@@ -54,7 +54,7 @@ export class GovUserService {
     const users = updateGovUserDto.entities;
     const entities = await Promise.all(
       users.map(async (user) => {
-        return this.userService.findById(user.UserId+"");
+        return this.userService.findById(user.userId+"");
       }),
     );
     return this.govUserRepository.save({entities, ... updateGovUserDto});

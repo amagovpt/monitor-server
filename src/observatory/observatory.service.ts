@@ -93,7 +93,7 @@ export class ObservatoryService {
 
       if (manual) {
         await this.observatoryRepository.delete({
-          Type: "manual",
+          type: "manual",
         });
       }
 

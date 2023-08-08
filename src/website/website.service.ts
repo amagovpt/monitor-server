@@ -616,7 +616,7 @@ export class WebsiteService {
     tagName: string
   ): Promise<any> {
     const tag = await this.tagRepository.findOne({
-      where: { UserId: userId, Name: tagName },
+      where: { userId, name: tagName },
     });
     if (tag) {
       return await this.websiteRepository.query(
@@ -822,24 +822,24 @@ export class WebsiteService {
 
       for (const url of pages || []) {
         const page = await queryRunner.manager.findOne(Page, {
-          where: { Uri: url },
+          where: { uri: url },
         });
         if (page) {
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.websiteId, page.PageId]
+            [insertWebsite.websiteId, page.pageId]
           );
           await queryRunner.manager.query(
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
-            [page.PageId, userId, page.Uri, "00", page.Creation_Date, userId]
+            [page.pageId, userId, page.uri, "00", page.creationDate, userId]
           );
         } else {
           //const evaluation = await this.evaluationService.evaluateUrl(url);
 
           const newPage = new Page();
-          newPage.Uri = url;
-          newPage.Show_In = "000";
-          newPage.Creation_Date = newWebsite.creationDate;
+          newPage.uri = url;
+          newPage.showIn = "000";
+          newPage.creationDate = newWebsite.creationDate;
 
           const insertPage = await queryRunner.manager.save(newPage);
 
@@ -847,7 +847,7 @@ export class WebsiteService {
 
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.websiteId, insertPage.PageId]
+            [insertWebsite.websiteId, insertPage.pageId]
           );
 
           const existingWebsite = await queryRunner.manager.query(
@@ -871,18 +871,18 @@ export class WebsiteService {
           if (existingWebsite.length > 0) {
             await queryRunner.manager.query(
               `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-              [existingWebsite[0].WebsiteId, newPage.PageId]
+              [existingWebsite[0].WebsiteId, newPage.pageId]
             );
           }
 
           await queryRunner.manager.query(
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [
-              insertPage.PageId,
+              insertPage.pageId,
               userId,
-              insertPage.Uri,
+              insertPage.uri,
               "00",
-              insertPage.Creation_Date,
+              insertPage.creationDate,
             ]
           );
         }
@@ -1237,18 +1237,18 @@ export class WebsiteService {
       for (const observatoryPage of updateObservatoryPages.pages || []) {
         let show = null;
         const id = observatoryPage.id;
-        const page = await this.pageRepository.findOne({where:{PageId:id}});
+        const page = await this.pageRepository.findOne({where:{pageId:id}});
 
         if (!observatoryPage.inObservatory) {
-          show = page.Show_In[0] + page.Show_In[2] + "0";
+          show = page.showIn[0] + page.showIn[2] + "0";
         } else {
-          show = page.Show_In[0] + page.Show_In[2] + "1";
+          show = page.showIn[0] + page.showIn[2] + "1";
         }
 
         await queryRunner.manager.update(
           Page,
-          { PageId: page.PageId },
-          { Show_In: show }
+          { pageId: page.pageId },
+          { showIn: show }
         );
       }
 

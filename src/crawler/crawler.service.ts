@@ -70,8 +70,8 @@ export class CrawlerService {
               for (const url of urls || []) {
                 try {
                   const newCrawlPage = new CrawlPage();
-                  newCrawlPage.Uri = decodeURIComponent(url);
-                  newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
+                  newCrawlPage.uri = decodeURIComponent(url);
+                  newCrawlPage.crawlWebsiteId = website[0].CrawlWebsiteId;
                   await queryRunner.manager.save(newCrawlPage);
                 } catch (e) {
                   console.log(e);
@@ -145,8 +145,8 @@ export class CrawlerService {
             for (const url of urls || []) {
               try{
               const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = decodeURIComponent(url);
-              newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
+              newCrawlPage.uri = decodeURIComponent(url);
+              newCrawlPage.crawlWebsiteId = website[0].CrawlWebsiteId;
                 await queryRunner.manager.save(newCrawlPage);
               }catch (e) {
                 console.log(e);
@@ -174,7 +174,7 @@ export class CrawlerService {
   }
 
   findAll(): Promise<any> {
-    return this.crawlWebsiteRepository.find({ where: { UserId: -1 } });
+    return this.crawlWebsiteRepository.find({ where: { userId: -1 } });
   }
 
   getConfig(): any {
@@ -195,9 +195,9 @@ export class CrawlerService {
 
   async isUserCrawlerDone(userId: number, websiteId: number): Promise<boolean> {
     const page = await this.crawlWebsiteRepository.findOne({
-      where: { UserId: userId, WebsiteId: websiteId },
+      where: { userId,  websiteId },
     });
-    return page && page.Done === 1;
+    return page && page.done === 1;
     /*if (page) {
       return page.Done === 1;
     } else {
@@ -259,8 +259,8 @@ export class CrawlerService {
   async deleteUserCrawler(userId: number, websiteId: number): Promise<boolean> {
     try {
       await this.crawlWebsiteRepository.delete({
-        UserId: userId,
-        WebsiteId: websiteId,
+        userId,
+        websiteId,
       });
       return true;
     } catch (err) {
@@ -320,14 +320,14 @@ export class CrawlerService {
     try {
       for (const website of websites ?? []) {
         const newCrawlWebsite = new CrawlWebsite();
-        newCrawlWebsite.UserId = userId;
-        newCrawlWebsite.StartingUrl = website.url;
-        newCrawlWebsite.WebsiteId = website.websiteId;
-        newCrawlWebsite.Max_Depth = maxDepth;
-        newCrawlWebsite.Max_Pages = maxPages;
-        newCrawlWebsite.Wait_JS = waitJS;
-        newCrawlWebsite.Creation_Date = new Date();
-        newCrawlWebsite.Tag = tag;
+        newCrawlWebsite.userId = userId;
+        newCrawlWebsite.startingUrl = website.url;
+        newCrawlWebsite.websiteId = website.websiteId;
+        newCrawlWebsite.maxDepth = maxDepth;
+        newCrawlWebsite.maxPages = maxPages;
+        newCrawlWebsite.waitJS = waitJS;
+        newCrawlWebsite.creationDate = new Date();
+        newCrawlWebsite.tag = tag;
 
         await queryRunner.manager.save(newCrawlWebsite);
       }
@@ -366,7 +366,7 @@ export class CrawlerService {
   async delete(crawlWebsiteId: number): Promise<any> {
     try {
       await this.crawlWebsiteRepository.delete({
-        CrawlWebsiteId: crawlWebsiteId,
+        crawlWebsiteId,
       });
       return true;
     } catch (err) {
@@ -378,7 +378,7 @@ export class CrawlerService {
   async deleteBulk(crawlWebsiteIds: Array<number>): Promise<any> {
     try {
       await this.crawlWebsiteRepository.delete({
-        CrawlWebsiteId: In(crawlWebsiteIds),
+        crawlWebsiteId: In(crawlWebsiteIds),
       });
       return true;
     } catch (err) {

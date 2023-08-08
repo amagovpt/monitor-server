@@ -125,9 +125,9 @@ export class EntityController {
   @Post("create")
   async createEntity(@Body() createEntityDto: CreateEntityDto): Promise<any> {
     const entity = new EntityTable();
-    entity.Short_Name = createEntityDto.shortName;
-    entity.Long_Name = createEntityDto.longName;
-    entity.Creation_Date = new Date();
+    entity.shortName = createEntityDto.shortName;
+    entity.longName = createEntityDto.longName;
+    entity.creationDate = new Date();
 
     const websites = createEntityDto.websites;
 

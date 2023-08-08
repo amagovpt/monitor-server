@@ -33,14 +33,14 @@ export class UserService {
     let hasError = false;
     try {
       const user = await this.userRepository.findOne({
-        where: { UserId: userId },
+        where: { userId },
       });
-      if (user && (await comparePasswordHash(password, user.Password))) {
+      if (user && (await comparePasswordHash(password, user.password))) {
         const newPasswordHash = await generatePasswordHash(newPassword);
         await queryRunner.manager.update(
           User,
-          { UserId: userId },
-          { Password: newPasswordHash }
+          { userId },
+          { password: newPasswordHash }
         );
       } else {
         hasError = true;
@@ -83,15 +83,15 @@ export class UserService {
     try {
       await queryRunner.manager.update(
         User,
-        { UserId: userId },
-        { Names: names, Emails: emails }
+        { userId },
+        { names, emails }
       );
 
       if (password && password !== "null") {
         await queryRunner.manager.update(
           User,
-          { UserId: userId },
-          { Password: await generatePasswordHash(password) }
+          { userId },
+          { password: await generatePasswordHash(password) }
         );
       }
 
@@ -157,7 +157,7 @@ export class UserService {
 
             await queryRunner.manager.update(
               Website,
-              { WebsiteId: id },
+              { websiteId: id },
               { userId: null }
             );
           }
@@ -167,7 +167,7 @@ export class UserService {
           if (!defaultWebsites.includes(id)) {
             await queryRunner.manager.update(
               Website,
-              { WebsiteId: id },
+              { websiteId: id },
               { userId: userId }
             );
 
@@ -305,26 +305,26 @@ export class UserService {
 
   async findAllFromMyMonitor(): Promise<User[]> {
     return this.userRepository.find({
-      select: ["UserId", "Username", "Type", "Register_Date", "Last_Login"],
-      where: { Type: "monitor" },
+      select: ["userId", "username", "type", "registerDate", "lastLogin"],
+      where: { type: "monitor" },
     });
   }
 
   async findInfo(userId: number): Promise<any> {
     const user = await this.userRepository.findOne({
-      where: { UserId: userId },
+      where: { userId },
     });
 
     if (user) {
-      if (user.Type === "monitor") {
+      if (user.type === "monitor") {
         user["websites"] = await this.userRepository.query(
           `SELECT * FROM Website WHERE UserId = ?`,
           [userId]
         );
       }
 
-      delete user.Password;
-      delete user.Unique_Hash;
+      delete user.password;
+      delete user.uniqueHash;
 
       return user;
     } else {
@@ -333,19 +333,19 @@ export class UserService {
   }
 
   findById(id: string): Promise<User> {
-    return this.userRepository.findOne({ where: { UserId: +id } });
+    return this.userRepository.findOne({ where: { userId: +id } });
   }
 
   findByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { Username: username } });
+    return this.userRepository.findOne({ where: { username } });
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ where:{Type: "studies"} });
+    return this.userRepository.count({ where:{type: "studies"} });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ where: {Type: "monitor" }});
+    return this.userRepository.count({ where: {type: "monitor" }});
   }
 
   async findStudyMonitorUserTagByName(
@@ -353,7 +353,7 @@ export class UserService {
     name: string
   ): Promise<any> {
     return await this.tagRepository.findOne({
-      where: { Name: name, UserId: userId },
+      where: { name, userId },
     });
   }
 
@@ -372,11 +372,11 @@ export class UserService {
     try {
       const insertUser = await queryRunner.manager.save(user);
 
-      if (user.Type === "monitor" && websites.length > 0) {
+      if (user.type === "monitor" && websites.length > 0) {
         await queryRunner.manager.update(
           Website,
-          { WebsiteId: In(websites) },
-          { userId: insertUser.UserId }
+          { websiteId: In(websites) },
+          { userId: insertUser.userId }
         );
 
         if (transfer) {
@@ -394,7 +394,7 @@ export class UserService {
             [websites]
           );
         }
-      } else if (user.Type === "studies" && tags.length > 0) {
+      } else if (user.type === "studies" && tags.length > 0) {
         const copyTags = await queryRunner.manager.query(
           `SELECT * FROM Tag WHERE TagId IN (?)`,
           [tags]
@@ -402,9 +402,9 @@ export class UserService {
         for (const tag of copyTags || []) {
           // Create user tag
           const newTag = new Tag();
-          newTag.Name = tag.Name;
-          newTag.UserId = insertUser.UserId;
-          newTag.Creation_Date = new Date();
+          newTag.name = tag.Name;
+          newTag.userId = insertUser.userId;
+          newTag.creationDate = new Date();
 
           const insertTag = await queryRunner.manager.save(newTag);
 
@@ -426,14 +426,14 @@ export class UserService {
             const newWebsite = new Website();
             newWebsite.name = website.Name;
             newWebsite.startingUrl = website.StaringUrl;
-            newWebsite.userId = insertUser.UserId;
+            newWebsite.userId = insertUser.userId;
             newWebsite.creationDate = new Date();
 
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
             await queryRunner.manager.query(
               `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-              [insertTag.TagId, insertWebsite.websiteId]
+              [insertTag.tagId, insertWebsite.websiteId]
             );
 
             // Create user tag website pages connection
@@ -472,11 +472,11 @@ export class UserService {
     }
 
     const user = await this.userRepository.findOne({
-      where: { Username: username },
+      where: { username },
     });
 
     if (user) {
-      return user.Type;
+      return user.type;
     } else {
       return null;
     }

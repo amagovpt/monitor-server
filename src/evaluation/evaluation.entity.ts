@@ -4,54 +4,62 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 export class Evaluation {
 
   @PrimaryGeneratedColumn({
+    name: "EvaluationId",
     type: 'int'
   })
-  EvaluationId: number;
+  evaluationId: number;
 
   @Column({
+    name: "PageId",
     type: 'int',
     nullable: false
   })
-  PageId: number;
+  pageId: number;
 
   @Column({
+    name: "Title",
     type: 'varchar',
     length: 255,
     nullable: true
   })
-  Title: string;
+  title: string;
 
   @Column({
+    name: "Score",
     type: 'decimal',
     precision: 4,
     scale: 1,
     nullable: false
   })
-  Score: string;
+  score: string;
 
   @Column({
+    name: "Pagecode",
     type: 'mediumtext',
     nullable: false
   })
-  Pagecode: string;
+  pagecode: string;
 
   @Column({
+    name: "PageId",
     type: 'text',
     nullable: false
   })
   Tot: string;
 
   @Column({
+    name: "Nodes",
     type: 'mediumtext',
     nullable: false
   })
-  Nodes: string;
+  nodes: string;
 
   @Column({
+    name: "Errors",
     type: 'text',
     nullable: false
   })
-  Errors: string;
+  errors: string;
 
   @Column({
     type: 'int',
@@ -72,34 +80,39 @@ export class Evaluation {
   AAA: number;
 
   @Column({
+    name: "Evaluation_Date",
     type: 'datetime',
     nullable: false
   })
-  Evaluation_Date: any;
+  evaluationDate: any;
 
   @Column({
+    name: "Show_To",
     type: 'varchar',
     length: 2,
     nullable: false
   })
-  Show_To: string;
+  showTo: string;
 
   @Column({
+    name: "StudyUserId",
     type: 'int',
     nullable: true
   })
-  StudyUserId: number;
+  studyUserId: number;
 
   @Column({
+    name: "Element_Count",
     type: 'text',
     nullable: false
 
   })
-  Element_Count:string ;
+  elementCount:string ;
   @Column({
+    name: "Tag_Count",
     type: 'text',
     nullable: false
 
   })
-  Tag_Count:string ;
+  tagCount:string ;
 }

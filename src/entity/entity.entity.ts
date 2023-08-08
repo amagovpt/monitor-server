@@ -10,33 +10,37 @@ import { Website } from "../website/website.entity";
 @Entity("Entity")
 export class EntityTable {
   @PrimaryGeneratedColumn({
+    name: "Tag_Count",
     type: "int",
   })
-  EntityId: number;
+  entityId: number;
 
   @Column({
+    name: "Short_Name",
     type: "varchar",
     length: 255,
     nullable: false,
     unique: true,
   })
-  Short_Name: string;
+  shortName: string;
 
   @Column({
+    name: "Long_Name",
     type: "varchar",
     length: 255,
     nullable: false,
     unique: true,
   })
-  Long_Name: string;
+  longName: string;
 
   @Column({
+    name: "Creation_Date",
     type: "datetime",
     nullable: false,
   })
-  Creation_Date: any;
+  creationDate: any;
 
   @ManyToMany((type) => Website)
   @JoinTable()
-  Websites: Website[];
+  websites: Website[];
 }

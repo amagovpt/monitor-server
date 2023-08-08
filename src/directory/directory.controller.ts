@@ -70,10 +70,10 @@ export class DirectoryController {
   @Post("create")
   async createDirectory(@Body() createDirectory: CreateDirectory): Promise<any> {
     const directory = new Directory();
-    directory.Name = createDirectory.name;
-    directory.Show_in_Observatory = createDirectory.observatory;
-    directory.Method = createDirectory.method;
-    directory.Creation_Date = new Date();
+    directory.name = createDirectory.name;
+    directory.showInObservatory = createDirectory.observatory;
+    directory.method = createDirectory.method;
+    directory.creationDate = new Date();
 
     const tags = createDirectory.tags;
 

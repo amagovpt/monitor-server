@@ -80,13 +80,13 @@ export class TagService {
   }
 
   async findByTagName(tagName: string): Promise<Tag | undefined> {
-    const tag = await this.tagRepository.findOne({ where: { Name: tagName } });
+    const tag = await this.tagRepository.findOne({ where: { name: tagName } });
     return tag;
   }
 
   async findByOfficialTagName(tagName: string): Promise<Tag | undefined> {
     const tag = await this.tagRepository.findOne({
-      where: { Name: tagName, UserId: IsNull() },
+      where: { name: tagName, userId: IsNull() },
     });
     return tag;
   }
@@ -143,7 +143,7 @@ export class TagService {
   }
 
   async findAllOfficial(): Promise<any> {
-    return this.tagRepository.find({ where: { UserId: IsNull() } });
+    return this.tagRepository.find({ where: { userId: IsNull() } });
   }
 
   async findNumberOfStudyMonitor(): Promise<number> {
@@ -409,14 +409,14 @@ export class TagService {
       for (const directoryId of directories || []) {
         await queryRunner.manager.query(
           `INSERT INTO DirectoryTag (DirectoryId, TagId) VALUES (?, ?)`,
-          [directoryId, insertTag.TagId]
+          [directoryId, insertTag.tagId]
         );
       }
 
       for (const websiteId of websites || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-          [insertTag.TagId, websiteId]
+          [insertTag.tagId, websiteId]
         );
       }
 
@@ -483,7 +483,7 @@ export class TagService {
       for (const website of websites || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-          [insertTag.TagId, website.WebsiteId]
+          [insertTag.tagId, website.WebsiteId]
         );
       }
 
@@ -546,8 +546,8 @@ export class TagService {
             const newWebsite = new Website();
             newWebsite.name = website.Name;
             newWebsite.startingUrl = website.StartingUrl;
-            newWebsite.userId = tag.UserId;
-            newWebsite.creationDate = tag.Creation_Date;
+            newWebsite.userId = tag.userId;
+            newWebsite.creationDate = tag.creationDate;
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
             const pages = await queryRunner.manager.query(
@@ -564,7 +564,7 @@ export class TagService {
 
             await queryRunner.manager.query(
               `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-              [insertTag.TagId, insertWebsite.websiteId]
+              [insertTag.tagId, insertWebsite.websiteId]
             );
           }
         }
@@ -600,7 +600,7 @@ export class TagService {
 
     let hasError = false;
     try {
-      await queryRunner.manager.update(Tag, { TagId: tagId }, { Name: name });
+      await queryRunner.manager.update(Tag, { tagId }, { name });
 
       for (const id of defaultDirectories || []) {
         if (!directories.includes(id)) {

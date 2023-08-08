@@ -11,32 +11,36 @@ import { Website } from "../website/website.entity";
 @Entity("Tag")
 export class Tag {
   @PrimaryGeneratedColumn({
+    name: "TagId",
     type: "int",
   })
-  TagId: number;
+  tagId: number;
 
   @Column({
+    name: "UserId",
     type: "int",
     nullable: true,
   })
-  UserId: number;
+  userId: number;
 
   @Column({
+    name: "Name",
     type: "varchar",
     length: 255,
     nullable: false,
   })
-  Name: string;
+  name: string;
 
   @Column({
+    name: "Creation_Date",
     type: "datetime",
     nullable: false,
   })
-  Creation_Date: any;
+  creationDate: any;
 
   @ManyToMany((type) => Directory)
   @JoinTable()
-  Directories: Directory[];
+  directories: Directory[];
 
   @ManyToMany((type) => Website, website => website.tags)
   @JoinTable({
@@ -44,5 +48,5 @@ export class Tag {
     joinColumns: [{ name: "TagId" }],
     inverseJoinColumns: [{ name: "WebsiteId" }]
   })
-  Websites: Website[];
+  websites: Website[];
 }

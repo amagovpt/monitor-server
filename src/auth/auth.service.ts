@@ -47,8 +47,8 @@ export class AuthService {
     try {
       await queryRunner.manager.update(
         User,
-        { UserId: userId },
-        { Last_Login: date }
+        {  userId },
+        { lastLogin: date }
       );
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -68,15 +68,15 @@ export class AuthService {
     password: string
   ): Promise<any> {
     const user = await this.userRepository.findOne({
-      where: { Username: username },
+      where: { username },
     });
 
-    if (user && (await comparePasswordHash(password, user.Password))) {
-      delete user.Password;
-      delete user.Names;
-      delete user.Emails;
-      delete user.Last_Login;
-      delete user.Register_Date;
+    if (user && (await comparePasswordHash(password, user.password))) {
+      delete user.password;
+      delete user.names;
+      delete user.emails;
+      delete user.lastLogin;
+      delete user.registerDate;
       return user;
     } else {
       return null;
@@ -86,10 +86,10 @@ export class AuthService {
   async verifyUserPayload(payload: any): Promise<boolean> {
     const user = await this.userRepository.findOne({
       where: {
-        UserId: payload.sub,
-        Username: payload.username,
-        Type: payload.type,
-        Unique_Hash: payload.hash,
+        userId: payload.sub,
+        username: payload.username,
+        type: payload.type,
+        uniqueHash: payload.hash,
       },
     });
     return !!user;

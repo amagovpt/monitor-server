@@ -181,7 +181,7 @@ export class EntityService {
 
   async findInfo(entityId: number): Promise<any> {
     const entity = await this.entityRepository.findOne({
-      where: { EntityId: entityId },
+      where: { entityId },
     });
 
     if (entity) {
@@ -202,11 +202,11 @@ export class EntityService {
   }
 
   async findByShortName(shortName: string): Promise<any> {
-    return this.entityRepository.findOne({ where: { Short_Name: shortName } });
+    return this.entityRepository.findOne({ where: {  shortName } });
   }
 
   async findByLongName(longName: string): Promise<any> {
-    return this.entityRepository.findOne({ where: { Long_Name: longName } });
+    return this.entityRepository.findOne({ where: { longName } });
   }
 
   async findAllWebsites(entity: string): Promise<any> {
@@ -281,7 +281,7 @@ export class EntityService {
       for (const websiteId of websites || []) {
         await queryRunner.manager.query(
           `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
-          [insertEntity.EntityId, websiteId]
+          [insertEntity.entityId, websiteId]
         );
       }
 
@@ -314,8 +314,8 @@ export class EntityService {
     try {
       await queryRunner.manager.update(
         EntityTable,
-        { EntityId: entityId },
-        { Short_Name: shortName, Long_Name: longName }
+        {  entityId },
+        {  shortName,longName }
       );
 
       for (const id of defaultWebsites || []) {

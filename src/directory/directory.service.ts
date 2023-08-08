@@ -110,7 +110,7 @@ export class DirectoryService {
       for (const tagId of tags || []) {
         await queryRunner.manager.query(
           `INSERT INTO DirectoryTag (DirectoryId, TagId) VALUES (?, ?)`,
-          [insertDirectory.DirectoryId, tagId]
+          [insertDirectory.directoryId, tagId]
         );
       }
 
@@ -144,8 +144,8 @@ export class DirectoryService {
     try {
       await queryRunner.manager.update(
         Directory,
-        { DirectoryId: directoryId },
-        { Name: name, Show_in_Observatory: observatory, Method: method }
+        { directoryId },
+        {  name, showInObservatory: observatory, method }
       );
 
       for (const id of defaultTags || []) {
@@ -348,7 +348,7 @@ export class DirectoryService {
   }
 
   findByDirectoryName(directoryName: string): Promise<Directory | undefined> {
-    return this.directoryRepository.findOne({ where: { Name: directoryName } });
+    return this.directoryRepository.findOne({ where: { name: directoryName } });
   }
 
   findAll(): Promise<any> {
@@ -362,7 +362,7 @@ export class DirectoryService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    return this.directoryRepository.count({where:{Show_in_Observatory: 1 }});
+    return this.directoryRepository.count({where:{showInObservatory: 1 }});
   }
 
   async findInfo(directoryId: number): Promise<any> {
