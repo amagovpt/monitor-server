@@ -15,6 +15,7 @@ export class WebsiteService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
+    @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     @InjectDataSource()
     private readonly connection: DataSource) { }
