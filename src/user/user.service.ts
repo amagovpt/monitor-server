@@ -158,7 +158,7 @@ export class UserService {
             await queryRunner.manager.update(
               Website,
               { WebsiteId: id },
-              { userId: null }
+              { UserId: null }
             );
           }
         }
@@ -168,7 +168,7 @@ export class UserService {
             await queryRunner.manager.update(
               Website,
               { WebsiteId: id },
-              { userId: userId }
+              { UserId: userId }
             );
 
             if (transfer) {
@@ -376,7 +376,7 @@ export class UserService {
         await queryRunner.manager.update(
           Website,
           { WebsiteId: In(websites) },
-          { userId: insertUser.UserId }
+          { UserId: insertUser.UserId }
         );
 
         if (transfer) {
@@ -424,16 +424,16 @@ export class UserService {
 
           for (const website of copyWebsites || []) {
             const newWebsite = new Website();
-            newWebsite.name = website.Name;
-            newWebsite.startingUrl = website.StaringUrl;
-            newWebsite.userId = insertUser.UserId;
-            newWebsite.creationDate = new Date();
+            newWebsite.Name = website.Name;
+            newWebsite.StartingUrl = website.StaringUrl;
+            newWebsite.UserId = insertUser.UserId;
+            newWebsite.Creation_Date = new Date();
 
             const insertWebsite = await queryRunner.manager.save(newWebsite);
 
             await queryRunner.manager.query(
               `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-              [insertTag.TagId, insertWebsite.websiteId]
+              [insertTag.TagId, insertWebsite.WebsiteId]
             );
 
             // Create user tag website pages connection
@@ -445,7 +445,7 @@ export class UserService {
             for (const page of pages || []) {
               await queryRunner.manager.query(
                 `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-                [insertWebsite.websiteId, page.PageId]
+                [insertWebsite.WebsiteId, page.PageId]
               );
             }
           }
