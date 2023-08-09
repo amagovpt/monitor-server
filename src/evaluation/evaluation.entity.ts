@@ -41,11 +41,11 @@ export class Evaluation {
   pagecode: string;
 
   @Column({
-    name: "PageId",
+    name: "Tot",
     type: 'text',
     nullable: false
   })
-  Tot: string;
+  tot: string;
 
   @Column({
     name: "Nodes",

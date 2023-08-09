@@ -10,7 +10,7 @@ import { Website } from "../website/website.entity";
 @Entity("Entity")
 export class EntityTable {
   @PrimaryGeneratedColumn({
-    name: "Tag_Count",
+    name: "EntityId",
     type: "int",
   })
   entityId: number;
