@@ -11,68 +11,59 @@ import { EntityTable } from "../entity/entity.entity";
 @Entity("Website")
 export class Website {
   @PrimaryGeneratedColumn({
-    name:"WebsiteId",
     type: "int",
   })
-  websiteId: number;
+  WebsiteId: number;
 
   @Column({
-    name: "UserId",
     type: "int",
     nullable: true,
   })
-  userId: number;
+  UserId: number;
 
   @Column({
-    name: "Name",
     type: "varchar",
     length: 255,
     nullable: false,
   })
-  name: string;
+  Name: string;
 
   @Column({
-    name: "StartingUrl",
     type: "varchar",
     length: 255,
     nullable: false,
   })
-  startingUrl: string;
+  StartingUrl: string;
 
   @Column({
-    name: "Declaration",
     type: "int",
     nullable: true,
   })
-  declaration: number;
+  Declaration: number;
 
   @Column({
-    name: "Declaration_Update_Date",
     type: "datetime",
     nullable: true,
   })
-  declarationUpdateDate: any;
+  Declaration_Update_Date: any;
 
   @Column({
-    name: "Stamp",
     type: "int",
     nullable: true,
   })
-  stamp: number;
+  Stamp: number;
 
   @Column({
-    name:"Stamp_Update_Date",
     type: "datetime",
     nullable: true,
   })
-  stampUpdateDate: any;
+  Stamp_Update_Date: any;
 
   @Column({
-    name: "Creation_Date",
     type: "datetime",
     nullable: false,
   })
-  creationDate: any;
+  Creation_Date: any;
 
   @ManyToMany((type) => Tag,tag=>tag.Websites)
   tags: Tag[];

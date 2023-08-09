@@ -22,7 +22,7 @@ export class WebsiteService {
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
     return await Promise.all(websites.map(async (website) => {
-      const id = website.websiteId;
+      const id = website.WebsiteId;
       const pages = await this.findAllPages(id);
       website["numberOfPages"] = pages.length;
       website["averagePoints"] = this.averagePointsPageEvaluation(pages);
@@ -311,7 +311,7 @@ export class WebsiteService {
 
   async findByOfficialName(name: string): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: {  name, userId: IsNull() },
+      where: {  Name:name, UserId: IsNull() },
     });
     return website;
     /*if (website && website.Name !== name) {
@@ -483,7 +483,7 @@ export class WebsiteService {
     websiteName: string
   ): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: {  userId, name: websiteName },
+      where: {  UserId: userId, Name: websiteName },
     });
     if (!website) {
       throw new InternalServerErrorException();
@@ -503,7 +503,7 @@ export class WebsiteService {
         wp.WebsiteId = w.WebsiteId AND
         p.PageId = wp.PageId AND
         p.Show_In LIKE '_1_'`,
-      [website.name, website.userId]
+      [website.Name, website.UserId]
     );
 
     const queryRunner = this.connection.createQueryRunner();
@@ -808,16 +808,16 @@ export class WebsiteService {
     let hasError = false;
     try {
       const newWebsite = new Website();
-      newWebsite.userId = userId;
-      newWebsite.name = websiteName;
-      newWebsite.startingUrl = startingUrl;
-      newWebsite.creationDate = new Date();
+      newWebsite.UserId = userId;
+      newWebsite.Name = websiteName;
+      newWebsite.StartingUrl = startingUrl;
+      newWebsite.Creation_Date = new Date();
 
       const insertWebsite = await queryRunner.manager.save(newWebsite);
 
       await queryRunner.manager.query(
         `INSERT INTO TagWebsite (TagId, WebsiteId) SELECT TagId, ? FROM Tag WHERE Name = ?`,
-        [insertWebsite.websiteId, tag]
+        [insertWebsite.WebsiteId, tag]
       );
 
       for (const url of pages || []) {
@@ -827,7 +827,7 @@ export class WebsiteService {
         if (page) {
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.websiteId, page.PageId]
+            [insertWebsite.WebsiteId, page.PageId]
           );
           await queryRunner.manager.query(
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -839,7 +839,7 @@ export class WebsiteService {
           const newPage = new Page();
           newPage.Uri = url;
           newPage.Show_In = "000";
-          newPage.Creation_Date = newWebsite.creationDate;
+          newPage.Creation_Date = newWebsite.Creation_Date;
 
           const insertPage = await queryRunner.manager.save(newPage);
 
@@ -847,7 +847,7 @@ export class WebsiteService {
 
           await queryRunner.manager.query(
             `INSERT INTO WebsitePage (WebsiteId, PageId) VALUES (?, ?)`,
-            [insertWebsite.websiteId, insertPage.PageId]
+            [insertWebsite.WebsiteId, insertPage.PageId]
           );
 
           const existingWebsite = await queryRunner.manager.query(
@@ -1070,15 +1070,15 @@ export class WebsiteService {
     try {
       await queryRunner.manager.update(
         Website,
-        { websiteId },
+        { WebsiteId:websiteId },
         {
-          userId,
-      name: updateWebsiteDto.name,
-      startingUrl: updateWebsiteDto.startingUrl,
-      declaration: updateWebsiteDto.declaration,
-      declarationUpdateDate: updateWebsiteDto.declarationUpdateDate,
-      stamp: updateWebsiteDto.stamp,
-      stampUpdateDate: updateWebsiteDto.stampUpdateDate,
+          UserId:userId,
+      Name: updateWebsiteDto.name,
+      StartingUrl: updateWebsiteDto.startingUrl,
+      Declaration: updateWebsiteDto.declaration,
+      Declaration_Update_Date: updateWebsiteDto.declarationUpdateDate,
+      Stamp: updateWebsiteDto.stamp,
+      Stamp_Update_Date: updateWebsiteDto.stampUpdateDate,
         }
       );
       if (oldUserId === null && userId !== null) {
