@@ -328,7 +328,7 @@ export class EvaluationService {
     newEvaluation.pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
     );
-    newEvaluation.Tot = Buffer.from(
+    newEvaluation.tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
     newEvaluation.nodes = Buffer.from(
@@ -369,7 +369,7 @@ export class EvaluationService {
     newEvaluation.pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
     );
-    newEvaluation.Tot = Buffer.from(
+    newEvaluation.tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
     newEvaluation.nodes = Buffer.from(
@@ -791,7 +791,7 @@ export class EvaluationService {
       where: { evaluationId: id },
     });
 
-    const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
+    const tot = JSON.parse(Buffer.from(evaluation.tot, "base64").toString());
 
     return {
       pagecode: Buffer.from(evaluation.pagecode, "base64").toString(),
