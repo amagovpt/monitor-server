@@ -66,8 +66,9 @@ export class Website {
   })
   Creation_Date: any;
 
-  @ManyToMany((type) => Tag,tag=>tag.Websites)
-  tags: Tag[];
+  @ManyToMany((type) => Tag)
+  @JoinTable()
+  Tags: Tag[];
 
   @ManyToMany((type) => EntityTable)
   @JoinTable()

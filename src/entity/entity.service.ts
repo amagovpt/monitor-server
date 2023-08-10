@@ -1,15 +1,16 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { Repository, In, DataSource } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
 import { EntityTable } from "./entity.entity";
+import { Website } from "../website/website.entity";
 
 @Injectable()
 export class EntityService {
   constructor(
     @InjectRepository(EntityTable)
     private readonly entityRepository: Repository<EntityTable>,
-    @InjectDataSource()
-    private readonly connection: DataSource,  ) {}
+    private readonly connection: Connection
+  ) {}
 
   async addPagesToEvaluate(
     entitiesId: number[],
@@ -81,7 +82,8 @@ export class EntityService {
 
   async adminCount(search: string): Promise<any> {
     const name = search.trim() !== "" ? `%${search.trim()}%` : "%";
-    const count = await this.entityRepository.query(
+    const manager = getManager();
+    const count = await manager.query(
       `
       SELECT 
         COUNT(*) as Count 
@@ -98,8 +100,10 @@ export class EntityService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
+    const manager = getManager();
+
     const data = (
-      await this.entityRepository.query(
+      await manager.query(
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
@@ -118,7 +122,8 @@ export class EntityService {
     const name = search.trim() !== "" ? `%${search.trim()}%` : "%";
     if (!direction.trim()) {
       if (size !== -1) {
-        const entities = await this.entityRepository.query(
+        const manager = getManager();
+        const entities = await manager.query(
           `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
           FROM 
             Entity as e 
@@ -132,7 +137,8 @@ export class EntityService {
         );
         return entities;
       } else {
-        const entities = await this.entityRepository.query(
+        const manager = getManager();
+        const entities = await manager.query(
           `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
           FROM 
             Entity as e 
@@ -162,7 +168,8 @@ export class EntityService {
           break;
       }
 
-      const entities = await this.entityRepository.query(
+      const manager = getManager();
+      const entities = await manager.query(
         `SELECT e.*, COUNT(distinct ew.WebsiteId) as Websites 
         FROM 
           Entity as e 
@@ -210,8 +217,9 @@ export class EntityService {
   }
 
   async findAllWebsites(entity: string): Promise<any> {
+    const manager = getManager();
 
-    const websites = await this.entityRepository.query(
+    const websites = await manager.query(
       `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
       FROM
         Entity as e
@@ -231,7 +239,9 @@ export class EntityService {
   }
 
   async findAllWebsitesPages(entity: string): Promise<any> {
-    const websites = await this.entityRepository.query(
+    const manager = getManager();
+
+    const websites = await manager.query(
       `
       SELECT 
         w.WebsiteId,

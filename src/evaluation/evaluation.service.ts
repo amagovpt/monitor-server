@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { Connection, getManager, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import clone from "lodash.clone";
 import fs from "fs";
@@ -9,7 +9,8 @@ import {
   executeUrlsEvaluation,
   executeHtmlEvaluation,
 } from "./middleware";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { AccessibilityStatementService } from "src/accessibility-statement-module/accessibility-statement/accessibility-statement.service";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class EvaluationService {
@@ -17,12 +18,9 @@ export class EvaluationService {
   private isEvaluatingUserInstance: boolean;
   private SKIP = 20;
 
-  constructor(
-    @InjectDataSource()
-    private readonly connection: DataSource,
+  constructor(private readonly connection: Connection,
     @InjectRepository(Evaluation)
-    private readonly evaluationRepository: Repository<Evaluation>,
-  ) {
+    private readonly evaluationRepository: Repository<Evaluation>,) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
   }
@@ -63,12 +61,12 @@ export class EvaluationService {
         process.env.NAMESPACE === undefined ||
         parseInt(process.env.AMSID) === 0
       ) {
-        pages = await this.connection.query(
+        pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
         const skip = parseInt(process.env.AMSID) * this.SKIP;
-        pages = await this.connection.query(
+        pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
       }
@@ -92,12 +90,12 @@ export class EvaluationService {
         process.env.NAMESPACE === undefined ||
         parseInt(process.env.USRID) === 0
       ) {
-        pages = await this.connection.query(
+        pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
         );
       } else {
         const skip = parseInt(process.env.USRID) * this.SKIP;
-        pages = await this.connection.query(
+        pages = await getManager().query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
         );
       }
@@ -161,7 +159,7 @@ export class EvaluationService {
   private async evaluateInBackground(pages: any[]): Promise<void> {
     if (pages.length > 0) {
       try {
-        await this.connection.query(
+        await getManager().query(
           `UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`,
           [pages.map((p) => p.EvaluationListId)]
         );
@@ -400,81 +398,82 @@ export class EvaluationService {
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AMS/Observatory"`
     );
   }
 
   async increaseMyMonitorRequestCounter(): Promise<void> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "MyMonitor"`
     );
   }
 
   async increaseStudyMonitorRequestCounter(): Promise<void> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "StudyMonitor"`
     );
   }
 
   async increaseAccessMonitorRequestCounter(): Promise<void> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AccessMonitor"`
     );
   }
 
   async getAMSObservatoryRequestCounter(): Promise<any> {
-
-    const counter = await this.connection.query(
+    const manager = getManager();
+    const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
     );
     return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async getMyMonitorRequestCounter(): Promise<any> {
-
-    const counter = await this.connection.query(
+    const manager = getManager();
+    const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
     );
     return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async getStudyMonitorRequestCounter(): Promise<any> {
-
-    const counter = await this.connection.query(
+    const manager = getManager();
+    const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
     );
     return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async getAccessMonitorRequestCounter(): Promise<any> {
-
-    const counter = await this.connection.query(
+    const manager = getManager();
+    const counter = await manager.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
     );
     return { counter: counter[0].Counter, date: counter[0].Start_Date };
   }
 
   async resetAdminWaitingList(): Promise<boolean> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE UserId = -1`
     );
     return true;
   }
 
   async deleteAdminWaitingList(): Promise<boolean> {
-
-    await this.connection.query(`DELETE FROM Evaluation_List WHERE UserId = -1`);
+    const manager = getManager();
+    await manager.query(`DELETE FROM Evaluation_List WHERE UserId = -1`);
     return true;
   }
 
   async resetMMWaitingList(): Promise<boolean> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE 
         Evaluation_List as el, User as u
       SET 
@@ -489,8 +488,8 @@ export class EvaluationService {
   }
 
   async deleteMMWaitingList(): Promise<boolean> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `DELETE el.* FROM Evaluation_List as el, User as u 
        WHERE 
         el.UserId <> -1 AND
@@ -501,8 +500,8 @@ export class EvaluationService {
   }
 
   async resetSMWaitingList(): Promise<boolean> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `UPDATE 
         Evaluation_List as el, User as u
       SET 
@@ -517,8 +516,8 @@ export class EvaluationService {
   }
 
   async deleteSMWaitingList(): Promise<boolean> {
-
-    await this.connection.query(
+    const manager = getManager();
+    await manager.query(
       `DELETE el.* FROM Evaluation_List as el, User as u 
        WHERE 
         el.UserId <> -1 AND
@@ -532,9 +531,9 @@ export class EvaluationService {
     userId: number,
     website: string
   ): Promise<any> {
+    const manager = getManager();
 
-
-    const evaluations = await this.connection.query(
+    const evaluations = await manager.query(
       `SELECT e.*, p.Uri 
       FROM
         Website as w,
@@ -580,10 +579,10 @@ export class EvaluationService {
     website: string,
     url: string
   ): Promise<any> {
-
+    const manager = getManager();
 
     const evaluation = (
-      await this.connection.query(
+      await manager.query(
         `SELECT e.* 
       FROM
         Website as w,
@@ -629,9 +628,9 @@ export class EvaluationService {
     tag: string,
     website: string
   ): Promise<any> {
+    const manager = getManager();
 
-
-    const evaluations = await this.connection.query(
+    const evaluations = await manager.query(
       `SELECT e.*, p.Uri
       FROM
         Tag as t,
@@ -683,10 +682,10 @@ export class EvaluationService {
     website: string,
     url: string
   ): Promise<any> {
-
+    const manager = getManager();
 
     const evaluation = (
-      await this.connection.query(
+      await manager.query(
         `SELECT e.* 
       FROM
         Tag as t,
@@ -734,7 +733,7 @@ export class EvaluationService {
   }
 
   async findAllEvaluationsFromPage(type: string, page: string): Promise<any> {
-
+    const manager = getManager();
     let query = "";
 
     if (type === "admin") {
@@ -786,14 +785,14 @@ export class EvaluationService {
       throw new InternalServerErrorException();
     }
 
-    const evaluations = await this.connection.query(query, [page]);
+    const evaluations = await manager.query(query, [page]);
     return evaluations;
   }
 
   async findEvaluationById(url: string, id: number): Promise<any> {
+    const manager = getManager();
 
-
-    const evaluation = await this.evaluationRepository.findOne({
+    const evaluation = await manager.findOne(Evaluation, {
       where: { EvaluationId: id },
     });
 
@@ -824,9 +823,9 @@ export class EvaluationService {
       throw new InternalServerErrorException();
     }
 
+    const manager = getManager();
 
-
-    const evaluation = (await this.connection.query(query, [url]))[0];
+    const evaluation = (await manager.query(query, [url]))[0];
 
     const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
 
@@ -872,9 +871,9 @@ export class EvaluationService {
   }
 
   async findWebsiteEvaluations(website: string, sample: boolean): Promise<any> {
+    const manager = getManager();
 
-
-    const evaluations = await this.connection.query(
+    const evaluations = await manager.query(
       `SELECT distinct e.*, p.Uri
       FROM
         Website as w,

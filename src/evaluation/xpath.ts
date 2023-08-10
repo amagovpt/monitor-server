@@ -1,13 +1,10 @@
-const xpath: any = {
+export default {
   'a': '//a[@href]',
-  'aSkipFirst': '//a',
   'abbrNo': '//abbr[not(@title) or normalize-space(@title)=""]|//acronym[not(@title) or normalize-space(@title)=""]',
   'applet': '//applet',
   'area': '//area',
   'areaAltNo': '//area[not(@alt) or normalize-space(@alt)=""]',
   'blink': '//blink',
-  'dl': '//dl',
-  'dd,dt': '//dd,dt',
   'ehandMouse': '//*[@onmousedown]|//*[@onmouseup]|//*[@onmouseout]|//*[@onmouseover]',
   'ehandler': '//*[@onfocus]|//*[@onblur]|//*[@onkeypress]|//*[@onkeydown]|//*[@onkeyup]|//*[@onsubmit]|//*[@onreset]|//*[@onselect]|//*[@onchange]|//*[@onload]|//*[@onunload]|//*[@onclick]|//*[@ondblclick]|//*[@onmousedown]|//*[@onmouseup]|//*[@onmouseover]|//*[@onmousemove]|//*[@onmouseout]',
   'embed': '//embed',
@@ -19,7 +16,7 @@ const xpath: any = {
   'frame': '//frame',
   'frameTitleNo': '//frame[not(@title) or normalize-space(@title)=""]',
   'frameset': '//frameset',
-  'hx': '//h1|//h2|//h3|//h4|//h5|//h6|//[@aria-level][@role="heading"]',
+  'hx': '//h1|//h2|//h3|//h4|//h5|//h6',
   'id': '//*[@id]',
   'iframe': '//iframe',
   'iframeTitleNo': '//iframe[not(@title) or normalize-space(@title)=""]',
@@ -41,8 +38,6 @@ const xpath: any = {
   'langNo': '//html',
   'layoutAttr': '//*[@align]|//*[@hspace]|//*[@vspace]|//*[@color]|//*[@face]|//basefont[@size]|//*[@text]|//*[@link]|//*[@alink]|//*[@vlink]|//*[@bgcolor]|//*[@background]|//font[@size]',
   'layoutElem': '//blink|//center',
-  'li': '//li',
-  'listNotCorrectly': '//li',
   'liNoList': '//li[not(ancestor::ol) and not(ancestor::ul)]',
   'linkRel': '//link[@rel="alternate" or @rel="appendix" or @rel="bookmark" or @rel="chapter" or @rel="contents" or @rel="copyright" or @rel="glossary" or @rel="help" or @rel="index" or @rel="next" or @rel="prev" or @rel="section" or @rel="start" or @rel="subsection"]|//link[@rev="alternate" or @rev="appendix" or @rev="bookmark" or @rev="chapter" or @rev="contents" or @rev="copyright" or @rev="glossary" or @rev="help" or @rev="index" or @rev="next" or @rev="prev" or @rev="section" or @rev="start" or @rev="subsection"]',
   'longDImg': '//img[@longdesc]',
@@ -65,5 +60,3 @@ const xpath: any = {
   'titleVrs': '//title',
   'titleOk': '//title'
 };
-
-export default xpath;

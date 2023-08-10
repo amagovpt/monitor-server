@@ -1,7 +1,7 @@
 import orderBy from "lodash.orderby";
-import tests from "src/evaluation/tests";
 import { Directory } from "./directory";
 import { Website } from "./website";
+import tests from "./tests";
 
 export class ListDirectories {
   directories: Array<Directory>;

@@ -6,73 +6,35 @@ import {
   UseGuards,
   Param,
   UnauthorizedException,
-  UseInterceptors,
-  Body,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { PageService } from "./page.service";
 import { success } from "../lib/response";
 import { EvaluationService } from "../evaluation/evaluation.service";
-import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
-import { PageUrlDto } from "./dto/page-url.dto";
-import { PageListDto } from "./dto/page-list.dto";
-import { CreatePageMyMonitorDto } from "./dto/create-page-my-monitor.dto";
-import { DeletePageMyMonitorDto } from "./dto/delete-page-my-monitor.dto";
-import { Page } from "./page.entity";
-import { PageEvaluateDto } from "./dto/page-evaluate.dto";
-import { PageEvaluateStudyMonitorDto } from "./dto/page-evaluate-study-monitor.dto";
-import { PageCreateStudyMonitorDto } from "./dto/page-create-study-monitor.dto";
-import { PageDeleteStudyMonitorDto } from "./dto/page-delete-study-monitor.dto";
-import { PageUpdateDto } from "./dto/page-update.dto";
-import { PageDeleteDto } from "./dto/page-delete.dto";
-import { PageImportDto } from "./dto/page-import.dto";
 
-@ApiBasicAuth()
-@ApiTags('page')
-@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("page")
-@UseInterceptors(LoggingInterceptor)
 export class PageController {
   constructor(
     private readonly pageService: PageService,
     private readonly evaluationService: EvaluationService
   ) {}
 
-  @ApiOperation({ summary: 'Reevaluate page' })
-  @ApiResponse({
-    status: 200,
-    description: 'The evaluation request has been submited',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluatePage(@Body() pageUrlDto: PageUrlDto): Promise<any> {
-    const page = decodeURIComponent(pageUrlDto.page);
+  async reEvaluatePage(@Request() req: any): Promise<any> {
+    const page = decodeURIComponent(req.body.page);
 
     await this.evaluationService.increaseAMSObservatoryRequestCounter();
 
     return success(await this.pageService.addPageToEvaluate(page, "10", -1));
   }
 
-  @ApiOperation({ summary: 'Find the number of pages in observatory' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages in observatory',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("observatory/total")
-  async getNumberOfObservatoryPages(): Promise<any> {
+  async getNumberOfObservatoryEntities(): Promise<any> {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Reevaluate multiple pages by url' })
-  @ApiResponse({
-    status: 200,
-    description: 'The evaluation request has been submited',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluateMulti")
   async reEvaluatePages(@Request() req: any): Promise<any> {
@@ -80,12 +42,6 @@ export class PageController {
     return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
-  @ApiOperation({ summary: 'Find the number of pages being evaluated by the admin' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages being evaluated',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/evaluating")
   async getNumberOfAdminPagesBeingEvaluated(): Promise<any> {
@@ -94,97 +50,49 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the admin' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages waiting',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/waiting")
   async getNumberOfAdminPagesWaitingForEvaluation(): Promise<any> {
     return success(await this.pageService.findAdminWaitingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages that failed the evaluation by the admin' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages that failed the evaluation',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/admin/error")
   async getNumberOfAdminPagesWithError(): Promise<any> {
     return success(await this.pageService.findAdminWithErrorInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages being evaluated by the user' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages being evaluated',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/user/evaluating")
   async getNumberOfUserPagesBeingEvaluated(): Promise<any> {
     return success(await this.pageService.findUserEvaluatingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the user' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages waiting',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/user/waiting")
   async getNumberOfUserPagesWaitingForEvaluation(): Promise<any> {
     return success(await this.pageService.findUserWaitingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages that failed the evaluation by the user' })
-  @ApiResponse({
-    status: 200,
-    description: 'The number of pages that failed the evaluation',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/user/error")
   async getNumberOfUserPagesWithError(): Promise<any> {
     return success(await this.pageService.findUserWithErrorInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Delete pages from evaluation list' })
-  @ApiResponse({
-    status: 200,
-    description: 'The selected pages have been deleted from the evaluation list',
-    type: Number,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("evaluationList/error/delete")
-  async deleteAdminPagesWithError(@Body() pageListDto: PageListDto): Promise<any> {
-    const pages = pageListDto.pages;
+  async deleteAdminPagesWithError(@Request() req: any): Promise<any> {
+    const pages = req.body.pages;
     return success(await this.pageService.deleteAdminPagesWithError(pages));
   }
 
-  @ApiOperation({ summary: 'Find pages with evaluation errors' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of a pages with evaluation errors',
-    type: Number,
-  })  
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/error")
   async getAdminPagesWithError(): Promise<any> {
     return success(await this.pageService.getAdminPagesWithError());
   }
 
-  @ApiOperation({ summary: 'Find number of pages by search term' })
-  @ApiResponse({
-    status: 200,
-    description: 'Number of pages',
-    type: Number,
-  })  
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminPageCount(@Param("search") search: string): Promise<any> {
@@ -192,12 +100,7 @@ export class PageController {
       await this.pageService.adminCount(decodeURIComponent(search.substring(7)))
     );
   }
-  @ApiOperation({ summary: 'Find pages by search term, sort, direction, and size' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of pages',
-    type: Number,
-  })  
+
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/:size/:page/:sort/:direction/:search")
   async getAllPages(
@@ -218,12 +121,7 @@ export class PageController {
       )
     );
   }
-  @ApiOperation({ summary: 'Find all pages from a specific website in MyMonitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of pages',
-    type: Number,
-  })  
+
   @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor/website/:website")
   async getAllMyMonitorUserWebsitePages(
@@ -238,19 +136,12 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Add a page to a website in MyMonitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page added with success',
-    type: Boolean,
-  })  
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/create")
-  async createMyMonitorUserWebsitePages(@Request() req: any, 
-  @Body() pageMyMonitorDto: CreatePageMyMonitorDto): Promise<any> {
-    const website = pageMyMonitorDto.website;
-    const startingUrl = pageMyMonitorDto.startingUrl;
-    const uris = pageMyMonitorDto.pages;
+  async createMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
+    const website = req.body.website;
+    const startingUrl = req.body.startingUrl;
+    const uris = JSON.parse(req.body.pages);
 
     return success(
       await this.pageService.createMyMonitorUserWebsitePages(
@@ -262,18 +153,11 @@ export class PageController {
     );
   }
 
-
-  @ApiOperation({ summary: 'Delete a page in a website in MyMonitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page deleted with success',
-    type: Boolean,
-  })  
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/remove")
-  async removeMyMonitorUserWebsitePages(@Request() req: any, @Body() deletePageMyMonitorDto: DeletePageMyMonitorDto): Promise<any> {
-    const website = deletePageMyMonitorDto.website;
-    const ids = deletePageMyMonitorDto.pagesId;
+  async removeMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
+    const website = req.body.website;
+    const ids = JSON.parse(req.body.pagesId);
     return success(
       await this.pageService.removeMyMonitorUserWebsitePages(
         req.user.userId,
@@ -283,12 +167,6 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of pages',
-    type: Array<Page>,
-  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/website/:website")
   async getStudyMonitorUserTagWebsitePages(
@@ -305,12 +183,6 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of pages',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("add")
   async addPages(@Request() req: any): Promise<any> {
@@ -326,16 +198,10 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Evaluate page' })
-  @ApiResponse({
-    status: 200,
-    description: 'Evaluation added to evaluation queue',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("page/evaluate")
-  async evaluatePage(@Body() pageEvaluateDto: PageEvaluateDto): Promise<any> {
-    const url = decodeURIComponent(pageEvaluateDto.url);
+  async evaluatePage(@Request() req: any): Promise<any> {
+    const url = decodeURIComponent(req.body.url);
     const page = await this.pageService.findPageFromUrl(url);
 
     if (page) {
@@ -346,17 +212,11 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Evaluate page in My Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Evaluation added to evaluation queue',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/evaluate")
-  async evaluateMyMonitorWebsitePage(@Request() req: any, @Body() pageEvaluateDto: PageEvaluateDto): Promise<any> {
+  async evaluateMyMonitorWebsitePage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const url = decodeURIComponent(pageEvaluateDto.url);
+    const url = decodeURIComponent(req.body.url);
     const page = await this.pageService.findPageFromUrl(url);
     const isUserPage = await this.pageService.isPageFromMyMonitorUser(
       userId,
@@ -373,19 +233,13 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Evaluate page in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Evaluation added to evaluation queue',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/evaluate")
-  async evaluateStudyMonitorTagWebsitePage(@Request() req: any, @Body() pageEvaluateStudyMonitorDto:PageEvaluateStudyMonitorDto): Promise<any> {
+  async evaluateStudyMonitorTagWebsitePage(@Request() req: any): Promise<any> {
     const userId = req.user.userId;
-    const tag = pageEvaluateStudyMonitorDto.tag;
-    const website = pageEvaluateStudyMonitorDto.website;
-    const url = decodeURIComponent(pageEvaluateStudyMonitorDto.url);
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const url = decodeURIComponent(req.body.url);
     const page = await this.pageService.findPageFromUrl(url);
     const isUserPage = await this.pageService.isPageFromStudyMonitorUser(
       userId,
@@ -404,24 +258,17 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Create page in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page created',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/create")
   async createStudyMonitorUserTagWebsitePages(
-    @Request() req: any,
-    pageCreateStudyMonitorDto: PageCreateStudyMonitorDto
+    @Request() req: any
   ): Promise<any> {
-    const tag = pageCreateStudyMonitorDto.tag;
-    const website = pageCreateStudyMonitorDto.website;
-    const startingUrl = pageCreateStudyMonitorDto.startingUrl;
-    const uris = JSON.parse(pageCreateStudyMonitorDto.pages).map((page) =>
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const startingUrl = req.body.startingUrl;
+    const uris = JSON.parse(req.body.pages).map((page) =>
       decodeURIComponent(page)
-    );//FIXME
+    );
     return success(
       await this.pageService.createStudyMonitorUserTagWebsitePages(
         req.user.userId,
@@ -433,21 +280,14 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Remove page in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page removed',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/remove")
   async removeStudyMonitorUserTagWebsitePages(
-    @Request() req: any,
-    pageDeleteStudyMonitorDto: PageDeleteStudyMonitorDto
+    @Request() req: any
   ): Promise<any> {
-    const tag = pageDeleteStudyMonitorDto.tag;
-    const website = pageDeleteStudyMonitorDto.website;
-    const pagesId = pageDeleteStudyMonitorDto.pagesId;
+    const tag = req.body.tag;
+    const website = req.body.website;
+    const pagesId = JSON.parse(req.body.pagesId);
     return success(
       await this.pageService.removeStudyMonitorUserTagWebsitePages(
         req.user.userId,
@@ -458,46 +298,28 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Update page in Study Monitor' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page updated',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async update(@Body() pageUpdateDto: PageUpdateDto): Promise<any> {
-    const pageId = pageUpdateDto.pageId;
-    const checked = pageUpdateDto.checked;
+  async update(@Request() req: any): Promise<any> {
+    const pageId = req.body.pageId;
+    const checked = req.body.checked;
     return success(await this.pageService.update(pageId, checked));
   }
 
-  @ApiOperation({ summary: 'Delete page' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page deleted',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
-  async delete(@Body() pageDeleteDto: PageDeleteDto): Promise<any> {
-    const pages = pageDeleteDto.pages;
+  async delete(@Request() req: any): Promise<any> {
+    const pages = req.body.pages;
     return success(await this.pageService.delete(pages));
   }
 
-  @ApiOperation({ summary: 'Import page from a my monitor or study monitor user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Page imported',
-    type: Boolean,
-  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("import")
-  async importPage(@Body() pageImportDto: PageImportDto): Promise<any> {
-    const pageId = pageImportDto.pageId;
-    const username = pageImportDto.user;
-    const tag = pageImportDto.tag;
-    const website = pageImportDto.website;
+  async importPage(@Request() req: any): Promise<any> {
+    const pageId = req.body.pageId;
+    const username = req.body.user;
+    const tag = req.body.tag;
+    const website = req.body.website;
 
     const type = await this.pageService.findUserType(username);
 

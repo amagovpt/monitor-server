@@ -1,15 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { Connection, getManager, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ListDirectories } from "./models/list-directories";
 import { Directory } from "./models/directory";
 import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
-import _tests from "src/evaluation/tests";
+import _tests from "./models/tests";
 import { Observatory } from "./observatory.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { calculateQuartiles } from "src/lib/quartil";
 
 @Injectable()
 export class ObservatoryService {
@@ -45,15 +44,17 @@ export class ObservatoryService {
   constructor(
     @InjectRepository(Observatory)
     private readonly observatoryRepository: Repository<Observatory>
-  ) { }
+  ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
   async generateData(manual = false): Promise<any> {
     console.log("generating data");
     console.log({ nameSpace: process.env.NAMESPACE, amsid: process.env.AMSID, intParse: parseInt(process.env.AMSID) });
     if (
-      (process.env.NAMESPACE === undefined ||
-        parseInt(process.env.AMSID) === 0) || manual) {
+      process.env.NAMESPACE === undefined ||
+      parseInt(process.env.AMSID) === 0
+    ) {
+      console.log("Starting");
       const data = await this.getData();
 
       const directories = new Array<Directory>();
@@ -92,14 +93,15 @@ export class ObservatoryService {
         directories: this.getDirectories(listDirectories),
       };
 
+      const manager = getManager();
 
       if (manual) {
-        await this.observatoryRepository.delete({
+        this.observatoryRepository.delete({
           Type: "manual",
         });
       }
 
-      await this.observatoryRepository.query(
+      await manager.query(
         "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
@@ -107,8 +109,10 @@ export class ObservatoryService {
   }
 
   async getObservatoryData(): Promise<any> {
+    const manager = getManager();
+
     const data = (
-      await this.observatoryRepository.query(
+      await manager.query(
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
@@ -117,14 +121,16 @@ export class ObservatoryService {
   }
 
   async getData(): Promise<any> {
+    const manager = getManager();
+
     let data = new Array<any>();
 
-    const directories = await this.observatoryRepository.query(
+    const directories = await manager.query(
       `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
     );
 
     for (const directory of directories) {
-      const tags = await this.observatoryRepository.query(
+      const tags = await manager.query(
         `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
         [directory.DirectoryId]
       );
@@ -132,7 +138,7 @@ export class ObservatoryService {
 
       let pages = null;
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
-        const websites = await this.observatoryRepository.query(
+        const websites = await manager.query(
           `
         SELECT * FROM TagWebsite WHERE TagId IN (?)
       `,
@@ -155,7 +161,7 @@ export class ObservatoryService {
           }
         }
 
-        pages = await this.observatoryRepository.query(
+        pages = await manager.query(
           `
           SELECT
             e.EvaluationId,
@@ -197,7 +203,7 @@ export class ObservatoryService {
           [websitesToFetch]
         );
       } else {
-        pages = await this.observatoryRepository.query(
+        pages = await manager.query(
           `
           SELECT
             e.EvaluationId,
@@ -251,7 +257,7 @@ export class ObservatoryService {
           p.Directory_Creation_Date = directory.Creation_Date;
           p.Entity_Name = null;
 
-          const entities = await this.observatoryRepository.query(
+          const entities = await manager.query(
             `
             SELECT e.Long_Name
             FROM
@@ -524,8 +530,8 @@ export class ObservatoryService {
   getTopFiveWebsites(listDirectories: ListDirectories): any {
     const websites = listDirectories
       .getWebsites()
-      .filter((value, index, array) => array.findIndex(element => element.name === value.name) === index && value.A + value.AA + value.AAA > 10)
-      .sort((a: Website, b: Website) => (Math.round(b.getScore() * 10) / 10) - (Math.round(a.getScore() * 10) / 10) || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A)
+      .slice()
+      .sort((a: Website, b: Website) => b.getScore() - a.getScore())
       .slice(0, 5);
 
     const topFiveWebsites = new Array<any>();
@@ -635,7 +641,8 @@ export class ObservatoryService {
     let rank = 1;
     const directories = listDirectories.directories
       .slice()
-      .sort((a: Directory, b: Directory) => (Math.round(b.getScore() * 10) / 10) - (Math.round(a.getScore() * 10) / 10) || b.AAA - a.AAA || b.AA - a.AA || b.A - a.A || b.nPages - a.nPages)
+      .sort((a: Directory, b: Directory) => a.getScore() - b.getScore())
+      .reverse()
       .map((d: Directory) => {
         d.rank = rank;
         rank++;
@@ -864,7 +871,7 @@ export class ObservatoryService {
           n_occurrences: website.success[key].n_occurrences,
           n_pages: website.success[key].n_pages,
           lvl: _tests[key].level.toUpperCase(),
-          quartiles: calculateQuartiles(
+          quartiles: this.calculateQuartiles(
             website.getPassedOccurrencesByPage(key)
           ),
         });
@@ -890,7 +897,7 @@ export class ObservatoryService {
           n_occurrences: website.errors[key].n_occurrences,
           n_pages: website.errors[key].n_pages,
           lvl: _tests[key].level.toUpperCase(),
-          quartiles: calculateQuartiles(
+          quartiles: this.calculateQuartiles(
             website.getErrorOccurrencesByPage(key)
           ),
         });
@@ -912,8 +919,72 @@ export class ObservatoryService {
     test: any
   ): Array<any> {
     let data = directories.getErrorOccurrenceByDirectory(test);
-    return calculateQuartiles(data);
 
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
+
+    let q1, q2, q3, q4;
+
+    q1 = values[Math.round(0.25 * (values.length + 1)) - 1];
+
+    if (values.length % 2 === 0) {
+      q2 = (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
+    } else {
+      q2 = values[(values.length + 1) / 2];
+    }
+
+    q3 = values[Math.round(0.75 * (values.length + 1)) - 1];
+    q4 = values[values.length - 1];
+
+    const tmp = {
+      q1: new Array<number>(),
+      q2: new Array<number>(),
+      q3: new Array<number>(),
+      q4: new Array<number>(),
+    };
+
+    let q;
+    for (const v of values) {
+      if (v <= q1) {
+        q = "q1";
+      } else {
+        if (v <= q2) {
+          q = "q2";
+        } else {
+          if (v <= q3) {
+            q = "q3";
+          } else {
+            q = "q4";
+          }
+        }
+      }
+
+      tmp[q].push(v);
+    }
+
+    const final = new Array<any>();
+
+    for (const k in tmp) {
+      if (k) {
+        const v = tmp[k];
+        const sum = v.length;
+
+        if (sum > 0) {
+          const test = {
+            tot: sum,
+            por: Math.round((sum * 100) / values.length),
+            int: {
+              lower: v[0],
+              upper: v[sum - 1],
+            },
+          };
+
+          final.push(clone(test));
+        }
+      }
+    }
+    return final;
   }
 
   private calculateQuartilesGlobalBestPractices(
@@ -921,8 +992,72 @@ export class ObservatoryService {
     test: any
   ): Array<any> {
     let data = directories.getPassedOccurrenceByDirectory(test);
-    return calculateQuartiles(data);
 
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
+
+    let q1, q2, q3, q4;
+
+    q1 = values[Math.round(0.25 * (values.length + 1)) - 1];
+
+    if (values.length % 2 === 0) {
+      q2 = (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
+    } else {
+      q2 = values[(values.length + 1) / 2];
+    }
+
+    q3 = values[Math.round(0.75 * (values.length + 1)) - 1];
+    q4 = values[values.length - 1];
+
+    const tmp = {
+      q1: new Array<number>(),
+      q2: new Array<number>(),
+      q3: new Array<number>(),
+      q4: new Array<number>(),
+    };
+
+    let q;
+    for (const v of values) {
+      if (v <= q1) {
+        q = "q1";
+      } else {
+        if (v <= q2) {
+          q = "q2";
+        } else {
+          if (v <= q3) {
+            q = "q3";
+          } else {
+            q = "q4";
+          }
+        }
+      }
+
+      tmp[q].push(v);
+    }
+
+    const final = new Array<any>();
+
+    for (const k in tmp) {
+      if (k) {
+        const v = tmp[k];
+        const sum = v.length;
+
+        if (sum > 0) {
+          const test = {
+            tot: sum,
+            por: Math.round((sum * 100) / values.length),
+            int: {
+              lower: v[0],
+              upper: v[sum - 1],
+            },
+          };
+
+          final.push(clone(test));
+        }
+      }
+    }
+    return final;
   }
 
   private calculateQuartilesDirectoryErrors(
@@ -930,7 +1065,72 @@ export class ObservatoryService {
     test: any
   ): Array<any> {
     let data = directory.getErrorOccurrencesByWebsite(test);
-    return calculateQuartiles(data);
+
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
+
+    let q1, q2, q3, q4;
+
+    q1 = values[Math.round(0.25 * (values.length + 1)) - 1];
+
+    if (values.length % 2 === 0) {
+      q2 = (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
+    } else {
+      q2 = values[(values.length + 1) / 2];
+    }
+
+    q3 = values[Math.round(0.75 * (values.length + 1)) - 1];
+    q4 = values[values.length - 1];
+
+    const tmp = {
+      q1: new Array<number>(),
+      q2: new Array<number>(),
+      q3: new Array<number>(),
+      q4: new Array<number>(),
+    };
+
+    let q;
+    for (const v of values) {
+      if (v <= q1) {
+        q = "q1";
+      } else {
+        if (v <= q2) {
+          q = "q2";
+        } else {
+          if (v <= q3) {
+            q = "q3";
+          } else {
+            q = "q4";
+          }
+        }
+      }
+
+      tmp[q].push(v);
+    }
+
+    const final = new Array<any>();
+
+    for (const k in tmp) {
+      if (k) {
+        const v = tmp[k];
+        const sum = v.length;
+
+        if (sum > 0) {
+          const test = {
+            tot: sum,
+            por: Math.round((sum * 100) / values.length),
+            int: {
+              lower: v[0],
+              upper: v[sum - 1],
+            },
+          };
+
+          final.push(clone(test));
+        }
+      }
+    }
+    return final;
   }
 
   private calculateQuartilesDirectoryBestPractices(
@@ -938,6 +1138,142 @@ export class ObservatoryService {
     test: any
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
-    return calculateQuartiles(data);
+
+    const values = data
+      .filter((n: number) => n !== undefined)
+      .sort((a, b) => a - b);
+
+    let q1, q2, q3, q4;
+
+    q1 = values[Math.round(0.25 * (values.length + 1)) - 1];
+
+    if (values.length % 2 === 0) {
+      q2 = (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
+    } else {
+      q2 = values[(values.length + 1) / 2];
+    }
+
+    q3 = values[Math.round(0.75 * (values.length + 1)) - 1];
+    q4 = values[values.length - 1];
+
+    const tmp = {
+      q1: new Array<number>(),
+      q2: new Array<number>(),
+      q3: new Array<number>(),
+      q4: new Array<number>(),
+    };
+
+    let q;
+    for (const v of values) {
+      if (v <= q1) {
+        q = "q1";
+      } else {
+        if (v <= q2) {
+          q = "q2";
+        } else {
+          if (v <= q3) {
+            q = "q3";
+          } else {
+            q = "q4";
+          }
+        }
+      }
+
+      tmp[q].push(v);
+    }
+
+    const final = new Array<any>();
+
+    for (const k in tmp) {
+      if (k) {
+        const v = tmp[k];
+        const sum = v.length;
+
+        if (sum > 0) {
+          const test = {
+            tot: sum,
+            por: Math.round((sum * 100) / values.length),
+            int: {
+              lower: v[0],
+              upper: v[sum - 1],
+            },
+          };
+
+          final.push(clone(test));
+        }
+      }
+    }
+    return final;
+  }
+
+  private calculateQuartiles(practices: any): Array<any> {
+    const values = practices
+      .filter((e: any) => e !== undefined)
+      .sort((a: number, b: number) => a - b);
+
+    let q1: number;
+    let q2: number;
+    let q3: number;
+    let q4: number;
+
+    q1 = values[Math.round(0.25 * (values.length + 1)) - 1];
+
+    if (values.length % 2 === 0) {
+      q2 = (values[values.length / 2 - 1] + values[values.length / 2]) / 2;
+    } else {
+      q2 = values[(values.length + 1) / 2];
+    }
+
+    q3 = values[Math.round(0.75 * (values.length + 1)) - 1];
+    q4 = values[values.length - 1];
+
+    const tmp = {
+      q1: new Array<number>(),
+      q2: new Array<number>(),
+      q3: new Array<number>(),
+      q4: new Array<number>(),
+    };
+
+    let q: string;
+    for (const v of values || []) {
+      if (v <= q1) {
+        q = "q1";
+      } else {
+        if (v <= q2) {
+          q = "q2";
+        } else {
+          if (v <= q3) {
+            q = "q3";
+          } else {
+            q = "q4";
+          }
+        }
+      }
+
+      tmp[q].push(v);
+    }
+
+    const final = new Array<any>();
+
+    for (const k in tmp) {
+      if (k) {
+        const v = tmp[k];
+        const sum = v.length;
+        if (sum > 0) {
+          const test = {
+            tot: sum,
+            por: Math.round((sum * 100) / values.length),
+            int: {
+              lower: v[0],
+              upper: v[sum - 1],
+            },
+          };
+
+          final.push(clone(test));
+        }
+      }
+    }
+
+    return final;
   }
 }

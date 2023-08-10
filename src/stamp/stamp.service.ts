@@ -1,16 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource } from "typeorm";
+import { getManager } from "typeorm";
 import { writeFileSync } from "fs";
 import badge from "svg-builder";
-import { InjectDataSource } from "@nestjs/typeorm";
 
 @Injectable()
 export class StampService {
-  constructor(
-    @InjectDataSource()
-    private readonly connection: DataSource) { }
   async generateAllWebsitesDigitalStamp(): Promise<any> {
-    const websites = await this.connection.query(`
+    const manager = getManager();
+    const websites = await manager.query(`
       SELECT DISTINCT
         w.WebsiteId,
         w.Name,
@@ -45,7 +42,8 @@ export class StampService {
 
     for (const id of websitesId ?? []) {
       try {
-        let pages = await this.connection.query(
+        const manager = getManager();
+        let pages = await manager.query(
           `SELECT
             p.PageId,
             e.Tot,

@@ -1,6 +1,6 @@
 import { Page } from "./page";
+import tests from "./tests";
 import orderBy from "lodash.orderby";
-import tests from "src/evaluation/tests";
 
 export class Website {
   id: number;

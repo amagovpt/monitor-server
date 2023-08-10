@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Repository, In } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Connection, Repository, getManager, In } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CrawlWebsite, CrawlPage } from "./crawler.entity";
 import { readFileSync, writeFileSync } from "fs";
@@ -17,9 +17,8 @@ export class CrawlerService {
   constructor(
     @InjectRepository(CrawlWebsite)
     private readonly crawlWebsiteRepository: Repository<CrawlWebsite>,
-    @InjectDataSource()
-    private readonly connection: DataSource,
-        private readonly pageService: PageService
+    private readonly connection: Connection,
+    private readonly pageService: PageService
   ) {
     this.isAdminCrawling = false;
     this.isUserCrawling = false;
@@ -197,19 +196,21 @@ export class CrawlerService {
     const page = await this.crawlWebsiteRepository.findOne({
       where: { UserId: userId, WebsiteId: websiteId },
     });
-    return page && page.Done === 1;
-    /*if (page) {
+
+    if (page) {
       return page.Done === 1;
     } else {
       throw new InternalServerErrorException();
-    }*/
+    }
   }
 
   async getUserCrawlResults(
     userId: number,
     websiteId: number
   ): Promise<boolean> {
-    const pages = await this.crawlWebsiteRepository.query(
+    const manager = getManager();
+
+    const pages = await manager.query(
       `
       SELECT
         cp.*
@@ -231,7 +232,9 @@ export class CrawlerService {
     userId: number,
     tagName: string
   ): Promise<any> {
-   const websites = await this.crawlWebsiteRepository.query(
+    const manager = getManager();
+
+    const websites = await manager.query(
       `
       SELECT
         w.Name,
@@ -271,7 +274,7 @@ export class CrawlerService {
 
   async crawlTags(tagsId: number[]): Promise<boolean> {
     try {
-      const websites = await this.crawlWebsiteRepository.query(
+      const websites = await getManager().query(
         `
         SELECT
           w.WebsiteId,
@@ -305,7 +308,7 @@ export class CrawlerService {
 
   async crawlWebsite(
     userId: number,
-    websites: Array<any>,
+    websites: any,
     maxDepth: number,
     maxPages: number,
     waitJS: number,
@@ -351,7 +354,9 @@ export class CrawlerService {
   }
 
   async getCrawlResultsByCrawlWebsiteID(crawlWebsiteId: number): Promise<any> {
-    const pages = await this.crawlWebsiteRepository.query(
+    const manager = getManager();
+
+    const pages = await manager.query(
       `SELECT cp.Uri, cp.CrawlId, cw.Creation_Date
       FROM 
         CrawlPage as cp,
@@ -388,7 +393,8 @@ export class CrawlerService {
   }
 
   async getWebsiteId(userId: number, websiteUrl: string): Promise<number> {
-    const website = await this.crawlWebsiteRepository.query(
+    const manager = getManager();
+    const website = await manager.query(
       `
       SELECT w.WebsiteId
       FROM
