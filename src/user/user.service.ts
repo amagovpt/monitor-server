@@ -335,19 +335,19 @@ export class UserService {
   }
 
   findById(id: string): Promise<User> {
-    return this.userRepository.findOne(id);
+    return this.userRepository.findOne({ where: { UserId: +id } });
   }
 
   findByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { Username: username } });
+    return this.userRepository.findOne({ where: { Username:username } });
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "studies" });
+    return this.userRepository.count({ where: { Type: "studies" } });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "monitor" });
+    return this.userRepository.count({ where: { Type: "monitor" } });
   }
 
   async findStudyMonitorUserTagByName(
