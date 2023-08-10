@@ -13,6 +13,6 @@
     "baseUrl": "./",
     "incremental": true,
     "types": ["./node_modules/@qualweb/types","jest", "node"]
-  },
+    },
   "exclude": ["node_modules", "dist"]
 }

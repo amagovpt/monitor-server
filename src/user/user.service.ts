@@ -3,8 +3,8 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, In } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { Repository, In, DataSource } from "typeorm";
 import { User } from "./user.entity";
 import { Tag } from "../tag/tag.entity";
 import { Website } from "../website/website.entity";
@@ -17,8 +17,8 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
-    private readonly connection: Connection
-  ) {}
+    @InjectDataSource()
+    private readonly connection: DataSource  ) { }
 
   async changePassword(
     userId: number,
@@ -291,15 +291,13 @@ export class UserService {
     return !hasError;
   }
 
-  async findAllNonAdmin(): Promise<User[]> {
-    const manager = getManager();
-    const users = await manager.query(`
+  async findAll(): Promise<User[]> {
+    const users = await this.userRepository.query(`
       SELECT 
         u.UserId, u.Username, u.Type, u.Register_Date, u.Last_Login, 
         COUNT(distinct w.WebsiteId) as Websites
       FROM User as u
       LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
-      WHERE u.Type != "nimda"
       GROUP BY u.UserId`);
 
     return users;
@@ -335,7 +333,7 @@ export class UserService {
   }
 
   findById(id: string): Promise<User> {
-    return this.userRepository.findOne(id);
+    return this.userRepository.findOne({ where: { UserId: +id } });
   }
 
   findByUsername(username: string): Promise<User | undefined> {
@@ -343,11 +341,11 @@ export class UserService {
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "studies" });
+    return this.userRepository.count({ where:{Type: "studies"} });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ Type: "monitor" });
+    return this.userRepository.count({ where: {Type: "monitor" }});
   }
 
   async findStudyMonitorUserTagByName(
@@ -485,9 +483,8 @@ export class UserService {
   }
 
   async findAllWebsites(user: string): Promise<any> {
-    const manager = getManager();
 
-    const websites = await manager.query(
+    const websites = await this.userRepository.query(
       `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
           User as u,
@@ -505,9 +502,8 @@ export class UserService {
   }
 
   async findAllTags(user: string): Promise<any> {
-    const manager = getManager();
 
-    const tags = await manager.query(
+    const tags = await this.userRepository.query(
       `SELECT t.*, COUNT(distinct tw.WebsiteId) as Websites, u.Username as User 
       FROM 
         User as u,

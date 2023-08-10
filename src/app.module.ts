@@ -25,6 +25,12 @@ import { AccessibilityStatementModule } from './accessibility-statement-module/a
 import { AutomaticEvaluationModule } from './accessibility-statement-module/automatic-evaluation/automatic-evaluation.module';
 import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
 import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
+import { GovUserModule } from './gov-user/gov-user.module';
+import winston from "winston";
+import 'winston-daily-rotate-file';
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
+import { LogModule } from './log/log.module';
+import { DumpModule } from './dump/dump.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -32,6 +38,33 @@ const databaseConfig = JSON.parse(
 
 @Module({
   imports: [
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.DailyRotateFile({
+          filename: 'error-log/monitor-server-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '1m', 
+          level: "error"}),
+        new winston.transports.DailyRotateFile({
+          filename: 'action-log/monitor-server-%DATE%.log',
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '1m',
+          level: "http"
+        }),
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('monitor-server', {
+              // options
+            })
+          ),
+        }),
+      ],
+      // options
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "mysql",
@@ -63,6 +96,9 @@ const databaseConfig = JSON.parse(
     DirectoryModule,
     AccessibilityStatementModule,
      AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule,
+    GovUserModule,
+    LogModule,
+    DumpModule,
   ],
   controllers: [AppController],
   providers: [
@@ -73,4 +109,4 @@ const databaseConfig = JSON.parse(
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,28 +1,32 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../user/user.entity";
 import { InvalidToken } from "./invalid-token.entity";
 import { comparePasswordHash } from "../lib/security";
+import axios from "axios";
+import { NAME_CONVERTER, NIC } from "./constants";
+import { GovUserService } from "src/gov-user/gov-user.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly govUserService: GovUserService,
     @InjectRepository(InvalidToken)
     private readonly invalidTokenRepository: Repository<InvalidToken>,
-    private readonly connection: Connection,
+    @InjectDataSource()
+    private readonly connection: DataSource,
     private readonly jwtService: JwtService
-  ) {}
+  ) { }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanInvalidSessionTokens(): Promise<void> {
     // Called at midnight every day
-    const manager = getManager();
-    await manager.query(
+    await this.invalidTokenRepository.query(
       `DELETE FROM Invalid_Token WHERE Expiration_Date < NOW()`
     );
   }
@@ -141,4 +145,43 @@ export class AuthService {
 
     return !error;
   }
+  async verifyLoginUser(token: string) {
+    const atributes = await this.getAtributes(token);
+    const ccNumber = atributes.cc;
+    await this.govUserService.updateLogin(ccNumber);
+   return this.govUserService.findOneByCC(ccNumber);
+  }
+
+
+  async getAtributes(token: string) {
+    const atributesName = ["http://interop.gov.pt/MDC/Cidadao/NIC", "http://interop.gov.pt/MDC/Cidadao/NomeCompleto"]
+    const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName })
+    const authenticationContextId = responseStart.data.authenticationContextId;
+    const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
+    return this.parseAtributes(responseAtributes.data);
+  }
+  
+  private parseAtributes(atributes:any){
+    let result = {cc:null,name:""};
+    atributes.map((atribute)=>{
+      const name = atribute.name;
+      const realName = NAME_CONVERTER[name];
+      result[realName] = atribute.value;
+    })
+    return result;
+  }
 }
+/**
+ * > [                                                                                                                            │
+   {                                                                                                                          │
+ name: 'http://interop.gov.pt/MDC/Cidadao/NIC',                                                                           │
+  value: '15366302',                                                                                                       │
+  state: 'Available'                                                                                                       │
+},                                                                                                                         │
+{                                                                                                                          │
+  name: 'http://interop.gov.pt/MDC/Cidadao/NomeCompleto',                                                                  │
+  value: 'ANTÓNIO MANUEL SANTOS ESTRIGA',                                                                                  │
+  state: 'Available'                                                                                                       │
+}                                                                                                                          │
+│                                                         ]
+ */
