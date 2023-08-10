@@ -98,7 +98,7 @@ export class AccessibilityStatementService {
     return aStatement;
   }
   async updateHash(hash: string, id: number) {
-    const aStatement = await this.accessibilityStatementRepository.findOne(id);
+    const aStatement = await this.accessibilityStatementRepository.findOne({where:{Id:id}});
     aStatement.hash = hash;
     return this.accessibilityStatementRepository.save(aStatement);
   }
