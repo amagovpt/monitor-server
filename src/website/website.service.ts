@@ -1005,13 +1005,21 @@ export class WebsiteService {
   }
 
   async createOne(
-    website: CreateWebsiteDto,
+    websiteDto: CreateWebsiteDto,
     entities: string[],
     tags: string[]
   ): Promise<boolean> {
+    const website = new Website();
+    website.Name = websiteDto.name;
+    website.UserId = websiteDto.userId;
+    website.Declaration = websiteDto.declaration;
+    website.Declaration_Update_Date = websiteDto.declaration_Update_Date;
+    website.Stamp = websiteDto.stamp;
+    website.Stamp_Update_Date = websiteDto.stamp_Update_Date;
+    website.Creation_Date = new Date();
 
-    website.creation_Date = new Date();
-    website.startingUrl = decodeURIComponent(website.startingUrl);
+    website.Creation_Date = new Date();
+    website.StartingUrl = decodeURIComponent(websiteDto.startingUrl);
 
     const queryRunner = this.connection.createQueryRunner();
 
@@ -1020,19 +1028,19 @@ export class WebsiteService {
 
     let hasError = false;
     try {
-      const insertWebsite = await queryRunner.manager.save({ ...website });
+      const insertWebsite = await queryRunner.manager.save(website);
 
       for (const entity of entities || []) {
         await queryRunner.manager.query(
           `INSERT INTO EntityWebsite (EntityId, WebsiteId) VALUES (?, ?)`,
-          [entity, insertWebsite.websiteId]
+          [entity, insertWebsite.WebsiteId]
         );
       }
 
       for (const tag of tags || []) {
         await queryRunner.manager.query(
           `INSERT INTO TagWebsite (TagId, WebsiteId) VALUES (?, ?)`,
-          [tag, insertWebsite.websiteId]
+          [tag, insertWebsite.WebsiteId]
         );
       }
 
