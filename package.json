@@ -17,6 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test/govUser": "jest gov-user/gov-user.service.spec.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:aStatement": "jest accessibility-statement/page-parser-test.spec.ts"
   },
@@ -32,7 +33,8 @@
     "@nestjs/serve-static": "^3.0.1",
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "9.0.1",
-    "@qualweb/core": "0.7.29",
+    "@qualweb/core": "0.7.37",
+    "axios": "^1.3.4",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "class-validator": "0.14.0",

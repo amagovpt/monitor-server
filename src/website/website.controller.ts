@@ -6,17 +6,39 @@ import {
   Post,
   UseGuards,
   Param,
+  UseInterceptors,
+  Body,
+  Delete,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import * as SqlString from "sqlstring";
 import { WebsiteService } from "./website.service";
 import { Website } from "./website.entity";
 import { success } from "../lib/response";
+import { LoggingInterceptor } from "src/log/log.interceptor";
+import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { WebsitesIdDto } from "./dto/websites-id.dto";
+import { CreateWebsiteDto } from "./dto/create-website.dto";
+import { UpdateWebsiteDto } from "./dto/update-website.dto";
+import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
+import { DeleteBulkWebsiteDto } from "./dto/delete-bulk-website.dto";
+import { ImportWebsiteMyMonitorDto } from "./dto/import-website-my-monitor.dto";
+import { Page } from "src/page/page.entity";
+import { WebsiteMyMonitorDto } from "./dto/website-my-monitor.dto";
 
+@ApiBasicAuth()
+@ApiTags('website')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("website")
+@UseInterceptors(LoggingInterceptor)
 export class WebsiteController {
   constructor(private readonly websiteService: WebsiteService) {}
 
+  @ApiOperation({ summary: 'Reevaluate all pages from website' })
+  @ApiResponse({
+    status: 200,
+    description: 'The evaluation request has been submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("accessibility-statement/update")
   async accessibilityStatementUpdate(): Promise<any> {
@@ -34,42 +56,26 @@ export class WebsiteController {
 
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Request() req: any): Promise<any> {
-    const websitesId = JSON.parse(req.body.websitesId);
-    const option = req.body.option;
-
+  async reEvaluateWebsitePages(@Body() websitesIdDto: WebsitesIdDto): Promise<any> {
     return success(
-      await this.websiteService.addPagesToEvaluate(websitesId, option)
+      await this.websiteService.addPagesToEvaluate(websitesIdDto.websitesId, websitesIdDto.option)
     );
   }
 
+  @ApiOperation({ summary: 'Create website' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been created',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("create")
-  async createWebsite(@Request() req: any): Promise<any> {
-    const website = new Website();
-    website.Name = req.body.name;
-    website.UserId = parseInt(SqlString.escape(req.body.userId)) || null;
-    website.Declaration = req.body.declaration;
-    website.Declaration_Update_Date = req.body.declarationDate;
-    website.Stamp = req.body.stamp;
-    website.Stamp_Update_Date = req.body.stampDate;
-    website.Creation_Date = new Date();
-
-    const startingUrl = decodeURIComponent(req.body.startingUrl);
-
-    const entities = JSON.parse(req.body.entities).map((entity: string) =>
-      SqlString.escape(entity)
-    );
-
-    const tags = JSON.parse(req.body.tags).map((tag: string) =>
-      SqlString.escape(tag)
-    );
-
+  async createWebsite(@Body() websiteDto: CreateWebsiteDto): Promise<any> {
+ 
     const createSuccess = await this.websiteService.createOne(
-      website,
-      startingUrl,
-      entities,
-      tags
+      websiteDto,
+      websiteDto.entities,
+      websiteDto.tags
     );
     if (!createSuccess) {
       throw new InternalServerErrorException();
@@ -78,39 +84,19 @@ export class WebsiteController {
     return success(true);
   }
 
+
+  @ApiOperation({ summary: 'Update website' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been updated',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async updateWebsite(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
-    const name = req.body.name;
-    const startingUrl = decodeURIComponent(req.body.startingUrl);
-    const declaration = req.body.declaration;
-    const stamp = req.body.stamp;
-    const declarationDate = req.body.declarationDate;
-    const stampDate = req.body.stampDate;
-    const userId = req.body.userId;
-    const oldUserId = req.body.olderUserId;
-    const transfer = !!req.body.transfer;
-    const defaultEntities = JSON.parse(req.body.defaultEntities);
-    const entities = JSON.parse(req.body.entities);
-    const defaultTags = JSON.parse(req.body.defaultTags);
-    const tags = JSON.parse(req.body.tags);
+  async updateWebsite(@Body() updateWebsiteDto: UpdateWebsiteDto): Promise<any> {
 
     const updateSuccess = await this.websiteService.update(
-      websiteId,
-      name,
-      startingUrl,
-      declaration,
-      stamp,
-      declarationDate,
-      stampDate,
-      userId,
-      oldUserId,
-      transfer,
-      defaultEntities,
-      entities,
-      defaultTags,
-      tags
+      updateWebsiteDto
     );
     if (!updateSuccess) {
       throw new InternalServerErrorException();
@@ -119,22 +105,30 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Update pages in the observatory' })
+  @ApiResponse({
+    status: 200,
+    description: 'The pages in the observatory have been updated',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/updateObservatory")
-  async updateWebsitePagesObservatory(@Request() req: any): Promise<any> {
-    const pages = JSON.parse(req.body.pages);
-    const pagesId = JSON.parse(req.body.pagesId);
+  async updateWebsitePagesObservatory(@Body() updateObservatoryPages: UpdateObservatoryPages): Promise<any> {
     return success(
-      await this.websiteService.updatePagesObservatory(pages, pagesId)
+      await this.websiteService.updatePagesObservatory(updateObservatoryPages)
     );
   }
 
+  @ApiOperation({ summary: 'Delete websites' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list has been deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteWebsites(@Request() req: any): Promise<any> {
-    const websitesId = JSON.parse(req.body.websitesId);
-
-    const deleteSuccess = await this.websiteService.deleteBulk(websitesId);
+  async deleteWebsites(@Body() deleteBulkWebsiteDto: DeleteBulkWebsiteDto): Promise<any> {
+    const deleteSuccess = await this.websiteService.deleteBulk(deleteBulkWebsiteDto.websitesId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
@@ -142,12 +136,17 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Delete website' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
-  @Post("delete")
-  async deleteWebsite(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
+  @Delete(':id')
+  async deleteWebsite(@Param('id') id: number): Promise<any> {
 
-    const deleteSuccess = await this.websiteService.delete(websiteId);
+    const deleteSuccess = await this.websiteService.delete(id);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
@@ -155,6 +154,12 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Finds a website, by the starting URL, from the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website has been found',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor/url/:website")
   async getMyMonitorUserWebsiteDomain(
@@ -169,12 +174,16 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Deletes all pages from a list of websites' })
+  @ApiResponse({
+    status: 200,
+    description: 'The selected pages have been deleted',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
-  async deleteWebsitesaPages(@Request() req: any): Promise<any> {
-    const websitesId = JSON.parse(req.body.websitesId);
-
-    const deleteSuccess = await this.websiteService.pagesDeleteBulk(websitesId);
+  async deleteWebsitesaPages(@Body() deleteBulkWebsiteDto: DeleteBulkWebsiteDto): Promise<any> {
+    const deleteSuccess = await this.websiteService.pagesDeleteBulk(deleteBulkWebsiteDto.websitesId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }
@@ -182,15 +191,27 @@ export class WebsiteController {
     return success(true);
   }
 
+  @ApiOperation({ summary: 'Imports a website from MyMonitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The selected website has been imported',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("import")
-  async importWebsiteFromMyMonitor(@Request() req: any): Promise<any> {
-    const websiteId = req.body.websiteId;
-    const websiteName = req.body.websiteName;
+  async importWebsiteFromMyMonitor(@Body() importWebsiteMyMonitorDto: ImportWebsiteMyMonitorDto): Promise<any> {
+    const websiteId = importWebsiteMyMonitorDto.websiteId;
+    const websiteName = importWebsiteMyMonitorDto.newWebsiteName;
 
     return success(await this.websiteService.import(websiteId, websiteName));
   }
 
+  @ApiOperation({ summary: 'Calculates the number of websites in AMS filtered by search string' })
+  @ApiResponse({
+    status: 200,
+    description: ' The number of websites in AMS filtered by search string',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminWebsiteCount(@Param("search") search: string): Promise<any> {
@@ -201,6 +222,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Finds websites in AMS filtered by search string, size, sort and direction' })
+  @ApiResponse({
+    status: 200,
+    description: ' The websites in AMS filtered by search string, size, sort and direction',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/:size/:page/:sort/:direction/:search")
   async getAllWebsites(
@@ -221,12 +248,24 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find website information by id' })
+  @ApiResponse({
+    status: 200,
+    description: ' The specific website information',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("info/:websiteId")
   async getWebsiteInfo(@Param("websiteId") websiteId: number): Promise<any> {
     return success(await this.websiteService.findInfo(websiteId));
   }
 
+  @ApiOperation({ summary: 'Find website by user and name' })
+  @ApiResponse({
+    status: 200,
+    description: ' The specific website',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get(":website/user/:user/pages")
   async getAllWebsiteDomains(
@@ -241,6 +280,24 @@ export class WebsiteController {
     return success(await this.websiteService.findAllPages(websiteId));
   }
 
+  @ApiOperation({ summary: 'Finds all website data to build a csv' })
+  @ApiResponse({
+    status: 200,
+    description: ' All the webiste data',
+    type: Website,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("csv")
+  async getAllWebsiteCSVData(): Promise<any> {  
+    return success(await this.websiteService.getAllWebsiteDataCSV());
+  }
+
+  @ApiOperation({ summary: 'Finds all pages from a website by id' })
+  @ApiResponse({
+    status: 200,
+    description: ' All pages from the specific website',
+    type: Array<Page>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("pages/:websiteId")
   async getAllWebsitePages(
@@ -249,48 +306,96 @@ export class WebsiteController {
     return success(await this.websiteService.findAllPages(websiteId));
   }
 
+  @ApiOperation({ summary: 'Finds all websites excluding Study Monitor websites' })
+  @ApiResponse({
+    status: 200,
+    description: 'The list of websites',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("official")
   async getAllOfficialWebsites(): Promise<any> {
     return success(await this.websiteService.findAllOfficial());
   }
 
+  @ApiOperation({ summary: 'Finds all websites without user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The list of websites',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("withoutUser")
   async getWebsitesWithoutUser(): Promise<any> {
     return success(await this.websiteService.findAllWithoutUser());
   }
 
+  @ApiOperation({ summary: 'Finds all websites without entity' })
+  @ApiResponse({
+    status: 200,
+    description: 'The list of websites',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("withoutEntity")
   async getWebsitesWithoutEntity(): Promise<any> {
     return success(await this.websiteService.findAllWithoutEntity());
   }
 
+  @ApiOperation({ summary: 'Finds the number of websites in study monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of websites',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("studyMonitor/total")
-  async getNumberOfStudyMonitorUsers(): Promise<any> {
+  async getNumberOfStudyMonitorWebsites(): Promise<any> {
     return success(await this.websiteService.findNumberOfStudyMonitor());
   }
 
+  @ApiOperation({ summary: 'Finds the number of websites in my monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of websites',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("myMonitor/total")
-  async getNumberOfMyMonitorUsers(): Promise<any> {
+  async getNumberOfMyMonitorWebsites(): Promise<any> {
     return success(await this.websiteService.findNumberOfMyMonitor());
   }
 
+  @ApiOperation({ summary: 'Finds the number of websites in observatory' })
+  @ApiResponse({
+    status: 200,
+    description: 'The number of websites',
+    type: Number,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("observatory/total")
-  async getNumberOfObservatoryTags(): Promise<any> {
+  async getNumberOfObservatoryWebsites(): Promise<any> {
     return success(await this.websiteService.findNumberOfObservatory());
   }
 
+  @ApiOperation({ summary: 'Check if website exists by name' })
+  @ApiResponse({
+    status: 200,
+    description: 'The specific website',
+    type: Website,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("exists/:name")
   async checkIfWebsiteExists(@Param("name") name: string): Promise<any> {
     return success(!!(await this.websiteService.findByOfficialName(name)));
   }
 
+  @ApiOperation({ summary: 'Check if website exists by starting url' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("exists/url/:url")
   async checkIfWebsiteUrlExists(@Param("url") url: string): Promise<any> {
@@ -299,28 +404,46 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Check if website is in observatory' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("isInObservatory")
-  async checkIfIsInObservatory(@Request() req: any): Promise<any> {
+  async checkIfIsInObservatory(websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
     return success(
       await this.websiteService.isInObservatory(
-        req.user.userId,
-        req.body.website
+        websiteMyMonitorDto.userId,
+        websiteMyMonitorDto.website
       )
     );
   }
 
+  @ApiOperation({ summary: 'Transfers observatory pages from a specific website to a specific user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The transfer was a success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("transferObservatoryPages")
-  async transferObservatoryPages(@Request() req: any): Promise<any> {
+  async transferObservatoryPages(websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
     return success(
       await this.websiteService.transferObservatoryPages(
-        req.user.userId,
-        req.body.website
+        websiteMyMonitorDto.userId,
+        websiteMyMonitorDto.website
       )
     );
   }
 
+  @ApiOperation({ summary: 'Finds all websites from a specific user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The list of websites',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor")
   async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
@@ -329,17 +452,29 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Reevalute all pages from a specific website in My Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The page evaluation was submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/reEvaluate")
-  async reEvaluateMyMonitorUserWebsitePages(@Request() req: any): Promise<any> {
-    const userId = req.user.userId;
-    const website = req.body.website;
+  async reEvaluateMyMonitorUserWebsitePages(websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
+    const userId = websiteMyMonitorDto.userId;
+    const website = websiteMyMonitorDto.website;
 
     return success(
       await this.websiteService.reEvaluateMyMonitorWebsite(userId, website)
     );
   }
 
+  @ApiOperation({ summary: 'Reevalute all pages from a specific website in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The page evaluation was submited',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/reEvaluate")
   async reEvaluateStudyMonitorUserTagWebsitePages(
@@ -358,6 +493,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag")
   async getStudyMonitorUserTagWebsites(
@@ -370,6 +511,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/otherTags/:tag")
   async getStudyMonitorUserOtherTagsWebsites(
@@ -385,6 +532,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Find all websites from a specific user and tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The website list',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/website/nameExists/:website")
   async checkIfStudyMonitorUserTagWebsiteNameExists(
@@ -402,6 +555,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Check if website exists in specific tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Get("studyMonitor/tag/:tag/websiteExists/:startingUrl")
   async checkIfStudyMonitorUserTagWebsiteExists(
@@ -419,6 +578,13 @@ export class WebsiteController {
     );
   }
 
+
+  @ApiOperation({ summary: 'Link a website to a tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Array<Website>,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/link")
   async linkStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
@@ -441,6 +607,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Create a website in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Website
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/create")
   async createStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
@@ -469,6 +641,12 @@ export class WebsiteController {
     );
   }
 
+  @ApiOperation({ summary: 'Remove a website to a tag in Study Monitor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/remove")
   async removeStudyMonitorUserTagWebsite(@Request() req: any): Promise<any> {
