@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../user/user.entity";
 import { InvalidToken } from "./invalid-token.entity";
@@ -18,15 +18,15 @@ export class AuthService {
     private readonly govUserService: GovUserService,
     @InjectRepository(InvalidToken)
     private readonly invalidTokenRepository: Repository<InvalidToken>,
-    private readonly connection: Connection,
+    @InjectDataSource()
+    private readonly connection: DataSource,
     private readonly jwtService: JwtService
   ) { }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanInvalidSessionTokens(): Promise<void> {
     // Called at midnight every day
-    const manager = getManager();
-    await manager.query(
+    await this.invalidTokenRepository.query(
       `DELETE FROM Invalid_Token WHERE Expiration_Date < NOW()`
     );
   }

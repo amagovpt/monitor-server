@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, In } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository, In } from "typeorm";
 import { Directory } from "./directory.entity";
 
 @Injectable()
@@ -8,8 +8,8 @@ export class DirectoryService {
   constructor(
     @InjectRepository(Directory)
     private readonly directoryRepository: Repository<Directory>,
-    private readonly connection: Connection
-  ) {}
+    @InjectDataSource()
+    private readonly connection: DataSource,  ) {}
 
   async addPagesToEvaluate(
     directoriesId: number[],
@@ -352,8 +352,7 @@ export class DirectoryService {
   }
 
   findAll(): Promise<any> {
-    const manager = getManager();
-    return manager.query(`SELECT 
+    return this.directoryRepository.query(`SELECT 
         d.*,
         COUNT(distinct dt.TagId) as Tags 
       FROM 
@@ -363,7 +362,7 @@ export class DirectoryService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    return this.directoryRepository.count({ Show_in_Observatory: 1 });
+    return this.directoryRepository.count({where:{Show_in_Observatory: 1 }});
   }
 
   async findInfo(directoryId: number): Promise<any> {
@@ -393,8 +392,7 @@ export class DirectoryService {
   }
 
   findAllDirectoryTags(directory: string): Promise<any> {
-    const manager = getManager();
-    return manager.query(
+    return this.directoryRepository.query(
       `SELECT 
         t.*,
         COUNT(distinct tw.WebsiteId) as Websites 
@@ -414,15 +412,13 @@ export class DirectoryService {
   }
 
   async findAllDirectoryWebsites(directory: string): Promise<any> {
-    const manager = getManager();
-
-    const _directory = await manager.query(
+    const _directory = await this.directoryRepository.query(
       `SELECT * FROM Directory WHERE Name = ? LIMIT 1`,
       [directory]
     );
     const method = _directory[0].Method;
 
-    const nTags = await manager.query(
+    const nTags = await this.directoryRepository.query(
       `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
       [directory]
     );
@@ -450,7 +446,7 @@ export class DirectoryService {
         HAVING COUNT(tw.WebsiteId) = ?`,
         [nTags.map((t) => t.TagId), nTags.length]
       );*/
-      const websites = await manager.query(
+      const websites = await this.directoryRepository.query(
         `
         SELECT * FROM TagWebsite WHERE TagId IN (?)
       `,
@@ -473,7 +469,7 @@ export class DirectoryService {
         }
       }
 
-      return manager.query(
+      return this.directoryRepository.query(
         `
         SELECT 
           w.*, 
@@ -495,7 +491,7 @@ export class DirectoryService {
         [websitesToFetch]
       );
     } else {
-      return manager.query(
+      return this.directoryRepository.query(
         `SELECT DISTINCT
           w.*, 
           u.Username as User, u.Type as Type, 
@@ -520,21 +516,20 @@ export class DirectoryService {
   }
 
   async findAllDirectoryWebsitePages(directory: string): Promise<any> {
-    const manager = getManager();
 
-    const _directory = await manager.query(
+    const _directory = await this.directoryRepository.query(
       `SELECT * FROM Directory WHERE Name = ? LIMIT 1`,
       [directory]
     );
     const method = _directory[0].Method;
 
-    const nTags = await manager.query(
+    const nTags = await this.directoryRepository.query(
       `SELECT td.* FROM Directory as d, DirectoryTag as td WHERE d.Name = ? AND td.DirectoryId = d.DirectoryId`,
       [directory]
     );
 
     if (method === 0) {
-      const pages = await manager.query(
+      const pages = await this.directoryRepository.query(
         `SELECT 
           w.WebsiteId,
           p.*,
@@ -568,7 +563,7 @@ export class DirectoryService {
 
       return pages.filter((p) => p.Score !== null);
     } else {
-      const pages = await manager.query(
+      const pages = await this.directoryRepository.query(
         `SELECT DISTINCT
           w.WebsiteId,
           p.*,

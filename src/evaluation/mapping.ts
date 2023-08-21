@@ -290,6 +290,7 @@ function QW_ACT_R11(elements: any, results: any, nodes: any, rule: any): void {
   }
 }
 function QW_ACT_R12(elements: any, results: any, nodes: any, rule: any): void {
+  addToElements(elements, "a", rule.results.length);
   if (rule.metadata.outcome === "passed") {
     addToElements(elements, "linkAName", rule.metadata.passed);
     addToResults(results, "a_10");

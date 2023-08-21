@@ -7,15 +7,26 @@ import ipRangeCheck from "ip-range-check";
 import { RateLimit } from "nestjs-rate-limiter";
 import { LoggingInterceptor } from "src/log/log.interceptor";
 import { ConfigService } from "@nestjs/config";
+import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+
 
 const blackList = readFileSync("../black-list.txt").toString().split("\n");
 
+@ApiBasicAuth()
+@ApiTags('amp')
+@ApiResponse({ status: 403, description: 'Forbidden' })
 @Controller("amp")
 @UseInterceptors(LoggingInterceptor)
 export class AmpController {
   constructor(private readonly evaluationService: EvaluationService, 
     private readonly configService: ConfigService) { }
 
+  @ApiOperation({ summary: 'Evaluate page via url' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @RateLimit({
     keyPrefix: "amp",
     points: 3,
@@ -49,6 +60,12 @@ export class AmpController {
     );
   }
 
+  @ApiOperation({ summary: 'Evaluate html code' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Boolean,
+  })
   @Post("eval/html")
   async evaluateHtml(@Request() req: any): Promise<any> {
     await this.evaluationService.increaseAccessMonitorRequestCounter();
