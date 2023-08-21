@@ -54,10 +54,10 @@ export class EvaluationService {
       let pages = [];
       //LOCK
             try {
-        pages = await getManager().query(
+              pages = await this.connection.query(
           `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT ?`, [this.EVALUATING]
         );
-        await getManager().query(
+              await this.connection.query(
           `UPDATE Evaluation_List SET Is_Evaluating = 1 WHERE EvaluationListId IN (?)`,
           [pages.map((p) => p.EvaluationListId)]
         );
