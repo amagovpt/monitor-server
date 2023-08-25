@@ -1545,9 +1545,9 @@ function QW_WCAG_T34(
 
 function QW_BP1(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "hxNone", undefined);
+    addToElements(elements, "hxNone", technique.metadata.failed);
     addToResults(results, "hx_01a");
-    addToNodes(nodes, "hxNone", undefined);
+    addToNodes(nodes, "hxNone", technique.results.filter((r: any) => r.verdict === "failed"));
   } else if (technique.metadata.outcome === "warning") {
     addToElements(elements, "hx", technique.metadata.warning);
     addToResults(results, "hx_01b");
