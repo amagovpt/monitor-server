@@ -27,8 +27,5 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(process.env.PORT || 3000);
 }
-async function deletePlicas(app){
-  const pageService = app.get(PageService);
-  await pageService.deletePlicas();
-}
+
 bootstrap();
