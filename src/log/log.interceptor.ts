@@ -29,7 +29,7 @@ export class LoggingInterceptor implements NestInterceptor {
                 }
                 const logData = {
                     path: request.route.path,
-                    origin: request.headers.origin,
+                    origin: request.headers['x-forwarded-for'] || request.connection.remoteAddress,
                     body,
                     user,
                 };
