@@ -15,7 +15,7 @@ export class LogService {
 
   signFile(name:string){
     const fileContent = fs.readFileSync('./action-log/'+name);
-    fs.writeFileSync('./action-log/ds-'+name, this.digitallySignContent(name));
+    fs.writeFileSync('./action-log/ds-' + name, this.digitallySignContent(fileContent));
   }
 
   digitallySignContent(content:string){
