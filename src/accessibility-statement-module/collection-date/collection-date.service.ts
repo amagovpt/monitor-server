@@ -12,12 +12,12 @@ export class CollectionDateService {
   }
 
   create() {
-    const collection = this.collectionDateRepository.create(new CollectionDate());
+    const collection = this.collectionDateRepository.create({ createdAt: new Date() });
     return this.collectionDateRepository.save(collection);
   }
 
   findLatest() {
-    return this.collectionDateRepository.findOne({where:{}, order: { createdAt:'ASC'}});
+    return this.collectionDateRepository.findOne({ where: {}, order: { createdAt: 'DESC' } });
   }
 
 }
