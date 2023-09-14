@@ -39,11 +39,12 @@ export class AccessibilityStatementService {
       const currentHash = currentAS.hash;
       const currentDate = currentAS.statementDate;
       const newhash = hash(aStatementParsed);
-
-      if (currentDate === aStatementParsed.statementDate && currentHash !== newhash) {
+      const dateDiferent = currentDate.toISOString() !== aStatementParsed.statementDate.toISOString();
+      
+      if (!dateDiferent && currentHash !== newhash) {
         this.deleteById(currentAS.Id);
         aStatement = this.createAStatement(aStatementParsed, website);
-      } else if (currentDate !== aStatementParsed.statementDate) {
+      } else if (dateDiferent) {
         aStatement = this.createAStatement(aStatementParsed, website);
       }
     }

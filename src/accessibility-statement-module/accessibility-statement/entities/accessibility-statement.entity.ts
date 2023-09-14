@@ -22,7 +22,7 @@ export class AccessibilityStatement {
     })
     UpdatedAt: Date;
 
-    @ManyToOne(type => Website)
+    @ManyToOne(type => Website, (website) => website.AStatements)
     @JoinColumn({ name: "WebsiteId", referencedColumnName: "WebsiteId" })
     Website: Website;
 
