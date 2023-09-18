@@ -16,6 +16,8 @@ export class LogService {
 
   signFile(name:string){
     const fileContent = fs.readFileSync('./action-log/'+name);
+    console.log(name)
+    console.log(this.digitallySignContent(fileContent))
     fs.writeFileSync('./action-log/ds-' + name, this.digitallySignContent(fileContent));
   }
 
@@ -33,7 +35,7 @@ export class LogService {
     const yesterdayTimeStamp = timeStamp - 24 * 60 * 60 * 1000;
     const yesterdayDate = new Date(yesterdayTimeStamp);
     const dateString = yesterdayDate.toISOString().split('T')[0]
-    const todayList = fileList.filter((s) => { s.includes(dateString)});
+    const todayList = fileList.filter((s) => { return s.includes(dateString)});
     todayList.map((fileName) => { this.signFile(fileName)});
   
   }

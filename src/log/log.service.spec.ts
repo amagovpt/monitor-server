@@ -12,7 +12,8 @@ describe('LogService', () => {
     service = module.get<LogService>(LogService);
   });
 
-  it('should be defined', () => {
+  it('should be defined', async () => {
     expect(service).toBeDefined();
+    await service.signEveryYeterdayLogFile();
   });
 });

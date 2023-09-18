@@ -17,7 +17,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test/govUser": "jest gov-user/gov-user.service.spec.ts",
+    "test:govUser": "jest gov-user/gov-user.service.spec.ts",
+    "test:log": "jest log/log.service.spec.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:aStatement": "jest accessibility-statement/page-parser-test.spec.ts"
   },
