@@ -3,7 +3,6 @@ import { AppModule } from "./app.module";
 import express from "express";
 import helmet from "helmet";
 import compression from "compression";
-import { PageService } from "./page/page.service";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { HttpExceptionFilter } from "./lib/http-exception.filter";
@@ -26,9 +25,5 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(process.env.PORT || 3000);
-}
-async function findAccessiblityStatements(app){
-  const pageService = app.get(PageService);
-  await pageService.findAccessiblityStatements();
 }
 bootstrap();
