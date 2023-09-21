@@ -229,7 +229,7 @@ export class WebsiteService {
         LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
       WHERE 
         w.WebsiteId = ?
-      GROUP BY w.WebsiteId, w.StartingUrl 
+      GROUP BY w.WebsiteId, w.StartingUrl, u.Username, e.Long_Name
       LIMIT 1`,
       [websiteId]
     );

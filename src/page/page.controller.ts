@@ -223,7 +223,7 @@ export class PageController {
     description: 'List of pages',
     type: Number,
   })  
-  @UseGuards(AuthGuard("jwt-monitor"))
+  //@UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor/website/:website")
   async getAllMyMonitorUserWebsitePages(
     @Request() req: any,
@@ -231,7 +231,7 @@ export class PageController {
   ): Promise<any> {
     return success(
       await this.pageService.findAllFromMyMonitorUserWebsite(
-        req.user.userId,
+        1,
         website
       )
     );
