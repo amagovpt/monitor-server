@@ -501,7 +501,7 @@ export class ObservatoryService {
           }
 
           if (website.stampDate.getFullYear() === currentYear) {
-            switch (website.declaration) {
+            switch (website.stamp) {
               case 1:
                 badges.currentYear.websites.bronze++;
                 break;
