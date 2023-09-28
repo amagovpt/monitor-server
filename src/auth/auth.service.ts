@@ -106,7 +106,7 @@ export class AuthService {
   }
 
   signToken(payload: any): string {
-    return this.jwtService.sign(payload,{algorithm:"RS256"});
+    return this.jwtService.sign(payload,{algorithm:"HS256"});
   }
 
   verifyJWT(jwt: string): any {

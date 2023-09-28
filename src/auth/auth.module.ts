@@ -18,8 +18,7 @@ import { GovUserModule } from 'src/gov-user/gov-user.module';
     TypeOrmModule.forFeature([User, InvalidToken]),
     GovUserModule,
     JwtModule.register({
-      publicKey: jwtConstants.publicKey,
-      privateKey: jwtConstants.privateKey,
+      secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
     })
   ],

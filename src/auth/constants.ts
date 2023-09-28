@@ -1,8 +1,5 @@
-import { readFileSync } from 'fs';
 const jwtConstants = {
-  secret: 'secretKey',
-  publicKey: readFileSync('../keys.pub'),
-  privateKey: readFileSync('../keys')
+  secret: process.env.SECRET_KEY,
 };
 const NIC = "http://interop.gov.pt/MDC/Cidadao/NIC";
 const NOME_COMPLETO = "http://interop.gov.pt/MDC/Cidadao/NomeCompleto";

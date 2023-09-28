@@ -10,7 +10,7 @@ export class JwtMonitorStrategy extends PassportStrategy(Strategy, 'jwt-monitor'
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: jwtConstants.privateKey,
+      secret: jwtConstants.secret,
     });
   }
 
