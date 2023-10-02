@@ -4,6 +4,7 @@ import { success, error } from "../lib/response";
 import { AuthGuard } from "@nestjs/passport";
 import { LoggingInterceptor } from "src/log/log.interceptor";
 import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Observatory } from "./observatory.entity";
 
 
 @ApiBasicAuth()
@@ -13,12 +14,24 @@ import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagge
 @UseInterceptors(LoggingInterceptor)
 export class ObservatoryController {
   constructor(private readonly observatoryService: ObservatoryService) {}
+
+  @ApiOperation({ summary: 'Get all observatory data' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: Observatory,
+  })
+  @Get('/all')
+  async findAll(): Promise<any> {
+    const data = await this.observatoryService.findAll();
+    return success(data);
+  }
   
   @ApiOperation({ summary: 'Get latest observatory data' })
   @ApiResponse({
     status: 200,
     description: 'Success',
-    type: Boolean,
+    type: Observatory,
   })
   @Get()
   async getData(): Promise<any> {
