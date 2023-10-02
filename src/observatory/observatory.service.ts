@@ -48,7 +48,7 @@ export class ObservatoryService {
   ) { }
 
   async findAll():Promise<Observatory[]>{
-    return await this.observatoryRepository.find();
+    return this.observatoryRepository.find();
   }
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async generateData(manual = false): Promise<any> {

@@ -21,7 +21,7 @@ export class ObservatoryController {
     description: 'Success',
     type: Observatory,
   })
-  @Get('/all')
+  @Get('all')
   async findAll(): Promise<any> {
     const data = await this.observatoryService.findAll();
     return success(data);
