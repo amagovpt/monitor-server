@@ -4,6 +4,4 @@ public/stamps
 
 dist
 
-package-lock.json
-
 qualweb-errors-*.log
