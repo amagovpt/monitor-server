@@ -1,5 +1,6 @@
 import { GovUser } from 'src/gov-user/entities/gov-user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import { Role } from './role';
 
 @Entity('User')
 export class User {
@@ -16,6 +17,9 @@ export class User {
     nullable: false
   })
   Username: string;
+
+  @Column({ type: 'enum', enum: Role })
+  Role: string;
 
   @Column({
     type: 'varchar',

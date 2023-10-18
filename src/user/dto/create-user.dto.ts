@@ -1,4 +1,7 @@
+import { Role } from "../role";
+
 export class CreateUserDto {
+    role:Role
     password:string;
     username:string;
     names:string;
