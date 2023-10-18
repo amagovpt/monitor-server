@@ -803,7 +803,7 @@ export default {
     ref: "G134",
     scs: "4.1.1",
     dis: "22232",
-    result: "failed",
+    result: "warning",
   },
   font_01: {
     type: "decr",

@@ -149,7 +149,7 @@ export class ListDirectories {
       errors,
       ["n_occurrences", "n_pages", "n_websites"],
       ["desc", "desc", "desc"]
-    ).filter((elem) => tests[elem.key] !== "warning").slice(0, 5);
+    ).slice(0, 5);
   }
 
   getTopFiveBestPractices(): any {
