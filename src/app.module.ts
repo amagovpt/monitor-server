@@ -28,7 +28,6 @@ import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-win
 import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
 import { CriticalAspectsModule } from "./critical-aspects/critical-aspects.module";
-
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db.json").toString()
 );
@@ -71,7 +70,7 @@ const databaseConfig = JSON.parse(
       password: databaseConfig.password,
       database: databaseConfig.database,
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: false,
+      synchronize: false, // migrations
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "public"),

@@ -245,6 +245,18 @@ export class WebsiteController {
     return success(await this.websiteService.findInfo(websiteId));
   }
 
+  @ApiOperation({ summary: 'Find website information by name' })
+  @ApiResponse({
+    status: 200,
+    description: ' The specific website information',
+    type: Website,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("info/byName/:websiteName")
+  async getWebsiteInfoByName(@Param("websiteName") websiteName: string): Promise<any> {
+    return success(await this.websiteService.findInfoByName(websiteName));
+  }
+
   @ApiOperation({ summary: 'Find website by user and name' })
   @ApiResponse({
     status: 200,
@@ -429,11 +441,11 @@ export class WebsiteController {
     description: 'The list of websites',
     type: Array<Website>,
   })
-  @UseGuards(AuthGuard("jwt-monitor"))
+  //@UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor")
   async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
     return success(
-      await this.websiteService.findAllFromMyMonitorUser(req.user.userId)
+      await this.websiteService.findAllFromMyMonitorUser(1)
     );
   }
 

@@ -252,6 +252,26 @@ export class WebsiteService {
     }
   }
 
+  async findInfoByName(websiteName: string): Promise<any> {
+    const websites = await this.websiteRepository.query(
+      `SELECT w.WebsiteId,w.Name,w.Declaration_Update_Date, COUNT(distinct wp.PageId) as Pages
+      FROM 
+        Website as w
+        LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
+      WHERE 
+        w.Name = ?
+      GROUP BY w.WebsiteId, w.Name, w.Declaration_Update_Date
+      LIMIT 1`,
+      [websiteName]
+    );
+
+    if (websites) {
+      return websites[0];
+    } else {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {
       return "nimda";

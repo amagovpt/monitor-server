@@ -16,13 +16,6 @@ export class WebsiteCriteriaNotes {
   websiteId: number;
 
   @Column({
-    type: 'text',
-    name:'checklist_id',
-    nullable: false
-  })
-  checklistId: number;
-
-  @Column({
     type: 'int',
     name:'sub_criteria_id',
     nullable: false
@@ -31,7 +24,7 @@ export class WebsiteCriteriaNotes {
 
   @Column({
     type: 'text',
-    nullable: true,
+    nullable: false,
   })
   note: string;
 

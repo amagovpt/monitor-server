@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn,OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn,OneToMany, JoinColumn} from 'typeorm';
 import { SubCriteria } from './sub-criteria.entity';
 
 @Entity('Criteria')

@@ -7,6 +7,7 @@ import { Criteria } from "./entities/criteria.entity";
 import { SubCriteria } from "./entities/sub-criteria.entity";
 import { WebsiteCriteriaNotes } from "./entities/website-criteria-notes.entity";
 import { CriteriaFindAllDTO } from "./dto/criteria-find-all.dto";
+import { WebSiteCriteriaNotesDTO } from "./dto/website-criteria-notes.dto";
 
 @Injectable()
 export class CriticalAspectService {
@@ -19,6 +20,17 @@ export class CriticalAspectService {
     private readonly webSiteCriteriaNotesRepository: Repository<WebsiteCriteriaNotes>,
   ) { }
 
+  async findAllNotesByChecklistIdAndWebsiteId(checklistId: string, websiteId: number): Promise<WebSiteCriteriaNotesDTO[]> {
+    return await this.webSiteCriteriaNotesRepository
+    .createQueryBuilder('wcn')
+    .where('wcn.websiteId = :websiteId and wcn.checklistId = :checklistId', { websiteId, checklistId })
+    .getMany();
+  }
+
+  async saveNotes(webSiteCriteriaNotes: WebsiteCriteriaNotes[]) {
+    return await this.webSiteCriteriaNotesRepository.save(webSiteCriteriaNotes);
+  }
+
   async findAllByWebsite(websiteId: number): Promise<CriteriaFindAllDTO> {
     let dto: CriteriaFindAllDTO = new CriteriaFindAllDTO();
     dto.criteria = await this.criteriaRepository
@@ -26,13 +38,10 @@ export class CriticalAspectService {
       .leftJoinAndSelect('criteria.subCriteria', 'SubCriteria')
       .getMany();
     dto.notes = await this.webSiteCriteriaNotesRepository.createQueryBuilder('wcn')
-      .where('wcn.websiteId = :websiteId', { websiteId }).getMany();
+      .where('wcn.websiteId = :websiteId', { websiteId }).getMany();      
     return dto;
   }
 
-  async saveNotes(webSiteCriteriaNotes: WebsiteCriteriaNotes[]) {
-    return await this.webSiteCriteriaNotesRepository.save(webSiteCriteriaNotes);
-  }
   async countConformNotes(websiteId: number) {
     return await this.webSiteCriteriaNotesRepository.count({
       where:
@@ -43,5 +52,4 @@ export class CriticalAspectService {
     }
     )
   }
-
 }
