@@ -64,6 +64,7 @@ CREATE TABLE `User` (
   `UserId` int(11) NOT NULL AUTO_INCREMENT,
   `Username` varchar(255) NOT NULL,
   `Password` varchar(255) NOT NULL,
+  `Role` enum('Admin','User') DEFAULT NULL,
   `Type` varchar(45) NOT NULL,
   `Names` varchar(255) DEFAULT NULL,
   `Emails` varchar(255) DEFAULT NULL,

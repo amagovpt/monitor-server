@@ -18,7 +18,10 @@ export class User {
   })
   Username: string;
 
-  @Column({ type: 'enum', enum: Role })
+  @Column({
+    type: 'enum',
+    enum: Role
+  })
   Role: string;
 
   @Column({
