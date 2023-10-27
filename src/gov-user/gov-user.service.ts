@@ -17,6 +17,7 @@ export class GovUserService {
   create(createGovUserDto: CreateGovUserDto) {
     return this.addToDB(createGovUserDto);
   }
+  
   addToDB(createGovUserDto: CreateGovUserDto){
     const newUser = this.govUserRepository.create({registerDate: new Date(),...createGovUserDto});
     return this.govUserRepository.save(newUser);

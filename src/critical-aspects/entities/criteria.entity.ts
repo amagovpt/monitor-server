@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany} from 'typeorm';
-import { SubCriteria } from './sub-criteria.entity';
 
 @Entity('Criteria')
 export class Criteria {
@@ -15,7 +14,5 @@ export class Criteria {
   })
   title: string;
 
-  @OneToMany(type => SubCriteria, (subCriteria) => subCriteria.criteria)
-  subCriteria: SubCriteria[];
 }
 

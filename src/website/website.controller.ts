@@ -441,7 +441,7 @@ export class WebsiteController {
     description: 'The list of websites',
     type: Array<Website>,
   })
-  //@UseGuards(AuthGuard("jwt-monitor"))
+  @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor")
   async getMyMonitorUserWebsites(@Request() req: any): Promise<any> {
     return success(
