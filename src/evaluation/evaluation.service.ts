@@ -10,6 +10,7 @@ import {
   executeHtmlEvaluation,
 } from "./middleware";
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class EvaluationService {
@@ -22,6 +23,7 @@ export class EvaluationService {
     private readonly connection: DataSource,
     @InjectRepository(Evaluation)
     private readonly evaluationRepository: Repository<Evaluation>,
+    private configService: ConfigService
   ) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
@@ -280,15 +282,15 @@ export class EvaluationService {
   }
 
   evaluateUrl(url: string): Promise<any> {
-    return executeUrlEvaluation(url);
+    return executeUrlEvaluation(url, this.configService.get<string>('http.validator'));
   }
 
   evaluateUrls(urls: string[]): Promise<any> {
-    return executeUrlsEvaluation(urls);
+    return executeUrlsEvaluation(urls, this.configService.get<string>('http.validator'));
   }
 
   evaluateHtml(html: string): Promise<any> {
-    return executeHtmlEvaluation(html);
+    return executeHtmlEvaluation(html, this.configService.get<string>('http.validator'));
   }
 
   async createOne(evaluation: Evaluation): Promise<any> {

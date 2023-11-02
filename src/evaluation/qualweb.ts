@@ -1,6 +1,7 @@
 import { QualWeb, EvaluationReport, QualwebOptions } from "@qualweb/core";
 
-export async function evaluate(params: any): Promise<any> {
+
+export async function evaluate(params: any,validator:string): Promise<any> {
   const options: QualwebOptions = {
     execute: {
       act: true,
@@ -124,7 +125,7 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url || params.urls) {
-    if (process.env.VALIDATOR) {
+    if (validator) {
       options["wcag-techniques"].techniques.push("QW-WCAG-T16");
     }
     options.url = params.url;
@@ -135,8 +136,8 @@ export async function evaluate(params: any): Promise<any> {
 
   options.log = { file: true };
 
-  if (process.env.VALIDATOR) {
-    options["validator"] = process.env.VALIDATOR;
+  if (validator) {
+    options["validator"] = validator;
   }
 
   const qualweb = new QualWeb({ stealth: true });

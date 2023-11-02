@@ -1,0 +1,24 @@
+http:
+  port: 3000
+  referer: "http://10.55.37.16/"
+  validator: "http://10.55.37.16/validate/"
+
+auth:
+  key: 
+
+server:
+  type: "admin"
+
+blacklist:
+  ip: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+
+db:
+  user: "root"
+  password: "mysqlroot"
+  host: 'localhost'
+  database: "monitorserver"
+  port: 3306
+
+gov:
+  client_id: "5679267266509668091"
+  redirect_uri: "http://10.55.37.16/mm2/loginRedirect"

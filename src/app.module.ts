@@ -27,21 +27,24 @@ import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
-
-const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
-);
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import configurationYaml from "./config/configuration.yaml";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configurationYaml]
+    }),
     WinstonModule.forRoot({
       transports: [
         new winston.transports.DailyRotateFile({
           filename: 'error-log/monitor-server-%DATE%.log',
           datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
-          maxSize: '1m', 
-          level: "error"}),
+          maxSize: '1m',
+          level: "error"
+        }),
         new winston.transports.DailyRotateFile({
           filename: 'action-log/monitor-server-%DATE%.log',
           datePattern: 'YYYY-MM-DD',
@@ -62,15 +65,19 @@ const databaseConfig = JSON.parse(
       // options
     }),
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: "mysql",
-      host: databaseConfig.host,
-      port: 3306,
-      username: databaseConfig.user,
-      password: databaseConfig.password,
-      database: databaseConfig.database,
-      entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: "mysql",
+        host: configService.get<string>("host"),
+        port: 3306,
+        username: configService.get<string>("username"),
+        password: configService.get<string>("password"),
+        database: configService.get<string>("database"),
+        entities: [__dirname + "/**/*.entity{.ts,.js}"],
+        synchronize: false,
+      }),
+      inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "public"),

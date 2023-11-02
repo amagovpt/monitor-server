@@ -285,7 +285,7 @@ function parseEvaluation(evaluation: any): any {
   return report;
 }
 
-export async function executeUrlEvaluation(url: string): Promise<any> {
+export async function executeUrlEvaluation(url: string, validator: string): Promise<any> {
   const params = {
     url,
   };
@@ -295,11 +295,11 @@ export async function executeUrlEvaluation(url: string): Promise<any> {
     params.url = "http://" + params.url;
   }
 
-  const reports = await qualweb.evaluate(params);
+  const reports = await qualweb.evaluate(params, validator);
   return parseEvaluation(reports[params.url]);
 }
 
-export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
+export async function executeUrlsEvaluation(urls: string[], validator: string): Promise<any> {
   const normalized = new Array<string>();
 
   for (const url of urls ?? []) {
@@ -315,7 +315,7 @@ export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
     urls: normalized,
   };
 
-  const reports = await qualweb.evaluate(params);
+  const reports = await qualweb.evaluate(params, validator);
   for (const url in reports ?? {}) {
     if (url && reports[url]) {
       reports[url] = parseEvaluation(reports[url]);
@@ -324,7 +324,7 @@ export async function executeUrlsEvaluation(urls: string[]): Promise<any> {
   return reports;
 }
 
-export async function executeHtmlEvaluation(html: string): Promise<any> {
-  const reports = await qualweb.evaluate({ html });
+export async function executeHtmlEvaluation(html: string,validator:string): Promise<any> {
+  const reports = await qualweb.evaluate({ html }, validator);
   return parseEvaluation(reports["customHtml"]);
 }

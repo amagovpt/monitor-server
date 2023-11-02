@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "monitor-server2",
+      name: "monitor-server",
       namespace: "amp",
       script: "./dist/main.js",
       instances: 2,
@@ -10,26 +10,10 @@ module.exports = {
       env: {
         NAMESPACE: "AMP",
         AMPID: 0,
-        PORT: 3001,
-        NODE_ENV: "development",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
-      env_production: {
-        NAMESPACE: "AMP",
-        AMPID: 0,
-        PORT: 3001,
-        NODE_ENV: "production",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
+      }
     },
     {
-      name: "monitor-server2",
+      name: "monitor-server",
       namespace: "admin",
       script: "./dist/main.js",
       instances: 3,
@@ -37,27 +21,10 @@ module.exports = {
       increment_var: "AMSID",
       env: {
         NAMESPACE: "ADMIN",
-        AMSID: 0,
-        PORT: 3001,
-        NODE_ENV: "development",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
-      env_production: {
-        NAMESPACE: "ADMIN",
-        AMSID: 0,
-        PORT: 3001,
-        NODE_ENV: "production",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
+        AMSID: 0,}
     },
     {
-      name: "monitor-server2",
+      name: "monitor-server",
       namespace: "user",
       script: "./dist/main.js",
       instances: 3,
@@ -65,24 +32,7 @@ module.exports = {
       increment_var: "USRID",
       env: {
         NAMESPACE: "USER",
-        USRID: 0,
-        PORT: 3001,
-        NODE_ENV: "development",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
-      env_production: {
-        NAMESPACE: "USER",
-        USRID: 0,
-        PORT: 3001,
-        NODE_ENV: "production",
-        VALIDATOR: "http://10.55.37.16/validate/",
-        REFERER: "http://10.55.37.16/",
-        CLIENT_ID: 5679267266509668091,
-        REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
-      },
+        USRID: 0,}
     },
   ],
 };

@@ -34,7 +34,7 @@ export class LoggingInterceptor implements NestInterceptor {
                     user,
                 };
                 const dateString = date.toISOString();
-                console.log(logData);
+                //console.log(logData);
                 this.logger.log({
                     level: 'http',
                     message: '"' + dateString + '"' + ':' + JSON.stringify(logData)

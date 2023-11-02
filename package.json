@@ -25,6 +25,7 @@
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.3.9",
     "@nestjs/core": "^9.3.9",
+    "@nestjs/config": "^3.0.0",
     "@nestjs/jwt": "^10.0.2",
     "@nestjs/mapped-types": "1.2.2",
     "@nestjs/passport": "^9.0.3",
