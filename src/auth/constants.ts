@@ -1,6 +1,3 @@
-const jwtConstants = {
-  secret: process.env.SECRET_KEY,
-};
 const NIC = "http://interop.gov.pt/MDC/Cidadao/NIC";
 const NOME_COMPLETO = "http://interop.gov.pt/MDC/Cidadao/NomeCompleto";
 const NAME_CONVERTER = {
@@ -9,5 +6,5 @@ const NAME_CONVERTER = {
 }
 
 export {
-  NIC, NOME_COMPLETO, jwtConstants, NAME_CONVERTER
+  NIC, NOME_COMPLETO, NAME_CONVERTER
 }

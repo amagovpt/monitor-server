@@ -10,7 +10,6 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { JwtMonitorStrategy } from './jwt-monitor.strategy';
 import { JwtStudyStrategy } from './jwt-study.strategy';
-import { jwtConstants } from './constants';
 import { GovUserModule } from 'src/gov-user/gov-user.module';
 
 @Module({
@@ -18,7 +17,6 @@ import { GovUserModule } from 'src/gov-user/gov-user.module';
     TypeOrmModule.forFeature([User, InvalidToken]),
     GovUserModule,
     JwtModule.register({
-      secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
     })
   ],

@@ -21,4 +21,4 @@ db:
 
 gov:
   client_id: "5679267266509668091"
-  redirect_uri: "http://10.55.37.16/mm2/loginRedirect"
+  redirect_uri: "http://10.55.37.16/mm/loginRedirect"
