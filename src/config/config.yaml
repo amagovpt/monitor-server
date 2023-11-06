@@ -4,7 +4,7 @@ http:
   validator: "http://10.55.37.16/validate/"
 
 auth:
-  key: 
+  key: "vsz9f09*"
 
 server:
   type: "admin"

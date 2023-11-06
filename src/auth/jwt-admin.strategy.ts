@@ -10,7 +10,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      "assets": [{ "include": "./config/*.yaml", "outDir": "./dist" }],
+      secretOrKey: configService.get<string>('auth.key'),
     });
   }
 

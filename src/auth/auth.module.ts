@@ -11,13 +11,18 @@ import { JwtAdminStrategy } from './jwt-admin.strategy';
 import { JwtMonitorStrategy } from './jwt-monitor.strategy';
 import { JwtStudyStrategy } from './jwt-study.strategy';
 import { GovUserModule } from 'src/gov-user/gov-user.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, InvalidToken]),
     GovUserModule,
-    JwtModule.register({
-      signOptions: { expiresIn: '1d' },
+    JwtModule.registerAsync({
+      useFactory: async (configService: ConfigService) => ({
+        signOptions: { expiresIn: '1d' },
+        secret: configService.get<string>('auth.key'),
+      }),
+      inject: [ConfigService],
     })
   ],
   exports: [AuthService],
