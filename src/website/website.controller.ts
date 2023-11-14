@@ -40,6 +40,21 @@ export class WebsiteController {
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
+  @Post("accessibility-statement/update")
+  async accessibilityStatementUpdate(): Promise<any> {
+    return success(
+      await this.websiteService.findAccessiblityStatements());
+  }
+
+
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("accessibility-statement/update/:id")
+  async accessibilityStatementUpdateById(@Param('id') id: number): Promise<any> {
+    await this.websiteService.updateAStatement(id);
+    return success(true);
+  }
+
+  @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
   async reEvaluateWebsitePages(@Body() websitesIdDto: WebsitesIdDto): Promise<any> {
     return success(

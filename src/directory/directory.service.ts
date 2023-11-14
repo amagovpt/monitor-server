@@ -362,7 +362,7 @@ export class DirectoryService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    return this.directoryRepository.count({where:{Show_in_Observatory: 1 }});
+    return this.directoryRepository.count({ where: { Show_in_Observatory: 1 } });
   }
 
   async findInfo(directoryId: number): Promise<any> {

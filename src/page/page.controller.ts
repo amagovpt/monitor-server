@@ -207,6 +207,7 @@ export class PageController {
     @Param("direction") direction: string,
     @Param("search") search: string
   ): Promise<any> {
+    console.log("pedido CHegou");
     return success(
       await this.pageService.findAll(
         parseInt(size),
