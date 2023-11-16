@@ -137,6 +137,7 @@ export class UserController {
     const userId = updateUserDto.userId;
     const password = updateUserDto.password;
     const confirmPassword = updateUserDto.confirmPassword;//FIXME
+    const role= updateUserDto.role;
 
     if (password && confirmPassword && !this.passwordValidator(password)) {
       throw new InternalServerErrorException();
@@ -155,6 +156,7 @@ export class UserController {
     const transfer = !!updateUserDto.transfer;
 
     const updateSuccess = await this.userService.update(
+      role,
       userId,
       password,
       names,

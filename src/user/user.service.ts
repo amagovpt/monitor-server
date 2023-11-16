@@ -9,6 +9,7 @@ import { User } from "./user.entity";
 import { Tag } from "../tag/tag.entity";
 import { Website } from "../website/website.entity";
 import { comparePasswordHash, generatePasswordHash } from "../lib/security";
+import { Role } from "./role";
 
 @Injectable()
 export class UserService {
@@ -65,6 +66,7 @@ export class UserService {
   }
 
   async update(
+    role:Role,
     userId: number,
     password: string,
     names: string,
@@ -84,7 +86,7 @@ export class UserService {
       await queryRunner.manager.update(
         User,
         { UserId: userId },
-        { Names: names, Emails: emails }
+        { Names: names, Emails: emails,Role:role }
       );
 
       if (password && password !== "null") {
