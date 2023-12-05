@@ -75,7 +75,7 @@ import configurationYaml from "./config/configuration.yaml";
         type: "mysql",
         host: configService.get<string>("db.host"),
         port: 3306,
-        user: configService.get<string>("db.username"),
+        username: configService.get<string>("db.user"),
         password: configService.get<string>("db.password"),
         database: configService.get<string>("db.database"),
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
