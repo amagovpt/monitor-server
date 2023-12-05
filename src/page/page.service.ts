@@ -5,6 +5,7 @@ import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
 
+
 @Injectable()
 export class PageService {
   constructor(
@@ -144,6 +145,7 @@ export class PageService {
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -195,7 +197,7 @@ export class PageService {
         `,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
-
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -823,6 +825,7 @@ export class PageService {
           Page,
           {where: {Uri: uri} , select: ["PageId", "Uri", "Creation_Date"] }
         );
+
         if (pageExists) {
           const websitePage = await queryRunner.manager.query(
             `SELECT 

@@ -337,7 +337,7 @@ export class UserService {
   }
 
   findByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { Username: username } });
+    return this.userRepository.findOne({ where: { Username:username } });
   }
 
   findNumberOfStudyMonitor(): Promise<number> {

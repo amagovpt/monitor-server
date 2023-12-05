@@ -156,8 +156,8 @@ function calculateTrueFalse(v: any): any {
   const score = v["score"];
   const ret = { s: score, p: 0 };
   for (const w in v["dis"]) {
-    if (parseInt(v.dis[w]) > 1) {
-      const p = +v["trust"] * parseInt(v.dis[w]);
+    if (parseInt(w) > 1) {
+      const p = +v["trust"] * parseInt(w);
       ret["p"] += p;
     }
   }
@@ -174,9 +174,9 @@ function calculateDecr(v: any, report: any): any {
   const op = score - minus;
   const rr = op < 1 ? 1 : op;
   const ret = { s: rr, p: 0 };
-  for (const w in v["dis"]) {
-    if (parseInt(v.dis[w]) > 1) {
-      const p = +v["trust"] * parseInt(v.dis[w]);
+  for (const w of v["dis"]) {
+    if (parseInt(w) > 1) {
+      const p = +v["trust"] * parseInt(w);
       ret["p"] += p;
     }
   }
@@ -190,9 +190,9 @@ function calculateProp(v: any, report: any): any {
   const op = score - (score / elem) * test;
   const rr = op < 1 ? 1 : op;
   const ret = { s: rr, p: 0 };
-  for (const w in v["dis"]) {
-    if (parseInt(v.dis[w]) > 1) {
-      const p = +v["trust"] * parseInt(v.dis[w]);
+  for (const w of v["dis"]) {
+    if (parseInt(w) > 1) {
+      const p = +v["trust"] * parseInt(w);
       ret["p"] += p;
     }
   }
