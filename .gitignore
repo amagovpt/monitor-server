@@ -1,6 +1,8 @@
 node_modules
 public/stamps
 dist
+action-log
+error-log
 
 idea
 qualweb-errors-*.log

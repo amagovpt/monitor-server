@@ -12,7 +12,6 @@ export async function evaluate(params: any): Promise<any> {
       rules: [
         "QW-ACT-R1",
         "QW-ACT-R2",
-        "QW-ACT-R3",
         "QW-ACT-R4",
         "QW-ACT-R5",
         "QW-ACT-R6",
@@ -26,7 +25,6 @@ export async function evaluate(params: any): Promise<any> {
         "QW-ACT-R15",
         "QW-ACT-R16",
         "QW-ACT-R17",
-        "QW-ACT-R18",
         "QW-ACT-R19",
         "QW-ACT-R20",
         "QW-ACT-R21",
@@ -89,6 +87,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-WCAG-T31",
         "QW-WCAG-T33",
         "QW-WCAG-T34",
+        "QW-WCAG-T35",
       ],
     },
     "best-practices": {
@@ -117,7 +116,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP25",
         "QW-BP26",
         "QW-BP27",
-
+        "QW-BP29"
       ],
     },
     waitUntil: ["load", "networkidle0"],
