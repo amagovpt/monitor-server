@@ -53,7 +53,7 @@
     "nestjs-rate-limiter": "^3.1.0",
     "object-hash": "^3.0.0",
     "passport": "^0.6.0",
-    "passport-jwt": "4.0.0",
+    "passport-jwt": "4.0.1",
     "passport-local": "^1.0.0",
     "puppeteer": "21.3.6",
     "puppeteer-extra": "^3.3.6",
