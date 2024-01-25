@@ -197,7 +197,7 @@ export default {
     ref: "G1",
     scs: "2.4.1",
     dis: "43522",
-    result: "failed",
+    result: "warning",
   },
   a_02a: {
     type: "fals",
@@ -803,7 +803,7 @@ export default {
     ref: "G134",
     scs: "4.1.1",
     dis: "22232",
-    result: "failed",
+    result: "warning",
   },
   font_01: {
     type: "decr",
@@ -1025,7 +1025,7 @@ export default {
     ref: "H42",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   aria_01: {
     type: "true",
@@ -1073,7 +1073,7 @@ export default {
     ref: "6a7281",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   aria_05: {
     type: "true",
@@ -1091,13 +1091,13 @@ export default {
     type: "fals",
     elem: "all",
     test: "ariaStNotPermitted",
-    score: 10,
+    score: 3,
     level: "A",
     trust: "1",
     ref: "5c01ea",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   aria_07: {
     type: "true",
@@ -1121,7 +1121,7 @@ export default {
     ref: "5f99a7",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   audio_video_01: {
     type: "true",
@@ -1145,7 +1145,7 @@ export default {
     ref: "80f0bf",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   autocomplete_01: {
     type: "true",
@@ -1169,7 +1169,7 @@ export default {
     ref: "73f2c2",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   button_01: {
     type: "true",
@@ -1193,7 +1193,7 @@ export default {
     ref: "97a4e1",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   element_01: {
     type: "true",
@@ -1229,7 +1229,7 @@ export default {
     ref: "6cfa84",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   element_04: {
     type: "true",
@@ -1253,7 +1253,7 @@ export default {
     ref: "46ca7f",
     scs: "4.1.2",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   element_06: {
     type: "true",
@@ -1277,7 +1277,7 @@ export default {
     ref: "H58",
     scs: "3.1.2",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   element_08: {
     type: "true",
@@ -1301,7 +1301,7 @@ export default {
     ref: "307n5z",
     scs: "4.1.2",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   element_10: {
     type: "true",
@@ -1337,7 +1337,7 @@ export default {
     ref: "H43",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   id_01: {
     type: "true",
@@ -1361,7 +1361,7 @@ export default {
     ref: "H93",
     scs: "4.1.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   iframe_02: {
     type: "true",
@@ -1411,7 +1411,7 @@ export default {
     ref: "G202",
     scs: "2.1.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   letter_01: {
     type: "true",
@@ -1437,7 +1437,7 @@ export default {
     ref: "24afc2",
     scs: "1.4.12",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   a_10: {
     type: "true",
@@ -1461,7 +1461,7 @@ export default {
     ref: "G91",
     scs: "4.1.2",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   a_12: {
     type: "true",
@@ -1509,7 +1509,7 @@ export default {
     ref: "m6b1q3",
     scs: "4.1.2",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   meta_03: {
     type: "true",
@@ -1533,7 +1533,7 @@ export default {
     ref: "G110",
     scs: "2.2.4",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   meta_05: {
     type: "true",
@@ -1569,7 +1569,7 @@ export default {
     ref: "b4f0c3",
     scs: "1.1.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   orientation_01: {
     type: "true",
@@ -1593,7 +1593,7 @@ export default {
     ref: "b33eff",
     scs: "1.3.4",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   role_01: {
     type: "true",
@@ -1619,7 +1619,7 @@ export default {
     ref: "674b10",
     scs: "1.3.4",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   scrollable_01: {
     type: "true",
@@ -1643,7 +1643,7 @@ export default {
     ref: "G202",
     scs: "2.1.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   svg_01: {
     type: "true",
@@ -1667,7 +1667,7 @@ export default {
     ref: "G202",
     scs: "1.1.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   table_07: {
     type: "true",
@@ -1691,7 +1691,7 @@ export default {
     ref: "d0f69e",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   textC_01: {
     type: "true",
@@ -1763,7 +1763,7 @@ export default {
     ref: "G208",
     scs: "2.5.3",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   word_01: {
     type: "true",
@@ -1787,7 +1787,7 @@ export default {
     ref: "9e45ec",
     scs: "1.4.12",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   css_02: {
     type: "true",
@@ -1823,7 +1823,7 @@ export default {
     ref: "ARIA11",
     scs: "1.3.1,2.4.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_03: {
     type: "true",
@@ -1847,7 +1847,7 @@ export default {
     ref: "ARIA11",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_05: {
     type: "true",
@@ -1871,7 +1871,7 @@ export default {
     ref: "ARIA11",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_07: {
     type: "true",
@@ -1895,7 +1895,7 @@ export default {
     ref: "ARIA11",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_09: {
     type: "true",
@@ -1919,7 +1919,7 @@ export default {
     ref: "ARIA11",
     scs: "1.3.1,2.4.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_11: {
     type: "true",
@@ -1943,7 +1943,7 @@ export default {
     ref: "ARIA11",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   landmark_13: {
     type: "true",
@@ -1967,7 +1967,7 @@ export default {
     ref: "ARIA11",
     scs: "",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   listitem_01: {
     type: "true",
@@ -1991,7 +1991,7 @@ export default {
     ref: "H48",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   list_02: {
     type: "true",
@@ -2015,7 +2015,7 @@ export default {
     ref: "H48",
     scs: "1.3.1",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   list_04: {
     type: "true",
@@ -2039,7 +2039,7 @@ export default {
     ref: "H40",
     scs: "3.1.3",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
   list_06: {
     type: "true",
@@ -2063,6 +2063,6 @@ export default {
     ref: "H40",
     scs: "3.1.3",
     dis: "43353",
-    result: "fail",
+    result: "failed",
   },
 };

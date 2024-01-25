@@ -1,9 +1,10 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, Repository, getManager, Like, In } from "typeorm";
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { Repository, Like, In, DataSource } from "typeorm";
 import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
+
 
 @Injectable()
 export class PageService {
@@ -12,30 +13,15 @@ export class PageService {
     private readonly websiteRepository: Repository<Website>,
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
-    private readonly connection: Connection
-  ) { }
-  async deletePlicas(): Promise<any> {
-    const pages = await this.pageRepository.find();
-    for (const page of pages) {
-      try {
-        const uri = page.Uri;
-        console.log(uri);
-        if (page.Uri?.includes("'")) {
-          page.Uri = uri.replace("'", "").replace("'", "");
-          await this.pageRepository.save(page);
-        }
-      }
-      catch (e) {
-        console.log(e);
-      }
-    }
-  }
+    @InjectDataSource()
+    private readonly connection: DataSource ) { }
+
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {
       return "nimda";
     }
 
-    const user = await getManager().query(
+    const user = await this.pageRepository.query(
       `SELECT * FROM User WHERE Username = ? LIMIT 1`,
       [username]
     );
@@ -48,10 +34,8 @@ export class PageService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    const manager = getManager();
-
     const data = (
-      await manager.query(
+      await this.pageRepository.query(
         "SELECT * FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
       )
     )[0].Global_Statistics;
@@ -61,48 +45,42 @@ export class PageService {
   }
 
   async findAdminEvaluatingInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 1"
     );
     return result[0].Total;
   }
 
   async findAdminWaitingInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NULL"
     );
     return result[0].Total;
   }
 
   async findAdminWithErrorInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
     );
     return result[0].Total;
   }
 
   async findUserEvaluatingInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 1"
     );
     return result[0].Total;
   }
 
   async findUserWaitingInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 0 AND Error IS NULL"
     );
     return result[0].Total;
   }
 
   async findUserWithErrorInEvaluationList(): Promise<number> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId <> -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
     );
     return result[0].Total;
@@ -110,8 +88,7 @@ export class PageService {
 
   async deleteAdminPagesWithError(pages: number[]): Promise<boolean> {
     try {
-      const manager = getManager();
-      await manager.query(
+      await this.pageRepository.query(
         "DELETE FROM Evaluation_List WHERE EvaluationListId IN (?)",
         [pages]
       );
@@ -124,16 +101,14 @@ export class PageService {
   }
 
   async getAdminPagesWithError(): Promise<any> {
-    const manager = getManager();
-    const result = await manager.query(
+    const result = await this.pageRepository.query(
       "SELECT * FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 0 AND Error IS NOT NULL"
     );
     return result;
   }
 
   async adminCount(search: string): Promise<any> {
-    const manager = getManager();
-    const count = await manager.query(
+    const count = await this.pageRepository.query(
       `SELECT COUNT(*) as Count
       FROM 
         Page
@@ -154,8 +129,7 @@ export class PageService {
     search: string
   ): Promise<any> {
     if (!direction.trim()) {
-      const manager = getManager();
-      const pages = await manager.query(
+      const pages = await this.pageRepository.query(
         `SELECT p.*, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
@@ -171,6 +145,7 @@ export class PageService {
         LIMIT ? OFFSET ?`,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -204,8 +179,7 @@ export class PageService {
           break;
       }
 
-      const manager = getManager();
-      const pages = await manager.query(
+      const pages = await this.pageRepository.query(
         `SELECT p.*, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date, e.Element_Count, e.Tag_Count
         FROM 
           Page as p
@@ -223,7 +197,7 @@ export class PageService {
         `,
         [search.trim() !== "" ? `%${search.trim()}%` : "%", size, page * size]
       );
-
+      console.log(pages[0]);
       return pages.map((p) => {
         p.Error = null;
         return p;
@@ -232,16 +206,15 @@ export class PageService {
   }
 
   async getObservatoryData(): Promise<any> {
-    const manager = getManager();
 
     let data = new Array<any>();
 
-    const directories = await manager.query(
+    const directories = await this.pageRepository.query(
       `SELECT * FROM Directory WHERE Show_in_Observatory = 1`
     );
 
     for (const directory of directories) {
-      const tags = await manager.query(
+      const tags = await this.pageRepository.query(
         `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
         [directory.DirectoryId]
       );
@@ -249,7 +222,7 @@ export class PageService {
 
       let pages = null;
       if (parseInt(directory.Method) === 0) {
-        pages = await manager.query(
+        pages = await this.pageRepository.query(
           `
           SELECT
             e.EvaluationId,
@@ -295,7 +268,7 @@ export class PageService {
           [tagsId, tagsId.length]
         );
       } else {
-        pages = await manager.query(
+        pages = await this.pageRepository.query(
           `
           SELECT
             e.EvaluationId,
@@ -349,7 +322,7 @@ export class PageService {
           p.Directory_Creation_Date = directory.Creation_Date;
           p.Entity_Name = null;
 
-          const entities = await manager.query(
+          const entities = await this.pageRepository.query(
             `
             SELECT e.Long_Name
             FROM
@@ -389,9 +362,7 @@ export class PageService {
       throw new InternalServerErrorException();
     }
 
-    const manager = getManager();
-
-    const pages = await manager.query(
+    const pages = await this.pageRepository.query(
       `SELECT 
       distinct p.*,
       e.Score,
@@ -425,8 +396,7 @@ export class PageService {
     tag: string,
     website: string
   ): Promise<any> {
-    const manager = getManager();
-    const websiteExists = await manager.query(
+    const websiteExists = await this.pageRepository.query(
       `SELECT * FROM Website WHERE UserId = ? AND Name = ? LIMIT 1`,
       [userId, website]
     );
@@ -435,7 +405,7 @@ export class PageService {
       throw new InternalServerErrorException();
     }
 
-    const pages = await manager.query(
+    const pages = await this.pageRepository.query(
       `SELECT 
         distinct p.*,
         e.Score,
@@ -477,8 +447,7 @@ export class PageService {
     website: string,
     pageId: number
   ): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(
+    const pages = await this.pageRepository.query(
       `SELECT p.* FROM
         Tag as t,
         TagWebsite as tw,
@@ -503,8 +472,7 @@ export class PageService {
   }
 
   async isPageFromMyMonitorUser(userId: number, pageId: number): Promise<any> {
-    const manager = getManager();
-    const pages = await manager.query(
+    const pages = await this.pageRepository.query(
       `SELECT p.* FROM
         Website as w,
         WebsitePage as wp,
@@ -711,7 +679,7 @@ export class PageService {
     website: string,
     startingUrl: string,
     uris: string[]
-  ): Promise<any> {
+  ): Promise<boolean> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -857,6 +825,7 @@ export class PageService {
           Page,
           {where: {Uri: uri} , select: ["PageId", "Uri", "Creation_Date"] }
         );
+
         if (pageExists) {
           const websitePage = await queryRunner.manager.query(
             `SELECT 

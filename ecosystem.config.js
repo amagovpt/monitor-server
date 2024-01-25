@@ -16,6 +16,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
       env_production: {
         NAMESPACE: "AMP",
@@ -26,6 +27,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
     },
     {
@@ -44,6 +46,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
       env_production: {
         NAMESPACE: "ADMIN",
@@ -54,6 +57,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
     },
     {
@@ -72,6 +76,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
       env_production: {
         NAMESPACE: "USER",
@@ -82,6 +87,7 @@ module.exports = {
         REFERER: "http://10.55.37.16/",
         CLIENT_ID: 5679267266509668091,
         REDIRECT_URI: "http://10.55.37.16/mm2/loginRedirect",
+        SECRET_KEY: "vtUfe9I6Tc",
       },
     },
   ],

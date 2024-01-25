@@ -4,9 +4,12 @@ import {
   PrimaryGeneratedColumn,
   JoinTable,
   ManyToMany,
+  OneToMany
 } from "typeorm";
 import { Tag } from "../tag/tag.entity";
 import { EntityTable } from "../entity/entity.entity";
+import { Page } from "src/page/page.entity";
+import { AccessibilityStatement } from "src/accessibility-statement-module/accessibility-statement/entities/accessibility-statement.entity";
 
 @Entity("Website")
 export class Website {
@@ -71,4 +74,15 @@ export class Website {
   @ManyToMany((type) => EntityTable)
   @JoinTable()
   Entities: EntityTable[];
+  
+  @JoinTable({
+    name: 'WebsitePage',
+    joinColumn: { name: 'WebsiteId' },
+    inverseJoinColumn: { name: 'PageId' }
+  })
+  @ManyToMany((type) => Page, (page) => page.Pages)
+  Pages: Page[];
+
+  @OneToMany(type => AccessibilityStatement, (as) => as.Website)
+  AStatements: AccessibilityStatement[];
 }

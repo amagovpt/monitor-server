@@ -1,9 +1,9 @@
 node_modules
-
 public/stamps
-
 dist
+action-log
+error-log
 
-package-lock.json
-
+idea
 qualweb-errors-*.log
+tmux*.log

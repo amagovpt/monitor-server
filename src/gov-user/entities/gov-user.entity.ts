@@ -6,6 +6,7 @@ import {
     JoinTable,
     PrimaryGeneratedColumn
 } from 'typeorm';
+//Utilizador do Autenticação.gov
 @Entity({ name: "GovUser" })
 export class GovUser {
 
