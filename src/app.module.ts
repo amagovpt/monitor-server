@@ -31,6 +31,7 @@ import 'winston-daily-rotate-file';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import { LogModule } from './log/log.module';
 import { DumpModule } from './dump/dump.module';
+import { ApiSeloModule } from './api-selo/api-selo.module';
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db2.json").toString()
@@ -99,6 +100,7 @@ const databaseConfig = JSON.parse(
     GovUserModule,
     LogModule,
     DumpModule,
+    ApiSeloModule,
   ],
   controllers: [AppController],
   providers: [
