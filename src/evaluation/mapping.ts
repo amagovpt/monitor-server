@@ -46,6 +46,7 @@ const act_mapping = {
     "QW-ACT-R70": QW_ACT_R70,
     "QW-ACT-R71": QW_ACT_R71,
     "QW-ACT-R76": QW_ACT_R76,
+    "QW-ACT-R77": QW_ACT_R77,
 };
 
 const wcag_mapping = {
@@ -936,6 +937,26 @@ function QW_ACT_R76(elements: any, results: any, nodes: any, rule: any): void {
         addToNodes(
             nodes,
             "textContrastHNot",
+            rule.results.filter((r: any) => r.verdict === "failed")
+        );
+    }
+}
+
+function QW_ACT_R77(elements: any, results: any, nodes: any, rule: any): void {
+    if (rule.metadata.outcome === "passed") {
+        addToElements(elements, "ariaControlsIdFound", rule.metadata.passed);
+        addToResults(results, "aria_10");
+        addToNodes(
+            nodes,
+            "ariaControlsIdFound",
+            rule.results.filter((r: any) => r.verdict === "passed")
+        );
+    } else if (rule.metadata.outcome === "failed") {
+        addToElements(elements, "ariaControlsIdNotFound", rule.metadata.failed);
+        addToResults(results, "aria_09");
+        addToNodes(
+            nodes,
+            "ariaControlsIdNotFound",
             rule.results.filter((r: any) => r.verdict === "failed")
         );
     }

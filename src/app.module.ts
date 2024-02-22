@@ -34,7 +34,7 @@ import { DumpModule } from './dump/dump.module';
 import { ApiSeloModule } from './api-selo/api-selo.module';
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db2.json").toString()
+  readFileSync("../monitor_db.json").toString()
 );
 
 @Module({
