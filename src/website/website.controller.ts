@@ -20,6 +20,7 @@ import { WebsitesIdDto } from "./dto/websites-id.dto";
 import { CreateWebsiteDto } from "./dto/create-website.dto";
 import { UpdateWebsiteDto } from "./dto/update-website.dto";
 import { UpdateObservatoryPages } from "./dto/update-observatory-pages.dto";
+import { DeleteWebsiteDto } from "./dto/delete-website.dto";
 import { DeleteBulkWebsiteDto } from "./dto/delete-bulk-website.dto";
 import { ImportWebsiteMyMonitorDto } from "./dto/import-website-my-monitor.dto";
 import { Page } from "src/page/page.entity";
@@ -143,10 +144,10 @@ export class WebsiteController {
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
-  @Delete(':id')
-  async deleteWebsite(@Param('id') id: number): Promise<any> {
+  @Post('delete')
+  async deleteWebsite(@Body() deleteWebsiteDto: DeleteWebsiteDto): Promise<any> {
 
-    const deleteSuccess = await this.websiteService.delete(id);
+    const deleteSuccess = await this.websiteService.delete(deleteWebsiteDto.websiteId);
     if (!deleteSuccess) {
       throw new InternalServerErrorException();
     }

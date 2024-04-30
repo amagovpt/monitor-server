@@ -1413,7 +1413,7 @@ export class WebsiteService {
       `,
         [websitesId]
       );
-      if (pages !== 0) {
+      if (pages.length > 0) {
         await queryRunner.manager.query(
           `
         DELETE FROM  
