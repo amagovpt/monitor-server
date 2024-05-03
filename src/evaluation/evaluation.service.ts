@@ -108,6 +108,25 @@ export class EvaluationService {
     }
   }
 
+  @Cron(CronExpression.EVERY_QUARTER)
+  async evaluateStuckPages(): Promise<void> {
+    const pages = await this.connection.query(
+      `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR) LIMIT 20`
+    );
+
+    if (pages.length > 0) {
+      try {
+        await this.connection.query(
+          `UPDATE Evaluation_List SET Is_Evaluating = 0 WHERE EvaluationListId IN (?)`,
+          [pages.map((p) => p.EvaluationListId)]
+        );
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    }
+  }
+
   /*@Cron('0 0 * * 0')
   async evaluateOldPages(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
