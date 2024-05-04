@@ -108,12 +108,12 @@ export class EvaluationService {
     }
   }
 
-  @Cron(CronExpression.EVERY_QUARTER)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async evaluateStuckPages(): Promise<void> {
     const pages = await this.connection.query(
-      `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR) LIMIT 20`
+      `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`
     );
-
+    
     if (pages.length > 0) {
       try {
         await this.connection.query(
