@@ -145,7 +145,7 @@ CREATE TABLE `Evaluation` (
   `Score` decimal(4,1) NOT NULL,
   `Pagecode` mediumtext NOT NULL,
   `Tot` text NOT NULL,
-  `Nodes` mediumtext NOT NULL,
+  `Nodes` longtext NOT NULL,
   `Errors` text NOT NULL,
   `A` int(11) NOT NULL,
   `AA` int(11) NOT NULL,
