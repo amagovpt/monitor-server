@@ -150,8 +150,8 @@ export class UserController {
     const emails = updateUserDto.emails;
     const app = updateUserDto.app;
 
-    const websites = updateUserDto.websites;
-    const defaultWebsites = updateUserDto.defaultWebsites;
+    const websites = this.convertToNumberArray(updateUserDto.websites);
+    const defaultWebsites = this.convertToNumberArray(updateUserDto.defaultWebsites);
     const transfer = !!updateUserDto.transfer;
 
     const updateSuccess = await this.userService.update(
@@ -169,6 +169,16 @@ export class UserController {
     }
 
     return success(true);
+  }
+
+  private convertToNumberArray(str: any): number[] {
+    if (typeof str === "string") {
+      // remove first and last character
+      str = str.substring(1, str.length - 1);
+      return str.split(",").map((x) => +x);
+    } else {
+      return str;
+    }
   }
 
   @ApiOperation({ summary: 'Delete user' })
