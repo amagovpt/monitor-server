@@ -2022,8 +2022,8 @@ export function getElementsMapping(evaluation: any): any {
                 nodes,
                 evaluation.modules["wcag-techniques"].assertions[technique]
             );
-            if (technique === "QW-WCAG-T9")
-                console.log(technique, "\n*\n", evaluation.modules["wcag-techniques"].assertions[technique])
+            // if (technique === "QW-WCAG-T9")
+            //     console.log(technique, "\n*\n", evaluation.modules["wcag-techniques"].assertions[technique])
         }
     }
 
