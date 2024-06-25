@@ -2000,49 +2000,43 @@ export function getElementsMapping(evaluation: any): any {
     const elements = {};
     const results = {};
     const nodes = {};
-    if (evaluation.modules["act-rules"]) {
-        for (const rule of Object.keys(evaluation.modules["act-rules"].assertions) ||
-            []) {
-            if (act_mapping[rule] !== undefined) {
-                act_mapping[rule](
-                    elements,
-                    results,
-                    nodes,
-                    evaluation.modules["act-rules"].assertions[rule]
-                );
-            }
+    for (const rule of Object.keys(evaluation.modules["act-rules"].assertions) ||
+        []) {
+        if (act_mapping[rule] !== undefined) {
+            act_mapping[rule](
+                elements,
+                results,
+                nodes,
+                evaluation.modules["act-rules"].assertions[rule]
+            );
         }
     }
 
-    if (evaluation.modules["wcag-techniques"]) {
-        for (const technique of Object.keys(
-            evaluation.modules["wcag-techniques"].assertions
-        ) || []) {
-            if (wcag_mapping[technique] !== undefined) {
-                wcag_mapping[technique](
-                    elements,
-                    results,
-                    nodes,
-                    evaluation.modules["wcag-techniques"].assertions[technique]
-                );
-                // if (technique === "QW-WCAG-T9")
-                //     console.log(technique, "\n*\n", evaluation.modules["wcag-techniques"].assertions[technique])
-            }
+    for (const technique of Object.keys(
+        evaluation.modules["wcag-techniques"].assertions
+    ) || []) {
+        if (wcag_mapping[technique] !== undefined) {
+            wcag_mapping[technique](
+                elements,
+                results,
+                nodes,
+                evaluation.modules["wcag-techniques"].assertions[technique]
+            );
+            // if (technique === "QW-WCAG-T9")
+            //     console.log(technique, "\n*\n", evaluation.modules["wcag-techniques"].assertions[technique])
         }
     }
 
-    if (evaluation.modules["best-practices"]) {
-            for (const technique of Object.keys(
-            evaluation.modules["best-practices"].assertions
-        ) || []) {
-            if (bp_mapping[technique] !== undefined) {
-                bp_mapping[technique](
-                    elements,
-                    results,
-                    nodes,
-                    evaluation.modules["best-practices"].assertions[technique]
-                );
-            }
+    for (const technique of Object.keys(
+        evaluation.modules["best-practices"].assertions
+    ) || []) {
+        if (bp_mapping[technique] !== undefined) {
+            bp_mapping[technique](
+                elements,
+                results,
+                nodes,
+                evaluation.modules["best-practices"].assertions[technique]
+            );
         }
     }
 
