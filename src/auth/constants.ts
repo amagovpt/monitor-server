@@ -1,6 +1,6 @@
 const jwtConstants = {
-  // secret: process.env.SECRET_KEY,
-  secret: 'secretKey',
+  secret: process.env.SECRET_KEY,
+  // secret: 'secretKey',
 };
 const NIC = "http://interop.gov.pt/MDC/Cidadao/NIC";
 const NOME_COMPLETO = "http://interop.gov.pt/MDC/Cidadao/NomeCompleto";

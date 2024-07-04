@@ -120,7 +120,7 @@ export async function evaluate(params: any): Promise<any> {
         "QW-BP29"
       ],
     },
-    waitUntil: ["load", "networkidle2"],
+    waitUntil: ["load", "networkidle0"],
   };
 
   if (params.url || params.urls) {
@@ -143,7 +143,7 @@ export async function evaluate(params: any): Promise<any> {
   await qualweb.start(
     { maxConcurrency: 2, timeout: 1000 * 240 * 2 },
     {
-      args: ["--no-sandbox"/*, "--ignore-certificate-errors", "--lang=pt-pt,pt"*/],
+      args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"],
     }
   );
 
