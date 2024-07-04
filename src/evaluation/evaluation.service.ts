@@ -392,7 +392,7 @@ export class EvaluationService {
     newEvaluation.Score = evaluation.data.score;
     newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
-    );
+    ).substring(0, 16000000);
     newEvaluation.Tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
