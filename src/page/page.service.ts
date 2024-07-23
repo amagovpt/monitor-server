@@ -674,12 +674,25 @@ export class PageService {
     return !hasError;
   }
 
+  convertStringToStringArray(numStr : string) : string[] {
+    // remove first and last character
+    numStr = numStr.substring(1, numStr.length - 1);
+    return numStr.split(',').map((s) => s.substring(1, numStr.length - 1));
+  }
+
   async createMyMonitorUserWebsitePages(
     userId: number,
     website: string,
     startingUrl: string,
     uris: string[]
   ): Promise<boolean> {
+    let uriArray : string[] = [];
+    if (typeof uris === 'string') {
+      uriArray = this.convertStringToStringArray(uris);
+    } else {
+      uriArray = uris;
+    }
+
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -687,7 +700,7 @@ export class PageService {
 
     let hasError = false;
     try {
-      for (const uri of uris || []) {
+      for (const uri of uriArray || []) {
         const page = await queryRunner.manager.findOne(Page, {
           where: { Uri: decodeURIComponent(uri) },
         });
@@ -759,11 +772,24 @@ export class PageService {
     //return await this.findAllFromMyMonitorUserWebsite(userId, website);
   }
 
+  convertStringToNumberArray(numStr : string) : number[] {
+    // remove first and last character
+    numStr = numStr.substring(1, numStr.length - 1);
+    return numStr.split(',').map(Number);
+  }
+
   async removeMyMonitorUserWebsitePages(
     userId: number,
     website: string,
     pagesIds: number[]
   ): Promise<any> {
+    // this should not happen, but pagesIds type is string, so it needs to be converted to number[]
+    let ids : number[] = [];
+    if (typeof pagesIds === 'string') {
+      ids = this.convertStringToNumberArray(pagesIds);
+    } else {
+      ids = pagesIds;
+    }
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -771,9 +797,9 @@ export class PageService {
 
     let hasError = false;
     try {
-      for (const pageId of pagesIds || []) {
+      for (const pageId of ids || []) {
         const page = await this.pageRepository.findOne({
-          select: ["Show_In"],
+          select: { Show_In: true },
           where: { PageId: pageId },
         });
         if (page) {

@@ -430,10 +430,10 @@ export class WebsiteController {
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("transferObservatoryPages")
-  async transferObservatoryPages(websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
+  async transferObservatoryPages(@Request() req: any, @Body() websiteMyMonitorDto: WebsiteMyMonitorDto): Promise<any> {
     return success(
       await this.websiteService.transferObservatoryPages(
-        websiteMyMonitorDto.userId,
+        req.user.userId,
         websiteMyMonitorDto.website
       )
     );

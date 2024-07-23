@@ -94,7 +94,7 @@ export class UserService {
           { Password: await generatePasswordHash(password) }
         );
       }
-
+      
       if (app === "monitor") {
         for (const id of defaultWebsites || []) {
           if (!websites.includes(id)) {
@@ -179,7 +179,7 @@ export class UserService {
                   wp.WebsiteId = w.WebsiteId AND
                   p.PageId = wp.PageId AND
                   p.Show_In = "101" AND
-                  e.PageId = e.PageId`,
+                  e.PageId = p.PageId`,
                 [id]
               );
             }

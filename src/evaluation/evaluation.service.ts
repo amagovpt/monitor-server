@@ -108,6 +108,25 @@ export class EvaluationService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async evaluateStuckPages(): Promise<void> {
+    const pages = await this.connection.query(
+      `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`
+    );
+    
+    if (pages.length > 0) {
+      try {
+        await this.connection.query(
+          `UPDATE Evaluation_List SET Is_Evaluating = 0 WHERE EvaluationListId IN (?)`,
+          [pages.map((p) => p.EvaluationListId)]
+        );
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    }
+  }
+
   /*@Cron('0 0 * * 0')
   async evaluateOldPages(): Promise<void> {
     if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
@@ -369,11 +388,11 @@ export class EvaluationService {
   ): Promise<any> {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
+    newEvaluation.Title = evaluation.data.title.replace(/"/g, "").replace(/[\u0800-\uFFFF]/g, '');
     newEvaluation.Score = evaluation.data.score;
     newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
-    );
+    ).substring(0, 16000000);
     newEvaluation.Tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
