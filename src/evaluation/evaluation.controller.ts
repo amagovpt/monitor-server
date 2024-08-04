@@ -6,6 +6,7 @@ import {
   UseGuards,
   Param,
   UseInterceptors,
+  Res,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EvaluationService } from "./evaluation.service";
@@ -13,6 +14,8 @@ import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
 import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Evaluation } from "./evaluation.entity";
+import { Readable } from "stream";
+import { Response } from "express";
 
 
 @ApiBasicAuth()
@@ -311,7 +314,7 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Repeat evaluations from specific evaluation list ' })
+  @ApiOperation({ summary: 'Return existing evaluations for a website ' })
   @ApiResponse({
     status: 200,
     description: 'Success',
@@ -322,13 +325,22 @@ export class EvaluationController {
   async getWebsitePageEvaluations(
     @Request() req: any,
     @Param("website") website: string,
-    @Param("sample") sample: string
+    @Param("sample") sample: string,
+    @Res() res: Response
   ): Promise<any> {
-    return success(
-      await this.evaluationService.findWebsiteEvaluations(
-        decodeURIComponent(website),
-        sample === "true"
-      )
+    const results = await this.evaluationService.findWebsiteEvaluations(
+      decodeURIComponent(website),
+      sample === "true"
     );
+    const stream = new Readable({
+      read() {
+        results.forEach((result) => {
+          this.push(JSON.stringify(result) + '\n');
+        });
+        this.push(null);
+      },
+    });
+    res.setHeader('Content-Type', 'application/json');
+    stream.pipe(res);
   }
 }
