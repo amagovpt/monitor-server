@@ -916,7 +916,8 @@ export class EvaluationService {
     for (const evaluation of evaluations || []) {
       const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       reports.push({
-        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
+        // pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(), // removed because is not used upstream and is too big
+        pagecode: "",
         data: {
           title: evaluation.Title,
           score: evaluation.Score,
