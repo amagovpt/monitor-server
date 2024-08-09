@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync } from "fs";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { PageService } from "src/page/page.service";
-import { Crawler } from "@qualweb/crawler";
+import { BrowserContext } from "puppeteer";
 
 @Injectable()
 export class CrawlerService {
@@ -19,7 +19,7 @@ export class CrawlerService {
     private readonly crawlWebsiteRepository: Repository<CrawlWebsite>,
     @InjectDataSource()
     private readonly connection: DataSource,
-        private readonly pageService: PageService
+    private readonly pageService: PageService
   ) {
     this.isAdminCrawling = false;
     this.isUserCrawling = false;
@@ -47,25 +47,15 @@ export class CrawlerService {
 
           if (website.length > 0) {
             const browser = await puppeteer.launch({
+              headless: "new",
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
-            const incognito:any = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(
-              incognito,
-              website[0].StartingUrl,
-              undefined,
-              website[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
-            );
-
-            await crawler.crawl({
-              maxDepth: website[0].Max_Depth,
-              maxUrls: website[0].Max_Pages ? website[0].Max_Pages : undefined,
-            });
-
+            const incognito: any =
+              await browser.createIncognitoBrowserContext();
+            const urls = await this.MSCrawl(incognito, website[0].StartingUrl);
             await incognito.close();
             await browser.close();
 
-            const urls = crawler.getResults();
             if (website[0].Tag !== 1) {
               for (const url of urls || []) {
                 try {
@@ -128,27 +118,19 @@ export class CrawlerService {
             const browser = await puppeteer.launch({
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
-            const incognito:any = await browser.createIncognitoBrowserContext();
-            const crawler = new Crawler(
-              incognito,
-              website[0].StartingUrl,
-              undefined,
-              website[0].Wait_JS === 1 ? "networkidle0" : "domcontentloaded"
-            );
-            //await this.crawl(website[0].StartingUrl);
-            await crawler.crawl({ maxDepth: 0 });
-
+            const incognito: any =
+              await browser.createIncognitoBrowserContext();
+            const urls = await this.MSCrawl(incognito, website[0].StartingUrl);
             await incognito.close();
             await browser.close();
 
-            const urls = crawler.getResults();
             for (const url of urls || []) {
-              try{
-              const newCrawlPage = new CrawlPage();
-              newCrawlPage.Uri = decodeURIComponent(url);
-              newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
+              try {
+                const newCrawlPage = new CrawlPage();
+                newCrawlPage.Uri = decodeURIComponent(url);
+                newCrawlPage.CrawlWebsiteId = website[0].CrawlWebsiteId;
                 await queryRunner.manager.save(newCrawlPage);
-              }catch (e) {
+              } catch (e) {
                 console.log(e);
               }
             }
@@ -199,10 +181,10 @@ export class CrawlerService {
     });
     return page && page.Done === 1;
     /*if (page) {
-      return page.Done === 1;
-    } else {
-      throw new InternalServerErrorException();
-    }*/
+          return page.Done === 1;
+        } else {
+          throw new InternalServerErrorException();
+        }*/
   }
 
   async getUserCrawlResults(
@@ -231,7 +213,7 @@ export class CrawlerService {
     userId: number,
     tagName: string
   ): Promise<any> {
-   const websites = await this.crawlWebsiteRepository.query(
+    const websites = await this.crawlWebsiteRepository.query(
       `
       SELECT
         w.Name,
@@ -402,5 +384,79 @@ export class CrawlerService {
     );
 
     return website[0].WebsiteId;
+  }
+
+  private async MSCrawl(
+    browser: BrowserContext,
+    pageURL: string
+  ): Promise<string[]> {
+    try {
+      const page = await browser.newPage();
+      await page.goto(pageURL, { waitUntil: "domcontentloaded" });
+      const urls = await page.evaluate(
+        (pageURL) => {
+          const notHtml =
+            "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt|zip".split(
+              "|"
+            );
+          const links = document.querySelectorAll("body a");
+          const urls = new Array<string>();
+          links.forEach((link: Element) => {
+            if (link.hasAttribute("href")) {
+              let href = link.getAttribute("href").trim();
+              if (href.startsWith("//")) {
+                href = href.replace("//", "https://");
+              }
+              if (
+                (href.startsWith(pageURL) ||
+                  href.startsWith("/") ||
+                  href.startsWith("./") ||
+                  (!href.startsWith("http") && !href.startsWith("#"))) &&
+                !href.includes("mailto:") &&
+                !href.includes("tel:") &&
+                !href.includes("javascript:")
+              ) {
+                let valid = true;
+                for (const not of notHtml || []) {
+                  if (href.endsWith(not) || href.includes("." + not + "/")) {
+                    valid = false;
+                    break;
+                  }
+                  const parts = href.split("/");
+                  if (parts.length > 0) {
+                    const lastPart = parts[parts.length - 1];
+                    if (lastPart.startsWith("#")) {
+                      valid = false;
+                      break;
+                    }
+                  }
+                }
+                if (valid) {
+                  let correctUrl = "";
+                  if (href.startsWith(pageURL)) {
+                    correctUrl = href;
+                  } else if (href.startsWith("./")) {
+                    correctUrl = pageURL + href.slice(2);
+                  } else if (href.startsWith("/")) {
+                    correctUrl = pageURL + href.slice(1);
+                  } else {
+                    correctUrl = pageURL + href;
+                  }
+                  if (!urls.includes(correctUrl)) {
+                    urls.push(correctUrl);
+                  }
+                }
+              }
+            }
+          });
+          return urls;
+        },
+        pageURL.endsWith("/") ? pageURL : pageURL + "/"
+      );
+      return urls;
+    } catch (e) {
+      console.log("Problem during crawling", e);
+      return [];
+    }
   }
 }
