@@ -1,6 +1,6 @@
-import {  IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
 export class WebsiteMyMonitorDto {
-    @IsNotEmpty()
-    website: string;
-    userId: number;
+  @IsNotEmpty()
+  website: string;
+  userId: number;
 }

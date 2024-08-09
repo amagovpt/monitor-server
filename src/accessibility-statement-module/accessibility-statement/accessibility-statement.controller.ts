@@ -1,14 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { success } from 'src/lib/response';
-import { AccessibilityStatementService } from './accessibility-statement.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { success } from "src/lib/response";
+import { AccessibilityStatementService } from "./accessibility-statement.service";
 
-@Controller('accessibility-statement')
+@Controller("accessibility-statement")
 export class AccessibilityStatementController {
-  constructor(private readonly accessibilityStatementService: AccessibilityStatementService) {}
+  constructor(
+    private readonly accessibilityStatementService: AccessibilityStatementService
+  ) {}
 
-  @Get('website/:name')
-  async findOne(@Param('name') name: string) {
-    return success(await this.accessibilityStatementService.findByWebsiteName(name));
+  @Get("website/:name")
+  async findOne(@Param("name") name: string) {
+    return success(
+      await this.accessibilityStatementService.findByWebsiteName(name)
+    );
   }
 
   @Get()
@@ -16,58 +28,65 @@ export class AccessibilityStatementController {
     return success(await this.accessibilityStatementService.getASList());
   }
 
-  @Get('id/:id')
-  async findOneById(@Param('id') id: number) {
+  @Get("id/:id")
+  async findOneById(@Param("id") id: number) {
     return success(await this.accessibilityStatementService.findById(id));
   }
 
-  @Get('year')
+  @Get("year")
   async findAllByYear() {
     return success(await this.accessibilityStatementService.getByAge());
   }
 
-  @Get('conformance')
+  @Get("conformance")
   async findAllByConformance() {
     return success(await this.accessibilityStatementService.getByConformance());
   }
 
-  @Get('seal')
+  @Get("seal")
   async findAllBySeal() {
     return success(await this.accessibilityStatementService.getBySeal());
   }
 
-  @Get('state')
+  @Get("state")
   async findAllByState() {
     return success(await this.accessibilityStatementService.getByState());
   }
 
-  @Get('directory/state')
+  @Get("directory/state")
   async findAllByDirectoryState() {
-    return success(await this.accessibilityStatementService.getByDirectoryState());
+    return success(
+      await this.accessibilityStatementService.getByDirectoryState()
+    );
   }
 
-  @Get('directory/seal')
+  @Get("directory/seal")
   async findAllByDirectorySeal() {
-    return success(await this.accessibilityStatementService.getByDirectorySeal());
+    return success(
+      await this.accessibilityStatementService.getByDirectorySeal()
+    );
   }
 
-  @Get('directory/conformance')
+  @Get("directory/conformance")
   async findAllByDirectoryConformity() {
-    return success(await this.accessibilityStatementService.getByDirectoryConformity());
+    return success(
+      await this.accessibilityStatementService.getByDirectoryConformity()
+    );
   }
 
-
-  @Get('directory/OPAW')
+  @Get("directory/OPAW")
   async findAllByDirectoryWebsite() {
     return success(await this.accessibilityStatementService.getOPAWTable());
   }
 
-  @Get('evaluations')
+  @Get("evaluations")
   async findNumberOfEvaluationByType() {
-    return success(await this.accessibilityStatementService.getNumberOfEvaluationByType());
+    return success(
+      await this.accessibilityStatementService.getNumberOfEvaluationByType()
+    );
   }
 
- /* @Post()
+  /* @Post()
   create(@Body() createAccessibilityStatementDto: CreateAccessibilityStatementDto) {
     return this.accessibilityStatementService.create(createAccessibilityStatementDto);
   }

@@ -10,10 +10,14 @@ import { AccessibilityStatementModule } from "src/accessibility-statement-module
 import { CollectionDateModule } from "src/accessibility-statement-module/collection-date/collection-date.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tag, Website, Page]), EvaluationModule,
-    AccessibilityStatementModule,CollectionDateModule],
+  imports: [
+    TypeOrmModule.forFeature([Tag, Website, Page]),
+    EvaluationModule,
+    AccessibilityStatementModule,
+    CollectionDateModule,
+  ],
   exports: [WebsiteService],
   providers: [WebsiteService],
   controllers: [WebsiteController],
 })
-export class WebsiteModule { }
+export class WebsiteModule {}

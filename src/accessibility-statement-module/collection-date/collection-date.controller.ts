@@ -1,9 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CollectionDateService } from './collection-date.service';
-import { success } from 'src/lib/response';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { CollectionDateService } from "./collection-date.service";
+import { success } from "src/lib/response";
 
-
-@Controller('collection-date')
+@Controller("collection-date")
 export class CollectionDateController {
   constructor(private readonly collectionDateService: CollectionDateService) {}
 
@@ -11,5 +18,4 @@ export class CollectionDateController {
   async findLatest() {
     return success(await this.collectionDateService.findLatest());
   }
-
 }

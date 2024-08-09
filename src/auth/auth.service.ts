@@ -21,7 +21,7 @@ export class AuthService {
     @InjectDataSource()
     private readonly connection: DataSource,
     private readonly jwtService: JwtService
-  ) { }
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanInvalidSessionTokens(): Promise<void> {
@@ -106,7 +106,7 @@ export class AuthService {
   }
 
   signToken(payload: any): string {
-    return this.jwtService.sign(payload,{algorithm:"HS256"});
+    return this.jwtService.sign(payload, { algorithm: "HS256" });
   }
 
   verifyJWT(jwt: string): any {
@@ -149,25 +149,32 @@ export class AuthService {
     const atributes = await this.getAtributes(token);
     const ccNumber = atributes.cc;
     await this.govUserService.updateLogin(ccNumber);
-   return this.govUserService.findOneByCC(ccNumber);
+    return this.govUserService.findOneByCC(ccNumber);
   }
-
 
   async getAtributes(token: string) {
-    const atributesName = ["http://interop.gov.pt/MDC/Cidadao/NIC", "http://interop.gov.pt/MDC/Cidadao/NomeCompleto"]
-    const responseStart = await axios.post("https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager", { token, atributesName })
+    const atributesName = [
+      "http://interop.gov.pt/MDC/Cidadao/NIC",
+      "http://interop.gov.pt/MDC/Cidadao/NomeCompleto",
+    ];
+    const responseStart = await axios.post(
+      "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
+      { token, atributesName }
+    );
     const authenticationContextId = responseStart.data.authenticationContextId;
-    const responseAtributes = await axios.get(`https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`)
+    const responseAtributes = await axios.get(
+      `https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`
+    );
     return this.parseAtributes(responseAtributes.data);
   }
-  
-  private parseAtributes(atributes:any){
-    let result = {cc:null,name:""};
-    atributes.map((atribute)=>{
+
+  private parseAtributes(atributes: any) {
+    let result = { cc: null, name: "" };
+    atributes.map((atribute) => {
       const name = atribute.name;
       const realName = NAME_CONVERTER[name];
       result[realName] = atribute.value;
-    })
+    });
     return result;
   }
 }

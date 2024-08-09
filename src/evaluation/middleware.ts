@@ -114,7 +114,7 @@ function generateScore(report: any): string {
           report.data["elems"][value["elem"]] !== undefined
         ) {
           // if (report.data["elems"][value["test"]] !== undefined) {
-            calc = true;
+          calc = true;
           // }
         }
         break;

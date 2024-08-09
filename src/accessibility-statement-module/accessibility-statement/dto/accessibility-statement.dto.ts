@@ -5,13 +5,12 @@ import { CreateUserEvaluationDto } from "src/accessibility-statement-module/user
 import { State } from "../state";
 
 export class AccessibilityStatementDto {
-    url: string;
-    conformance:string;
-    statementDate: Date;
-    state?:State;
-    autoList: Array<CreateAutomaticEvaluationDto>;
-    userList: Array<CreateUserEvaluationDto>;
-    manualList: Array<CreateManualEvaluationDto>;
-    contacts: Array<CreateContactDto>;
-
+  url: string;
+  conformance: string;
+  statementDate: Date;
+  state?: State;
+  autoList: Array<CreateAutomaticEvaluationDto>;
+  userList: Array<CreateUserEvaluationDto>;
+  manualList: Array<CreateManualEvaluationDto>;
+  contacts: Array<CreateContactDto>;
 }

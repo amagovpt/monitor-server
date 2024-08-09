@@ -18,7 +18,8 @@ export class UserService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     @InjectDataSource()
-    private readonly connection: DataSource  ) { }
+    private readonly connection: DataSource
+  ) {}
 
   async changePassword(
     userId: number,
@@ -94,7 +95,7 @@ export class UserService {
           { Password: await generatePasswordHash(password) }
         );
       }
-      
+
       if (app === "monitor") {
         for (const id of defaultWebsites || []) {
           if (!websites.includes(id)) {
@@ -337,15 +338,15 @@ export class UserService {
   }
 
   findByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { Username:username } });
+    return this.userRepository.findOne({ where: { Username: username } });
   }
 
   findNumberOfStudyMonitor(): Promise<number> {
-    return this.userRepository.count({ where:{Type: "studies"} });
+    return this.userRepository.count({ where: { Type: "studies" } });
   }
 
   findNumberOfMyMonitor(): Promise<number> {
-    return this.userRepository.count({ where: {Type: "monitor" }});
+    return this.userRepository.count({ where: { Type: "monitor" } });
   }
 
   async findStudyMonitorUserTagByName(
@@ -483,7 +484,6 @@ export class UserService {
   }
 
   async findAllWebsites(user: string): Promise<any> {
-
     const websites = await this.userRepository.query(
       `SELECT w.*, e.Short_Name as Entity, e.Long_Name as Entity2, u.Username as User 
         FROM 
@@ -502,7 +502,6 @@ export class UserService {
   }
 
   async findAllTags(user: string): Promise<any> {
-
     const tags = await this.userRepository.query(
       `SELECT t.*, COUNT(distinct tw.WebsiteId) as Websites, u.Username as User 
       FROM 

@@ -12,7 +12,12 @@ import { AuthGuard } from "@nestjs/passport";
 import { CrawlerService } from "./crawler.service";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiResponse, ApiTags, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiResponse,
+  ApiTags,
+  ApiOperation,
+} from "@nestjs/swagger";
 import { CrawlWebsite } from "./crawler.entity";
 import { CrawlerConfig } from "./dto/crawler-config.dto";
 import { CrawlerCreate } from "./dto/crawler-create.dto";
@@ -21,19 +26,18 @@ import { CrawlerUserWebsite } from "./dto/crawler-user-website.dto";
 import { CrawlerDelete } from "./dto/crawler-delete.dto";
 import { CrawlerDeleteBulk } from "./dto/crawler-delete-bulk.dto";
 
-
 @ApiBasicAuth()
-@ApiTags('directory')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("directory")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("crawler")
 @UseInterceptors(LoggingInterceptor)
 export class CrawlerController {
   constructor(private readonly crawlerService: CrawlerService) {}
 
-  @ApiOperation({ summary: 'Find all crawl website' })
+  @ApiOperation({ summary: "Find all crawl website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<CrawlWebsite>,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -42,10 +46,10 @@ export class CrawlerController {
     return success(await this.crawlerService.findAll());
   }
 
-  @ApiOperation({ summary: 'Find  the crawler config' })
+  @ApiOperation({ summary: "Find  the crawler config" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -54,11 +58,10 @@ export class CrawlerController {
     return success(this.crawlerService.getConfig());
   }
 
-
-  @ApiOperation({ summary: 'Change the crawler config' })
+  @ApiOperation({ summary: "Change the crawler config" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -69,10 +72,10 @@ export class CrawlerController {
     return success(this.crawlerService.setConfig(maxDepth, maxPages));
   }
 
-  @ApiOperation({ summary: 'Change the crawler config' })
+  @ApiOperation({ summary: "Change the crawler config" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -95,10 +98,10 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Crawl all websites in a list of tags' })
+  @ApiOperation({ summary: "Crawl all websites in a list of tags" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -108,15 +111,18 @@ export class CrawlerController {
     return success(await this.crawlerService.crawlTags(tagsId));
   }
 
-  @ApiOperation({ summary: 'Crawl user website(My Monitor)' })
+  @ApiOperation({ summary: "Crawl user website(My Monitor)" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("crawlUser")
-  async crawlUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async crawlUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -136,15 +142,18 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Check user crawl from a specific website' })
+  @ApiOperation({ summary: "Check user crawl from a specific website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("crawlUserCheck")
-  async checkCrawlUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async checkCrawlUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -157,15 +166,18 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Check user crawl results from a specific website' })
+  @ApiOperation({ summary: "Check user crawl results from a specific website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("crawlUserResults")
-  async getCrawlUserPageResults(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async getCrawlUserPageResults(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -178,15 +190,18 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Delete user crawl from a specific website' })
+  @ApiOperation({ summary: "Delete user crawl from a specific website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("crawlUserDelete")
-  async deleteCrawlUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async deleteCrawlUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -199,15 +214,18 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Crawl user website(Study Monitor)' })
+  @ApiOperation({ summary: "Crawl user website(Study Monitor)" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("crawlStudiesUser")
-  async crawlStudiesUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async crawlStudiesUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -227,15 +245,20 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Check user crawl results from a specific website(Study Monitor)' })
+  @ApiOperation({
+    summary: "Check user crawl results from a specific website(Study Monitor)",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("crawlStudiesUserCheck")
-  async checkStudiesCrawlUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async checkStudiesCrawlUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteUrl = crawlerUserWebsite.website;
     const websiteId = await this.crawlerService.getWebsiteId(
@@ -248,10 +271,10 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Find crawl results from a specific tag' })
+  @ApiOperation({ summary: "Find crawl results from a specific tag" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -269,15 +292,18 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Check user crawl results from a specific website' })
+  @ApiOperation({ summary: "Check user crawl results from a specific website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("crawlStudiesUserResults")
-  async getCrawlStudiesUserPageResults(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async getCrawlStudiesUserPageResults(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteId = crawlerUserWebsite.websiteId;
 
@@ -286,16 +312,20 @@ export class CrawlerController {
     );
   }
 
-
-  @ApiOperation({ summary: 'Delete user crawl from a specific website(Study Monitor)' })
+  @ApiOperation({
+    summary: "Delete user crawl from a specific website(Study Monitor)",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("crawlStudiesUserDelete")
-  async deleteCrawlStudiesUserPage(@Request() req: any, @Body() crawlerUserWebsite: CrawlerUserWebsite): Promise<any> {
+  async deleteCrawlStudiesUserPage(
+    @Request() req: any,
+    @Body() crawlerUserWebsite: CrawlerUserWebsite
+  ): Promise<any> {
     const userId = req.user.userId;
     const websiteId = crawlerUserWebsite.websiteId;
 
@@ -304,10 +334,10 @@ export class CrawlerController {
     );
   }
 
-  @ApiOperation({ summary: 'Delete specific crawl' })
+  @ApiOperation({ summary: "Delete specific crawl" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -318,24 +348,26 @@ export class CrawlerController {
     return success(await this.crawlerService.delete(crawlWebsiteId));
   }
 
-  @ApiOperation({ summary: 'Delete list of crawls' })
+  @ApiOperation({ summary: "Delete list of crawls" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteCrawlers(@Body() crawlerDeleteBulk: CrawlerDeleteBulk): Promise<any> {
+  async deleteCrawlers(
+    @Body() crawlerDeleteBulk: CrawlerDeleteBulk
+  ): Promise<any> {
     const crawlWebsiteIds = crawlerDeleteBulk.crawlWebsiteIds;
 
     return success(await this.crawlerService.deleteBulk(crawlWebsiteIds));
   }
 
-  @ApiOperation({ summary: 'Find crawl website by id' })
+  @ApiOperation({ summary: "Find crawl website by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))

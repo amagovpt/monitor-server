@@ -12,24 +12,30 @@ import { AuthGuard } from "@nestjs/passport";
 import { EvaluationService } from "./evaluation.service";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { Evaluation } from "./evaluation.entity";
 import { Readable } from "stream";
 import { Response } from "express";
 
-
 @ApiBasicAuth()
-@ApiTags('evaluation')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("evaluation")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("evaluation")
 @UseInterceptors(LoggingInterceptor)
 export class EvaluationController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
-  @ApiOperation({ summary: 'Find number of requests done to Observatory from the start date' })
+  @ApiOperation({
+    summary: "Find number of requests done to Observatory from the start date",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -40,10 +46,12 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find number of requests done to My Monitor from the start date' })
+  @ApiOperation({
+    summary: "Find number of requests done to My Monitor from the start date",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -52,10 +60,13 @@ export class EvaluationController {
     return success(await this.evaluationService.getMyMonitorRequestCounter());
   }
 
-  @ApiOperation({ summary: 'Find number of requests done to Study Monitor from the start date' })
+  @ApiOperation({
+    summary:
+      "Find number of requests done to Study Monitor from the start date",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -66,10 +77,13 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find number of requests done to Acess Monitor from the start date' })
+  @ApiOperation({
+    summary:
+      "Find number of requests done to Acess Monitor from the start date",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -80,10 +94,10 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Reset  AMS evaluation queue' })
+  @ApiOperation({ summary: "Reset  AMS evaluation queue" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -92,10 +106,12 @@ export class EvaluationController {
     return success(await this.evaluationService.resetAdminWaitingList());
   }
 
-  @ApiOperation({ summary: 'Delete AMS evaluation queue (including error list)' })
+  @ApiOperation({
+    summary: "Delete AMS evaluation queue (including error list)",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -104,10 +120,10 @@ export class EvaluationController {
     return success(await this.evaluationService.deleteAdminWaitingList());
   }
 
-  @ApiOperation({ summary: 'Reset  My Monitor evaluation queue' })
+  @ApiOperation({ summary: "Reset  My Monitor evaluation queue" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -116,10 +132,12 @@ export class EvaluationController {
     return success(await this.evaluationService.resetMMWaitingList());
   }
 
-  @ApiOperation({ summary: 'Delete My Monitor evaluation queue (including error list)' })
+  @ApiOperation({
+    summary: "Delete My Monitor evaluation queue (including error list)",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -127,10 +145,10 @@ export class EvaluationController {
   async deleteMMEvaluationList(): Promise<any> {
     return success(await this.evaluationService.deleteMMWaitingList());
   }
-  @ApiOperation({ summary: 'Reset  Study Monitor evaluation queue' })
+  @ApiOperation({ summary: "Reset  Study Monitor evaluation queue" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -139,10 +157,12 @@ export class EvaluationController {
     return success(await this.evaluationService.resetSMWaitingList());
   }
 
-  @ApiOperation({ summary: 'Delete Study Monitor evaluation queue (including error list)' })
+  @ApiOperation({
+    summary: "Delete Study Monitor evaluation queue (including error list)",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -151,10 +171,12 @@ export class EvaluationController {
     return success(await this.evaluationService.deleteSMWaitingList());
   }
 
-  @ApiOperation({ summary: 'Find evaluations from a specific user and website in My Monitor' })
+  @ApiOperation({
+    summary: "Find evaluations from a specific user and website in My Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Evaluation>,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
@@ -172,10 +194,13 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluations from a specific user, website and page in My Monitor' })
+  @ApiOperation({
+    summary:
+      "Find evaluations from a specific user, website and page in My Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Evaluation>,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
@@ -196,10 +221,13 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluations from a specific user, website and tag in Study Monitor' })
+  @ApiOperation({
+    summary:
+      "Find evaluations from a specific user, website and tag in Study Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Evaluation>,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -219,10 +247,13 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluations from a specific user, website, tag and url in Study Monitor' })
+  @ApiOperation({
+    summary:
+      "Find evaluations from a specific user, website, tag and url in Study Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Evaluation>,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -245,10 +276,10 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluations of a specific page in AMS' })
+  @ApiOperation({ summary: "Find evaluations of a specific page in AMS" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Evaluation>,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -264,10 +295,10 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluation by id in AMS' })
+  @ApiOperation({ summary: "Find evaluation by id in AMS" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Evaluation,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -282,10 +313,10 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Find evaluation by type and url in AMS' })
+  @ApiOperation({ summary: "Find evaluation by type and url in AMS" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Evaluation,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -300,10 +331,12 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Repeat evaluations from specific evaluation list ' })
+  @ApiOperation({
+    summary: "Repeat evaluations from specific evaluation list ",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Evaluation,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -314,10 +347,10 @@ export class EvaluationController {
     );
   }
 
-  @ApiOperation({ summary: 'Return existing evaluations for a website ' })
+  @ApiOperation({ summary: "Return existing evaluations for a website " })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Evaluation,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -335,12 +368,12 @@ export class EvaluationController {
     const stream = new Readable({
       read() {
         results.forEach((result) => {
-          this.push(JSON.stringify(result) + '\n');
+          this.push(JSON.stringify(result) + "\n");
         });
         this.push(null);
       },
     });
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader("Content-Type", "application/json");
     stream.pipe(res);
   }
 }

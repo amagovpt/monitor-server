@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AutomaticEvaluationService } from './automatic-evaluation.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AutomaticEvaluationService } from "./automatic-evaluation.service";
 
-describe('AutomaticEvaluationService', () => {
+describe("AutomaticEvaluationService", () => {
   let service: AutomaticEvaluationService;
 
   beforeEach(async () => {
@@ -9,10 +9,12 @@ describe('AutomaticEvaluationService', () => {
       providers: [AutomaticEvaluationService],
     }).compile();
 
-    service = module.get<AutomaticEvaluationService>(AutomaticEvaluationService);
+    service = module.get<AutomaticEvaluationService>(
+      AutomaticEvaluationService
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

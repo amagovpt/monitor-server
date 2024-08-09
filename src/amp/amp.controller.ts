@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Param, Request, UseInterceptors } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Request,
+  UseInterceptors,
+} from "@nestjs/common";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { success, accessDenied } from "../lib/response";
 import { readFileSync } from "fs";
@@ -6,23 +13,27 @@ import dns from "dns";
 import ipRangeCheck from "ip-range-check";
 import { RateLimit } from "nestjs-rate-limiter";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-
+import {
+  ApiBasicAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 
 const blackList = readFileSync("../black-list.txt").toString().split("\n");
 
 @ApiBasicAuth()
-@ApiTags('amp')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("amp")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("amp")
 @UseInterceptors(LoggingInterceptor)
 export class AmpController {
   constructor(private readonly evaluationService: EvaluationService) {}
 
-  @ApiOperation({ summary: 'Evaluate page via url' })
+  @ApiOperation({ summary: "Evaluate page via url" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @RateLimit({
@@ -56,10 +67,10 @@ export class AmpController {
     );
   }
 
-  @ApiOperation({ summary: 'Evaluate html code' })
+  @ApiOperation({ summary: "Evaluate html code" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @Post("eval/html")

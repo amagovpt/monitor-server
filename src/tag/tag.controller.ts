@@ -14,7 +14,12 @@ import { TagService } from "./tag.service";
 import { Tag } from "./tag.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiTags,
+  ApiResponse,
+  ApiOperation,
+} from "@nestjs/swagger";
 import { TagReEvaluateDto } from "./dto/tag-reevalute.dto";
 import { CreateTagDto } from "./dto/create-tag.dto";
 import { UpdateTagDto } from "./dto/update-tag.dto";
@@ -25,32 +30,34 @@ import { DeleteTagStudyDto } from "./dto/delete-tag-study.dto";
 import { ImportTagDto } from "./dto/import-tag.dto";
 
 @ApiBasicAuth()
-@ApiTags('tag')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("tag")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("tag")
 @UseInterceptors(LoggingInterceptor)
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
-  @ApiOperation({ summary: 'Reevaluate all pages from a tag' })
+  @ApiOperation({ summary: "Reevaluate all pages from a tag" })
   @ApiResponse({
     status: 200,
-    description: 'The evaluation request has been submited',
+    description: "The evaluation request has been submited",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Body() tagReEvaluateDto: TagReEvaluateDto): Promise<any> {
+  async reEvaluateWebsitePages(
+    @Body() tagReEvaluateDto: TagReEvaluateDto
+  ): Promise<any> {
     const tagsId = tagReEvaluateDto.tagsId;
     const option = tagReEvaluateDto.option;
 
     return success(await this.tagService.addPagesToEvaluate(tagsId, option));
   }
 
-  @ApiOperation({ summary: 'Create a new tag' })
+  @ApiOperation({ summary: "Create a new tag" })
   @ApiResponse({
     status: 200,
-    description: 'The tag was created',
+    description: "The tag was created",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -76,10 +83,10 @@ export class TagController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Update a specific tag' })
+  @ApiOperation({ summary: "Update a specific tag" })
   @ApiResponse({
     status: 200,
-    description: 'The tag was updated',
+    description: "The tag was updated",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -108,10 +115,10 @@ export class TagController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a specific tag' })
+  @ApiOperation({ summary: "Delete a specific tag" })
   @ApiResponse({
     status: 200,
-    description: 'The tag was deleted',
+    description: "The tag was deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -127,15 +134,17 @@ export class TagController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a list of tags' })
+  @ApiOperation({ summary: "Delete a list of tags" })
   @ApiResponse({
     status: 200,
-    description: 'The tags were deleted',
+    description: "The tags were deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteBulkOfficialTags(@Body() deleteTagBulkDto: DeleteTagBulkDto): Promise<any> {
+  async deleteBulkOfficialTags(
+    @Body() deleteTagBulkDto: DeleteTagBulkDto
+  ): Promise<any> {
     const tagsId = deleteTagBulkDto.tagsId;
 
     const deleteSuccess = await this.tagService.deleteBulk(tagsId);
@@ -146,15 +155,17 @@ export class TagController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete all pages from a specific tag' })
+  @ApiOperation({ summary: "Delete all pages from a specific tag" })
   @ApiResponse({
     status: 200,
-    description: 'The pages were deleted',
+    description: "The pages were deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
-  async deleteBulkOfficialTagsPages(@Body() deleteTagBulkDto: DeleteTagBulkDto): Promise<any> {
+  async deleteBulkOfficialTagsPages(
+    @Body() deleteTagBulkDto: DeleteTagBulkDto
+  ): Promise<any> {
     const tagsId = deleteTagBulkDto.tagsId;
 
     const deleteSuccess = await this.tagService.pagesDeleteBulk(tagsId);
@@ -165,15 +176,17 @@ export class TagController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Create study monitor tag' })
+  @ApiOperation({ summary: "Create study monitor tag" })
   @ApiResponse({
     status: 200,
-    description: 'The study monitor tag was created',
+    description: "The study monitor tag was created",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("user/create")
-  async createStudyMonitorUserTag(@Body() createTagStudyDto: CreateTagStudyDto): Promise<any> {
+  async createStudyMonitorUserTag(
+    @Body() createTagStudyDto: CreateTagStudyDto
+  ): Promise<any> {
     const tag = new Tag();
     tag.Name = createTagStudyDto.user_tag_name;
     tag.UserId = createTagStudyDto.userId;
@@ -195,16 +208,18 @@ export class TagController {
     return success(true);
   }
 
-
-  @ApiOperation({ summary: 'Delete study monitor tag' })
+  @ApiOperation({ summary: "Delete study monitor tag" })
   @ApiResponse({
     status: 200,
-    description: 'The study monitor tag was deleted',
+    description: "The study monitor tag was deleted",
     type: Array<Tag>,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("user/remove")
-  async removeStudyMonitorUserTag(@Request() req: any, deleteTagStudyDto: DeleteTagStudyDto): Promise<any> {
+  async removeStudyMonitorUserTag(
+    @Request() req: any,
+    deleteTagStudyDto: DeleteTagStudyDto
+  ): Promise<any> {
     const tagsId = deleteTagStudyDto.tagsId;
 
     const removeSuccess = await this.tagService.removeUserTag(tagsId);
@@ -218,10 +233,10 @@ export class TagController {
     );
   }
 
-  @ApiOperation({ summary: 'Import tag to AMS' })
+  @ApiOperation({ summary: "Import tag to AMS" })
   @ApiResponse({
     status: 200,
-    description: 'The tag was imported',
+    description: "The tag was imported",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -233,10 +248,10 @@ export class TagController {
     return success(await this.tagService.import(tagId, tagName));
   }
 
-  @ApiOperation({ summary: 'Check if tag exists by name' })
+  @ApiOperation({ summary: "Check if tag exists by name" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -247,10 +262,10 @@ export class TagController {
     return success(!!(await this.tagService.findByOfficialTagName(tagName)));
   }
 
-  @ApiOperation({ summary: 'Find all tags' })
+  @ApiOperation({ summary: "Find all tags" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -258,10 +273,12 @@ export class TagController {
   async getAllTags(): Promise<any> {
     return success(await this.tagService.findAll());
   }
-  @ApiOperation({ summary: 'Find websites from a specific user tag study monitor' })
+  @ApiOperation({
+    summary: "Find websites from a specific user tag study monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -291,10 +308,10 @@ export class TagController {
     return success(websites);
   }
 
-  @ApiOperation({ summary: 'Find websites from a specific user tag' })
+  @ApiOperation({ summary: "Find websites from a specific user tag" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -306,10 +323,10 @@ export class TagController {
     return success(await this.tagService.findAllUserTagWebsites(tag, user));
   }
 
-  @ApiOperation({ summary: 'Find pages from a specific user tag' })
+  @ApiOperation({ summary: "Find pages from a specific user tag" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -324,10 +341,10 @@ export class TagController {
     );
   }
 
-  @ApiOperation({ summary: 'Find a specific tag by name' })
+  @ApiOperation({ summary: "Find a specific tag by name" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -336,10 +353,10 @@ export class TagController {
     return success(await this.tagService.findAllWebsitePages(tag));
   }
 
-  @ApiOperation({ summary: 'Find a specific tag by id' })
+  @ApiOperation({ summary: "Find a specific tag by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt"))
@@ -348,10 +365,10 @@ export class TagController {
     return success(await this.tagService.findInfo(tagId));
   }
 
-  @ApiOperation({ summary: 'Find all AMS tags' })
+  @ApiOperation({ summary: "Find all AMS tags" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt"))
@@ -360,10 +377,10 @@ export class TagController {
     return success(await this.tagService.findAllOfficial());
   }
 
-  @ApiOperation({ summary: 'Find the number of study monitor tags' })
+  @ApiOperation({ summary: "Find the number of study monitor tags" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -372,10 +389,10 @@ export class TagController {
     return success(await this.tagService.findNumberOfStudyMonitor());
   }
 
-  @ApiOperation({ summary: 'Find the number observatory tags' })
+  @ApiOperation({ summary: "Find the number observatory tags" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -384,10 +401,10 @@ export class TagController {
     return success(await this.tagService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Find all study monitor tags from a specific user' })
+  @ApiOperation({ summary: "Find all study monitor tags from a specific user" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -398,10 +415,10 @@ export class TagController {
     );
   }
 
-  @ApiOperation({ summary: 'Find tag data from a specific tag' })
+  @ApiOperation({ summary: "Find tag data from a specific tag" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -415,10 +432,10 @@ export class TagController {
     );
   }
 
-  @ApiOperation({ summary: 'Find tag data from a specific tag and website' })
+  @ApiOperation({ summary: "Find tag data from a specific tag and website" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))

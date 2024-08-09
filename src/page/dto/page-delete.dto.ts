@@ -1,3 +1,3 @@
 export class PageDeleteDto {
-    pages:number[];
+  pages: number[];
 }

@@ -1,3 +1,3 @@
 export class PageUrlDto {
-    page:string//URL
+  page: string; //URL
 }

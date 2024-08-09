@@ -5,7 +5,6 @@ import { Website } from "../website/website.entity";
 import { Page } from "./page.entity";
 import { Evaluation } from "../evaluation/evaluation.entity";
 
-
 @Injectable()
 export class PageService {
   constructor(
@@ -14,7 +13,8 @@ export class PageService {
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     @InjectDataSource()
-    private readonly connection: DataSource ) { }
+    private readonly connection: DataSource
+  ) {}
 
   async findUserType(username: string): Promise<any> {
     if (username === "admin") {
@@ -206,7 +206,6 @@ export class PageService {
   }
 
   async getObservatoryData(): Promise<any> {
-
     let data = new Array<any>();
 
     const directories = await this.pageRepository.query(
@@ -674,10 +673,10 @@ export class PageService {
     return !hasError;
   }
 
-  convertStringToStringArray(numStr : string) : string[] {
+  convertStringToStringArray(numStr: string): string[] {
     // remove first and last character
     numStr = numStr.substring(1, numStr.length - 1);
-    return numStr.split(',').map((s) => s.substring(1, numStr.length - 1));
+    return numStr.split(",").map((s) => s.substring(1, numStr.length - 1));
   }
 
   async createMyMonitorUserWebsitePages(
@@ -686,8 +685,8 @@ export class PageService {
     startingUrl: string,
     uris: string[]
   ): Promise<boolean> {
-    let uriArray : string[] = [];
-    if (typeof uris === 'string') {
+    let uriArray: string[] = [];
+    if (typeof uris === "string") {
       uriArray = this.convertStringToStringArray(uris);
     } else {
       uriArray = uris;
@@ -772,10 +771,10 @@ export class PageService {
     //return await this.findAllFromMyMonitorUserWebsite(userId, website);
   }
 
-  convertStringToNumberArray(numStr : string) : number[] {
+  convertStringToNumberArray(numStr: string): number[] {
     // remove first and last character
     numStr = numStr.substring(1, numStr.length - 1);
-    return numStr.split(',').map(Number);
+    return numStr.split(",").map(Number);
   }
 
   async removeMyMonitorUserWebsitePages(
@@ -784,8 +783,8 @@ export class PageService {
     pagesIds: number[]
   ): Promise<any> {
     // this should not happen, but pagesIds type is string, so it needs to be converted to number[]
-    let ids : number[] = [];
-    if (typeof pagesIds === 'string') {
+    let ids: number[] = [];
+    if (typeof pagesIds === "string") {
       ids = this.convertStringToNumberArray(pagesIds);
     } else {
       ids = pagesIds;
@@ -847,10 +846,10 @@ export class PageService {
     let hasError = false;
     try {
       for (const uri of uris || []) {
-        const pageExists = await queryRunner.manager.findOne(
-          Page,
-          {where: {Uri: uri} , select: ["PageId", "Uri", "Creation_Date"] }
-        );
+        const pageExists = await queryRunner.manager.findOne(Page, {
+          where: { Uri: uri },
+          select: ["PageId", "Uri", "Creation_Date"],
+        });
 
         if (pageExists) {
           const websitePage = await queryRunner.manager.query(

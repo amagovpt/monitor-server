@@ -113,4 +113,4 @@ const HTML = `<html lang="pt-PT">
 <!-- fim do código -->
    </body>
 </html>`;
-export { HTML}
+export { HTML };

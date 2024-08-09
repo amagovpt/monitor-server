@@ -1,4 +1,4 @@
 export class ImportTagDto {
-    tagId:number;
-    tagName:string;
+  tagId: number;
+  tagName: string;
 }

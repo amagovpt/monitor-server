@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AccessibilityStatementService } from './accessibility-statement.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AccessibilityStatementService } from "./accessibility-statement.service";
 
-describe('AccessibilityStatementService', () => {
+describe("AccessibilityStatementService", () => {
   let service: AccessibilityStatementService;
 
   beforeEach(async () => {
@@ -9,10 +9,12 @@ describe('AccessibilityStatementService', () => {
       providers: [AccessibilityStatementService],
     }).compile();
 
-    service = module.get<AccessibilityStatementService>(AccessibilityStatementService);
+    service = module.get<AccessibilityStatementService>(
+      AccessibilityStatementService
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

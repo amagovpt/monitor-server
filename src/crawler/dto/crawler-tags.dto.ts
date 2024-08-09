@@ -1,4 +1,3 @@
-
 export class CrawlerTags {
-    tagsId:number[];
+  tagsId: number[];
 }

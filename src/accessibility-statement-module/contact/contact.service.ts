@@ -1,25 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AccessibilityStatement } from '../accessibility-statement/entities/accessibility-statement.entity';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { Contact } from './entities/contact.entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { AccessibilityStatement } from "../accessibility-statement/entities/accessibility-statement.entity";
+import { CreateContactDto } from "./dto/create-contact.dto";
+import { Contact } from "./entities/contact.entity";
 
 @Injectable()
 export class ContactService {
   constructor(
     @InjectRepository(Contact)
-    private readonly contactRepository: Repository<Contact>) {
-  }
-  
-  create(createContactDto: CreateContactDto,acessiblityStatement: AccessibilityStatement) {
+    private readonly contactRepository: Repository<Contact>
+  ) {}
+
+  create(
+    createContactDto: CreateContactDto,
+    acessiblityStatement: AccessibilityStatement
+  ) {
     const contact = this.contactRepository.create({
-      ...createContactDto, acessiblityStatement
-      });
+      ...createContactDto,
+      acessiblityStatement,
+    });
     return this.contactRepository.save(contact);
   }
 
-  getContactsByWebsite(){
+  getContactsByWebsite() {
     this.contactRepository.query(
       `select 
         w.Name, 
@@ -29,6 +33,7 @@ export class ContactService {
         join Accessibility_Statement as st on st.Id = c.Accessibility_Statement_Id 
         join Website as w on w.WebsiteId = st.WebsiteId 
       where 
-        c.Contact is not null`);
+        c.Contact is not null`
+    );
   }
 }

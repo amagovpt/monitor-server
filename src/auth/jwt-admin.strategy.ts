@@ -1,11 +1,11 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { jwtConstants } from './constants';
-import { AuthService } from './auth.service';
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { PassportStrategy } from "@nestjs/passport";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { jwtConstants } from "./constants";
+import { AuthService } from "./auth.service";
 
 @Injectable()
-export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
+export class JwtAdminStrategy extends PassportStrategy(Strategy, "jwt-admin") {
   constructor(private readonly authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -21,11 +21,11 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
     const token = this.authService.signToken(payload);
 
     const isBlackListed = await this.authService.isTokenBlackListed(token);
-    
-    if (!valid || payload.type !== 'nimda' || isBlackListed) {
-      throw new UnauthorizedException(); 
+
+    if (!valid || payload.type !== "nimda" || isBlackListed) {
+      throw new UnauthorizedException();
     }
-    
+
     return { userId: payload.sub, username: payload.username };
   }
 }

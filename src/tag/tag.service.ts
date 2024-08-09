@@ -10,7 +10,8 @@ export class TagService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     @InjectDataSource()
-    private readonly connection: DataSource  ) {}
+    private readonly connection: DataSource
+  ) {}
 
   async addPagesToEvaluate(tagsId: number[], option: string): Promise<boolean> {
     const pages = await this.tagRepository.query(
@@ -353,7 +354,6 @@ export class TagService {
   }
 
   async findAllWebsitePages(tag: string): Promise<any> {
-
     const websites = await this.tagRepository.query(
       `
       SELECT 
@@ -785,7 +785,6 @@ export class TagService {
   }
 
   async findAllUserTagWebsites(tag: string, user: string): Promise<any> {
-
     if (user === "admin") {
       const websites = await this.tagRepository.query(
         `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct e.PageId) as Evaluated_Pages
@@ -832,7 +831,6 @@ export class TagService {
   }
 
   async verifyUpdateWebsiteAdmin(websiteId: number): Promise<any> {
-
     const studyP = await this.tagRepository.query(
       `SELECT p.PageId
       FROM  
@@ -851,7 +849,6 @@ export class TagService {
   }
 
   async websiteExistsInAdmin(websiteId: number): Promise<any> {
-
     const websites = await this.tagRepository.query(
       `SELECT
         w2.*

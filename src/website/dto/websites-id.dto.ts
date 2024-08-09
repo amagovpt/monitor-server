@@ -1,9 +1,8 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
 export class WebsitesIdDto {
-    @IsNotEmpty()
-    websitesId: number[];
+  @IsNotEmpty()
+  websitesId: number[];
 
-    @IsNotEmpty()
-    option: string;
-
+  @IsNotEmpty()
+  option: string;
 }

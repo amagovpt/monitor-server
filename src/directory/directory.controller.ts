@@ -13,7 +13,12 @@ import { DirectoryService } from "./directory.service";
 import { Directory } from "./directory.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ReEvaluateDto } from "./dto/reEvaluate-pages.dto";
 import { CreateDirectory } from "./dto/create-diretory.dto";
 import { UpdateDirectory } from "./dto/update-diretory.dto";
@@ -22,24 +27,25 @@ import { DeleteBulkDirectory } from "./dto/delete-bulk-diretory.dto";
 import { Tag } from "src/tag/tag.entity";
 import { Website } from "src/website/website.entity";
 
-
 @ApiBasicAuth()
-@ApiTags('directory')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("directory")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("directory")
 @UseInterceptors(LoggingInterceptor)
 export class DirectoryController {
   constructor(private readonly directoryService: DirectoryService) {}
 
-  @ApiOperation({ summary: 'Reevaluate all pages from a directory' })
+  @ApiOperation({ summary: "Reevaluate all pages from a directory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Body() reEvaluateDto: ReEvaluateDto): Promise<any> {
+  async reEvaluateWebsitePages(
+    @Body() reEvaluateDto: ReEvaluateDto
+  ): Promise<any> {
     const directoriesId = reEvaluateDto.directoriesId;
     const option = reEvaluateDto.option;
 
@@ -48,10 +54,10 @@ export class DirectoryController {
     );
   }
 
-  @ApiOperation({ summary: 'Find all directories' })
+  @ApiOperation({ summary: "Find all directories" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -60,15 +66,17 @@ export class DirectoryController {
     return success(await this.directoryService.findAll());
   }
 
-  @ApiOperation({ summary: 'Create a new directory' })
+  @ApiOperation({ summary: "Create a new directory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("create")
-  async createDirectory(@Body() createDirectory: CreateDirectory): Promise<any> {
+  async createDirectory(
+    @Body() createDirectory: CreateDirectory
+  ): Promise<any> {
     const directory = new Directory();
     directory.Name = createDirectory.name;
     directory.Show_in_Observatory = createDirectory.observatory;
@@ -89,10 +97,10 @@ export class DirectoryController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Check if directory name exists' })
+  @ApiOperation({ summary: "Check if directory name exists" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -105,15 +113,17 @@ export class DirectoryController {
     );
   }
 
-  @ApiOperation({ summary: 'Update a specific directory' })
+  @ApiOperation({ summary: "Update a specific directory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("update")
-  async updateDirectory(@Body() updateDirectory: UpdateDirectory): Promise<any> {
+  async updateDirectory(
+    @Body() updateDirectory: UpdateDirectory
+  ): Promise<any> {
     const directoryId = updateDirectory.directoryId;
     const name = updateDirectory.name;
     const observatory = updateDirectory.observatory;
@@ -137,15 +147,17 @@ export class DirectoryController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a specific directory' })
+  @ApiOperation({ summary: "Delete a specific directory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("delete")
-  async deleteDirectory(@Body() deleteDirectory: DeleteDirectory): Promise<any> {
+  async deleteDirectory(
+    @Body() deleteDirectory: DeleteDirectory
+  ): Promise<any> {
     const directoryId = deleteDirectory.directoryId;
 
     const deleteSuccess = await this.directoryService.delete(directoryId);
@@ -156,15 +168,17 @@ export class DirectoryController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a list directories' })
+  @ApiOperation({ summary: "Delete a list directories" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteDirectories(@Body() deleteBulkDirectory: DeleteBulkDirectory): Promise<any> {
+  async deleteDirectories(
+    @Body() deleteBulkDirectory: DeleteBulkDirectory
+  ): Promise<any> {
     const directoriesId = deleteBulkDirectory.directoriesId;
 
     const deleteSuccess = await this.directoryService.deleteBulk(directoriesId);
@@ -174,15 +188,17 @@ export class DirectoryController {
 
     return success(true);
   }
-  @ApiOperation({ summary: 'Delete all pages from a list directories' })
+  @ApiOperation({ summary: "Delete all pages from a list directories" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
-  async deleteDirectoriesPages(@Body() deleteBulkDirectory: DeleteBulkDirectory): Promise<any> {
+  async deleteDirectoriesPages(
+    @Body() deleteBulkDirectory: DeleteBulkDirectory
+  ): Promise<any> {
     const directoriesId = deleteBulkDirectory.directoriesId;
 
     const deleteSuccess = await this.directoryService.pagesDeleteBulk(
@@ -195,10 +211,10 @@ export class DirectoryController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Find number of observatory directories' })
+  @ApiOperation({ summary: "Find number of observatory directories" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -207,23 +223,24 @@ export class DirectoryController {
     return success(await this.directoryService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Find a specific directory info' })
+  @ApiOperation({ summary: "Find a specific directory info" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Directory,
   })
   @UseGuards(AuthGuard("jwt"))
   @Get("info/:directoryId")
-  async getDirectoryInfo(@Param("directoryId") directoryId: number): Promise<any> {
+  async getDirectoryInfo(
+    @Param("directoryId") directoryId: number
+  ): Promise<any> {
     return success(await this.directoryService.findInfo(directoryId));
   }
 
-
-  @ApiOperation({ summary: 'Find all tags from a specific dirctory' })
+  @ApiOperation({ summary: "Find all tags from a specific dirctory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Tag>,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -232,10 +249,10 @@ export class DirectoryController {
     return success(await this.directoryService.findAllDirectoryTags(directory));
   }
 
-  @ApiOperation({ summary: 'Find all websites from a specific dirctory' })
+  @ApiOperation({ summary: "Find all websites from a specific dirctory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Website>,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -248,11 +265,10 @@ export class DirectoryController {
     );
   }
 
-
-  @ApiOperation({ summary: 'Find all pages from a specific dirctory' })
+  @ApiOperation({ summary: "Find all pages from a specific dirctory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Website>,
   })
   @UseGuards(AuthGuard("jwt-admin"))

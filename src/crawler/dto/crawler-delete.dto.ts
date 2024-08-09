@@ -1,4 +1,3 @@
-
 export class CrawlerDelete {
-    crawlWebsiteId:number;
+  crawlWebsiteId: number;
 }

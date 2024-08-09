@@ -1,4 +1,3 @@
 export class DeleteWebsiteDto {
-
-    websiteId: number;
+  websiteId: number;
 }

@@ -14,7 +14,12 @@ import { EntityService } from "./entity.service";
 import { EntityTable } from "./entity.entity";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ReevaluateEntityDto } from "./dto/reevalute-entity.dto";
 import { CreateEntityDto } from "./dto/create-entity.dto";
 import { UpdateEntityDto } from "./dto/update-entity.dto";
@@ -23,24 +28,25 @@ import { DeleteBulkEntityDto } from "./dto/delete-bulk-entity.dto";
 import { Website } from "src/website/website.entity";
 import { Page } from "src/page/page.entity";
 
-
 @ApiBasicAuth()
-@ApiTags('entity')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("entity")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("entity")
 @UseInterceptors(LoggingInterceptor)
 export class EntityController {
   constructor(private readonly entityService: EntityService) {}
 
-  @ApiOperation({ summary: 'Reevaluate all pages from an entity list' })
+  @ApiOperation({ summary: "Reevaluate all pages from an entity list" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("reEvaluate")
-  async reEvaluateWebsitePages(@Body() reevaluateEntityDto: ReevaluateEntityDto): Promise<any> {
+  async reEvaluateWebsitePages(
+    @Body() reevaluateEntityDto: ReevaluateEntityDto
+  ): Promise<any> {
     const entitiesId = reevaluateEntityDto.entitiesId;
     const option = reevaluateEntityDto.option;
 
@@ -49,10 +55,10 @@ export class EntityController {
     );
   }
 
-  @ApiOperation({ summary: 'Find number of entities in Observatory' })
+  @ApiOperation({ summary: "Find number of entities in Observatory" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -61,10 +67,10 @@ export class EntityController {
     return success(await this.entityService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Find entity by search term in AMS' })
+  @ApiOperation({ summary: "Find entity by search term in AMS" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -77,10 +83,13 @@ export class EntityController {
     );
   }
 
-  @ApiOperation({ summary: 'Find entity by search term, size, page, sort and sort direction in AMS' })
+  @ApiOperation({
+    summary:
+      "Find entity by search term, size, page, sort and sort direction in AMS",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -103,10 +112,10 @@ export class EntityController {
     );
   }
 
-  @ApiOperation({ summary: 'Find entity info by id' })
+  @ApiOperation({ summary: "Find entity info by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: EntityTable,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -115,10 +124,10 @@ export class EntityController {
     return success(await this.entityService.findInfo(entityId));
   }
 
-  @ApiOperation({ summary: 'Create a new entity' })
+  @ApiOperation({ summary: "Create a new entity" })
   @ApiResponse({
     status: 200,
-    description: 'A new entity was created',
+    description: "A new entity was created",
     type: EntityTable,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -139,10 +148,10 @@ export class EntityController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Update a specific entity' })
+  @ApiOperation({ summary: "Update a specific entity" })
   @ApiResponse({
     status: 200,
-    description: 'The entity was updated',
+    description: "The entity was updated",
     type: EntityTable,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -169,10 +178,10 @@ export class EntityController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a specific entity' })
+  @ApiOperation({ summary: "Delete a specific entity" })
   @ApiResponse({
     status: 200,
-    description: 'The entity was deleted',
+    description: "The entity was deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -188,15 +197,17 @@ export class EntityController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete a list of entities' })
+  @ApiOperation({ summary: "Delete a list of entities" })
   @ApiResponse({
     status: 200,
-    description: 'The entity list was deleted',
+    description: "The entity list was deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
-  async deleteEntities(@Request() deleteBulkEntityDto: DeleteBulkEntityDto): Promise<any> {
+  async deleteEntities(
+    @Request() deleteBulkEntityDto: DeleteBulkEntityDto
+  ): Promise<any> {
     const entitiesId = deleteBulkEntityDto.entitiesId;
 
     const deleteSuccess = await this.entityService.deleteBulk(entitiesId);
@@ -207,15 +218,17 @@ export class EntityController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Delete all pages from a list of entities' })
+  @ApiOperation({ summary: "Delete all pages from a list of entities" })
   @ApiResponse({
     status: 200,
-    description: 'The page list was deleted',
+    description: "The page list was deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("pages/deleteBulk")
-  async deleteEntitiesPages(@Body() deleteBulkEntityDto: DeleteBulkEntityDto): Promise<any> {
+  async deleteEntitiesPages(
+    @Body() deleteBulkEntityDto: DeleteBulkEntityDto
+  ): Promise<any> {
     const entitiesId = deleteBulkEntityDto.entitiesId;
 
     const deleteSuccess = await this.entityService.pagesDeleteBulk(entitiesId);
@@ -226,10 +239,10 @@ export class EntityController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Check if entity exists by short-name' })
+  @ApiOperation({ summary: "Check if entity exists by short-name" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -240,10 +253,10 @@ export class EntityController {
     return success(!!(await this.entityService.findByShortName(shortName)));
   }
 
-  @ApiOperation({ summary: 'Check if entity exists by long-name' })
+  @ApiOperation({ summary: "Check if entity exists by long-name" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -254,10 +267,10 @@ export class EntityController {
     return success(!!(await this.entityService.findByLongName(longName)));
   }
 
-  @ApiOperation({ summary: 'Find all the websites in a specific entity' })
+  @ApiOperation({ summary: "Find all the websites in a specific entity" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Website>,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -266,10 +279,10 @@ export class EntityController {
     return success(await this.entityService.findAllWebsites(entity));
   }
 
-  @ApiOperation({ summary: 'Find all the pages in a specific entity' })
+  @ApiOperation({ summary: "Find all the pages in a specific entity" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Array<Page>,
   })
   @UseGuards(AuthGuard("jwt-admin"))

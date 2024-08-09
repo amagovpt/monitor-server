@@ -1,5 +1,5 @@
 export enum State {
-  completeStatement = 'completeStatement',
-  incompleteStatement = 'incompleteStatement',
-  possibleStatement = 'possibleStatement',
+  completeStatement = "completeStatement",
+  incompleteStatement = "incompleteStatement",
+  possibleStatement = "possibleStatement",
 }

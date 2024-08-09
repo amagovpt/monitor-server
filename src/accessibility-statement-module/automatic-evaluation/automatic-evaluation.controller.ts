@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AutomaticEvaluationService } from './automatic-evaluation.service';
-import { CreateAutomaticEvaluationDto } from './dto/create-automatic-evaluation.dto';
-import { UpdateAutomaticEvaluationDto } from './dto/update-automatic-evaluation.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { AutomaticEvaluationService } from "./automatic-evaluation.service";
+import { CreateAutomaticEvaluationDto } from "./dto/create-automatic-evaluation.dto";
+import { UpdateAutomaticEvaluationDto } from "./dto/update-automatic-evaluation.dto";
 
-@Controller('automatic-evaluation')
+@Controller("automatic-evaluation")
 export class AutomaticEvaluationController {
-  constructor(private readonly automaticEvaluationService: AutomaticEvaluationService) {}
-/*
+  constructor(
+    private readonly automaticEvaluationService: AutomaticEvaluationService
+  ) {}
+  /*
   @Post()
   create(@Body() createAutomaticEvaluationDto: CreateAutomaticEvaluationDto) {
     return this.automaticEvaluationService.create(createAutomaticEvaluationDto);

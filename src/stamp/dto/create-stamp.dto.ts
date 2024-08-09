@@ -1,3 +1,3 @@
 export class PageUrlDto {
-    websitesId:number[];
+  websitesId: number[];
 }

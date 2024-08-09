@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UserEvaluationService } from './user-evaluation.service';
-import { CreateUserEvaluationDto } from './dto/create-user-evaluation.dto';
-import { UpdateUserEvaluationDto } from './dto/update-user-evaluation.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { UserEvaluationService } from "./user-evaluation.service";
+import { CreateUserEvaluationDto } from "./dto/create-user-evaluation.dto";
+import { UpdateUserEvaluationDto } from "./dto/update-user-evaluation.dto";
 
-@Controller('user-evaluation')
+@Controller("user-evaluation")
 export class UserEvaluationController {
   constructor(private readonly userEvaluationService: UserEvaluationService) {}
 

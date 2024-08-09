@@ -1,5 +1,5 @@
 export class PageDeleteStudyMonitorDto {
-    tag:string;
-    website: string;
-    pagesId: number[];
+  tag: string;
+  website: string;
+  pagesId: number[];
 }

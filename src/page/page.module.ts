@@ -14,7 +14,7 @@ import { AccessibilityStatementModule } from "src/accessibility-statement-module
     TypeOrmModule.forFeature([Website, Page, Evaluation]),
     AuthModule,
     EvaluationModule,
-    AccessibilityStatementModule
+    AccessibilityStatementModule,
   ],
   exports: [PageService],
   providers: [PageService],

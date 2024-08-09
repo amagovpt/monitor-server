@@ -1,3 +1,3 @@
 export class PageListDto {
-    pages:number[]//id
+  pages: number[]; //id
 }

@@ -1,4 +1,4 @@
-import { Evaluation } from './evaluation';
+import { Evaluation } from "./evaluation";
 
 export class Page {
   id: number;
@@ -12,8 +12,27 @@ export class Page {
     this.creationDate = creationDate;
   }
 
-  addEvaluation(id: number, title: string, score: number, errors: any, tot: any,
-                A: number, AA: number, AAA: number, evaluationDate: Date): void {
-    this.evaluation = new Evaluation(id, title, score, errors, tot, A, AA, AAA, evaluationDate);
+  addEvaluation(
+    id: number,
+    title: string,
+    score: number,
+    errors: any,
+    tot: any,
+    A: number,
+    AA: number,
+    AAA: number,
+    evaluationDate: Date
+  ): void {
+    this.evaluation = new Evaluation(
+      id,
+      title,
+      score,
+      errors,
+      tot,
+      A,
+      AA,
+      AAA,
+      evaluationDate
+    );
   }
 }

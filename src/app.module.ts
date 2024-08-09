@@ -21,17 +21,20 @@ import { AmpModule } from "./amp/amp.module";
 import { StampModule } from "./stamp/stamp.module";
 import { CrawlerModule } from "./crawler/crawler.module";
 import { DirectoryModule } from "./directory/directory.module";
-import { AccessibilityStatementModule } from './accessibility-statement-module/accessibility-statement/accessibility-statement.module';
-import { AutomaticEvaluationModule } from './accessibility-statement-module/automatic-evaluation/automatic-evaluation.module';
-import { ManualEvaluationModule } from './accessibility-statement-module/manual-evaluation/manual-evaluation.module';
-import { UserEvaluationModule } from './accessibility-statement-module/user-evaluation/user-evaluation.module';
-import { GovUserModule } from './gov-user/gov-user.module';
+import { AccessibilityStatementModule } from "./accessibility-statement-module/accessibility-statement/accessibility-statement.module";
+import { AutomaticEvaluationModule } from "./accessibility-statement-module/automatic-evaluation/automatic-evaluation.module";
+import { ManualEvaluationModule } from "./accessibility-statement-module/manual-evaluation/manual-evaluation.module";
+import { UserEvaluationModule } from "./accessibility-statement-module/user-evaluation/user-evaluation.module";
+import { GovUserModule } from "./gov-user/gov-user.module";
 import winston from "winston";
-import 'winston-daily-rotate-file';
-import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
-import { LogModule } from './log/log.module';
-import { DumpModule } from './dump/dump.module';
-import { ApiSeloModule } from './api-selo/api-selo.module';
+import "winston-daily-rotate-file";
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+} from "nest-winston";
+import { LogModule } from "./log/log.module";
+import { DumpModule } from "./dump/dump.module";
+import { ApiSeloModule } from "./api-selo/api-selo.module";
 
 const databaseConfig = JSON.parse(
   readFileSync("../monitor_db.json").toString()
@@ -42,23 +45,24 @@ const databaseConfig = JSON.parse(
     WinstonModule.forRoot({
       transports: [
         new winston.transports.DailyRotateFile({
-          filename: 'error-log/monitor-server-%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
+          filename: "error-log/monitor-server-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
           zippedArchive: true,
-          maxSize: '1m', 
-          level: "error"}),
+          maxSize: "1m",
+          level: "error",
+        }),
         new winston.transports.DailyRotateFile({
-          filename: 'action-log/monitor-server-%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
+          filename: "action-log/monitor-server-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
           zippedArchive: true,
-          maxSize: '1m',
-          level: "http"
+          maxSize: "1m",
+          level: "http",
         }),
         new winston.transports.Console({
           format: winston.format.combine(
             winston.format.timestamp(),
             winston.format.ms(),
-            nestWinstonModuleUtilities.format.nestLike('monitor-server', {
+            nestWinstonModuleUtilities.format.nestLike("monitor-server", {
               // options
             })
           ),
@@ -96,7 +100,9 @@ const databaseConfig = JSON.parse(
     CrawlerModule,
     DirectoryModule,
     AccessibilityStatementModule,
-     AutomaticEvaluationModule, ManualEvaluationModule, UserEvaluationModule,
+    AutomaticEvaluationModule,
+    ManualEvaluationModule,
+    UserEvaluationModule,
     GovUserModule,
     LogModule,
     DumpModule,
@@ -111,4 +117,4 @@ const databaseConfig = JSON.parse(
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -9,7 +9,8 @@ export class EntityService {
     @InjectRepository(EntityTable)
     private readonly entityRepository: Repository<EntityTable>,
     @InjectDataSource()
-    private readonly connection: DataSource,  ) {}
+    private readonly connection: DataSource
+  ) {}
 
   async addPagesToEvaluate(
     entitiesId: number[],
@@ -210,7 +211,6 @@ export class EntityService {
   }
 
   async findAllWebsites(entity: string): Promise<any> {
-
     const websites = await this.entityRepository.query(
       `SELECT w.*, u.Username as User, COUNT(distinct p.PageId) as Pages, COUNT(distinct ev.PageId) as Evaluated_Pages
       FROM

@@ -1,66 +1,65 @@
-import { GovUser } from 'src/gov-user/entities/gov-user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import { GovUser } from "src/gov-user/entities/gov-user.entity";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from "typeorm";
 
-@Entity('User')
+@Entity("User")
 export class User {
-
   @PrimaryGeneratedColumn({
-    type: 'int'
+    type: "int",
   })
   UserId: number;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
     unique: true,
-    nullable: false
+    nullable: false,
   })
   Username: string;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
-    nullable: false
+    nullable: false,
   })
   Password: string;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 45,
-    nullable: false
+    nullable: false,
   })
   Type: string;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
-    nullable: true
+    nullable: true,
   })
   Names: string;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
-    nullable: true
+    nullable: true,
   })
   Emails: string;
 
   @Column({
-    type: 'datetime',
-    nullable: false
+    type: "datetime",
+    nullable: false,
   })
   Register_Date: any;
 
   @Column({
-    type: 'datetime',
-    nullable: true
+    type: "datetime",
+    nullable: true,
   })
   Last_Login: any;
 
   @Column({
-    type: 'varchar',
+    type: "varchar",
     length: 255,
-    nullable: false
+    nullable: false,
   })
   Unique_Hash: string;
 

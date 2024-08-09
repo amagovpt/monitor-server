@@ -1,4 +1,4 @@
 export class PageUpdateDto {
-    pageId:number;
-    checked:boolean;
+  pageId: number;
+  checked: boolean;
 }

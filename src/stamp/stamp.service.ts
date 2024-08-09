@@ -8,7 +8,8 @@ import { InjectDataSource } from "@nestjs/typeorm";
 export class StampService {
   constructor(
     @InjectDataSource()
-    private readonly connection: DataSource) { }
+    private readonly connection: DataSource
+  ) {}
   async generateAllWebsitesDigitalStamp(): Promise<any> {
     const websites = await this.connection.query(`
       SELECT DISTINCT

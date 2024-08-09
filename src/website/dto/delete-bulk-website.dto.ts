@@ -1,4 +1,3 @@
 export class DeleteBulkWebsiteDto {
-
-    websitesId: number[];
+  websitesId: number[];
 }
