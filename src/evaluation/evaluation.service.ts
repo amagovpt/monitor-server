@@ -21,14 +21,18 @@ export class EvaluationService {
     @InjectDataSource()
     private readonly connection: DataSource,
     @InjectRepository(Evaluation)
-    private readonly evaluationRepository: Repository<Evaluation>,
+    private readonly evaluationRepository: Repository<Evaluation>
   ) {
     this.isEvaluatingAdminInstance = false;
     this.isEvaluatingUserInstance = false;
   }
   //FIXME confirmar se as paginas têm sempre avaliação
   async getLastEvaluationByPage(pageId: number): Promise<Evaluation> {
-    const evaluationList = await this.evaluationRepository.find({ where: { PageId: pageId},take:1,order: { Evaluation_Date:"DESC"}});
+    const evaluationList = await this.evaluationRepository.find({
+      where: { PageId: pageId },
+      take: 1,
+      order: { Evaluation_Date: "DESC" },
+    });
     return evaluationList[0];
   }
 
@@ -113,7 +117,7 @@ export class EvaluationService {
     const pages = await this.connection.query(
       `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`
     );
-    
+
     if (pages.length > 0) {
       try {
         await this.connection.query(
@@ -388,11 +392,13 @@ export class EvaluationService {
   ): Promise<any> {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, "").replace(/[\u0800-\uFFFF]/g, '');
+    newEvaluation.Title = evaluation.data.title
+      .replace(/"/g, "")
+      .replace(/[\u0800-\uFFFF]/g, "");
     newEvaluation.Score = evaluation.data.score;
-    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
-      "base64"
-    ).substring(0, 16000000);
+    newEvaluation.Pagecode = Buffer.from(evaluation.pagecode)
+      .toString("base64")
+      .substring(0, 16000000);
     newEvaluation.Tot = Buffer.from(
       JSON.stringify(evaluation.data.tot)
     ).toString("base64");
@@ -415,7 +421,6 @@ export class EvaluationService {
     );
     newEvaluation.Tag_Count = JSON.stringify(evaluation.data.tot.info.cTags);
     const savedEvaluation = await queryRunner.manager.save(newEvaluation);
-
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
@@ -425,28 +430,24 @@ export class EvaluationService {
   }
 
   async increaseMyMonitorRequestCounter(): Promise<void> {
-
     await this.connection.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "MyMonitor"`
     );
   }
 
   async increaseStudyMonitorRequestCounter(): Promise<void> {
-
     await this.connection.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "StudyMonitor"`
     );
   }
 
   async increaseAccessMonitorRequestCounter(): Promise<void> {
-
     await this.connection.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AccessMonitor"`
     );
   }
 
   async getAMSObservatoryRequestCounter(): Promise<any> {
-
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
     );
@@ -454,7 +455,6 @@ export class EvaluationService {
   }
 
   async getMyMonitorRequestCounter(): Promise<any> {
-
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
     );
@@ -462,7 +462,6 @@ export class EvaluationService {
   }
 
   async getStudyMonitorRequestCounter(): Promise<any> {
-
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
     );
@@ -470,7 +469,6 @@ export class EvaluationService {
   }
 
   async getAccessMonitorRequestCounter(): Promise<any> {
-
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
     );
@@ -478,7 +476,6 @@ export class EvaluationService {
   }
 
   async resetAdminWaitingList(): Promise<boolean> {
-
     await this.connection.query(
       `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE UserId = -1`
     );
@@ -486,13 +483,13 @@ export class EvaluationService {
   }
 
   async deleteAdminWaitingList(): Promise<boolean> {
-
-    await this.connection.query(`DELETE FROM Evaluation_List WHERE UserId = -1`);
+    await this.connection.query(
+      `DELETE FROM Evaluation_List WHERE UserId = -1`
+    );
     return true;
   }
 
   async resetMMWaitingList(): Promise<boolean> {
-
     await this.connection.query(
       `UPDATE 
         Evaluation_List as el, User as u
@@ -508,7 +505,6 @@ export class EvaluationService {
   }
 
   async deleteMMWaitingList(): Promise<boolean> {
-
     await this.connection.query(
       `DELETE el.* FROM Evaluation_List as el, User as u 
        WHERE 
@@ -520,7 +516,6 @@ export class EvaluationService {
   }
 
   async resetSMWaitingList(): Promise<boolean> {
-
     await this.connection.query(
       `UPDATE 
         Evaluation_List as el, User as u
@@ -536,7 +531,6 @@ export class EvaluationService {
   }
 
   async deleteSMWaitingList(): Promise<boolean> {
-
     await this.connection.query(
       `DELETE el.* FROM Evaluation_List as el, User as u 
        WHERE 
@@ -551,8 +545,6 @@ export class EvaluationService {
     userId: number,
     website: string
   ): Promise<any> {
-
-
     const evaluations = await this.connection.query(
       `SELECT e.*, p.Uri 
       FROM
@@ -599,8 +591,6 @@ export class EvaluationService {
     website: string,
     url: string
   ): Promise<any> {
-
-
     const evaluation = (
       await this.connection.query(
         `SELECT e.* 
@@ -648,8 +638,6 @@ export class EvaluationService {
     tag: string,
     website: string
   ): Promise<any> {
-
-
     const evaluations = await this.connection.query(
       `SELECT e.*, p.Uri
       FROM
@@ -702,8 +690,6 @@ export class EvaluationService {
     website: string,
     url: string
   ): Promise<any> {
-
-
     const evaluation = (
       await this.connection.query(
         `SELECT e.* 
@@ -753,7 +739,6 @@ export class EvaluationService {
   }
 
   async findAllEvaluationsFromPage(type: string, page: string): Promise<any> {
-
     let query = "";
 
     if (type === "admin") {
@@ -810,8 +795,6 @@ export class EvaluationService {
   }
 
   async findEvaluationById(url: string, id: number): Promise<any> {
-
-
     const evaluation = await this.evaluationRepository.findOne({
       where: { EvaluationId: id },
     });
@@ -842,8 +825,6 @@ export class EvaluationService {
     } else {
       throw new InternalServerErrorException();
     }
-
-
 
     const evaluation = (await this.connection.query(query, [url]))[0];
 
@@ -891,8 +872,6 @@ export class EvaluationService {
   }
 
   async findWebsiteEvaluations(website: string, sample: boolean): Promise<any> {
-
-
     const evaluations = await this.connection.query(
       `SELECT distinct e.*, p.Uri
       FROM
@@ -916,7 +895,8 @@ export class EvaluationService {
     for (const evaluation of evaluations || []) {
       const tot = JSON.parse(Buffer.from(evaluation.Tot, "base64").toString());
       reports.push({
-        pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(),
+        // pagecode: Buffer.from(evaluation.Pagecode, "base64").toString(), // removed because is not used upstream and is too big
+        pagecode: "",
         data: {
           title: evaluation.Title,
           score: evaluation.Score,

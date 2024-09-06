@@ -1,6 +1,6 @@
 export class CreateDirectory {
-    observatory:number;
-    name:string;
-    method:number;
-    tags: number[];
+  observatory: number;
+  name: string;
+  method: number;
+  tags: number[];
 }

@@ -1,22 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('Invalid_Token')
+@Entity("Invalid_Token")
 export class InvalidToken {
-
   @PrimaryGeneratedColumn({
-    type: 'int'
+    type: "int",
   })
   TokenId: number;
 
   @Column({
-    type: 'text',
-    nullable: false
+    type: "text",
+    nullable: false,
   })
   Token: string;
 
   @Column({
-    type: 'datetime',
-    nullable: false
+    type: "datetime",
+    nullable: false,
   })
   Expiration_Date: any;
 }

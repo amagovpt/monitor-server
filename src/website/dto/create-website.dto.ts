@@ -1,27 +1,27 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
 export class CreateWebsiteDto {
-    websiteId: number;
+  websiteId: number;
 
-    @IsNotEmpty()
-    userId: number;
+  @IsNotEmpty()
+  userId: number;
 
-    @IsNotEmpty()
-    name: string;
+  @IsNotEmpty()
+  name: string;
 
-    @IsNotEmpty()
-    startingUrl: string;
+  @IsNotEmpty()
+  startingUrl: string;
 
-    declaration: number;
+  declaration: number;
 
-    declaration_Update_Date: any;
+  declaration_Update_Date: any;
 
-    stamp: number;
+  stamp: number;
 
-    stamp_Update_Date: any;
+  stamp_Update_Date: any;
 
-    creation_Date: any;
+  creation_Date: any;
 
-    entities: string[];
+  entities: string[];
 
-    tags: string[];
+  tags: string[];
 }

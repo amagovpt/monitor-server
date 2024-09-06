@@ -9,7 +9,8 @@ export class DirectoryService {
     @InjectRepository(Directory)
     private readonly directoryRepository: Repository<Directory>,
     @InjectDataSource()
-    private readonly connection: DataSource,  ) {}
+    private readonly connection: DataSource
+  ) {}
 
   async addPagesToEvaluate(
     directoriesId: number[],
@@ -362,7 +363,9 @@ export class DirectoryService {
   }
 
   async findNumberOfObservatory(): Promise<number> {
-    return this.directoryRepository.count({ where: { Show_in_Observatory: 1 } });
+    return this.directoryRepository.count({
+      where: { Show_in_Observatory: 1 },
+    });
   }
 
   async findInfo(directoryId: number): Promise<any> {
@@ -516,7 +519,6 @@ export class DirectoryService {
   }
 
   async findAllDirectoryWebsitePages(directory: string): Promise<any> {
-
     const _directory = await this.directoryRepository.query(
       `SELECT * FROM Directory WHERE Name = ? LIMIT 1`,
       [directory]

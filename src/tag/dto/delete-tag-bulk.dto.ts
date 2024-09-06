@@ -1,3 +1,3 @@
 export class DeleteTagBulkDto {
-    tagsId:number[];
+  tagsId: number[];
 }

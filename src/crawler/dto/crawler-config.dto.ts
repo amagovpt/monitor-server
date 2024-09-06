@@ -1,4 +1,4 @@
-
 export class CrawlerConfig {
-    maxDepth:number;
-    maxPages:number;}
+  maxDepth: number;
+  maxPages: number;
+}

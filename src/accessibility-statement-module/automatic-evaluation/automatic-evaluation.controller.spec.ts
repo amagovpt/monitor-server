@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AutomaticEvaluationController } from './automatic-evaluation.controller';
-import { AutomaticEvaluationService } from './automatic-evaluation.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AutomaticEvaluationController } from "./automatic-evaluation.controller";
+import { AutomaticEvaluationService } from "./automatic-evaluation.service";
 
-describe('AutomaticEvaluationController', () => {
+describe("AutomaticEvaluationController", () => {
   let controller: AutomaticEvaluationController;
 
   beforeEach(async () => {
@@ -11,10 +11,12 @@ describe('AutomaticEvaluationController', () => {
       providers: [AutomaticEvaluationService],
     }).compile();
 
-    controller = module.get<AutomaticEvaluationController>(AutomaticEvaluationController);
+    controller = module.get<AutomaticEvaluationController>(
+      AutomaticEvaluationController
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

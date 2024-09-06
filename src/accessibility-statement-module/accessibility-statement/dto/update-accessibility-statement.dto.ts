@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateAccessibilityStatementDto } from './create-accessibility-statement.dto';
+import { PartialType } from "@nestjs/mapped-types";
+import { CreateAccessibilityStatementDto } from "./create-accessibility-statement.dto";
 
-export class UpdateAccessibilityStatementDto extends PartialType(CreateAccessibilityStatementDto) {}
+export class UpdateAccessibilityStatementDto extends PartialType(
+  CreateAccessibilityStatementDto
+) {}

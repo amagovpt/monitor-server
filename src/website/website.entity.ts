@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   JoinTable,
   ManyToMany,
-  OneToMany
+  OneToMany,
 } from "typeorm";
 import { Tag } from "../tag/tag.entity";
 import { EntityTable } from "../entity/entity.entity";
@@ -68,21 +68,21 @@ export class Website {
   })
   Creation_Date: any;
 
-  @ManyToMany((type) => Tag,tag=>tag.Websites)
+  @ManyToMany((type) => Tag, (tag) => tag.Websites)
   Tags: Tag[];
 
   @ManyToMany((type) => EntityTable)
   @JoinTable()
   Entities: EntityTable[];
-  
+
   @JoinTable({
-    name: 'WebsitePage',
-    joinColumn: { name: 'WebsiteId' },
-    inverseJoinColumn: { name: 'PageId' }
+    name: "WebsitePage",
+    joinColumn: { name: "WebsiteId" },
+    inverseJoinColumn: { name: "PageId" },
   })
   @ManyToMany((type) => Page, (page) => page.Pages)
   Pages: Page[];
 
-  @OneToMany(type => AccessibilityStatement, (as) => as.Website)
+  @OneToMany((type) => AccessibilityStatement, (as) => as.Website)
   AStatements: AccessibilityStatement[];
 }

@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CollectionDateController } from './collection-date.controller';
-import { CollectionDateService } from './collection-date.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { CollectionDateController } from "./collection-date.controller";
+import { CollectionDateService } from "./collection-date.service";
 
-describe('CollectionDateController', () => {
+describe("CollectionDateController", () => {
   let controller: CollectionDateController;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('CollectionDateController', () => {
     controller = module.get<CollectionDateController>(CollectionDateController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

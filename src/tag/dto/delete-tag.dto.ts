@@ -1,3 +1,3 @@
 export class DeleteTagDto {
-    tagId:number;
+  tagId: number;
 }

@@ -1,4 +1,4 @@
 export class TagReEvaluateDto {
-    tagsId:number[];
-    option:string;
+  tagsId: number[];
+  option: string;
 }

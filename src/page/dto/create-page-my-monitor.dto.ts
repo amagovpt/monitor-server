@@ -1,5 +1,5 @@
 export class CreatePageMyMonitorDto {
-    website:string;
-    startingUrl:string;
-    pages:string[];
+  website: string;
+  startingUrl: string;
+  pages: string[];
 }

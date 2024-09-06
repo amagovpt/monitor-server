@@ -1,2 +1,3 @@
 export class DeleteBulkDirectory {
-    directoriesId:number[];}
+  directoriesId: number[];
+}

@@ -1,13 +1,10 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
 export class UpdateObservatoryPages {
-    @IsNotEmpty()
-    pages: ObservatoryPage[];
-
+  @IsNotEmpty()
+  pages: ObservatoryPage[];
 }
 
 export class ObservatoryPage {
-    id:number;
-    inObservatory:boolean;
-
+  id: number;
+  inObservatory: boolean;
 }
-

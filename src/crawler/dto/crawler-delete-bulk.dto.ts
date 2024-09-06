@@ -1,4 +1,3 @@
-
 export class CrawlerDeleteBulk {
-    crawlWebsiteIds:number[];
+  crawlWebsiteIds: number[];
 }

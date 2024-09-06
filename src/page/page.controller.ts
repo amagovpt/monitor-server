@@ -14,7 +14,12 @@ import { PageService } from "./page.service";
 import { success } from "../lib/response";
 import { EvaluationService } from "../evaluation/evaluation.service";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiTags,
+  ApiResponse,
+  ApiOperation,
+} from "@nestjs/swagger";
 import { PageUrlDto } from "./dto/page-url.dto";
 import { PageListDto } from "./dto/page-list.dto";
 import { CreatePageMyMonitorDto } from "./dto/create-page-my-monitor.dto";
@@ -29,8 +34,8 @@ import { PageDeleteDto } from "./dto/page-delete.dto";
 import { PageImportDto } from "./dto/page-import.dto";
 
 @ApiBasicAuth()
-@ApiTags('page')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("page")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("page")
 @UseInterceptors(LoggingInterceptor)
 export class PageController {
@@ -39,10 +44,10 @@ export class PageController {
     private readonly evaluationService: EvaluationService
   ) {}
 
-  @ApiOperation({ summary: 'Reevaluate page' })
+  @ApiOperation({ summary: "Reevaluate page" })
   @ApiResponse({
     status: 200,
-    description: 'The evaluation request has been submited',
+    description: "The evaluation request has been submited",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -55,10 +60,10 @@ export class PageController {
     return success(await this.pageService.addPageToEvaluate(page, "10", -1));
   }
 
-  @ApiOperation({ summary: 'Find the number of pages in observatory' })
+  @ApiOperation({ summary: "Find the number of pages in observatory" })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages in observatory',
+    description: "The number of pages in observatory",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -67,10 +72,10 @@ export class PageController {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
-  @ApiOperation({ summary: 'Reevaluate multiple pages by url' })
+  @ApiOperation({ summary: "Reevaluate multiple pages by url" })
   @ApiResponse({
     status: 200,
-    description: 'The evaluation request has been submited',
+    description: "The evaluation request has been submited",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -80,10 +85,12 @@ export class PageController {
     return success(await this.pageService.addPagesToEvaluate(pages, "10", -1));
   }
 
-  @ApiOperation({ summary: 'Find the number of pages being evaluated by the admin' })
+  @ApiOperation({
+    summary: "Find the number of pages being evaluated by the admin",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages being evaluated',
+    description: "The number of pages being evaluated",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -94,10 +101,12 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the admin' })
+  @ApiOperation({
+    summary: "Find the number of pages waiting for evaluation by the admin",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages waiting',
+    description: "The number of pages waiting",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -106,10 +115,12 @@ export class PageController {
     return success(await this.pageService.findAdminWaitingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages that failed the evaluation by the admin' })
+  @ApiOperation({
+    summary: "Find the number of pages that failed the evaluation by the admin",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages that failed the evaluation',
+    description: "The number of pages that failed the evaluation",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -118,10 +129,12 @@ export class PageController {
     return success(await this.pageService.findAdminWithErrorInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages being evaluated by the user' })
+  @ApiOperation({
+    summary: "Find the number of pages being evaluated by the user",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages being evaluated',
+    description: "The number of pages being evaluated",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -130,10 +143,12 @@ export class PageController {
     return success(await this.pageService.findUserEvaluatingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages waiting for evaluation by the user' })
+  @ApiOperation({
+    summary: "Find the number of pages waiting for evaluation by the user",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages waiting',
+    description: "The number of pages waiting",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -142,10 +157,12 @@ export class PageController {
     return success(await this.pageService.findUserWaitingInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Find the number of pages that failed the evaluation by the user' })
+  @ApiOperation({
+    summary: "Find the number of pages that failed the evaluation by the user",
+  })
   @ApiResponse({
     status: 200,
-    description: 'The number of pages that failed the evaluation',
+    description: "The number of pages that failed the evaluation",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -154,37 +171,40 @@ export class PageController {
     return success(await this.pageService.findUserWithErrorInEvaluationList());
   }
 
-  @ApiOperation({ summary: 'Delete pages from evaluation list' })
+  @ApiOperation({ summary: "Delete pages from evaluation list" })
   @ApiResponse({
     status: 200,
-    description: 'The selected pages have been deleted from the evaluation list',
+    description:
+      "The selected pages have been deleted from the evaluation list",
     type: Number,
   })
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("evaluationList/error/delete")
-  async deleteAdminPagesWithError(@Body() pageListDto: PageListDto): Promise<any> {
+  async deleteAdminPagesWithError(
+    @Body() pageListDto: PageListDto
+  ): Promise<any> {
     const pages = pageListDto.pages;
     return success(await this.pageService.deleteAdminPagesWithError(pages));
   }
 
-  @ApiOperation({ summary: 'Find pages with evaluation errors' })
+  @ApiOperation({ summary: "Find pages with evaluation errors" })
   @ApiResponse({
     status: 200,
-    description: 'List of a pages with evaluation errors',
+    description: "List of a pages with evaluation errors",
     type: Number,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("evaluationList/error")
   async getAdminPagesWithError(): Promise<any> {
     return success(await this.pageService.getAdminPagesWithError());
   }
 
-  @ApiOperation({ summary: 'Find number of pages by search term' })
+  @ApiOperation({ summary: "Find number of pages by search term" })
   @ApiResponse({
     status: 200,
-    description: 'Number of pages',
+    description: "Number of pages",
     type: Number,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/count/:search")
   async getAdminPageCount(@Param("search") search: string): Promise<any> {
@@ -192,12 +212,14 @@ export class PageController {
       await this.pageService.adminCount(decodeURIComponent(search.substring(7)))
     );
   }
-  @ApiOperation({ summary: 'Find pages by search term, sort, direction, and size' })
+  @ApiOperation({
+    summary: "Find pages by search term, sort, direction, and size",
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of pages',
+    description: "List of pages",
     type: Number,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-admin"))
   @Get("all/:size/:page/:sort/:direction/:search")
   async getAllPages(
@@ -218,12 +240,14 @@ export class PageController {
       )
     );
   }
-  @ApiOperation({ summary: 'Find all pages from a specific website in MyMonitor' })
+  @ApiOperation({
+    summary: "Find all pages from a specific website in MyMonitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of pages',
+    description: "List of pages",
     type: Number,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Get("myMonitor/website/:website")
   async getAllMyMonitorUserWebsitePages(
@@ -238,16 +262,18 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Add a page to a website in MyMonitor' })
+  @ApiOperation({ summary: "Add a page to a website in MyMonitor" })
   @ApiResponse({
     status: 200,
-    description: 'Page added with success',
+    description: "Page added with success",
     type: Boolean,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/create")
-  async createMyMonitorUserWebsitePages(@Request() req: any, 
-  @Body() pageMyMonitorDto: CreatePageMyMonitorDto): Promise<any> {
+  async createMyMonitorUserWebsitePages(
+    @Request() req: any,
+    @Body() pageMyMonitorDto: CreatePageMyMonitorDto
+  ): Promise<any> {
     const website = pageMyMonitorDto.website;
     const startingUrl = pageMyMonitorDto.startingUrl;
     const uris = pageMyMonitorDto.pages;
@@ -262,16 +288,18 @@ export class PageController {
     );
   }
 
-
-  @ApiOperation({ summary: 'Delete a page in a website in MyMonitor' })
+  @ApiOperation({ summary: "Delete a page in a website in MyMonitor" })
   @ApiResponse({
     status: 200,
-    description: 'Page deleted with success',
+    description: "Page deleted with success",
     type: Boolean,
-  })  
+  })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/remove")
-  async removeMyMonitorUserWebsitePages(@Request() req: any, @Body() deletePageMyMonitorDto: DeletePageMyMonitorDto): Promise<any> {
+  async removeMyMonitorUserWebsitePages(
+    @Request() req: any,
+    @Body() deletePageMyMonitorDto: DeletePageMyMonitorDto
+  ): Promise<any> {
     const website = deletePageMyMonitorDto.website;
     const ids = deletePageMyMonitorDto.pagesId;
     return success(
@@ -283,10 +311,12 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
+  @ApiOperation({
+    summary: "Find pages by tag, website and user in Study Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of pages',
+    description: "List of pages",
     type: Array<Page>,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -305,10 +335,12 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Find pages by tag, website and user in Study Monitor' })
+  @ApiOperation({
+    summary: "Find pages by tag, website and user in Study Monitor",
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of pages',
+    description: "List of pages",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -326,10 +358,10 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Evaluate page' })
+  @ApiOperation({ summary: "Evaluate page" })
   @ApiResponse({
     status: 200,
-    description: 'Evaluation added to evaluation queue',
+    description: "Evaluation added to evaluation queue",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -346,15 +378,18 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Evaluate page in My Monitor' })
+  @ApiOperation({ summary: "Evaluate page in My Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Evaluation added to evaluation queue',
+    description: "Evaluation added to evaluation queue",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-monitor"))
   @Post("myMonitor/evaluate")
-  async evaluateMyMonitorWebsitePage(@Request() req: any, @Body() pageEvaluateDto: PageEvaluateDto): Promise<any> {
+  async evaluateMyMonitorWebsitePage(
+    @Request() req: any,
+    @Body() pageEvaluateDto: PageEvaluateDto
+  ): Promise<any> {
     const userId = req.user.userId;
     const url = decodeURIComponent(pageEvaluateDto.url);
     const page = await this.pageService.findPageFromUrl(url);
@@ -373,15 +408,18 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Evaluate page in Study Monitor' })
+  @ApiOperation({ summary: "Evaluate page in Study Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Evaluation added to evaluation queue',
+    description: "Evaluation added to evaluation queue",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
   @Post("studyMonitor/evaluate")
-  async evaluateStudyMonitorTagWebsitePage(@Request() req: any, @Body() pageEvaluateStudyMonitorDto:PageEvaluateStudyMonitorDto): Promise<any> {
+  async evaluateStudyMonitorTagWebsitePage(
+    @Request() req: any,
+    @Body() pageEvaluateStudyMonitorDto: PageEvaluateStudyMonitorDto
+  ): Promise<any> {
     const userId = req.user.userId;
     const tag = pageEvaluateStudyMonitorDto.tag;
     const website = pageEvaluateStudyMonitorDto.website;
@@ -404,10 +442,10 @@ export class PageController {
     }
   }
 
-  @ApiOperation({ summary: 'Create page in Study Monitor' })
+  @ApiOperation({ summary: "Create page in Study Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Page created',
+    description: "Page created",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -421,7 +459,7 @@ export class PageController {
     const startingUrl = pageCreateStudyMonitorDto.startingUrl;
     const uris = JSON.parse(pageCreateStudyMonitorDto.pages).map((page) =>
       decodeURIComponent(page)
-    );//FIXME
+    ); //FIXME
     return success(
       await this.pageService.createStudyMonitorUserTagWebsitePages(
         req.user.userId,
@@ -433,10 +471,10 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Remove page in Study Monitor' })
+  @ApiOperation({ summary: "Remove page in Study Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Page removed',
+    description: "Page removed",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -458,10 +496,10 @@ export class PageController {
     );
   }
 
-  @ApiOperation({ summary: 'Update page in Study Monitor' })
+  @ApiOperation({ summary: "Update page in Study Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Page updated',
+    description: "Page updated",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -472,10 +510,10 @@ export class PageController {
     return success(await this.pageService.update(pageId, checked));
   }
 
-  @ApiOperation({ summary: 'Delete page' })
+  @ApiOperation({ summary: "Delete page" })
   @ApiResponse({
     status: 200,
-    description: 'Page deleted',
+    description: "Page deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -485,10 +523,12 @@ export class PageController {
     return success(await this.pageService.delete(pages));
   }
 
-  @ApiOperation({ summary: 'Import page from a my monitor or study monitor user' })
+  @ApiOperation({
+    summary: "Import page from a my monitor or study monitor user",
+  })
   @ApiResponse({
     status: 200,
-    description: 'Page imported',
+    description: "Page imported",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))

@@ -16,13 +16,13 @@ async function bootstrap() {
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   const config = new DocumentBuilder()
-    .setTitle('Monitor server')
-    .setDescription('The Monitor Server API description')
-    .setVersion('1.0')
-    .addTag('website')
+    .setTitle("Monitor server")
+    .setDescription("The Monitor Server API description")
+    .setVersion("1.0")
+    .addTag("website")
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup("api", app, document);
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(process.env.PORT || 3000);
 }

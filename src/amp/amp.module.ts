@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { AmpController } from './amp.controller';
-import { EvaluationModule } from '../evaluation/evaluation.module';
+import { Module } from "@nestjs/common";
+import { AmpController } from "./amp.controller";
+import { EvaluationModule } from "../evaluation/evaluation.module";
 
 @Module({
   imports: [EvaluationModule],
-  controllers: [AmpController]
+  controllers: [AmpController],
 })
 export class AmpModule {}

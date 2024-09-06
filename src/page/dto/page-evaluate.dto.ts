@@ -1,3 +1,3 @@
 export class PageEvaluateDto {
-    url:string;
+  url: string;
 }

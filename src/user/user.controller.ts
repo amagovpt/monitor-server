@@ -16,23 +16,28 @@ import { User } from "./user.entity";
 import { generatePasswordHash, createRandomUniqueHash } from "../lib/security";
 import { success } from "../lib/response";
 import { LoggingInterceptor } from "src/log/log.interceptor";
-import { ApiBasicAuth, ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiTags,
+  ApiResponse,
+  ApiOperation,
+} from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { DeleteUserDto } from "./dto/delete-user.dto";
 
 @ApiBasicAuth()
-@ApiTags('tag')
-@ApiResponse({ status: 403, description: 'Forbidden' })
+@ApiTags("tag")
+@ApiResponse({ status: 403, description: "Forbidden" })
 @Controller("user")
 @UseInterceptors(LoggingInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: 'Change user password' })
+  @ApiOperation({ summary: "Change user password" })
   @ApiResponse({
     status: 200,
-    description: 'The password was changed',
+    description: "The password was changed",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt"))
@@ -85,11 +90,10 @@ export class UserController {
     return true;
   }
 
-
-  @ApiOperation({ summary: 'Create user' })
+  @ApiOperation({ summary: "Create user" })
   @ApiResponse({
     status: 200,
-    description: 'A new user was created',
+    description: "A new user was created",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -125,10 +129,10 @@ export class UserController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Update user' })
+  @ApiOperation({ summary: "Update user" })
   @ApiResponse({
     status: 200,
-    description: 'The user was updated',
+    description: "The user was updated",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -136,7 +140,7 @@ export class UserController {
   async updateUser(@Body() updateUserDto: UpdateUserDto): Promise<any> {
     const userId = updateUserDto.userId;
     const password = updateUserDto.password;
-    const confirmPassword = updateUserDto.confirmPassword;//FIXME
+    const confirmPassword = updateUserDto.confirmPassword; //FIXME
 
     if (password && confirmPassword && !this.passwordValidator(password)) {
       throw new InternalServerErrorException();
@@ -151,7 +155,9 @@ export class UserController {
     const app = updateUserDto.app;
 
     const websites = this.convertToNumberArray(updateUserDto.websites);
-    const defaultWebsites = this.convertToNumberArray(updateUserDto.defaultWebsites);
+    const defaultWebsites = this.convertToNumberArray(
+      updateUserDto.defaultWebsites
+    );
     const transfer = !!updateUserDto.transfer;
 
     const updateSuccess = await this.userService.update(
@@ -181,10 +187,10 @@ export class UserController {
     }
   }
 
-  @ApiOperation({ summary: 'Delete user' })
+  @ApiOperation({ summary: "Delete user" })
   @ApiResponse({
     status: 200,
-    description: 'The user was deleted',
+    description: "The user was deleted",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -201,10 +207,10 @@ export class UserController {
     return success(true);
   }
 
-  @ApiOperation({ summary: 'Find user by id' })
+  @ApiOperation({ summary: "Find user by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -213,10 +219,10 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @ApiOperation({ summary: 'Find user info by id' })
+  @ApiOperation({ summary: "Find user info by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -225,10 +231,10 @@ export class UserController {
     return success(await this.userService.findInfo(userId));
   }
 
-  @ApiOperation({ summary: 'Check if user exists by id' })
+  @ApiOperation({ summary: "Check if user exists by id" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -239,10 +245,10 @@ export class UserController {
     return success(!!(await this.userService.findByUsername(username)));
   }
 
-  @ApiOperation({ summary: 'Find all users AMS' })
+  @ApiOperation({ summary: "Find all users AMS" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -251,11 +257,10 @@ export class UserController {
     return success(await this.userService.findAll());
   }
 
-
-  @ApiOperation({ summary: 'Find all users MyMonitor' })
+  @ApiOperation({ summary: "Find all users MyMonitor" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -264,10 +269,10 @@ export class UserController {
     return success(await this.userService.findAllFromMyMonitor());
   }
 
-  @ApiOperation({ summary: 'Find total users Study Monitor' })
+  @ApiOperation({ summary: "Find total users Study Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -276,10 +281,10 @@ export class UserController {
     return success(await this.userService.findNumberOfStudyMonitor());
   }
 
-  @ApiOperation({ summary: 'Find total users My Monitor' })
+  @ApiOperation({ summary: "Find total users My Monitor" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -288,10 +293,10 @@ export class UserController {
     return success(await this.userService.findNumberOfMyMonitor());
   }
 
-  @ApiOperation({ summary: 'Check if tag name exists' })
+  @ApiOperation({ summary: "Check if tag name exists" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-study"))
@@ -312,10 +317,10 @@ export class UserController {
     }
   }
 
-  @ApiOperation({ summary: 'Find user type' })
+  @ApiOperation({ summary: "Find user type" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -328,10 +333,10 @@ export class UserController {
     }
   }
 
-  @ApiOperation({ summary: 'Find websites by user' })
+  @ApiOperation({ summary: "Find websites by user" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))
@@ -344,10 +349,10 @@ export class UserController {
     }
   }
 
-  @ApiOperation({ summary: 'Find tags by user' })
+  @ApiOperation({ summary: "Find tags by user" })
   @ApiResponse({
     status: 200,
-    description: 'Success',
+    description: "Success",
     type: Boolean,
   })
   @UseGuards(AuthGuard("jwt-admin"))

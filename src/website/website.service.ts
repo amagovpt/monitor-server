@@ -24,10 +24,13 @@ export class WebsiteService {
     @InjectRepository(Page)
     private readonly pageRepository: Repository<Page>,
     @InjectDataSource()
-    private readonly connection: DataSource) { }
+    private readonly connection: DataSource
+  ) {}
 
   async findAccessiblityStatements(): Promise<any> {
-    const websites = await this.websiteRepository.find({relations:["Pages"]});
+    const websites = await this.websiteRepository.find({
+      relations: ["Pages"],
+    });
     await this.collectionDateService.create();
     for (const website of websites) {
       const id = website.WebsiteId;
@@ -36,38 +39,54 @@ export class WebsiteService {
     }
   }
 
-  async updateAStatement(WebsiteId:number): Promise<void> {
-    const website = await this.websiteRepository.findOne({ where:{WebsiteId}, relations: ["Pages"] });
-    if(website){
+  async updateAStatement(WebsiteId: number): Promise<void> {
+    const website = await this.websiteRepository.findOne({
+      where: { WebsiteId },
+      relations: ["Pages"],
+    });
+    if (website) {
       const pages = website.Pages;
-      await this.findAccessiblityStatementsInPageList(pages, website);}
-    }
-
-  async findAccessiblityStatementsInPageList(pages:Page[], website:Website): Promise<any> {
-    for(const page of pages){
-      const id = page.PageId;
-    const evaluation = await this.evaluationService.getLastEvaluationByPage(id);
-    if (evaluation) {
-      const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
-      await this.accessibilityStatementService.createIfExist(rawHtml, website, page.Uri);
+      await this.findAccessiblityStatementsInPageList(pages, website);
     }
   }
-}
+
+  async findAccessiblityStatementsInPageList(
+    pages: Page[],
+    website: Website
+  ): Promise<any> {
+    for (const page of pages) {
+      const id = page.PageId;
+      const evaluation = await this.evaluationService.getLastEvaluationByPage(
+        id
+      );
+      if (evaluation) {
+        const rawHtml = Buffer.from(evaluation.Pagecode, "base64").toString();
+        await this.accessibilityStatementService.createIfExist(
+          rawHtml,
+          website,
+          page.Uri
+        );
+      }
+    }
+  }
   async getAllWebsiteDataCSV(): Promise<any> {
     const websites = await this.websiteRepository.find({ relations: ["Tags"] });
-    return await Promise.all(websites.map(async (website) => {
-      const id = website.WebsiteId;
-      const pages = await this.findAllPages(id);
-      website["numberOfPages"] = pages.length;
-      website["averagePoints"] = this.averagePointsPageEvaluation(pages);
-      return website;
-    }));
+    return await Promise.all(
+      websites.map(async (website) => {
+        const id = website.WebsiteId;
+        const pages = await this.findAllPages(id);
+        website["numberOfPages"] = pages.length;
+        website["averagePoints"] = this.averagePointsPageEvaluation(pages);
+        return website;
+      })
+    );
   }
   private averagePointsPageEvaluation(pages) {
-    const totalPoints = pages.reduce((total, page) => { return total + (+page.Score) }, 0);
+    const totalPoints = pages.reduce((total, page) => {
+      return total + +page.Score;
+    }, 0);
     return totalPoints / pages.length;
   }
-
 
   async addPagesToEvaluate(
     websitesId: number[],
@@ -112,7 +131,7 @@ export class WebsiteService {
               [page.PageId, -1, page.Uri, "10", new Date()]
             );
           }
-        } catch (_) { }
+        } catch (_) {}
       }
 
       await queryRunner.manager.query(
@@ -346,7 +365,7 @@ export class WebsiteService {
 
   async findByOfficialName(name: string): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: {  Name:name, UserId: IsNull() },
+      where: { Name: name, UserId: IsNull() },
     });
     return website;
     /*if (website && website.Name !== name) {
@@ -419,7 +438,6 @@ export class WebsiteService {
   }
 
   async isInObservatory(userId: number, website: string): Promise<any> {
-
     const tags = await this.websiteRepository.query(
       `
       SELECT t.* 
@@ -528,12 +546,11 @@ export class WebsiteService {
     websiteName: string
   ): Promise<any> {
     const website = await this.websiteRepository.findOne({
-      where: {  UserId: userId, Name: websiteName },
+      where: { UserId: userId, Name: websiteName },
     });
     if (!website) {
       throw new InternalServerErrorException();
     }
-
 
     const pages = await this.websiteRepository.query(
       `SELECT 
@@ -565,7 +582,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date) VALUES (?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "01", new Date()]
           );
-        } catch (_) { }
+        } catch (_) {}
       }
 
       await queryRunner.manager.query(
@@ -635,7 +652,7 @@ export class WebsiteService {
             `INSERT INTO Evaluation_List (PageId, UserId, Url, Show_To, Creation_Date, StudyUserId) VALUES (?, ?, ?, ?, ?, ?)`,
             [page.PageId, userId, page.Uri, "00", new Date(), userId]
           );
-        } catch (_) { }
+        } catch (_) {}
       }
 
       await queryRunner.manager.query(
@@ -1055,7 +1072,8 @@ export class WebsiteService {
         d.Show_in_Observatory = 1 AND
         dt.DirectoryId = d.DirectoryId AND
         tw.TagId = dt.TagId AND 
-        w.WebsiteId = tw.WebsiteId`);
+        w.WebsiteId = tw.WebsiteId`
+    );
     console.log(dataPrint[0].Websites);
     const parsedData = JSON.parse(data);
     return parsedData.nWebsites;
@@ -1115,9 +1133,7 @@ export class WebsiteService {
     return !hasError;
   }
 
-  async update(
-    updateWebsiteDto: UpdateWebsiteDto
-  ): Promise<any> {
+  async update(updateWebsiteDto: UpdateWebsiteDto): Promise<any> {
     const oldUserId = updateWebsiteDto.oldUserId;
     const userId = updateWebsiteDto.userId;
     const transfer = updateWebsiteDto.transfer;
@@ -1126,7 +1142,9 @@ export class WebsiteService {
     const defaultEntities = updateWebsiteDto.defaultEntities;
     const defaultTags = updateWebsiteDto.defaultTags;
     const tags = updateWebsiteDto.tags;
-    updateWebsiteDto.startingUrl = decodeURIComponent(updateWebsiteDto.startingUrl);
+    updateWebsiteDto.startingUrl = decodeURIComponent(
+      updateWebsiteDto.startingUrl
+    );
 
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -1136,15 +1154,15 @@ export class WebsiteService {
     try {
       await queryRunner.manager.update(
         Website,
-        { WebsiteId:websiteId },
+        { WebsiteId: websiteId },
         {
-          UserId:userId,
-      Name: updateWebsiteDto.name,
-      StartingUrl: updateWebsiteDto.startingUrl,
-      Declaration: updateWebsiteDto.declaration,
-      Declaration_Update_Date: updateWebsiteDto.declarationUpdateDate,
-      Stamp: updateWebsiteDto.stamp,
-      Stamp_Update_Date: updateWebsiteDto.stampUpdateDate,
+          UserId: userId,
+          Name: updateWebsiteDto.name,
+          StartingUrl: updateWebsiteDto.startingUrl,
+          Declaration: updateWebsiteDto.declaration,
+          Declaration_Update_Date: updateWebsiteDto.declarationUpdateDate,
+          Stamp: updateWebsiteDto.stamp,
+          Stamp_Update_Date: updateWebsiteDto.stampUpdateDate,
         }
       );
       if (oldUserId === null && userId !== null) {
@@ -1291,19 +1309,22 @@ export class WebsiteService {
     return website ? website[0].StartingUrl : null;
   }
 
-  async updatePagesObservatory(updateObservatoryPages: UpdateObservatoryPages): Promise<any> {
+  async updatePagesObservatory(
+    updateObservatoryPages: UpdateObservatoryPages
+  ): Promise<any> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
 
     let hasError = false;
     try {
       for (const observatoryPage of updateObservatoryPages.pages || []) {
         let show = null;
         const id = observatoryPage.id;
-        const page = await this.pageRepository.findOne({where:{PageId:id}});
+        const page = await this.pageRepository.findOne({
+          where: { PageId: id },
+        });
 
         if (!observatoryPage.inObservatory) {
           show = page.Show_In[0] + page.Show_In[2] + "0";

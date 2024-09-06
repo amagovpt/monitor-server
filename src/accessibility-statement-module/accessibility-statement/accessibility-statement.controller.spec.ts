@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AccessibilityStatementController } from './accessibility-statement.controller';
-import { AccessibilityStatementService } from './accessibility-statement.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AccessibilityStatementController } from "./accessibility-statement.controller";
+import { AccessibilityStatementService } from "./accessibility-statement.service";
 
-describe('AccessibilityStatementController', () => {
+describe("AccessibilityStatementController", () => {
   let controller: AccessibilityStatementController;
 
   beforeEach(async () => {
@@ -11,10 +11,12 @@ describe('AccessibilityStatementController', () => {
       providers: [AccessibilityStatementService],
     }).compile();
 
-    controller = module.get<AccessibilityStatementController>(AccessibilityStatementController);
+    controller = module.get<AccessibilityStatementController>(
+      AccessibilityStatementController
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

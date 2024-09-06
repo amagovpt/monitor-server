@@ -1,14 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'fs';
-import mysqldump from 'mysqldump';
-
+import { Injectable } from "@nestjs/common";
+import { readFileSync } from "fs";
+import mysqldump from "mysqldump";
 
 @Injectable()
 export class DumpService {
-   databaseConfig = JSON.parse(
-    readFileSync("../monitor_db.json").toString()
-  );
-  path = './dump.sql.gz';
+  databaseConfig = JSON.parse(readFileSync("../monitor_db.json").toString());
+  path = "./dump.sql.gz";
   createDump() {
     mysqldump({
       connection: {
@@ -21,5 +18,4 @@ export class DumpService {
       compressFile: true,
     });
   }
-
 }

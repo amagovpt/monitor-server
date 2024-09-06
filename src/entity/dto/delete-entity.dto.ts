@@ -1,4 +1,3 @@
-
 export class DeleteEntityDto {
-    entityId:number;
+  entityId: number;
 }

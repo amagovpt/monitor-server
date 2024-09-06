@@ -1,4 +1,4 @@
 export class ReevaluateEntityDto {
-    entitiesId:number[];
-    option:string;
+  entitiesId: number[];
+  option: string;
 }

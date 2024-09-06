@@ -1,4 +1,3 @@
-
 export class DeleteBulkEntityDto {
-    entitiesId:number[];
+  entitiesId: number[];
 }

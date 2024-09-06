@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { GovUserController } from './gov-user.controller';
-import { GovUserService } from './gov-user.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { GovUserController } from "./gov-user.controller";
+import { GovUserService } from "./gov-user.service";
 
-describe('GovUserController', () => {
+describe("GovUserController", () => {
   let controller: GovUserController;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('GovUserController', () => {
     controller = module.get<GovUserController>(GovUserController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

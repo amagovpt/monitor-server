@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ManualEvaluationService } from './manual-evaluation.service';
-import { CreateManualEvaluationDto } from './dto/create-manual-evaluation.dto';
-import { UpdateManualEvaluationDto } from './dto/update-manual-evaluation.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { ManualEvaluationService } from "./manual-evaluation.service";
+import { CreateManualEvaluationDto } from "./dto/create-manual-evaluation.dto";
+import { UpdateManualEvaluationDto } from "./dto/update-manual-evaluation.dto";
 
-@Controller('manual-evaluation')
+@Controller("manual-evaluation")
 export class ManualEvaluationController {
-  constructor(private readonly manualEvaluationService: ManualEvaluationService) {}
-/*
+  constructor(
+    private readonly manualEvaluationService: ManualEvaluationService
+  ) {}
+  /*
   @Post()
   create(@Body() createManualEvaluationDto: CreateManualEvaluationDto) {
     return this.manualEvaluationService.create(createManualEvaluationDto);

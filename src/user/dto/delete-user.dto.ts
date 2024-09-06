@@ -1,4 +1,4 @@
 export class DeleteUserDto {
-    userId:number;
-    app:string;
+  userId: number;
+  app: string;
 }

@@ -1,5 +1,4 @@
-
 export class CrawlerUserWebsite {
-    website:string;
-    websiteId:number;
+  website: string;
+  websiteId: number;
 }
