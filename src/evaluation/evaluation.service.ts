@@ -351,7 +351,9 @@ export class EvaluationService {
 
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
-    newEvaluation.Title = evaluation.data.title.replace(/"/g, "");
+    newEvaluation.Title = evaluation.data.title
+      .replace(/"/g, "")
+      .replace(/[\u0800-\uFFFF]/g, "");
     newEvaluation.Score = evaluation.data.score;
     newEvaluation.Pagecode = Buffer.from(evaluation.pagecode).toString(
       "base64"
