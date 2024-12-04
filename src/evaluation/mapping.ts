@@ -105,6 +105,7 @@ const bp_mapping = {
   "QW-BP25": QW_BP25,
   "QW-BP26": QW_BP26,
   "QW-BP27": QW_BP27,
+  "QW-BP28": QW_BP28,
   "QW-BP29": QW_BP29,
 };
 
@@ -1991,6 +1992,26 @@ function QW_BP27(elements: any, results: any, nodes: any, technique: any) {
     addToNodes(
       nodes,
       "mainNotTopLevel",
+      technique.results.filter((r) => r.verdict === "failed")
+    );
+  }
+}
+
+function QW_BP28(elements: any, results: any, nodes: any, technique: any) {
+  if (technique.metadata.outcome === "passed") {
+    addToElements(elements, "onlyOneh1", technique.metadata.passed);
+    addToResults(results, "heading_03");
+    addToNodes(
+      nodes,
+      "onlyOneh1",
+      technique.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (technique.metadata.outcome === "failed") {
+    addToElements(elements, "notOneh1", technique.metadata.failed);
+    addToResults(results, "heading_04");
+    addToNodes(
+      nodes,
+      "notOneh1",
       technique.results.filter((r) => r.verdict === "failed")
     );
   }
