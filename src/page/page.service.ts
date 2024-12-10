@@ -676,7 +676,7 @@ export class PageService {
   convertStringToStringArray(numStr: string): string[] {
     // remove first and last character
     numStr = numStr.substring(1, numStr.length - 1);
-    return numStr.split(",").map((s) => s.substring(1, numStr.length - 1));
+    return numStr.split(",").map((s) => s.substring(1, numStr.length - 1).replace(/"+/g, ''));
   }
 
   async createMyMonitorUserWebsitePages(

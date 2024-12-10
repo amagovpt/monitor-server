@@ -165,6 +165,10 @@ export class ObservatoryService {
           }
         }
 
+        if (websitesToFetch.length === 0) {
+          continue
+        }
+
         pages = await this.observatoryRepository.query(
           `
           SELECT
