@@ -71,7 +71,7 @@
     "@nestjs/schematics": "^9.0.4",
     "@nestjs/testing": "^9.3.9",
     "@qualweb/act-rules": "0.7.0",
-    "@qualweb/best-practices": "0.7.0",
+    "@qualweb/best-practices": "0.7.1",
     "@qualweb/counter": "0.3.0",
     "@qualweb/qw-page": "0.3.0",
     "@qualweb/util": "0.6.0",
