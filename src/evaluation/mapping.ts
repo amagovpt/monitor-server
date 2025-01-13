@@ -2004,16 +2004,24 @@ function QW_BP28(elements: any, results: any, nodes: any, technique: any) {
     addToNodes(
       nodes,
       "onlyOneh1",
-      technique.results.filter((r: any) => r.verdict === "passed")
+      technique.results.filter((t: any) => t.verdict === "passed")
     );
   } else if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "notOneh1", technique.metadata.failed);
-    addToResults(results, "heading_04");
-    addToNodes(
-      nodes,
-      "notOneh1",
-      technique.results.filter((r) => r.verdict === "failed")
-    );
+    const noH1 = technique.results.filter((t: any) => t.resultCode === "F1");
+    if (noH1.length !== 0) {
+      addToElements(elements, "notOneh1", 0);
+      addToResults(results, "heading_04");
+    }
+    const multipleH1 = technique.results.filter((t: any) => t.resultCode === "F2");
+    if (multipleH1.length !== 0) {
+      addToElements(elements, "notOneh1", technique.metadata.failed);
+      addToResults(results, "heading_04");
+      addToNodes(
+        nodes,
+        "notOneh1",
+        technique.results.filter((t) => t.resultCode === "F2")
+      );
+    }
   }
 }
 
