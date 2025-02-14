@@ -16,9 +16,6 @@ export async function evaluate(params: any): Promise<any> {
   };
 
   if (params.url || params.urls) {
-    if (process.env.VALIDATOR) {
-      options["wcag-techniques"].techniques.push("QW-WCAG-T16");
-    }
     options.url = params.url;
     options.urls = params.urls;
   } else if (params.html) {
@@ -31,7 +28,7 @@ export async function evaluate(params: any): Promise<any> {
     options["validator"] = process.env.VALIDATOR;
   }
 
-  const qualweb = new QualWeb({ stealth: true });
+  const qualweb = new QualWeb({ adBlock: true, stealth: true });
   await qualweb.start(
     { maxConcurrency: 2, timeout: 1000 * 240 * 2 },
     {
