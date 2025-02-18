@@ -70,7 +70,7 @@
     "@nestjs/cli": "^9.2.0",
     "@nestjs/schematics": "^9.0.4",
     "@nestjs/testing": "^9.3.9",
-    "@qualweb/act-rules": "0.7.4",
+    "@qualweb/act-rules": "0.7.5",
     "@qualweb/best-practices": "0.7.6",
     "@qualweb/counter": "0.3.2",
     "@qualweb/qw-page": "0.3.2",
