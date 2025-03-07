@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "node16",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -12,7 +13,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "types": ["./node_modules/@qualweb/types","jest", "node"]
+    "types": ["jest", "node"]
     },
   "exclude": ["node_modules", "dist"]
 }
