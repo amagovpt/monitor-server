@@ -453,28 +453,36 @@ export class EvaluationService {
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AMS/Observatory" LIMIT 1`
     );
-    return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    if (counter[0])
+      return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    return { counter: 0, date: '' };
   }
 
   async getMyMonitorRequestCounter(): Promise<any> {
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "MyMonitor" LIMIT 1`
     );
-    return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    if (counter[0])
+      return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    return { counter: 0, date: '' };
   }
 
   async getStudyMonitorRequestCounter(): Promise<any> {
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "StudyMonitor" LIMIT 1`
     );
-    return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    if (counter[0])
+      return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    return { counter: 0, date: '' };
   }
 
   async getAccessMonitorRequestCounter(): Promise<any> {
     const counter = await this.connection.query(
       `SELECT * FROM Evaluation_Request_Counter WHERE Application = "AccessMonitor" LIMIT 1`
     );
-    return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    if (counter[0])
+      return { counter: counter[0].Counter, date: counter[0].Start_Date };
+    return { counter: 0, date: '' };
   }
 
   async resetAdminWaitingList(): Promise<boolean> {
