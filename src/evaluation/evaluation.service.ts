@@ -425,6 +425,71 @@ export class EvaluationService {
     const savedEvaluation = await queryRunner.manager.save(newEvaluation);
   }
 
+  async postAMPExtensionEvaluation(pageId: number, data: string[]): Promise<any> {
+    const splittedFirstLine = data[0].split(";");
+    const splittedLastLine = data[data.length - 1].split(";");
+
+    const newEvaluation = new Evaluation();
+    newEvaluation.PageId = pageId;
+
+    newEvaluation.Score = splittedFirstLine[9].replace(",", ".");
+    newEvaluation.Pagecode = splittedLastLine[1];
+    newEvaluation.Tot = splittedLastLine[2];
+    newEvaluation.Nodes = splittedLastLine[3];
+    newEvaluation.Errors = splittedLastLine[4];
+    newEvaluation.Tag_Count = splittedLastLine[5];
+    newEvaluation.Element_Count = splittedLastLine[6];
+    newEvaluation.A = this.calculateNotConformant("A", data);
+    newEvaluation.AA = this.calculateNotConformant("AA", data);
+    newEvaluation.AAA = this.calculateNotConformant("AAA", data);
+    newEvaluation.Evaluation_Date = new Date(splittedFirstLine[1]);
+    newEvaluation.Show_To = "10";
+
+    return this.createOne(newEvaluation);
+  }
+
+  async postMyMonitorAMPExtensionEvaluation(pageId: number, data: string[]): Promise<any> {
+    const splittedFirstLine = data[0].split(";");
+    const splittedLastLine = data[data.length - 1].split(";");
+
+    const newEvaluation = new Evaluation();
+    newEvaluation.PageId = pageId;
+
+    newEvaluation.Score = splittedFirstLine[9].replace(",", ".");
+    newEvaluation.Pagecode = splittedLastLine[1];
+    newEvaluation.Tot = splittedLastLine[2];
+    newEvaluation.Nodes = splittedLastLine[3];
+    newEvaluation.Errors = splittedLastLine[4];
+    newEvaluation.Tag_Count = splittedLastLine[5];
+    newEvaluation.Element_Count = splittedLastLine[6];
+    newEvaluation.A = this.calculateNotConformant("A", data);
+    newEvaluation.AA = this.calculateNotConformant("AA", data);
+    newEvaluation.AAA = this.calculateNotConformant("AAA", data);
+    newEvaluation.Evaluation_Date = new Date(splittedFirstLine[1]);
+    newEvaluation.Show_To = "01";
+
+    return this.createOne(newEvaluation);
+  }
+
+  private calculateNotConformant(type: string, data: string[]): number {
+    let total = 0;
+    switch (type) {
+      case "A":
+      case "AA":
+      case "AAA":
+        data.map((l) => {
+          const splittedLine = l.split(";");
+          if (splittedLine[4] === type && splittedLine[3] === "Erro") {
+            total++;
+          }
+        });
+        break;
+      default:
+        break;
+    }
+    return total;
+  }
+
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
     await this.connection.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AMS/Observatory"`
