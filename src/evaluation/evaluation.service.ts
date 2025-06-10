@@ -425,69 +425,48 @@ export class EvaluationService {
     const savedEvaluation = await queryRunner.manager.save(newEvaluation);
   }
 
-  async postAMPExtensionEvaluation(pageId: number, data: string[]): Promise<any> {
-    const splittedFirstLine = data[0].split(";");
-    const splittedLastLine = data[data.length - 1].split(";");
+  async postAMPExtensionEvaluation(pageId: number, data: string): Promise<any> {
+    const splittedData = data.split(";");
 
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
 
-    newEvaluation.Score = splittedFirstLine[9].replace(",", ".");
-    newEvaluation.Pagecode = splittedLastLine[1];
-    newEvaluation.Tot = splittedLastLine[2];
-    newEvaluation.Nodes = splittedLastLine[3];
-    newEvaluation.Errors = splittedLastLine[4];
-    newEvaluation.Tag_Count = splittedLastLine[5];
-    newEvaluation.Element_Count = splittedLastLine[6];
-    newEvaluation.A = this.calculateNotConformant("A", data);
-    newEvaluation.AA = this.calculateNotConformant("AA", data);
-    newEvaluation.AAA = this.calculateNotConformant("AAA", data);
-    newEvaluation.Evaluation_Date = new Date(splittedFirstLine[1]);
+    newEvaluation.Score = splittedData[7].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[0];
+    newEvaluation.Tot = splittedData[2];
+    newEvaluation.Nodes = splittedData[3];
+    newEvaluation.Errors = splittedData[4];
+    newEvaluation.Tag_Count = splittedData[5];
+    newEvaluation.Element_Count = splittedData[6];
+    newEvaluation.A = parseInt(splittedData[1].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[1].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[1].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[8]);
     newEvaluation.Show_To = "10";
 
     return this.createOne(newEvaluation);
   }
 
-  async postMyMonitorAMPExtensionEvaluation(pageId: number, data: string[]): Promise<any> {
-    const splittedFirstLine = data[0].split(";");
-    const splittedLastLine = data[data.length - 1].split(";");
+  async postMyMonitorAMPExtensionEvaluation(pageId: number, data: string): Promise<any> {
+    const splittedData = data.split(";");
 
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
 
-    newEvaluation.Score = splittedFirstLine[9].replace(",", ".");
-    newEvaluation.Pagecode = splittedLastLine[1];
-    newEvaluation.Tot = splittedLastLine[2];
-    newEvaluation.Nodes = splittedLastLine[3];
-    newEvaluation.Errors = splittedLastLine[4];
-    newEvaluation.Tag_Count = splittedLastLine[5];
-    newEvaluation.Element_Count = splittedLastLine[6];
-    newEvaluation.A = this.calculateNotConformant("A", data);
-    newEvaluation.AA = this.calculateNotConformant("AA", data);
-    newEvaluation.AAA = this.calculateNotConformant("AAA", data);
-    newEvaluation.Evaluation_Date = new Date(splittedFirstLine[1]);
+    newEvaluation.Score = splittedData[7].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[0];
+    newEvaluation.Tot = splittedData[2];
+    newEvaluation.Nodes = splittedData[3];
+    newEvaluation.Errors = splittedData[4];
+    newEvaluation.Tag_Count = splittedData[5];
+    newEvaluation.Element_Count = splittedData[6];
+    newEvaluation.A = parseInt(splittedData[1].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[1].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[1].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[8]);
     newEvaluation.Show_To = "01";
 
     return this.createOne(newEvaluation);
-  }
-
-  private calculateNotConformant(type: string, data: string[]): number {
-    let total = 0;
-    switch (type) {
-      case "A":
-      case "AA":
-      case "AAA":
-        data.map((l) => {
-          const splittedLine = l.split(";");
-          if (splittedLine[4] === type && splittedLine[3] === "Erro") {
-            total++;
-          }
-        });
-        break;
-      default:
-        break;
-    }
-    return total;
   }
 
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
