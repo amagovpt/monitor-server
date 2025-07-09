@@ -47,11 +47,11 @@ export class CrawlerService {
 
           if (website.length > 0) {
             const browser = await puppeteer.launch({
-              headless: "new",
+              headless: true,
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito: any =
-              await browser.createIncognitoBrowserContext();
+              await browser.createBrowserContext();
             const urls = await this.MSCrawl(incognito, website[0].StartingUrl);
             await incognito.close();
             await browser.close();
@@ -119,7 +119,7 @@ export class CrawlerService {
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
             const incognito: any =
-              await browser.createIncognitoBrowserContext();
+              await browser.createBrowserContext();
             const urls = await this.MSCrawl(incognito, website[0].StartingUrl);
             await incognito.close();
             await browser.close();
