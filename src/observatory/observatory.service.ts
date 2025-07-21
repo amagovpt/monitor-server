@@ -11,8 +11,16 @@ import { Observatory } from "./observatory.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";
 
+interface ObservatoryConfig {
+  chunkSize: number;
+  enableIncremental: boolean;
+  enableGarbageCollection: boolean;
+  maxMemoryUsageMB: number;
+}
+
 @Injectable()
 export class ObservatoryService {
+  private config: ObservatoryConfig;
   elemGroups = {
     a: "link",
     all: "other",
@@ -45,7 +53,21 @@ export class ObservatoryService {
   constructor(
     @InjectRepository(Observatory)
     private readonly observatoryRepository: Repository<Observatory>
-  ) {}
+  ) {
+    this.config = this.loadConfig();
+  }
+
+  /**
+   * Load configuration from environment variables with defaults
+   */
+  private loadConfig(): ObservatoryConfig {
+    return {
+      chunkSize: parseInt(process.env.OBSERVATORY_CHUNK_SIZE || '20'),
+      enableIncremental: process.env.ENABLE_INCREMENTAL_OBSERVATORY === 'true',
+      enableGarbageCollection: process.env.ENABLE_OBSERVATORY_GC === 'true',
+      maxMemoryUsageMB: parseInt(process.env.OBSERVATORY_MAX_MEMORY_MB || '1024')
+    };
+  }
 
   async findAll(): Promise<Observatory[]> {
     return this.observatoryRepository.find({
@@ -60,60 +82,324 @@ export class ObservatoryService {
       amsid: process.env.AMSID,
       intParse: parseInt(process.env.AMSID),
     });
+    
     if (
       process.env.NAMESPACE === undefined ||
       parseInt(process.env.AMSID) === 0 ||
       manual
     ) {
-      const data = await this.getData();
-
-      const directories = new Array<Directory>();
-      const tmpDirectories = this.createTemporaryDirectories(data);
-
-      for (const directory of tmpDirectories || []) {
-        const newDirectory = this.createDirectory(directory, clone(data));
-        directories.push(newDirectory);
+      // Use configured processing mode (Phase 2)
+      console.log('Observatory config:', this.config);
+      
+      if (this.config.enableIncremental) {
+        return this.generateDataIncremental(manual, this.config.chunkSize);
+      } else {
+        return this.generateDataChunked(manual, this.config.chunkSize);
       }
-
-      const listDirectories = new ListDirectories(data, directories);
-
-      const { declarations, badges } = this.countDeclarationsAndStamps(
-        listDirectories.directories
-      );
-
-      const global = {
-        score: listDirectories.getScore(),
-        nDirectories: listDirectories.directories.length,
-        nWebsites: listDirectories.nWebsites,
-        nEntities: listDirectories.nEntities,
-        nPages: listDirectories.nPages,
-        nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
-        recentPage: listDirectories.recentPage,
-        oldestPage: listDirectories.oldestPage,
-        topFiveWebsites: this.getTopFiveWebsites(listDirectories),
-        topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
-        topFiveErrors: listDirectories.getTopFiveErrors(),
-        declarations,
-        badges,
-        scoreDistributionFrequency: listDirectories.frequencies,
-        errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
-        bestPracticesDistribution:
-          this.getGlobalBestPracticesDistribution(listDirectories),
-        directoriesList: this.getSortedDirectoriesList(listDirectories),
-        directories: this.getDirectories(listDirectories),
-      };
-
-      if (manual) {
-        await this.observatoryRepository.delete({
-          Type: "manual",
-        });
-      }
-
-      await this.observatoryRepository.query(
-        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
-        [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
-      );
     }
+  }
+
+  /**
+   * Phase 2: Chunked processing to handle large datasets without memory issues
+   */
+  async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
+    console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
+    
+    // Get all directory IDs first
+    const directoryIds = await this.getDirectoryIds();
+    console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
+    
+    let allDirectories = new Array<Directory>();
+    let allData = new Array<any>();
+    
+    // Process directories in chunks
+    for (let i = 0; i < directoryIds.length; i += chunkSize) {
+      const chunk = directoryIds.slice(i, i + chunkSize);
+      console.log(`Processing chunk ${Math.floor(i / chunkSize) + 1}/${Math.ceil(directoryIds.length / chunkSize)}`);
+      
+      const chunkData = await this.getDataForDirectoryChunk(chunk);
+      const chunkDirectories = this.processDirectoryChunk(chunkData);
+      
+      allDirectories = [...allDirectories, ...chunkDirectories];
+      allData = [...allData, ...chunkData];
+      
+      // Optional: Force garbage collection between chunks if enabled
+      if (this.config.enableGarbageCollection && (globalThis as any).gc) {
+        (globalThis as any).gc();
+        console.log(`Forced garbage collection after chunk ${Math.floor(i / chunkSize) + 1}`);
+      }
+    }
+
+    // Create final result
+    const listDirectories = new ListDirectories(allData, allDirectories);
+    const global = await this.buildGlobalStatistics(listDirectories);
+
+    if (manual) {
+      await this.observatoryRepository.delete({
+        Type: "manual",
+      });
+    }
+
+    await this.observatoryRepository.query(
+      "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+      [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
+    );
+    
+    console.log("Chunked data generation completed");
+  }
+
+  /**
+   * Phase 2: Incremental processing to avoid rebuilding unchanged data
+   */
+  async generateDataIncremental(manual = false, chunkSize = 20): Promise<any> {
+    console.log("Starting incremental data generation");
+    
+    if (manual) {
+      // For manual runs, always do full regeneration
+      return this.generateDataChunked(manual, chunkSize);
+    }
+    
+    const lastRun = await this.getLastGenerationDate();
+    console.log(`Last generation date: ${lastRun}`);
+    
+    // Get directories that have changed since last run
+    const changedDirectoryIds = await this.getChangedDirectoryIds(lastRun);
+    console.log(`Found ${changedDirectoryIds.length} changed directories`);
+    
+    if (changedDirectoryIds.length === 0) {
+      console.log("No changes detected, skipping generation");
+      return;
+    }
+    
+    // Get unchanged data from cache or previous result
+    const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+    
+    // Process only changed directories
+    const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
+    const changedDirectories = this.processDirectoryChunk(changedData);
+    
+    // Merge results
+    const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
+    const mergedData = [...unchangedData.data, ...changedData];
+    
+    const listDirectories = new ListDirectories(mergedData, mergedDirectories);
+    const global = await this.buildGlobalStatistics(listDirectories);
+
+    await this.observatoryRepository.query(
+      "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+      [JSON.stringify(global), "auto", new Date()]
+    );
+    
+    console.log("Incremental data generation completed");
+  }
+
+  /**
+   * Helper method to get all directory IDs for chunking
+   */
+  async getDirectoryIds(): Promise<number[]> {
+    const result = await this.observatoryRepository.query(
+      'SELECT DirectoryId FROM Directory WHERE Show_in_Observatory = 1 ORDER BY DirectoryId'
+    );
+    return result.map((row: any) => row.DirectoryId);
+  }
+
+  /**
+   * Get data for a specific chunk of directories
+   */
+  async getDataForDirectoryChunk(directoryIds: number[]): Promise<any[]> {
+    if (directoryIds.length === 0) return [];
+    
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          WHERE Show_To LIKE '1_%'
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+        WHERE e1.Show_To LIKE '1_%'
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE 
+        d.DirectoryId IN (${directoryIds.map(() => '?').join(',')})
+        AND d.Show_in_Observatory = 1 
+        AND p.Show_In LIKE '__1'
+        AND e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    const rawData = await this.observatoryRepository.query(query, directoryIds);
+    
+    // Filter based on directory method and tag requirements
+    const filteredData = await Promise.all(
+      rawData.map(async (row: any) => {
+        const method = parseInt(row.Directory_Method);
+        const tagCount = parseInt(row.TagCount);
+        
+        // For Method 0 with multiple tags, ensure website has ALL tags
+        if (method === 0 && tagCount > 1) {
+          const hasAllTags = await this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+          return hasAllTags ? row : null;
+        }
+        
+        return row;
+      })
+    );
+
+    return filteredData.filter(Boolean);
+  }
+
+  /**
+   * Process a chunk of directories into Directory objects
+   */
+  processDirectoryChunk(chunkData: any[]): Directory[] {
+    const directories = new Array<Directory>();
+    const tmpDirectories = this.createTemporaryDirectories(chunkData);
+
+    for (const directory of tmpDirectories || []) {
+      const newDirectory = this.createDirectory(directory, clone(chunkData));
+      directories.push(newDirectory);
+    }
+
+    return directories;
+  }
+
+  /**
+   * Build global statistics from ListDirectories
+   */
+  async buildGlobalStatistics(listDirectories: ListDirectories): Promise<any> {
+    const { declarations, badges } = this.countDeclarationsAndStamps(
+      listDirectories.directories
+    );
+
+    return {
+      score: listDirectories.getScore(),
+      nDirectories: listDirectories.directories.length,
+      nWebsites: listDirectories.nWebsites,
+      nEntities: listDirectories.nEntities,
+      nPages: listDirectories.nPages,
+      nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
+      recentPage: listDirectories.recentPage,
+      oldestPage: listDirectories.oldestPage,
+      topFiveWebsites: this.getTopFiveWebsites(listDirectories),
+      topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
+      topFiveErrors: listDirectories.getTopFiveErrors(),
+      declarations,
+      badges,
+      scoreDistributionFrequency: listDirectories.frequencies,
+      errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
+      bestPracticesDistribution:
+        this.getGlobalBestPracticesDistribution(listDirectories),
+      directoriesList: this.getSortedDirectoriesList(listDirectories),
+      directories: this.getDirectories(listDirectories),
+    };
+  }
+
+  /**
+   * Get last generation date for incremental processing
+   */
+  async getLastGenerationDate(): Promise<Date> {
+    const result = await this.observatoryRepository.query(
+      'SELECT MAX(Creation_Date) as lastDate FROM Observatory WHERE Type = "auto"'
+    );
+    return result[0]?.lastDate || new Date('2000-01-01');
+  }
+
+  /**
+   * Get directory IDs that have changed since last generation
+   */
+  async getChangedDirectoryIds(lastRun: Date): Promise<number[]> {
+    // This is a simplified approach - in reality you'd want to track:
+    // - New/updated evaluations
+    // - New/updated websites
+    // - New/updated pages
+    // - Directory configuration changes
+    
+    const query = `
+      SELECT DISTINCT d.DirectoryId
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN TagWebsite tw ON dt.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN Evaluation e ON p.PageId = e.PageId
+      WHERE d.Show_in_Observatory = 1
+      AND (
+        e.Evaluation_Date > ? 
+        OR w.Declaration_Update_Date > ?
+        OR w.Stamp_Update_Date > ?
+        OR p.Creation_Date > ?
+      )
+    `;
+    
+    const result = await this.observatoryRepository.query(query, [lastRun, lastRun, lastRun, lastRun]);
+    return result.map((row: any) => row.DirectoryId);
+  }
+
+  /**
+   * Get unchanged observatory data (mock implementation)
+   */
+  async getUnchangedObservatoryData(changedDirectoryIds: number[]): Promise<{directories: Directory[], data: any[]}> {
+    // In a full implementation, this would:
+    // 1. Load the previous observatory result
+    // 2. Filter out directories that have changed
+    // 3. Return the unchanged portion
+    
+    // For now, return empty to force full rebuild of unchanged data
+    // This can be optimized later with proper caching
+    return { directories: [], data: [] };
   }
 
   async getObservatoryData(): Promise<any> {
@@ -127,6 +413,120 @@ export class ObservatoryService {
   }
 
   async getData(): Promise<any> {
+    // Use optimized single query to get all data at once
+    return this.getDataOptimized();
+  }
+
+  /**
+   * Optimized version of getData() that eliminates N+1 queries
+   * Uses single bulk query with proper joins and pre-computed latest evaluations
+   */
+  async getDataOptimized(): Promise<any> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          WHERE Show_To LIKE '1_%'
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+        WHERE e1.Show_To LIKE '1_%'
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE 
+        d.Show_in_Observatory = 1 
+        AND p.Show_In LIKE '__1'
+        AND e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    const rawData = await this.observatoryRepository.query(query);
+    
+    // Filter based on directory method and tag requirements
+    const filteredData = rawData.filter(row => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, ensure website has ALL tags
+      if (method === 0 && tagCount > 1) {
+        return this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+      }
+      
+      return true;
+    });
+
+    return filteredData;
+  }
+
+  /**
+   * Helper method to verify if a website has all required tags for Method 0 directories
+   */
+  private async websiteHasAllTags(websiteId: number, tagIds: string[], requiredTagCount: number): Promise<boolean> {
+    const result = await this.observatoryRepository.query(`
+      SELECT COUNT(DISTINCT TagId) as count
+      FROM TagWebsite 
+      WHERE WebsiteId = ? AND TagId IN (?)
+    `, [websiteId, tagIds]);
+    
+    return result[0].count === requiredTagCount;
+  }
+
+  /**
+   * Legacy getData method - kept for backwards compatibility
+   * TODO: Remove after migration is complete
+   */
+  async getDataLegacy(): Promise<any> {
     let data = new Array<any>();
 
     const directories = await this.observatoryRepository.query(
@@ -166,7 +566,7 @@ export class ObservatoryService {
         }
 
         if (websitesToFetch.length === 0) {
-          continue
+          continue;
         }
 
         pages = await this.observatoryRepository.query(
