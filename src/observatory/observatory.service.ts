@@ -103,49 +103,78 @@ export class ObservatoryService {
    * Phase 2: Chunked processing to handle large datasets without memory issues
    */
   async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
-    console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
-    
-    // Get all directory IDs first
-    const directoryIds = await this.getDirectoryIds();
-    console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
-    
-    let allDirectories = new Array<Directory>();
-    let allData = new Array<any>();
-    
-    // Process directories in chunks
-    for (let i = 0; i < directoryIds.length; i += chunkSize) {
-      const chunk = directoryIds.slice(i, i + chunkSize);
-      console.log(`Processing chunk ${Math.floor(i / chunkSize) + 1}/${Math.ceil(directoryIds.length / chunkSize)}`);
+    try {
+      console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
       
-      const chunkData = await this.getDataForDirectoryChunk(chunk);
-      const chunkDirectories = this.processDirectoryChunk(chunkData);
+      // Get all directory IDs first
+      const directoryIds = await this.getDirectoryIds();
+      console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
       
-      allDirectories = [...allDirectories, ...chunkDirectories];
-      allData = [...allData, ...chunkData];
+      let allDirectories = new Array<Directory>();
+      let allData = new Array<any>();
       
-      // Optional: Force garbage collection between chunks if enabled
-      if (this.config.enableGarbageCollection && (globalThis as any).gc) {
-        (globalThis as any).gc();
-        console.log(`Forced garbage collection after chunk ${Math.floor(i / chunkSize) + 1}`);
+      // Process directories in chunks
+      for (let i = 0; i < directoryIds.length; i += chunkSize) {
+        const chunk = directoryIds.slice(i, i + chunkSize);
+        const chunkNumber = Math.floor(i / chunkSize) + 1;
+        const totalChunks = Math.ceil(directoryIds.length / chunkSize);
+        
+        console.log(`Processing chunk ${chunkNumber}/${totalChunks} (directories ${chunk[0]} to ${chunk[chunk.length - 1]})`);
+        
+        try {
+          const chunkData = await this.getDataForDirectoryChunk(chunk);
+          console.log(`Chunk ${chunkNumber}: Retrieved ${chunkData.length} records`);
+          
+          const chunkDirectories = this.processDirectoryChunk(chunkData);
+          console.log(`Chunk ${chunkNumber}: Created ${chunkDirectories.length} directory objects`);
+          
+          allDirectories = [...allDirectories, ...chunkDirectories];
+          allData = [...allData, ...chunkData];
+          
+          console.log(`Chunk ${chunkNumber}: Total progress - ${allDirectories.length} directories, ${allData.length} records`);
+          
+          // Optional: Force garbage collection between chunks if enabled
+          if (this.config.enableGarbageCollection && (globalThis as any).gc) {
+            (globalThis as any).gc();
+            console.log(`Forced garbage collection after chunk ${chunkNumber}`);
+          }
+        } catch (chunkError) {
+          console.error(`Error processing chunk ${chunkNumber}:`, chunkError);
+          throw chunkError;
+        }
       }
+
+      console.log(`All chunks processed. Building global statistics from ${allDirectories.length} directories and ${allData.length} records...`);
+      
+      // Create final result
+      const listDirectories = new ListDirectories(allData, allDirectories);
+      console.log(`ListDirectories created with ${listDirectories.directories.length} directories`);
+      
+      const global = await this.buildGlobalStatistics(listDirectories);
+      console.log(`Global statistics built successfully`);
+
+      if (manual) {
+        console.log('Deleting existing manual records...');
+        await this.observatoryRepository.delete({
+          Type: "manual",
+        });
+        console.log('Manual records deleted');
+      }
+
+      console.log('Inserting new Observatory record...');
+      await this.observatoryRepository.query(
+        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
+      );
+      console.log('Observatory record inserted successfully');
+      
+      console.log("Chunked data generation completed successfully");
+      return global;
+    } catch (error) {
+      console.error('Error in generateDataChunked:', error);
+      console.error('Stack trace:', error.stack);
+      throw error;
     }
-
-    // Create final result
-    const listDirectories = new ListDirectories(allData, allDirectories);
-    const global = await this.buildGlobalStatistics(listDirectories);
-
-    if (manual) {
-      await this.observatoryRepository.delete({
-        Type: "manual",
-      });
-    }
-
-    await this.observatoryRepository.query(
-      "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
-      [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
-    );
-    
-    console.log("Chunked data generation completed");
   }
 
   /**
@@ -209,6 +238,208 @@ export class ObservatoryService {
   async getDataForDirectoryChunk(directoryIds: number[]): Promise<any[]> {
     if (directoryIds.length === 0) return [];
     
+    console.log(`Getting data for directory chunk: [${directoryIds.join(', ')}]`);
+    
+    // Use the legacy approach temporarily to isolate the issue
+    return this.getDataForDirectoryChunkLegacy(directoryIds);
+  }
+
+  /**
+   * Temporary legacy approach for directory chunks to debug the hanging issue
+   */
+  async getDataForDirectoryChunkLegacy(directoryIds: number[]): Promise<any[]> {
+    console.log(`Using legacy approach for directories: [${directoryIds.join(', ')}]`);
+    
+    let allData = [];
+    
+    // Get directories info
+    const directories = await this.observatoryRepository.query(
+      `SELECT * FROM Directory WHERE DirectoryId IN (${directoryIds.map(() => '?').join(',')}) AND Show_in_Observatory = 1`,
+      directoryIds
+    );
+    
+    console.log(`Found ${directories.length} directories`);
+    
+    for (const directory of directories) {
+      console.log(`Processing directory: ${directory.DirectoryId} - ${directory.Name}`);
+      
+      // Get tags for this directory
+      const tags = await this.observatoryRepository.query(
+        `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
+        [directory.DirectoryId]
+      );
+      const tagsId = tags.map((t) => t.TagId);
+      console.log(`Directory ${directory.DirectoryId} has ${tags.length} tags: [${tagsId.join(', ')}]`);
+
+      let pages = null;
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        console.log(`Directory ${directory.DirectoryId}: Method 0 with multiple tags - checking website intersections`);
+        
+        const websites = await this.observatoryRepository.query(
+          `SELECT * FROM TagWebsite WHERE TagId IN (${tagsId.map(() => '?').join(',')})`,
+          tagsId
+        );
+        console.log(`Found ${websites.length} tag-website relationships`);
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+        
+        console.log(`Directory ${directory.DirectoryId}: ${websitesToFetch.length} websites have all tags`);
+
+        if (websitesToFetch.length === 0) {
+          console.log(`Directory ${directory.DirectoryId}: No websites with all tags, skipping`);
+          continue;
+        }
+
+        pages = await this.observatoryRepository.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            w.WebsiteId IN (${websitesToFetch.map(() => '?').join(',')}) AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          websitesToFetch
+        );
+      } else {
+        console.log(`Directory ${directory.DirectoryId}: Standard method, getting pages for all tagged websites`);
+        
+        pages = await this.observatoryRepository.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            TagWebsite as tw,
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            tw.TagId IN (${tagsId.map(() => '?').join(',')}) AND
+            w.WebsiteId = tw.WebsiteId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          tagsId
+        );
+      }
+      
+      if (pages) {
+        pages = pages.filter((p) => p.Score !== null);
+        console.log(`Directory ${directory.DirectoryId}: Found ${pages.length} valid pages`);
+
+        for (const p of pages || []) {
+          p.DirectoryId = directory.DirectoryId;
+          p.Directory_Name = directory.Name;
+          p.Show_in_Observatory = directory.Show_in_Observatory;
+          p.Directory_Creation_Date = directory.Creation_Date;
+          p.Entity_Name = null;
+
+          const entities = await this.observatoryRepository.query(
+            `
+            SELECT e.Long_Name
+            FROM
+              EntityWebsite as ew,
+              Entity as e
+            WHERE
+              ew.WebsiteId = ? AND
+              e.EntityId = ew.EntityId
+          `,
+            [p.WebsiteId]
+          );
+
+          if (entities.length > 0) {
+            if (entities.length === 1) {
+              p.Entity_Name = entities[0].Long_Name;
+            } else {
+              p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
+            }
+          }
+        }
+
+        allData = [...allData, ...pages];
+      } else {
+        console.log(`Directory ${directory.DirectoryId}: No pages found`);
+      }
+    }
+    
+    console.log(`Legacy chunk processing complete: ${allData.length} total records`);
+    return allData;
+  }
+
+  /**
+   * Optimized approach - currently disabled for debugging
+   */
+  async getDataForDirectoryChunkOptimized(directoryIds: number[]): Promise<any[]> {
     const query = `
       SELECT 
         d.DirectoryId,
