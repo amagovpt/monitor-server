@@ -119,19 +119,16 @@ export class ObservatoryService {
         const chunkNumber = Math.floor(i / chunkSize) + 1;
         const totalChunks = Math.ceil(directoryIds.length / chunkSize);
         
-        console.log(`Processing chunk ${chunkNumber}/${totalChunks} (directories ${chunk[0]} to ${chunk[chunk.length - 1]})`);
+        console.log(`Processing chunk ${chunkNumber}/${totalChunks}`);
         
         try {
           const chunkData = await this.getDataForDirectoryChunk(chunk);
-          console.log(`Chunk ${chunkNumber}: Retrieved ${chunkData.length} records`);
-          
           const chunkDirectories = this.processDirectoryChunk(chunkData);
-          console.log(`Chunk ${chunkNumber}: Created ${chunkDirectories.length} directory objects`);
           
           allDirectories = [...allDirectories, ...chunkDirectories];
           allData = [...allData, ...chunkData];
           
-          console.log(`Chunk ${chunkNumber}: Total progress - ${allDirectories.length} directories, ${allData.length} records`);
+          console.log(`Chunk ${chunkNumber} complete: ${chunkDirectories.length} directories, ${chunkData.length} records`);
           
           // Optional: Force garbage collection between chunks if enabled
           if (this.config.enableGarbageCollection && (globalThis as any).gc) {
@@ -144,29 +141,25 @@ export class ObservatoryService {
         }
       }
 
-      console.log(`All chunks processed. Building global statistics from ${allDirectories.length} directories and ${allData.length} records...`);
+      console.log(`Building global statistics from ${allDirectories.length} directories and ${allData.length} records...`);
       
       // Create final result
       const listDirectories = new ListDirectories(allData, allDirectories);
-      console.log(`ListDirectories created with ${listDirectories.directories.length} directories`);
-      
       const global = await this.buildGlobalStatistics(listDirectories);
-      console.log(`Global statistics built successfully`);
 
       if (manual) {
         console.log('Deleting existing manual records...');
-        await this.observatoryRepository.delete({
-          Type: "manual",
-        });
+        await this.observatoryRepository.query(
+          'DELETE FROM Observatory WHERE Type = ?',
+          ['manual']
+        );
         console.log('Manual records deleted');
       }
 
-      console.log('Inserting new Observatory record...');
       await this.observatoryRepository.query(
         "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
-      console.log('Observatory record inserted successfully');
       
       console.log("Chunked data generation completed successfully");
       return global;
@@ -238,18 +231,14 @@ export class ObservatoryService {
   async getDataForDirectoryChunk(directoryIds: number[]): Promise<any[]> {
     if (directoryIds.length === 0) return [];
     
-    console.log(`Getting data for directory chunk: [${directoryIds.join(', ')}]`);
-    
-    // Use the legacy approach temporarily to isolate the issue
+    // Use the legacy approach (working and stable)
     return this.getDataForDirectoryChunkLegacy(directoryIds);
   }
 
   /**
-   * Temporary legacy approach for directory chunks to debug the hanging issue
+   * Process directory chunk using legacy approach (proven to work)
    */
-  async getDataForDirectoryChunkLegacy(directoryIds: number[]): Promise<any[]> {
-    console.log(`Using legacy approach for directories: [${directoryIds.join(', ')}]`);
-    
+  private async getDataForDirectoryChunkLegacy(directoryIds: number[]): Promise<any[]> {
     let allData = [];
     
     // Get directories info
@@ -258,28 +247,20 @@ export class ObservatoryService {
       directoryIds
     );
     
-    console.log(`Found ${directories.length} directories`);
-    
     for (const directory of directories) {
-      console.log(`Processing directory: ${directory.DirectoryId} - ${directory.Name}`);
-      
       // Get tags for this directory
       const tags = await this.observatoryRepository.query(
         `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
         [directory.DirectoryId]
       );
       const tagsId = tags.map((t) => t.TagId);
-      console.log(`Directory ${directory.DirectoryId} has ${tags.length} tags: [${tagsId.join(', ')}]`);
 
       let pages = null;
       if (parseInt(directory.Method) === 0 && tags.length > 1) {
-        console.log(`Directory ${directory.DirectoryId}: Method 0 with multiple tags - checking website intersections`);
-        
         const websites = await this.observatoryRepository.query(
           `SELECT * FROM TagWebsite WHERE TagId IN (${tagsId.map(() => '?').join(',')})`,
           tagsId
         );
-        console.log(`Found ${websites.length} tag-website relationships`);
 
         const counts = {};
         for (const w of websites ?? []) {
@@ -296,11 +277,8 @@ export class ObservatoryService {
             websitesToFetch.push(parseInt(id));
           }
         }
-        
-        console.log(`Directory ${directory.DirectoryId}: ${websitesToFetch.length} websites have all tags`);
 
         if (websitesToFetch.length === 0) {
-          console.log(`Directory ${directory.DirectoryId}: No websites with all tags, skipping`);
           continue;
         }
 
@@ -346,8 +324,6 @@ export class ObservatoryService {
           websitesToFetch
         );
       } else {
-        console.log(`Directory ${directory.DirectoryId}: Standard method, getting pages for all tagged websites`);
-        
         pages = await this.observatoryRepository.query(
           `
           SELECT
@@ -395,7 +371,6 @@ export class ObservatoryService {
       
       if (pages) {
         pages = pages.filter((p) => p.Score !== null);
-        console.log(`Directory ${directory.DirectoryId}: Found ${pages.length} valid pages`);
 
         for (const p of pages || []) {
           p.DirectoryId = directory.DirectoryId;
@@ -427,12 +402,9 @@ export class ObservatoryService {
         }
 
         allData = [...allData, ...pages];
-      } else {
-        console.log(`Directory ${directory.DirectoryId}: No pages found`);
       }
     }
     
-    console.log(`Legacy chunk processing complete: ${allData.length} total records`);
     return allData;
   }
 
