@@ -31,5 +31,8 @@ CREATE INDEX idx_websitepage_page ON WebsitePage (PageId);
 -- Used in main directory query: WHERE Show_in_Observatory = 1  
 CREATE INDEX idx_directory_observatory ON Directory (Show_in_Observatory, DirectoryId);
 
+-- 8. Optimize Delete
+CREATE INDEX idx_observatory_type ON Observatory (Type);
+
 -- Verification queries to check index usage:
 -- EXPLAIN SELECT ... (add before actual queries to verify index usage)
