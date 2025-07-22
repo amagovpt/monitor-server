@@ -114,6 +114,42 @@ Chunked data generation completed successfully
 - **Indexes**: `performance-indexes.sql` (applied)
 - **Summary**: `OPTIMIZATION_SUMMARY.md` (this file)
 
-## ✅ **Final Status: Mission Accomplished**
+## ⚠️ **Update: SIGABRT Memory Issue Fix (2025-07-22)**
 
-The Observatory data generation now successfully completes in production environments, processing over 200K records efficiently through chunked processing and optimized database queries. The system is production-ready with comprehensive configuration options for different deployment scenarios.
+### **Issue Identified:**
+- SIGABRT crashes occurring during optimized query processing of large datasets (172K+ records)
+- Memory exhaustion when processing large chunks with optimized single-query approach
+
+### **Root Cause:**
+The optimized query was loading entire large result sets (172K+ records) into memory simultaneously, causing Node.js to exceed available memory and crash with SIGABRT.
+
+### **Solution Implemented:**
+1. **Reduced Default Chunk Size**: Changed from 20 to 10 directories per chunk
+2. **Chunk Size Limits**: Force legacy processing for chunks > 10 directories
+3. **Memory Monitoring**: Added real-time memory usage tracking with warnings at 90% limit
+4. **Memory Limits**: Process aborts gracefully if memory exceeds configured limit
+5. **Graceful Shutdown**: Added SIGTERM/SIGINT handlers for clean shutdowns
+6. **Node.js Flags**: Added `--max-old-space-size=2048 --expose-gc` to PM2 config
+
+### **Configuration Changes:**
+```bash
+# Updated defaults for memory safety
+OBSERVATORY_CHUNK_SIZE=10           # Reduced from 20
+ENABLE_OBSERVATORY_GC=true          # Force GC between chunks  
+OBSERVATORY_MAX_MEMORY_MB=1024      # Hard memory limit
+```
+
+### **Prevention Strategy:**
+- Small chunks (≤10 directories) use optimized queries when safe
+- Large chunks automatically fall back to proven legacy approach
+- Memory monitoring prevents crashes with early warnings and limits
+- PM2 configuration includes memory management flags
+
+## ✅ **Final Status: Production Ready with Memory Safety**
+
+The Observatory system now handles both small and large datasets safely:
+- **Small datasets**: Uses optimized queries for maximum performance
+- **Large datasets**: Uses chunked legacy processing to prevent memory issues
+- **All datasets**: Include memory monitoring and graceful error handling
+
+This hybrid approach ensures reliability across all deployment scenarios while maintaining the performance benefits where possible.

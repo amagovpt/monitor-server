@@ -21,6 +21,8 @@ interface ObservatoryConfig {
 @Injectable()
 export class ObservatoryService {
   private config: ObservatoryConfig;
+  private isProcessing = false;
+  private shouldAbort = false;
   elemGroups = {
     a: "link",
     all: "other",
@@ -55,6 +57,36 @@ export class ObservatoryService {
     private readonly observatoryRepository: Repository<Observatory>
   ) {
     this.config = this.loadConfig();
+    this.setupGracefulShutdown();
+  }
+
+  /**
+   * Setup graceful shutdown handlers for memory pressure scenarios
+   */
+  private setupGracefulShutdown(): void {
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, initiating graceful shutdown...');
+      this.shouldAbort = true;
+    });
+
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, initiating graceful shutdown...');
+      this.shouldAbort = true;
+    });
+
+    // Handle memory warnings if available
+    if (process.memoryUsage) {
+      const checkMemoryPeriodically = () => {
+        if (this.isProcessing) {
+          const memUsage = process.memoryUsage();
+          const memUsageMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+          if (memUsageMB > this.config.maxMemoryUsageMB * 0.9) {
+            console.warn(`High memory usage detected: ${memUsageMB}MB (${Math.round(memUsageMB/this.config.maxMemoryUsageMB*100)}% of limit)`);
+          }
+        }
+      };
+      setInterval(checkMemoryPeriodically, 30000); // Check every 30 seconds
+    }
   }
 
   /**
@@ -62,7 +94,7 @@ export class ObservatoryService {
    */
   private loadConfig(): ObservatoryConfig {
     return {
-      chunkSize: parseInt(process.env.OBSERVATORY_CHUNK_SIZE || '20'),
+      chunkSize: parseInt(process.env.OBSERVATORY_CHUNK_SIZE || '10'),
       enableIncremental: process.env.ENABLE_INCREMENTAL_OBSERVATORY === 'true',
       enableGarbageCollection: process.env.ENABLE_OBSERVATORY_GC === 'true',
       maxMemoryUsageMB: parseInt(process.env.OBSERVATORY_MAX_MEMORY_MB || '1024')
@@ -104,6 +136,8 @@ export class ObservatoryService {
    */
   async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
     try {
+      this.isProcessing = true;
+      this.shouldAbort = false;
       console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
       
       // Get all directory IDs first
@@ -115,6 +149,11 @@ export class ObservatoryService {
       
       // Process directories in chunks
       for (let i = 0; i < directoryIds.length; i += chunkSize) {
+        // Check for abort signal
+        if (this.shouldAbort) {
+          console.log('Processing aborted due to shutdown signal');
+          throw new Error('Processing aborted due to shutdown signal');
+        }
         const chunk = directoryIds.slice(i, i + chunkSize);
         const chunkNumber = Math.floor(i / chunkSize) + 1;
         const totalChunks = Math.ceil(directoryIds.length / chunkSize);
@@ -130,10 +169,26 @@ export class ObservatoryService {
           
           console.log(`Chunk ${chunkNumber} complete: ${chunkDirectories.length} directories, ${chunkData.length} records`);
           
-          // Optional: Force garbage collection between chunks if enabled
-          if (this.config.enableGarbageCollection && (globalThis as any).gc) {
-            (globalThis as any).gc();
-            console.log(`Forced garbage collection after chunk ${chunkNumber}`);
+          // Monitor memory usage and force GC if needed
+          const memUsage = process.memoryUsage();
+          const memUsageMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+          console.log(`Memory usage after chunk ${chunkNumber}: ${memUsageMB}MB heap used`);
+          
+          // Force garbage collection if memory usage is high or if enabled
+          if ((memUsageMB > this.config.maxMemoryUsageMB * 0.8) || this.config.enableGarbageCollection) {
+            if ((globalThis as any).gc) {
+              (globalThis as any).gc();
+              const newMemUsage = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+              console.log(`Forced garbage collection after chunk ${chunkNumber}: ${memUsageMB}MB -> ${newMemUsage}MB`);
+            } else {
+              console.warn('Garbage collection requested but not available (run with --expose-gc)');
+            }
+          }
+          
+          // Emergency memory check
+          if (memUsageMB > this.config.maxMemoryUsageMB) {
+            console.error(`Memory usage (${memUsageMB}MB) exceeds limit (${this.config.maxMemoryUsageMB}MB)`);
+            throw new Error(`Memory limit exceeded: ${memUsageMB}MB > ${this.config.maxMemoryUsageMB}MB`);
           }
         } catch (chunkError) {
           console.error(`Error processing chunk ${chunkNumber}:`, chunkError);
@@ -167,6 +222,9 @@ export class ObservatoryService {
       console.error('Error in generateDataChunked:', error);
       console.error('Stack trace:', error.stack);
       throw error;
+    } finally {
+      this.isProcessing = false;
+      this.shouldAbort = false;
     }
   }
 
@@ -231,9 +289,16 @@ export class ObservatoryService {
   async getDataForDirectoryChunk(directoryIds: number[]): Promise<any[]> {
     if (directoryIds.length === 0) return [];
     
-    // Try optimized approach first, fallback to legacy if issues
+    // Force legacy approach for large chunks to prevent memory issues
+    const chunkSize = directoryIds.length;
+    if (chunkSize > 10) {
+      console.log(`Using legacy approach for large chunk (${chunkSize} directories) to prevent memory issues`);
+      return this.getDataForDirectoryChunkLegacy(directoryIds);
+    }
+    
+    // Try optimized approach for small chunks only
     try {
-      console.log('Using optimized query approach');
+      console.log('Using optimized query approach for small chunk');
       return await this.getDataForDirectoryChunkOptimized(directoryIds);
     } catch (error) {
       console.warn('Optimized query failed, falling back to legacy approach:', error.message);
