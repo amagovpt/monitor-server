@@ -3,6 +3,8 @@ public/stamps
 dist
 action-log
 error-log
+CLAUDE.md
+.claude/*
 
 idea
 qualweb-errors-*.log
