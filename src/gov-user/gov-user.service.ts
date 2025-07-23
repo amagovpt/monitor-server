@@ -33,8 +33,102 @@ export class GovUserService {
     return this.govUserRepository.save(govUser);
   }
 
-  findAll() {
-    return this.govUserRepository.find({ relations: ["entities"] });
+  findAll(
+    size?: number,
+    page?: number,
+    sort?: string,
+    direction?: string,
+    search?: string
+  ): Promise<any> {
+    // If no pagination parameters provided, return all gov users (existing behavior)
+    if (size === undefined) {
+      return this.govUserRepository.find({ relations: ["entities"] });
+    }
+
+    // Paginated version
+    const searchTerm = search?.trim() !== "" ? `%${search?.trim()}%` : "%";
+    
+    if (!direction?.trim()) {
+      // Without sorting
+      if (size !== -1) {
+        const govUsers = this.govUserRepository.query(
+          `SELECT 
+            g.id, g.name, g.ccNumber, g.registerDate, g.lastLogin,
+            COUNT(DISTINCT ugu.UserId) as Entities
+          FROM GovUser as g
+          LEFT OUTER JOIN UserGovUser as ugu ON ugu.GovUserId = g.id
+          WHERE g.name LIKE ? OR g.ccNumber LIKE ?
+          GROUP BY g.id
+          LIMIT ? OFFSET ?`,
+          [searchTerm, searchTerm, size, page * size]
+        );
+        return govUsers;
+      } else {
+        const govUsers = this.govUserRepository.query(
+          `SELECT 
+            g.id, g.name, g.ccNumber, g.registerDate, g.lastLogin,
+            COUNT(DISTINCT ugu.UserId) as Entities
+          FROM GovUser as g
+          LEFT OUTER JOIN UserGovUser as ugu ON ugu.GovUserId = g.id
+          WHERE g.name LIKE ? OR g.ccNumber LIKE ?
+          GROUP BY g.id`,
+          [searchTerm, searchTerm]
+        );
+        return govUsers;
+      }
+    } else {
+      // With sorting
+      let order = "";
+      switch (sort) {
+        case "name":
+          order = "g.name";
+          break;
+        case "ccNumber":
+          order = "g.ccNumber";
+          break;
+        case "registerDate":
+          order = "g.registerDate";
+          break;
+        case "lastLogin":
+          order = "g.lastLogin";
+          break;
+        case "Entities":
+          order = "Entities";
+          break;
+        default:
+          order = "g.name";
+          break;
+      }
+
+      if (size !== -1) {
+        const govUsers = this.govUserRepository.query(
+          `SELECT 
+            g.id, g.name, g.ccNumber, g.registerDate, g.lastLogin,
+            COUNT(DISTINCT ugu.UserId) as Entities
+          FROM GovUser as g
+          LEFT OUTER JOIN UserGovUser as ugu ON ugu.GovUserId = g.id
+          WHERE g.name LIKE ? OR g.ccNumber LIKE ?
+          GROUP BY g.id
+          ORDER BY ${order} ${direction.toUpperCase()}
+          LIMIT ? OFFSET ?`,
+          [searchTerm, searchTerm, size, page * size]
+        );
+        return govUsers;
+      } else {
+        const govUsers = this.govUserRepository.query(
+          `SELECT 
+            g.id, g.name, g.ccNumber, g.registerDate, g.lastLogin,
+            COUNT(DISTINCT ugu.UserId) as Entities
+          FROM GovUser as g
+          LEFT OUTER JOIN UserGovUser as ugu ON ugu.GovUserId = g.id
+          WHERE g.name LIKE ? OR g.ccNumber LIKE ?
+          GROUP BY g.id
+          ORDER BY ${order} ${direction.toUpperCase()}`,
+          [searchTerm, searchTerm]
+        );
+        return govUsers;
+      }
+    }
   }
 
   findOne(id: number) {
@@ -96,4 +190,5 @@ export class GovUserService {
     );
     return count[0].Count;
   }
+
 }

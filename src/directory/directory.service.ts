@@ -352,14 +352,116 @@ export class DirectoryService {
     return this.directoryRepository.findOne({ where: { Name: directoryName } });
   }
 
-  findAll(): Promise<any> {
-    return this.directoryRepository.query(`SELECT 
-        d.*,
-        COUNT(distinct dt.TagId) as Tags 
-      FROM 
-        Directory as d
-        LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
-      GROUP BY d.DirectoryId`);
+  findAll(
+    size?: number,
+    page?: number,
+    sort?: string,
+    direction?: string,
+    search?: string
+  ): Promise<any> {
+    // If no pagination parameters provided, return all directories (existing behavior)
+    if (size === undefined) {
+      return this.directoryRepository.query(`SELECT 
+          d.*,
+          COUNT(distinct dt.TagId) as Tags 
+        FROM 
+          Directory as d
+          LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+        GROUP BY d.DirectoryId`);
+    }
+
+    // Paginated version
+    const searchTerm = search?.trim() !== "" ? `%${search?.trim()}%` : "%";
+    
+    if (!direction?.trim()) {
+      // Without sorting
+      if (size !== -1) {
+        const directories = this.directoryRepository.query(
+          `SELECT 
+            d.*,
+            COUNT(distinct dt.TagId) as Tags
+          FROM 
+            Directory as d
+            LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+          WHERE
+            d.Name LIKE ?
+          GROUP BY d.DirectoryId
+          LIMIT ? OFFSET ?`,
+          [searchTerm, size, page * size]
+        );
+        return directories;
+      } else {
+        const directories = this.directoryRepository.query(
+          `SELECT 
+            d.*,
+            COUNT(distinct dt.TagId) as Tags
+          FROM 
+            Directory as d
+            LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+          WHERE
+            d.Name LIKE ?
+          GROUP BY d.DirectoryId`,
+          [searchTerm]
+        );
+        return directories;
+      }
+    } else {
+      // With sorting
+      let order = "";
+      switch (sort) {
+        case "Name":
+          order = "d.Name";
+          break;
+        case "Creation_Date":
+          order = "d.Creation_Date";
+          break;
+        case "Show_in_Observatory":
+          order = "d.Show_in_Observatory";
+          break;
+        case "Method":
+          order = "d.Method";
+          break;
+        case "Tags":
+          order = "Tags";
+          break;
+        default:
+          order = "d.Name";
+          break;
+      }
+
+      if (size !== -1) {
+        const directories = this.directoryRepository.query(
+          `SELECT 
+            d.*,
+            COUNT(distinct dt.TagId) as Tags
+          FROM 
+            Directory as d
+            LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+          WHERE
+            d.Name LIKE ?
+          GROUP BY d.DirectoryId
+          ORDER BY ${order} ${direction.toUpperCase()}
+          LIMIT ? OFFSET ?`,
+          [searchTerm, size, page * size]
+        );
+        return directories;
+      } else {
+        const directories = this.directoryRepository.query(
+          `SELECT 
+            d.*,
+            COUNT(distinct dt.TagId) as Tags
+          FROM 
+            Directory as d
+            LEFT OUTER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+          WHERE
+            d.Name LIKE ?
+          GROUP BY d.DirectoryId
+          ORDER BY ${order} ${direction.toUpperCase()}`,
+          [searchTerm]
+        );
+        return directories;
+      }
+    }
   }
 
   async findNumberOfObservatory(): Promise<number> {

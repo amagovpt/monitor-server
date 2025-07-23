@@ -294,4 +294,30 @@ export class DirectoryController {
       await this.directoryService.adminCount(decodeURIComponent(search.substring(7)))
     );
   }
+
+  @ApiOperation({ summary: "Find all directories with pagination and search" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Array,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/:size/:page/:sort/:direction/:search")
+  async getAllDirectoriesPaginated(
+    @Param("size") size: string,
+    @Param("page") page: string,
+    @Param("sort") sort: string,
+    @Param("direction") direction: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    return success(
+      await this.directoryService.findAll(
+        parseInt(size),
+        parseInt(page),
+        sort.substring(5),
+        direction.substring(10),
+        decodeURIComponent(search.substring(7))
+      )
+    );
+  }
 }

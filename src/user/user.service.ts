@@ -292,16 +292,120 @@ export class UserService {
     return !hasError;
   }
 
-  async findAll(): Promise<User[]> {
-    const users = await this.userRepository.query(`
-      SELECT 
-        u.UserId, u.Username, u.Type, u.Register_Date, u.Last_Login, 
-        COUNT(distinct w.WebsiteId) as Websites
-      FROM User as u
-      LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
-      GROUP BY u.UserId`);
+  async findAll(
+    size?: number,
+    page?: number,
+    sort?: string,
+    direction?: string,
+    search?: string
+  ): Promise<User[]> {
+    // If no pagination parameters provided, return all users (existing behavior)
+    if (size === undefined) {
+      const users = await this.userRepository.query(`
+        SELECT 
+          u.UserId, u.Username, u.Type, u.Register_Date, u.Last_Login, 
+          COUNT(distinct w.WebsiteId) as Websites
+        FROM User as u
+        LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+        GROUP BY u.UserId`);
 
-    return users;
+      return users;
+    }
+
+    // Paginated version
+    const searchTerm = search?.trim() !== "" ? `%${search?.trim()}%` : "%";
+    
+    if (!direction?.trim()) {
+      // Without sorting
+      if (size !== -1) {
+        const users = await this.userRepository.query(
+          `SELECT 
+            u.UserId, u.Username, u.Names, u.Emails, u.Type, u.Register_Date, u.Last_Login,
+            COUNT(distinct w.WebsiteId) as Websites
+          FROM User as u
+          LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+          WHERE
+            u.Type != "admin" AND (u.Username LIKE ? OR u.Names LIKE ? OR u.Emails LIKE ?)
+          GROUP BY u.UserId
+          LIMIT ? OFFSET ?`,
+          [searchTerm, searchTerm, searchTerm, size, page * size]
+        );
+        return users;
+      } else {
+        const users = await this.userRepository.query(
+          `SELECT 
+            u.UserId, u.Username, u.Names, u.Emails, u.Type, u.Register_Date, u.Last_Login,
+            COUNT(distinct w.WebsiteId) as Websites
+          FROM User as u
+          LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+          WHERE
+            u.Type != "admin" AND (u.Username LIKE ? OR u.Names LIKE ? OR u.Emails LIKE ?)
+          GROUP BY u.UserId`,
+          [searchTerm, searchTerm, searchTerm]
+        );
+        return users;
+      }
+    } else {
+      // With sorting
+      let order = "";
+      switch (sort) {
+        case "Username":
+          order = "u.Username";
+          break;
+        case "Names":
+          order = "u.Names";
+          break;
+        case "Emails":
+          order = "u.Emails";
+          break;
+        case "Type":
+          order = "u.Type";
+          break;
+        case "Register_Date":
+          order = "u.Register_Date";
+          break;
+        case "Last_Login":
+          order = "u.Last_Login";
+          break;
+        case "Websites":
+          order = "Websites";
+          break;
+        default:
+          order = "u.Username";
+          break;
+      }
+
+      if (size !== -1) {
+        const users = await this.userRepository.query(
+          `SELECT 
+            u.UserId, u.Username, u.Names, u.Emails, u.Type, u.Register_Date, u.Last_Login,
+            COUNT(distinct w.WebsiteId) as Websites
+          FROM User as u
+          LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+          WHERE
+            u.Type != "admin" AND (u.Username LIKE ? OR u.Names LIKE ? OR u.Emails LIKE ?)
+          GROUP BY u.UserId
+          ORDER BY ${order} ${direction.toUpperCase()}
+          LIMIT ? OFFSET ?`,
+          [searchTerm, searchTerm, searchTerm, size, page * size]
+        );
+        return users;
+      } else {
+        const users = await this.userRepository.query(
+          `SELECT 
+            u.UserId, u.Username, u.Names, u.Emails, u.Type, u.Register_Date, u.Last_Login,
+            COUNT(distinct w.WebsiteId) as Websites
+          FROM User as u
+          LEFT OUTER JOIN Website as w ON w.UserId = u.UserId
+          WHERE
+            u.Type != "admin" AND (u.Username LIKE ? OR u.Names LIKE ? OR u.Emails LIKE ?)
+          GROUP BY u.UserId
+          ORDER BY ${order} ${direction.toUpperCase()}`,
+          [searchTerm, searchTerm, searchTerm]
+        );
+        return users;
+      }
+    }
   }
 
   async findAllFromMyMonitor(): Promise<User[]> {
