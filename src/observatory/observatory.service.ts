@@ -8,6 +8,7 @@ import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
 import _tests from "src/evaluation/tests";
 import { Observatory } from "./observatory.entity";
+import { ObservatorySyncStatus, SyncStatus, SyncType } from "./observatory-sync-status.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";
 
@@ -52,7 +53,9 @@ export class ObservatoryService {
 
   constructor(
     @InjectRepository(Observatory)
-    private readonly observatoryRepository: Repository<Observatory>
+    private readonly observatoryRepository: Repository<Observatory>,
+    @InjectRepository(ObservatorySyncStatus)
+    private readonly syncStatusRepository: Repository<ObservatorySyncStatus>
   ) {
     this.config = this.loadConfig();
   }
@@ -88,6 +91,13 @@ export class ObservatoryService {
       parseInt(process.env.AMSID) === 0 ||
       manual
     ) {
+      // Check if sync is already running
+      const isRunning = await this.isSyncRunning();
+      if (isRunning) {
+        console.log('Data generation already in progress, skipping...');
+        return { message: 'Sync already in progress' };
+      }
+
       // Use configured processing mode (Phase 2)
       console.log('Observatory config:', this.config);
       
@@ -103,12 +113,23 @@ export class ObservatoryService {
    * Phase 2: Chunked processing to handle large datasets without memory issues
    */
   async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
+    let syncStatus: ObservatorySyncStatus | null = null;
+    
     try {
       console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
       
       // Get all directory IDs first
       const directoryIds = await this.getDirectoryIds();
       console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
+      
+      const totalChunks = Math.ceil(directoryIds.length / chunkSize);
+      
+      // Initialize sync status
+      syncStatus = await this.initializeSyncStatus(
+        manual ? SyncType.MANUAL : SyncType.AUTO,
+        totalChunks,
+        directoryIds.length
+      );
       
       let allDirectories = new Array<Directory>();
       let allData = new Array<any>();
@@ -117,7 +138,6 @@ export class ObservatoryService {
       for (let i = 0; i < directoryIds.length; i += chunkSize) {
         const chunk = directoryIds.slice(i, i + chunkSize);
         const chunkNumber = Math.floor(i / chunkSize) + 1;
-        const totalChunks = Math.ceil(directoryIds.length / chunkSize);
         
         console.log(`Processing chunk ${chunkNumber}/${totalChunks}`);
         
@@ -128,6 +148,9 @@ export class ObservatoryService {
           allDirectories = [...allDirectories, ...chunkDirectories];
           allData = [...allData, ...chunkData];
           
+          // Update progress
+          await this.updateSyncProgress(syncStatus.id, chunkNumber, i + chunk.length);
+          
           console.log(`Chunk ${chunkNumber} complete: ${chunkDirectories.length} directories, ${chunkData.length} records`);
           
           // Optional: Force garbage collection between chunks if enabled
@@ -137,6 +160,7 @@ export class ObservatoryService {
           }
         } catch (chunkError) {
           console.error(`Error processing chunk ${chunkNumber}:`, chunkError);
+          await this.markSyncFailed(syncStatus.id, chunkError.message);
           throw chunkError;
         }
       }
@@ -161,11 +185,19 @@ export class ObservatoryService {
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
       
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
       console.log("Chunked data generation completed successfully");
       return global;
     } catch (error) {
       console.error('Error in generateDataChunked:', error);
       console.error('Stack trace:', error.stack);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
       throw error;
     }
   }
@@ -190,29 +222,60 @@ export class ObservatoryService {
     
     if (changedDirectoryIds.length === 0) {
       console.log("No changes detected, skipping generation");
-      return;
+      
+      // Create a quick sync status record for "no changes"
+      const syncStatus = await this.initializeSyncStatus(SyncType.AUTO, 0, 0);
+      await this.markSyncCompleted(syncStatus.id);
+      
+      return { message: 'No changes detected, skipping generation' };
     }
     
-    // Get unchanged data from cache or previous result
-    const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+    let syncStatus: ObservatorySyncStatus | null = null;
     
-    // Process only changed directories
-    const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
-    const changedDirectories = this.processDirectoryChunk(changedData);
-    
-    // Merge results
-    const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
-    const mergedData = [...unchangedData.data, ...changedData];
-    
-    const listDirectories = new ListDirectories(mergedData, mergedDirectories);
-    const global = await this.buildGlobalStatistics(listDirectories);
+    try {
+      // Initialize sync status for incremental processing
+      syncStatus = await this.initializeSyncStatus(
+        SyncType.AUTO, 
+        1, // Only one "chunk" for incremental
+        changedDirectoryIds.length
+      );
+      
+      // Get unchanged data from cache or previous result
+      const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+      
+      // Process only changed directories
+      const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
+      const changedDirectories = this.processDirectoryChunk(changedData);
+      
+      // Update progress
+      await this.updateSyncProgress(syncStatus.id, 1, changedDirectoryIds.length);
+      
+      // Merge results
+      const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
+      const mergedData = [...unchangedData.data, ...changedData];
+      
+      const listDirectories = new ListDirectories(mergedData, mergedDirectories);
+      const global = await this.buildGlobalStatistics(listDirectories);
 
-    await this.observatoryRepository.query(
-      "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
-      [JSON.stringify(global), "auto", new Date()]
-    );
-    
-    console.log("Incremental data generation completed");
+      await this.observatoryRepository.query(
+        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), "auto", new Date()]
+      );
+      
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
+      console.log("Incremental data generation completed");
+      return global;
+    } catch (error) {
+      console.error('Error in generateDataIncremental:', error);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -1590,5 +1653,131 @@ export class ObservatoryService {
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
     return calculateQuartiles(data);
+  }
+
+  /**
+   * Sync Status Management Methods
+   */
+
+  async isSyncRunning(): Promise<boolean> {
+    const activeSyncs = await this.syncStatusRepository.find({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' },
+      take: 1
+    });
+
+    if (activeSyncs.length === 0) return false;
+
+    const activeSync = activeSyncs[0];
+    
+    // Check if sync is stale (running for more than 1 hour)
+    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
+    if (activeSync.startTime < oneHourAgo) {
+      // Mark stale sync as interrupted and allow new sync
+      await this.markSyncInterrupted(activeSync.id);
+      return false;
+    }
+
+    return true;
+  }
+
+  async getSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const latestSync = await this.syncStatusRepository.findOne({
+      order: { createdAt: 'DESC' }
+    });
+    
+    return latestSync;
+  }
+
+  async getCurrentRunningSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const runningSync = await this.syncStatusRepository.findOne({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' }
+    });
+    
+    return runningSync;
+  }
+
+  private async initializeSyncStatus(
+    type: SyncType, 
+    totalChunks: number, 
+    totalDirectories: number
+  ): Promise<ObservatorySyncStatus> {
+    const processId = process.pid.toString();
+    const namespace = process.env.NAMESPACE;
+    const amsid = process.env.AMSID ? parseInt(process.env.AMSID) : null;
+
+    const syncStatus = this.syncStatusRepository.create({
+      status: SyncStatus.RUNNING,
+      type,
+      startTime: new Date(),
+      totalChunks,
+      processedChunks: 0,
+      totalDirectories,
+      processedDirectories: 0,
+      processId,
+      namespace,
+      amsid
+    });
+
+    return await this.syncStatusRepository.save(syncStatus);
+  }
+
+  private async updateSyncProgress(
+    syncId: number, 
+    processedChunks: number, 
+    processedDirectories: number
+  ): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      processedChunks,
+      processedDirectories,
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncCompleted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.COMPLETED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncFailed(syncId: number, errorMessage: string): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.FAILED,
+      endTime: new Date(),
+      errorMessage: errorMessage.substring(0, 1000), // Limit error message length
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncInterrupted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.INTERRUPTED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  /**
+   * Clean up old sync status records (keep only last 50)
+   */
+  @Cron('0 2 * * *') // Run at 2 AM daily
+  async cleanupOldSyncStatuses(): Promise<void> {
+    try {
+      const allStatuses = await this.syncStatusRepository.find({
+        select: ['id'],
+        order: { createdAt: 'DESC' }
+      });
+
+      if (allStatuses.length > 50) {
+        const idsToDelete = allStatuses.slice(50).map(s => s.id);
+        await this.syncStatusRepository.delete(idsToDelete);
+        console.log(`Cleaned up ${idsToDelete.length} old sync status records`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up old sync statuses:', error);
+    }
   }
 }
