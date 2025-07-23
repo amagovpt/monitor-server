@@ -147,6 +147,20 @@ export class TagService {
     return this.tagRepository.find({ where: { UserId: IsNull() } });
   }
 
+  async adminCount(search: string): Promise<any> {
+    const count = await this.tagRepository.query(
+      `SELECT COUNT(t.TagId) as Count
+      FROM Tag as t
+      WHERE t.UserId IS NULL AND t.Name LIKE ?`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+    return count[0].Count;
+  }
+
+  async count(): Promise<number> {
+    return this.tagRepository.count();
+  }
+
   async findNumberOfStudyMonitor(): Promise<number> {
     return (
       await this.tagRepository.query(

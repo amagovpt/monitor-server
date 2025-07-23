@@ -280,4 +280,18 @@ export class DirectoryController {
       await this.directoryService.findAllDirectoryWebsitePages(directory)
     );
   }
+
+  @ApiOperation({ summary: "Count directories by search term" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/count/:search")
+  async getAdminDirectoryCount(@Param("search") search: string): Promise<any> {
+    return success(
+      await this.directoryService.adminCount(decodeURIComponent(search.substring(7)))
+    );
+  }
 }

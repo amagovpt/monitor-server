@@ -72,6 +72,18 @@ export class PageController {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
+  @ApiOperation({ summary: "Find number of pages in MyMonitor" })
+  @ApiResponse({
+    status: 200,
+    description: "The number of pages in MyMonitor",
+    type: Number,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("myMonitor/total")
+  async getNumberOfMyMonitorPages(): Promise<any> {
+    return success(await this.pageService.findNumberOfMyMonitor());
+  }
+
   @ApiOperation({ summary: "Reevaluate multiple pages by url" })
   @ApiResponse({
     status: 200,

@@ -77,4 +77,23 @@ export class GovUserService {
   remove(id: number) {
     return this.govUserRepository.delete(id);
   }
+
+  async findTotal(): Promise<number> {
+    return this.govUserRepository.count();
+  }
+
+  async adminCount(search: string): Promise<any> {
+    const count = await this.govUserRepository.query(
+      `SELECT COUNT(g.id) as Count
+      FROM GovUser as g
+      WHERE g.ccNumber LIKE ? OR g.firstName LIKE ? OR g.lastName LIKE ? OR g.email LIKE ?`,
+      [
+        search.trim() !== "" ? `%${search.trim()}%` : "%",
+        search.trim() !== "" ? `%${search.trim()}%` : "%",
+        search.trim() !== "" ? `%${search.trim()}%` : "%",
+        search.trim() !== "" ? `%${search.trim()}%` : "%"
+      ]
+    );
+    return count[0].Count;
+  }
 }

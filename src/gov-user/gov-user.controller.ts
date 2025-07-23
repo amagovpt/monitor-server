@@ -95,4 +95,28 @@ export class GovUserController {
   async remove(@Body() updateGovUserDto: UpdateGovUserDto) {
     return success(await this.govUserService.remove(updateGovUserDto.id));
   }
+
+  @ApiOperation({ summary: "Find total number of GovUsers" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @Get("total")
+  async getGovUserTotal(): Promise<any> {
+    return success(await this.govUserService.findTotal());
+  }
+
+  @ApiOperation({ summary: "Count GovUsers by search term" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @Get("all/count/:search")
+  async getAdminGovUserCount(@Param("search") search: string): Promise<any> {
+    return success(
+      await this.govUserService.adminCount(decodeURIComponent(search.substring(7)))
+    );
+  }
 }

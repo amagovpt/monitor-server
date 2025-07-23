@@ -453,4 +453,18 @@ export class TagController {
       )
     );
   }
+
+  @ApiOperation({ summary: "Count tags by search term" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("all/count/:search")
+  async getAdminTagCount(@Param("search") search: string): Promise<any> {
+    return success(
+      await this.tagService.adminCount(decodeURIComponent(search.substring(7)))
+    );
+  }
 }

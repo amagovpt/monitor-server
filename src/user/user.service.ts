@@ -349,6 +349,24 @@ export class UserService {
     return this.userRepository.count({ where: { Type: "monitor" } });
   }
 
+  async adminCount(search: string): Promise<any> {
+    const count = await this.userRepository.query(
+      `SELECT COUNT(u.UserId) as Count
+      FROM User as u
+      WHERE u.Type != "admin" AND (u.Username LIKE ? OR u.Names LIKE ? OR u.Emails LIKE ?)`,
+      [
+        search.trim() !== "" ? `%${search.trim()}%` : "%",
+        search.trim() !== "" ? `%${search.trim()}%` : "%",
+        search.trim() !== "" ? `%${search.trim()}%` : "%"
+      ]
+    );
+    return count[0].Count;
+  }
+
+  findNumberOfAMS(): Promise<number> {
+    return this.userRepository.count({ where: { Type: "admin" } });
+  }
+
   async findStudyMonitorUserTagByName(
     userId: number,
     name: string

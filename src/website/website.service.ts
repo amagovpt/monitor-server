@@ -167,6 +167,10 @@ export class WebsiteService {
     return count[0].Count;
   }
 
+  async count(): Promise<number> {
+    return this.websiteRepository.count();
+  }
+
   async getIdFromUserAndName(user: string, name: string): Promise<number> {
     const website = await this.websiteRepository.query(
       `

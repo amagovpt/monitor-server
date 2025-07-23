@@ -368,6 +368,20 @@ export class DirectoryService {
     });
   }
 
+  async adminCount(search: string): Promise<any> {
+    const count = await this.directoryRepository.query(
+      `SELECT COUNT(d.DirectoryId) as Count
+      FROM Directory as d
+      WHERE d.Name LIKE ?`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+    return count[0].Count;
+  }
+
+  async count(): Promise<number> {
+    return this.directoryRepository.count();
+  }
+
   async findInfo(directoryId: number): Promise<any> {
     const directories = await this.directoryRepository.query(
       `SELECT * FROM Directory WHERE DirectoryId = ? LIMIT 1`,
