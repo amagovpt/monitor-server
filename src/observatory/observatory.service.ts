@@ -122,7 +122,16 @@ export class ObservatoryService {
       const directoryIds = await this.getDirectoryIds();
       console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
       
-      const totalChunks = Math.ceil(directoryIds.length / chunkSize);
+      // Process directories in chunks with retry logic
+      const chunks = [];
+      for (let i = 0; i < directoryIds.length; i += chunkSize) {
+        chunks.push({
+          directories: directoryIds.slice(i, i + chunkSize),
+          chunkNumber: Math.floor(i / chunkSize) + 1
+        });
+      }
+      
+      const totalChunks = chunks.length;
       
       // Initialize sync status
       syncStatus = await this.initializeSyncStatus(
@@ -134,17 +143,6 @@ export class ObservatoryService {
       let allDirectories = new Array<Directory>();
       let allData = new Array<any>();
       const failedChunks = new Array<{chunk: number[], chunkNumber: number, error: string}>();
-      
-      // Process directories in chunks with retry logic
-      const chunks = [];
-      for (let i = 0; i < directoryIds.length; i += chunkSize) {
-        chunks.push({
-          directories: directoryIds.slice(i, i + chunkSize),
-          chunkNumber: Math.floor(i / chunkSize) + 1
-        });
-      }
-      
-      const totalChunks = chunks.length;
       console.log(`Created ${totalChunks} chunks for processing`);
       
       // Process each chunk with retry mechanism
