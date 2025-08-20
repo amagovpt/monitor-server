@@ -252,6 +252,18 @@ export class ObservatoryService {
           throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
         }
         
+        // STACK OVERFLOW PROTECTION: Test small operations first
+        console.log(`Testing stack safety before adding ${chunkDirectories.length} directories to results...`);
+        
+        // Test if we can safely add these directories
+        const testArray = [...allDirectories];
+        try {
+          testArray.push(...chunkDirectories.slice(0, Math.min(5, chunkDirectories.length)));
+          console.log(`Stack test passed, proceeding with full addition`);
+        } catch (testError) {
+          throw new Error(`Stack overflow detected during directory addition: ${testError.message}`);
+        }
+        
         // SUCCESS - Only add results to main arrays once per chunk, after complete success
         allDirectories.push(...chunkDirectories);
         allData.push(...chunkData);
@@ -291,7 +303,7 @@ export class ObservatoryService {
   }
 
   /**
-   * Validate that all chunks were processed successfully
+   * Validate that all chunks were processed successfully (fixed validation logic)
    */
   private async validateChunkProcessing(
     originalDirectoryIds: number[],
@@ -299,13 +311,19 @@ export class ObservatoryService {
     failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>
   ): Promise<void> {
     
-    const processedDirectoryIds = processedDirectories.map(d => d.id);
+    // Get unique directory IDs from processed directories (prevent counting duplicates)
+    const processedDirectoryIds = [...new Set(processedDirectories.map(d => d.id))];
     const expectedCount = originalDirectoryIds.length;
-    const actualCount = processedDirectories.length;
+    const actualCount = processedDirectoryIds.length;
+    const duplicateCount = processedDirectories.length - actualCount;
     
     console.log(`📊 Processing validation:`);
     console.log(`   Expected directories: ${expectedCount}`);
-    console.log(`   Processed directories: ${actualCount}`);
+    console.log(`   Unique processed directories: ${actualCount}`);
+    if (duplicateCount > 0) {
+      console.warn(`   ⚠️  Duplicate directory objects detected: ${duplicateCount}`);
+      console.warn(`   Total directory objects: ${processedDirectories.length}`);
+    }
     console.log(`   Failed chunks: ${failedChunks.length}`);
     
     if (failedChunks.length > 0) {
@@ -315,13 +333,23 @@ export class ObservatoryService {
       });
     }
     
-    // Find missing directories
+    // Find missing directories (based on failed chunks)
+    const failedDirectoryIds = new Set<number>();
+    failedChunks.forEach(({chunk}) => {
+      chunk.forEach(id => failedDirectoryIds.add(id));
+    });
+    
     const missingDirectories = originalDirectoryIds.filter(id => !processedDirectoryIds.includes(id));
+    const unexpectedMissing = missingDirectories.filter(id => !failedDirectoryIds.has(id));
+    
     if (missingDirectories.length > 0) {
       console.error(`🚨 Missing directories: [${missingDirectories.join(', ')}]`);
+      if (unexpectedMissing.length > 0) {
+        console.error(`🚨 Unexpectedly missing (not in failed chunks): [${unexpectedMissing.join(', ')}]`);
+      }
     }
     
-    // Calculate success rate
+    // Calculate success rate based on unique directories
     const successRate = (actualCount / expectedCount) * 100;
     console.log(`📈 Success rate: ${successRate.toFixed(1)}% (${actualCount}/${expectedCount})`);
     
@@ -765,16 +793,27 @@ export class ObservatoryService {
    */
   private processDirectoryChunkOptimized(chunkData: any[]): Directory[] {
     const directories = new Array<Directory>();
-    const tmpDirectories = this.createTemporaryDirectories(chunkData);
     
-    console.log(`Found ${tmpDirectories.length} unique directories to process`);
+    // Get unique directory IDs first to prevent duplicates
+    const uniqueDirectoryIds = [...new Set(chunkData.map(item => item.DirectoryId))];
+    console.log(`Found ${uniqueDirectoryIds.length} unique directories in ${chunkData.length} records`);
 
-    for (const directory of tmpDirectories || []) {
-      // CRITICAL: Don't clone the entire 171K dataset - just filter relevant data
-      const relevantData = chunkData.filter(item => item.DirectoryId === directory.id);
-      console.log(`Directory ${directory.id} (${directory.name}): ${relevantData.length} records`);
+    for (const directoryId of uniqueDirectoryIds) {
+      // Get directory metadata from first matching record
+      const directoryRecord = chunkData.find(item => item.DirectoryId === directoryId);
+      if (!directoryRecord) continue;
       
-      const newDirectory = this.createDirectory(directory, relevantData);
+      const directoryInfo = {
+        id: directoryRecord.DirectoryId,
+        name: directoryRecord.Directory_Name,
+        creation_date: directoryRecord.Directory_Creation_Date,
+      };
+      
+      // Get all relevant data for this specific directory
+      const relevantData = chunkData.filter(item => item.DirectoryId === directoryId);
+      console.log(`Directory ${directoryId} (${directoryInfo.name}): ${relevantData.length} records`);
+      
+      const newDirectory = this.createDirectory(directoryInfo, relevantData);
       directories.push(newDirectory);
       
       // Force cleanup of large arrays to prevent memory accumulation
@@ -783,7 +822,7 @@ export class ObservatoryService {
       }
     }
 
-    console.log(`Created ${directories.length} directory objects`);
+    console.log(`Created ${directories.length} directory objects (should match ${uniqueDirectoryIds.length} unique directories)`);
     return directories;
   }
 
