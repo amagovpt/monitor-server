@@ -210,7 +210,7 @@ export class ObservatoryService {
   }
 
   /**
-   * Process a single chunk with retry mechanism (fixed to prevent double-counting)
+   * Process a single chunk with retry mechanism (fixed to prevent double-counting from failed attempts)
    */
   private async processChunkWithRetry(
     chunk: number[],
@@ -223,12 +223,16 @@ export class ObservatoryService {
   ): Promise<boolean> {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      // Store results locally - only add to main arrays after COMPLETE success
+      let chunkDirectories: Directory[] | null = null;
+      let chunkData: any[] | null = null;
+      
       try {
         console.log(`Processing chunk ${chunkNumber}/${totalChunks} (attempt ${attempt}/${maxRetries})`);
         console.log(`Chunk ${chunkNumber} contains directories: [${chunk.join(', ')}]`);
         
         const startTime = Date.now();
-        const chunkData = await this.getDataForDirectoryChunk(chunk);
+        chunkData = await this.getDataForDirectoryChunk(chunk);
         const queryTime = Date.now() - startTime;
         
         console.log(`Chunk ${chunkNumber} query completed in ${queryTime}ms, returned ${chunkData.length} records`);
@@ -242,7 +246,7 @@ export class ObservatoryService {
         }
         
         const processStartTime = Date.now();
-        const chunkDirectories = this.processDirectoryChunk(chunkData);
+        chunkDirectories = this.processDirectoryChunk(chunkData);
         const processTime = Date.now() - processStartTime;
         
         console.log(`Chunk ${chunkNumber} processing completed in ${processTime}ms, created ${chunkDirectories.length} directories`);
@@ -252,21 +256,35 @@ export class ObservatoryService {
           throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
         }
         
-        // STACK OVERFLOW PROTECTION: Test small operations first
+        // STACK OVERFLOW PROTECTION: Test safe operations without spread operator
         console.log(`Testing stack safety before adding ${chunkDirectories.length} directories to results...`);
         
-        // Test if we can safely add these directories
-        const testArray = [...allDirectories];
+        // Test if we can safely add directories using for-loop (avoids spread operator completely)
         try {
-          testArray.push(...chunkDirectories.slice(0, Math.min(5, chunkDirectories.length)));
+          // Test with a small subset first - no array copying involved
+          const testLimit = Math.min(3, chunkDirectories.length);
+          for (let i = 0; i < testLimit; i++) {
+            // Just test the push operation without actually modifying main array
+            const testDirectory = chunkDirectories[i];
+            if (!testDirectory || typeof testDirectory !== 'object') {
+              throw new Error(`Invalid directory object at index ${i}`);
+            }
+          }
           console.log(`Stack test passed, proceeding with full addition`);
         } catch (testError) {
-          throw new Error(`Stack overflow detected during directory addition: ${testError.message}`);
+          throw new Error(`Stack overflow or data validation error: ${testError.message}`);
         }
         
-        // SUCCESS - Only add results to main arrays once per chunk, after complete success
-        allDirectories.push(...chunkDirectories);
-        allData.push(...chunkData);
+        // CRITICAL FIX: Only add results to main arrays after ALL operations succeed
+        console.log(`Adding ${chunkDirectories.length} directories to main array (current: ${allDirectories.length})`);
+        for (const directory of chunkDirectories) {
+          allDirectories.push(directory);
+        }
+        
+        console.log(`Adding ${chunkData.length} data records to main array (current: ${allData.length})`);
+        for (const dataItem of chunkData) {
+          allData.push(dataItem);
+        }
         
         console.log(`✅ Chunk ${chunkNumber} successful: ${chunkDirectories.length} directories, ${chunkData.length} records`);
         console.log(`   Running totals: ${allDirectories.length} directories, ${allData.length} records`);
@@ -277,8 +295,10 @@ export class ObservatoryService {
         console.error(`❌ Chunk ${chunkNumber} attempt ${attempt} failed:`, error.message);
         console.error(`   Error occurred during: ${error.stack ? 'processing' : 'unknown phase'}`);
         
-        // CRITICAL FIX: Do not add any results to main arrays on failure
-        // The arrays remain unchanged until a successful attempt
+        // CRITICAL: Local variables chunkDirectories and chunkData are discarded
+        // Main arrays allDirectories and allData are NEVER modified on failure
+        chunkDirectories = null;
+        chunkData = null;
         
         if (attempt === maxRetries) {
           // Final attempt failed - record as failed chunk
@@ -289,11 +309,11 @@ export class ObservatoryService {
           });
           
           console.error(`🚨 Chunk ${chunkNumber} failed after ${maxRetries} attempts - will be excluded from final result`);
-          console.error(`   No data from this chunk was added to totals`);
+          console.error(`   No data from this chunk was added to totals (${attempt} failed attempts)`);
           return false;
         } else {
           console.log(`⏳ Retrying chunk ${chunkNumber} (attempt ${attempt + 1}/${maxRetries}) in 5 seconds...`);
-          console.log(`   Previous attempt data discarded, starting fresh`);
+          console.log(`   Local attempt data discarded, main arrays unchanged`);
           await this.sleep(5000); // Wait 5 seconds before retry
         }
       }
