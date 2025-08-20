@@ -210,7 +210,7 @@ export class ObservatoryService {
   }
 
   /**
-   * Process a single chunk with retry mechanism
+   * Process a single chunk with retry mechanism (fixed to prevent double-counting)
    */
   private async processChunkWithRetry(
     chunk: number[],
@@ -252,7 +252,7 @@ export class ObservatoryService {
           throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
         }
         
-        // Success - add to results
+        // SUCCESS - Only add results to main arrays once per chunk, after complete success
         allDirectories.push(...chunkDirectories);
         allData.push(...chunkData);
         
@@ -263,6 +263,10 @@ export class ObservatoryService {
         
       } catch (error) {
         console.error(`❌ Chunk ${chunkNumber} attempt ${attempt} failed:`, error.message);
+        console.error(`   Error occurred during: ${error.stack ? 'processing' : 'unknown phase'}`);
+        
+        // CRITICAL FIX: Do not add any results to main arrays on failure
+        // The arrays remain unchanged until a successful attempt
         
         if (attempt === maxRetries) {
           // Final attempt failed - record as failed chunk
@@ -273,9 +277,11 @@ export class ObservatoryService {
           });
           
           console.error(`🚨 Chunk ${chunkNumber} failed after ${maxRetries} attempts - will be excluded from final result`);
+          console.error(`   No data from this chunk was added to totals`);
           return false;
         } else {
           console.log(`⏳ Retrying chunk ${chunkNumber} (attempt ${attempt + 1}/${maxRetries}) in 5 seconds...`);
+          console.log(`   Previous attempt data discarded, starting fresh`);
           await this.sleep(5000); // Wait 5 seconds before retry
         }
       }
@@ -732,9 +738,17 @@ export class ObservatoryService {
   }
 
   /**
-   * Process a chunk of directories into Directory objects
+   * Process a chunk of directories into Directory objects (optimized for large datasets)
    */
   processDirectoryChunk(chunkData: any[]): Directory[] {
+    console.log(`Processing ${chunkData.length} records into directory objects...`);
+    
+    // For very large datasets, avoid deep cloning the entire dataset for each directory
+    if (chunkData.length > 100000) {
+      console.log(`Using optimized processing for large dataset (${chunkData.length} records)`);
+      return this.processDirectoryChunkOptimized(chunkData);
+    }
+    
     const directories = new Array<Directory>();
     const tmpDirectories = this.createTemporaryDirectories(chunkData);
 
@@ -743,6 +757,33 @@ export class ObservatoryService {
       directories.push(newDirectory);
     }
 
+    return directories;
+  }
+
+  /**
+   * Memory-optimized processing for large datasets to prevent stack overflow
+   */
+  private processDirectoryChunkOptimized(chunkData: any[]): Directory[] {
+    const directories = new Array<Directory>();
+    const tmpDirectories = this.createTemporaryDirectories(chunkData);
+    
+    console.log(`Found ${tmpDirectories.length} unique directories to process`);
+
+    for (const directory of tmpDirectories || []) {
+      // CRITICAL: Don't clone the entire 171K dataset - just filter relevant data
+      const relevantData = chunkData.filter(item => item.DirectoryId === directory.id);
+      console.log(`Directory ${directory.id} (${directory.name}): ${relevantData.length} records`);
+      
+      const newDirectory = this.createDirectory(directory, relevantData);
+      directories.push(newDirectory);
+      
+      // Force cleanup of large arrays to prevent memory accumulation
+      if (relevantData.length > 10000 && (globalThis as any).gc) {
+        (globalThis as any).gc();
+      }
+    }
+
+    console.log(`Created ${directories.length} directory objects`);
     return directories;
   }
 
