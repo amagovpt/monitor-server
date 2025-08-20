@@ -110,7 +110,7 @@ export class ObservatoryService {
   }
 
   /**
-   * Phase 2: Chunked processing to handle large datasets without memory issues
+   * Phase 2: Chunked processing with robust error handling and retry mechanism
    */
   async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
     let syncStatus: ObservatorySyncStatus | null = null;
@@ -133,37 +133,44 @@ export class ObservatoryService {
       
       let allDirectories = new Array<Directory>();
       let allData = new Array<any>();
+      const failedChunks = new Array<{chunk: number[], chunkNumber: number, error: string}>();
       
-      // Process directories in chunks
+      // Process directories in chunks with retry logic
+      const chunks = [];
       for (let i = 0; i < directoryIds.length; i += chunkSize) {
-        const chunk = directoryIds.slice(i, i + chunkSize);
-        const chunkNumber = Math.floor(i / chunkSize) + 1;
+        chunks.push({
+          directories: directoryIds.slice(i, i + chunkSize),
+          chunkNumber: Math.floor(i / chunkSize) + 1
+        });
+      }
+      
+      const totalChunks = chunks.length;
+      console.log(`Created ${totalChunks} chunks for processing`);
+      
+      // Process each chunk with retry mechanism
+      for (const {directories, chunkNumber} of chunks) {
+        const success = await this.processChunkWithRetry(
+          directories, 
+          chunkNumber, 
+          totalChunks,
+          allDirectories,
+          allData,
+          failedChunks
+        );
         
-        console.log(`Processing chunk ${chunkNumber}/${totalChunks}`);
+        if (!success) {
+          console.error(`Failed to process chunk ${chunkNumber} after retries`);
+        }
         
-        try {
-          const chunkData = await this.getDataForDirectoryChunk(chunk);
-          const chunkDirectories = this.processDirectoryChunk(chunkData);
-          
-          allDirectories = [...allDirectories, ...chunkDirectories];
-          allData = [...allData, ...chunkData];
-          
-          // Update progress
-          await this.updateSyncProgress(syncStatus.id, chunkNumber, i + chunk.length);
-          
-          console.log(`Chunk ${chunkNumber} complete: ${chunkDirectories.length} directories, ${chunkData.length} records`);
-          
-          // Optional: Force garbage collection between chunks if enabled
-          if (this.config.enableGarbageCollection && (globalThis as any).gc) {
-            (globalThis as any).gc();
-            console.log(`Forced garbage collection after chunk ${chunkNumber}`);
-          }
-        } catch (chunkError) {
-          console.error(`Error processing chunk ${chunkNumber}:`, chunkError);
-          await this.markSyncFailed(syncStatus.id, chunkError.message);
-          throw chunkError;
+        // Optional: Force garbage collection between chunks if enabled
+        if (this.config.enableGarbageCollection && (globalThis as any).gc) {
+          (globalThis as any).gc();
+          console.log(`Forced garbage collection after chunk ${chunkNumber}`);
         }
       }
+
+      // Validate all chunks processed successfully
+      await this.validateChunkProcessing(directoryIds, allDirectories, failedChunks);
 
       console.log(`Building global statistics from ${allDirectories.length} directories and ${allData.length} records...`);
       
@@ -189,6 +196,8 @@ export class ObservatoryService {
       await this.markSyncCompleted(syncStatus.id);
       
       console.log("Chunked data generation completed successfully");
+      console.log(`Final summary: ${allDirectories.length} directories, ${allData.length} records, ${failedChunks.length} failed chunks`);
+      
       return global;
     } catch (error) {
       console.error('Error in generateDataChunked:', error);
@@ -200,6 +209,145 @@ export class ObservatoryService {
       
       throw error;
     }
+  }
+
+  /**
+   * Process a single chunk with retry mechanism
+   */
+  private async processChunkWithRetry(
+    chunk: number[],
+    chunkNumber: number,
+    totalChunks: number,
+    allDirectories: Directory[],
+    allData: any[],
+    failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>,
+    maxRetries = 3
+  ): Promise<boolean> {
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Processing chunk ${chunkNumber}/${totalChunks} (attempt ${attempt}/${maxRetries})`);
+        console.log(`Chunk ${chunkNumber} contains directories: [${chunk.join(', ')}]`);
+        
+        const startTime = Date.now();
+        const chunkData = await this.getDataForDirectoryChunk(chunk);
+        const queryTime = Date.now() - startTime;
+        
+        console.log(`Chunk ${chunkNumber} query completed in ${queryTime}ms, returned ${chunkData.length} records`);
+        
+        // Validate chunk data is not empty when it should contain data
+        if (chunkData.length === 0) {
+          const directoryExists = await this.validateDirectoriesExist(chunk);
+          if (directoryExists) {
+            throw new Error(`Chunk ${chunkNumber} returned 0 records but directories exist`);
+          }
+        }
+        
+        const processStartTime = Date.now();
+        const chunkDirectories = this.processDirectoryChunk(chunkData);
+        const processTime = Date.now() - processStartTime;
+        
+        console.log(`Chunk ${chunkNumber} processing completed in ${processTime}ms, created ${chunkDirectories.length} directories`);
+        
+        // Validate that we got directories for the chunk
+        if (chunkDirectories.length === 0 && chunkData.length > 0) {
+          throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
+        }
+        
+        // Success - add to results
+        allDirectories.push(...chunkDirectories);
+        allData.push(...chunkData);
+        
+        console.log(`✅ Chunk ${chunkNumber} successful: ${chunkDirectories.length} directories, ${chunkData.length} records`);
+        console.log(`   Running totals: ${allDirectories.length} directories, ${allData.length} records`);
+        
+        return true;
+        
+      } catch (error) {
+        console.error(`❌ Chunk ${chunkNumber} attempt ${attempt} failed:`, error.message);
+        
+        if (attempt === maxRetries) {
+          // Final attempt failed - record as failed chunk
+          failedChunks.push({
+            chunk,
+            chunkNumber,
+            error: error.message
+          });
+          
+          console.error(`🚨 Chunk ${chunkNumber} failed after ${maxRetries} attempts - will be excluded from final result`);
+          return false;
+        } else {
+          console.log(`⏳ Retrying chunk ${chunkNumber} (attempt ${attempt + 1}/${maxRetries}) in 5 seconds...`);
+          await this.sleep(5000); // Wait 5 seconds before retry
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Validate that all chunks were processed successfully
+   */
+  private async validateChunkProcessing(
+    originalDirectoryIds: number[],
+    processedDirectories: Directory[],
+    failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>
+  ): Promise<void> {
+    
+    const processedDirectoryIds = processedDirectories.map(d => d.id);
+    const expectedCount = originalDirectoryIds.length;
+    const actualCount = processedDirectories.length;
+    
+    console.log(`📊 Processing validation:`);
+    console.log(`   Expected directories: ${expectedCount}`);
+    console.log(`   Processed directories: ${actualCount}`);
+    console.log(`   Failed chunks: ${failedChunks.length}`);
+    
+    if (failedChunks.length > 0) {
+      console.error(`🚨 Failed chunks details:`);
+      failedChunks.forEach(({chunkNumber, chunk, error}) => {
+        console.error(`   Chunk ${chunkNumber}: directories [${chunk.join(', ')}] - ${error}`);
+      });
+    }
+    
+    // Find missing directories
+    const missingDirectories = originalDirectoryIds.filter(id => !processedDirectoryIds.includes(id));
+    if (missingDirectories.length > 0) {
+      console.error(`🚨 Missing directories: [${missingDirectories.join(', ')}]`);
+    }
+    
+    // Calculate success rate
+    const successRate = (actualCount / expectedCount) * 100;
+    console.log(`📈 Success rate: ${successRate.toFixed(1)}% (${actualCount}/${expectedCount})`);
+    
+    // Fail if success rate is too low (less than 95%)
+    if (successRate < 95) {
+      throw new Error(`Observatory generation failed: success rate ${successRate.toFixed(1)}% is below acceptable threshold (95%)`);
+    }
+    
+    if (failedChunks.length > 0 && successRate < 100) {
+      console.warn(`⚠️  Observatory generation completed with partial success (${successRate.toFixed(1)}%)`);
+      console.warn(`   This may result in incomplete observatory data`);
+    }
+  }
+
+  /**
+   * Check if directories actually exist in database
+   */
+  private async validateDirectoriesExist(directoryIds: number[]): Promise<boolean> {
+    const result = await this.observatoryRepository.query(
+      `SELECT COUNT(*) as count FROM Directory WHERE DirectoryId IN (${directoryIds.map(() => '?').join(',')}) AND Show_in_Observatory = 1`,
+      directoryIds
+    );
+    return result[0]?.count > 0;
+  }
+
+  /**
+   * Sleep utility for retry delays
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
