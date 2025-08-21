@@ -7,6 +7,7 @@ module.exports = {
       instances: 2,
       exec_mode: "cluster",
       increment_var: "AMPID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "AMP",
         AMPID: 0,
@@ -43,6 +44,7 @@ module.exports = {
       instances: 3,
       exec_mode: "cluster",
       increment_var: "AMSID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "ADMIN",
         AMSID: 0,
@@ -79,6 +81,7 @@ module.exports = {
       instances: 3,
       exec_mode: "cluster",
       increment_var: "USRID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "USER",
         USRID: 0,
