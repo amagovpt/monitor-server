@@ -1645,4 +1645,155 @@ export class WebsiteService {
       }
     }
   }
+
+  async findPagesCount(websiteId: number, search: string): Promise<number> {
+    let where_clause = `
+      wp.WebsiteId = ? AND
+      p.PageId = wp.PageId AND
+      p.Show_In LIKE "1__"
+    `;
+
+    const queryParams: any[] = [websiteId];
+
+    // Handle empty search (represented as '-' placeholder)
+    if (search && search.trim() !== "" && search !== "-") {
+      where_clause += ` AND p.Uri LIKE ?`;
+      queryParams.push(`%${search}%`);
+    }
+
+    const result = await this.websiteRepository.query(
+      `SELECT
+        COUNT(DISTINCT p.PageId) as total
+      FROM
+        WebsitePage as wp,
+        Page as p
+      WHERE
+        ${where_clause}`,
+      queryParams
+    );
+
+    return parseInt(result[0].total);
+  }
+
+  async findPagesPaginated(
+    websiteId: number,
+    size: number,
+    page: number,
+    sort: string,
+    direction: string,
+    search: string
+  ): Promise<any> {
+    let where_clause = `
+      wp.WebsiteId = ? AND
+      p.PageId = wp.PageId AND
+      p.Show_In LIKE "1__"
+    `;
+
+    const queryParams: any[] = [websiteId];
+
+    // Handle empty search (represented as '-' placeholder)
+    if (search && search.trim() !== "" && search !== "-") {
+      where_clause += ` AND p.Uri LIKE ?`;
+      queryParams.push(`%${search}%`);
+    }
+
+    // Handle case when no sorting is specified (like the working websites method)
+    if (!direction || !direction.trim()) {
+      queryParams.push(size, page * size);
+
+      const pages = await this.websiteRepository.query(
+        `SELECT
+          distinct p.*,
+          e.Score,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Tot,
+          e.Errors,
+          e.Element_Count,
+          e.Tag_Count,
+          e.Evaluation_Date,
+          el.EvaluationListId, el.Error, el.Is_Evaluating
+        FROM
+          WebsitePage as wp,
+          Page as p
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date IN (
+            SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE "1_"
+          )
+        WHERE
+          ${where_clause}
+        ORDER BY p.Uri ASC
+        LIMIT ? OFFSET ?`,
+        queryParams
+      );
+
+      return pages;
+    } else {
+      // Handle sorting case
+      let order_by = "p.Uri";
+      if (sort && sort !== "") {
+        switch (sort) {
+          case "Uri":
+            order_by = "p.Uri";
+            break;
+          case "Score":
+            order_by = "e.Score";
+            break;
+          case "Evaluation_Date":
+            order_by = "e.Evaluation_Date";
+            break;
+          case "A":
+            order_by = "e.A";
+            break;
+          case "AA":
+            order_by = "e.AA";
+            break;
+          case "AAA":
+            order_by = "e.AAA";
+            break;
+          case "State":
+            order_by = "el.Is_Evaluating, el.Error";
+            break;
+          case "Show_In":
+            order_by = "p.Show_In";
+            break;
+          default:
+            order_by = "p.Uri";
+        }
+      }
+
+      const sort_direction = direction === "desc" ? "DESC" : "ASC";
+      queryParams.push(size, page * size);
+
+      const pages = await this.websiteRepository.query(
+        `SELECT
+          distinct p.*,
+          e.Score,
+          e.A,
+          e.AA,
+          e.AAA,
+          e.Tot,
+          e.Errors,
+          e.Element_Count,
+          e.Tag_Count,
+          e.Evaluation_Date,
+          el.EvaluationListId, el.Error, el.Is_Evaluating
+        FROM
+          WebsitePage as wp,
+          Page as p
+          LEFT OUTER JOIN Evaluation_List as el ON el.PageId = p.PageId AND el.UserId = -1
+          LEFT OUTER JOIN Evaluation as e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date IN (
+            SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId AND Show_To LIKE "1_"
+          )
+        WHERE
+          ${where_clause}
+        ORDER BY ${order_by} ${sort_direction}
+        LIMIT ? OFFSET ?`,
+        queryParams
+      );
+
+      return pages;
+    }
+  }
 }
