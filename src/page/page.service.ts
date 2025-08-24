@@ -117,6 +117,29 @@ export class PageService {
     return result;
   }
 
+  async getMyMonitorPagesWithError(): Promise<any> {
+    const result = await this.pageRepository.query(`
+      SELECT 
+        el.Url,
+        el.Error,
+        el.Creation_Date,
+        u.Username,
+        u.UserId,
+        w.Name as WebsiteName,
+        w.StartingUrl
+      FROM Evaluation_List el
+      JOIN User u ON u.UserId = el.UserId
+      LEFT JOIN Page p ON p.Uri = el.Url
+      LEFT JOIN WebsitePage wp ON wp.PageId = p.PageId  
+      LEFT JOIN Website w ON w.WebsiteId = wp.WebsiteId
+      WHERE u.Type = "monitor" 
+        AND el.Is_Evaluating = 0 
+        AND el.Error IS NOT NULL
+      ORDER BY el.Creation_Date DESC
+    `);
+    return result;
+  }
+
   async adminCount(search: string): Promise<any> {
     const count = await this.pageRepository.query(
       `SELECT COUNT(*) as Count

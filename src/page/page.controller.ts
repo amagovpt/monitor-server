@@ -211,6 +211,18 @@ export class PageController {
     return success(await this.pageService.getAdminPagesWithError());
   }
 
+  @ApiOperation({ summary: "Find MyMonitor pages with evaluation errors" })
+  @ApiResponse({
+    status: 200,
+    description: "List of MyMonitor pages with evaluation errors",
+    type: Array,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("evaluationList/myMonitor/error")
+  async getMyMonitorPagesWithError(): Promise<any> {
+    return success(await this.pageService.getMyMonitorPagesWithError());
+  }
+
   @ApiOperation({ summary: "Find number of pages by search term" })
   @ApiResponse({
     status: 200,
