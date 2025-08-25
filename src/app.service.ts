@@ -6,6 +6,7 @@ import { WebsiteService } from "./website/website.service";
 import { PageService } from "./page/page.service";
 import { UserService } from "./user/user.service";
 import { GovUserService } from "./gov-user/gov-user.service";
+import { ObservatoryService } from "./observatory/observatory.service";
 
 @Injectable()
 export class AppService {
@@ -16,7 +17,8 @@ export class AppService {
     private readonly websiteService: WebsiteService,
     private readonly pageService: PageService,
     private readonly userService: UserService,
-    private readonly govUserService: GovUserService
+    private readonly govUserService: GovUserService,
+    private readonly observatoryService: ObservatoryService
   ) {}
 
   getHello(): string {
@@ -87,5 +89,11 @@ export class AppService {
       websites,
       pages
     };
+  }
+
+  async getTotalsData(): Promise<any> {
+    // Return observatory-format data but including ALL system data
+    // (observatory + mymonitor + AMS-only data)
+    return await this.observatoryService.buildTotalStatistics();
   }
 }

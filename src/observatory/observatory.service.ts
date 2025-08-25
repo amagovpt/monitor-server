@@ -847,6 +847,23 @@ export class ObservatoryService {
   }
 
   /**
+   * Build total statistics from ALL system data (same format as observatory)
+   */
+  async buildTotalStatistics(): Promise<any> {
+    console.log('Building total statistics from ALL system data...');
+    
+    // Get all data without visibility filters
+    const allData = await this.getAllSystemData();
+    
+    // Process the data using the same logic as observatory
+    const directories = this.processDirectoryChunk(allData);
+    const listDirectories = new ListDirectories(allData, directories);
+    
+    // Use the same statistics building method
+    return this.buildGlobalStatistics(listDirectories);
+  }
+
+  /**
    * Build global statistics from ListDirectories
    */
   async buildGlobalStatistics(listDirectories: ListDirectories): Promise<any> {
@@ -948,6 +965,11 @@ export class ObservatoryService {
     return this.getDataOptimized();
   }
 
+  async getAllSystemData(): Promise<any> {
+    // Get ALL data in the system (remove Show_in_Observatory and other visibility filters)
+    return this.getAllDataOptimized();
+  }
+
   /**
    * Optimized version of getData() that eliminates N+1 queries
    * Uses single bulk query with proper joins and pre-computed latest evaluations
@@ -1037,6 +1059,99 @@ export class ObservatoryService {
       return true;
     });
 
+    return filteredData;
+  }
+
+  /**
+   * Get ALL data in the system (removes Show_in_Observatory and Show_To filters)
+   * Same structure as getDataOptimized but includes all directories, websites, and pages
+   */
+  async getAllDataOptimized(): Promise<any[]> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    console.log('Executing query for ALL system data (no visibility filters)');
+    const startTime = Date.now();
+    
+    const rawData = await this.observatoryRepository.query(query);
+    
+    console.log(`All data query completed in ${Date.now() - startTime}ms, returned ${rawData.length} records`);
+    
+    // Apply same Method 0 filtering logic but for all directories
+    const filteredData = rawData.filter(row => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, ensure website has ALL tags
+      if (method === 0 && tagCount > 1) {
+        return this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+      }
+      
+      return true;
+    });
+
+    console.log(`Filtering completed for all data, returning ${filteredData.length} valid records`);
     return filteredData;
   }
 

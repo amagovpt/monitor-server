@@ -49,4 +49,16 @@ export class AppController {
   async getMyMonitorStats(): Promise<any> {
     return success(await this.appService.getMyMonitorStats());
   }
+
+  @ApiOperation({ summary: "Get total observatory-style data including all systems" })
+  @ApiResponse({
+    status: 200,
+    description: "Complete observatory-style statistics for all systems (observatory + mymonitor + AMS)",
+    type: Object,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("totals")
+  async getTotalsData(): Promise<any> {
+    return success(await this.appService.getTotalsData());
+  }
 }
