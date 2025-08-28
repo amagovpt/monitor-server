@@ -937,17 +937,42 @@ export class ObservatoryService {
   }
 
   /**
-   * Get unchanged observatory data (mock implementation)
+   * Get unchanged observatory data from directories that haven't changed since last run
    */
   async getUnchangedObservatoryData(changedDirectoryIds: number[]): Promise<{directories: Directory[], data: any[]}> {
-    // In a full implementation, this would:
-    // 1. Load the previous observatory result
-    // 2. Filter out directories that have changed
-    // 3. Return the unchanged portion
-    
-    // For now, return empty to force full rebuild of unchanged data
-    // This can be optimized later with proper caching
-    return { directories: [], data: [] };
+    try {
+      // Get all directory IDs that should be in observatory
+      const allDirectoryIds = await this.getDirectoryIds();
+      
+      // Find unchanged directories (all directories minus changed ones)
+      const unchangedDirectoryIds = allDirectoryIds.filter(id => !changedDirectoryIds.includes(id));
+      
+      console.log(`Loading data for ${unchangedDirectoryIds.length} unchanged directories (excluding ${changedDirectoryIds.length} changed)`);
+      
+      if (unchangedDirectoryIds.length === 0) {
+        console.log('No unchanged directories found, returning empty data');
+        return { directories: [], data: [] };
+      }
+      
+      // Get data for unchanged directories using existing optimized method
+      const unchangedData = await this.getDataForDirectoryChunk(unchangedDirectoryIds);
+      console.log(`Retrieved ${unchangedData.length} records from unchanged directories`);
+      
+      // Process unchanged data into Directory objects
+      const unchangedDirectories = this.processDirectoryChunk(unchangedData);
+      console.log(`Created ${unchangedDirectories.length} directory objects from unchanged data`);
+      
+      return { 
+        directories: unchangedDirectories, 
+        data: unchangedData 
+      };
+    } catch (error) {
+      console.error('Error loading unchanged observatory data:', error);
+      console.log('Falling back to full processing due to error in unchanged data retrieval');
+      
+      // On error, return empty to force full processing (safe fallback)
+      return { directories: [], data: [] };
+    }
   }
 
   async getObservatoryData(): Promise<any> {
