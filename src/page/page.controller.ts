@@ -72,6 +72,18 @@ export class PageController {
     return success(await this.pageService.findNumberOfObservatory());
   }
 
+  @ApiOperation({ summary: "Find number of pages in MyMonitor" })
+  @ApiResponse({
+    status: 200,
+    description: "The number of pages in MyMonitor",
+    type: Number,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("myMonitor/total")
+  async getNumberOfMyMonitorPages(): Promise<any> {
+    return success(await this.pageService.findNumberOfMyMonitor());
+  }
+
   @ApiOperation({ summary: "Reevaluate multiple pages by url" })
   @ApiResponse({
     status: 200,
@@ -197,6 +209,18 @@ export class PageController {
   @Get("evaluationList/error")
   async getAdminPagesWithError(): Promise<any> {
     return success(await this.pageService.getAdminPagesWithError());
+  }
+
+  @ApiOperation({ summary: "Find MyMonitor pages with evaluation errors" })
+  @ApiResponse({
+    status: 200,
+    description: "List of MyMonitor pages with evaluation errors",
+    type: Array,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("evaluationList/myMonitor/error")
+  async getMyMonitorPagesWithError(): Promise<any> {
+    return success(await this.pageService.getMyMonitorPagesWithError());
   }
 
   @ApiOperation({ summary: "Find number of pages by search term" })

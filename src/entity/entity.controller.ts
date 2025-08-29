@@ -206,7 +206,7 @@ export class EntityController {
   @UseGuards(AuthGuard("jwt-admin"))
   @Post("deleteBulk")
   async deleteEntities(
-    @Request() deleteBulkEntityDto: DeleteBulkEntityDto
+    @Body() deleteBulkEntityDto: DeleteBulkEntityDto
   ): Promise<any> {
     const entitiesId = deleteBulkEntityDto.entitiesId;
 
