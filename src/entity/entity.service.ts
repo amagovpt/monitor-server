@@ -98,6 +98,10 @@ export class EntityService {
     return count[0].Count;
   }
 
+  async count(): Promise<number> {
+    return this.entityRepository.count();
+  }
+
   async findNumberOfObservatory(): Promise<number> {
     const data = (
       await this.entityRepository.query(

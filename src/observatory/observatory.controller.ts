@@ -59,8 +59,54 @@ export class ObservatoryController {
   @Post("generate")
   async generateData(): Promise<any> {
     try {
-      this.observatoryService.generateData(true);
+      await this.observatoryService.generateData(true);
       return success();
+    } catch (err) {
+      return error(err);
+    }
+  }
+
+  @ApiOperation({ summary: "Get current sync status" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+  })
+  @Get("sync-status")
+  async getSyncStatus(): Promise<any> {
+    try {
+      const status = await this.observatoryService.getSyncStatus();
+      return success(status);
+    } catch (err) {
+      return error(err);
+    }
+  }
+
+  @ApiOperation({ summary: "Check if sync is running" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Boolean,
+  })
+  @Get("is-sync-running")
+  async isSyncRunning(): Promise<any> {
+    try {
+      const isRunning = await this.observatoryService.isSyncRunning();
+      return success({ isRunning });
+    } catch (err) {
+      return error(err);
+    }
+  }
+
+  @ApiOperation({ summary: "Get current running sync status with progress" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+  })
+  @Get("running-sync-status")
+  async getCurrentRunningSyncStatus(): Promise<any> {
+    try {
+      const status = await this.observatoryService.getCurrentRunningSyncStatus();
+      return success(status);
     } catch (err) {
       return error(err);
     }

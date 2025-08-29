@@ -1999,6 +1999,7 @@ function QW_BP27(elements: any, results: any, nodes: any, technique: any) {
 
 function QW_BP28(elements: any, results: any, nodes: any, technique: any) {
   if (technique.metadata.outcome === "passed") {
+    addToElements(elements, "h1", technique.metadata.passed);
     addToElements(elements, "onlyOneh1", technique.metadata.passed);
     addToResults(results, "heading_03");
     addToNodes(
@@ -2009,11 +2010,13 @@ function QW_BP28(elements: any, results: any, nodes: any, technique: any) {
   } else if (technique.metadata.outcome === "failed") {
     const noH1 = technique.results.filter((t: any) => t.resultCode === "F1");
     if (noH1.length !== 0) {
+      addToElements(elements, "h1", 0);
       addToElements(elements, "notOneh1", 0);
       addToResults(results, "heading_04");
     }
     const multipleH1 = technique.results.filter((t: any) => t.resultCode === "F2");
     if (multipleH1.length !== 0) {
+      addToElements(elements, "h1", technique.metadata.passed + technique.metadata.failed);
       addToElements(elements, "notOneh1", technique.metadata.failed);
       addToResults(results, "heading_04");
       addToNodes(

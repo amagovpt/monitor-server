@@ -95,4 +95,53 @@ export class GovUserController {
   async remove(@Body() updateGovUserDto: UpdateGovUserDto) {
     return success(await this.govUserService.remove(updateGovUserDto.id));
   }
+
+  @ApiOperation({ summary: "Find total number of GovUsers" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @Get("total")
+  async getGovUserTotal(): Promise<any> {
+    return success(await this.govUserService.findTotal());
+  }
+
+  @ApiOperation({ summary: "Count GovUsers by search term" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Number,
+  })
+  @Get("all/count/:search")
+  async getAdminGovUserCount(@Param("search") search: string): Promise<any> {
+    return success(
+      await this.govUserService.adminCount(decodeURIComponent(search.substring(7)))
+    );
+  }
+
+  @ApiOperation({ summary: "Find all GovUsers with pagination and search" })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Array,
+  })
+  @Get("all/:size/:page/:sort/:direction/:search")
+  async getAllGovUsers(
+    @Param("size") size: string,
+    @Param("page") page: string,
+    @Param("sort") sort: string,
+    @Param("direction") direction: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    return success(
+      await this.govUserService.findAll(
+        parseInt(size),
+        parseInt(page),
+        sort.substring(5),
+        direction.substring(10),
+        decodeURIComponent(search.substring(7))
+      )
+    );
+  }
 }
