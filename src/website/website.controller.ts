@@ -298,6 +298,67 @@ export class WebsiteController {
     description: " The specific website",
     type: Website,
   })
+
+  @ApiOperation({ summary: "Get count of pages for a specific website with search filter" })
+  @ApiResponse({
+    status: 200,
+    description: "The number of pages in the website matching the search criteria",
+    type: Number,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get(":website/user/:user/pages/count/:search")
+  async getWebsitePagesCount(
+    @Param("website") website: string,
+    @Param("user") user: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    const websiteId = await this.websiteService.getIdFromUserAndName(
+      user,
+      website
+    );
+
+    const count = await this.websiteService.findPagesCount(
+      websiteId,
+      decodeURIComponent(search)
+    );
+
+    return success(count);
+  }
+
+  @ApiOperation({ summary: "Get paginated and sorted pages for a specific website" })
+  @ApiResponse({
+    status: 200,
+    description: "The pages of the website with pagination, sorting and filtering",
+    type: Array<Page>,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get(":website/user/:user/pages/all/:size/:page/:sort/:direction/:search")
+  async getWebsitePagesPaginated(
+    @Param("website") website: string,
+    @Param("user") user: string,
+    @Param("size") size: string,
+    @Param("page") page: string,
+    @Param("sort") sort: string,
+    @Param("direction") direction: string,
+    @Param("search") search: string
+  ): Promise<any> {
+    const websiteId = await this.websiteService.getIdFromUserAndName(
+      user,
+      website
+    );
+
+    return success(
+      await this.websiteService.findPagesPaginated(
+        websiteId,
+        parseInt(size),
+        parseInt(page),
+        sort.substring(5),
+        direction.substring(10),
+        decodeURIComponent(search.substring(7))
+      )
+    );
+  }
+
   @UseGuards(AuthGuard("jwt-admin"))
   @Get(":website/user/:user/pages")
   async getAllWebsiteDomains(

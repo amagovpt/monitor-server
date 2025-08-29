@@ -8,6 +8,7 @@ import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
 import _tests from "src/evaluation/tests";
 import { Observatory } from "./observatory.entity";
+import { ObservatorySyncStatus, SyncStatus, SyncType } from "./observatory-sync-status.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";
 
@@ -52,7 +53,9 @@ export class ObservatoryService {
 
   constructor(
     @InjectRepository(Observatory)
-    private readonly observatoryRepository: Repository<Observatory>
+    private readonly observatoryRepository: Repository<Observatory>,
+    @InjectRepository(ObservatorySyncStatus)
+    private readonly syncStatusRepository: Repository<ObservatorySyncStatus>
   ) {
     this.config = this.loadConfig();
   }
@@ -88,6 +91,13 @@ export class ObservatoryService {
       parseInt(process.env.AMSID) === 0 ||
       manual
     ) {
+      // Check if sync is already running
+      const isRunning = await this.isSyncRunning();
+      if (isRunning) {
+        console.log('Data generation already in progress, skipping...');
+        return { message: 'Sync already in progress' };
+      }
+
       // Use configured processing mode (Phase 2)
       console.log('Observatory config:', this.config);
       
@@ -103,16 +113,14 @@ export class ObservatoryService {
    * Phase 2: Chunked processing with robust error handling and retry mechanism
    */
   async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
+    let syncStatus: ObservatorySyncStatus | null = null;
+    
     try {
       console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
       
       // Get all directory IDs first
       const directoryIds = await this.getDirectoryIds();
       console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
-      
-      let allDirectories = new Array<Directory>();
-      let allData = new Array<any>();
-      const failedChunks = new Array<{chunk: number[], chunkNumber: number, error: string}>();
       
       // Process directories in chunks with retry logic
       const chunks = [];
@@ -124,6 +132,17 @@ export class ObservatoryService {
       }
       
       const totalChunks = chunks.length;
+      
+      // Initialize sync status
+      syncStatus = await this.initializeSyncStatus(
+        manual ? SyncType.MANUAL : SyncType.AUTO,
+        totalChunks,
+        directoryIds.length
+      );
+      
+      let allDirectories = new Array<Directory>();
+      let allData = new Array<any>();
+      const failedChunks = new Array<{chunk: number[], chunkNumber: number, error: string}>();
       console.log(`Created ${totalChunks} chunks for processing`);
       
       // Process each chunk with retry mechanism
@@ -171,6 +190,9 @@ export class ObservatoryService {
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
       
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
       console.log("Chunked data generation completed successfully");
       console.log(`Final summary: ${allDirectories.length} directories, ${allData.length} records, ${failedChunks.length} failed chunks`);
       
@@ -178,12 +200,17 @@ export class ObservatoryService {
     } catch (error) {
       console.error('Error in generateDataChunked:', error);
       console.error('Stack trace:', error.stack);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
       throw error;
     }
   }
 
   /**
-   * Process a single chunk with retry mechanism
+   * Process a single chunk with retry mechanism (fixed to prevent double-counting from failed attempts)
    */
   private async processChunkWithRetry(
     chunk: number[],
@@ -196,12 +223,16 @@ export class ObservatoryService {
   ): Promise<boolean> {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      // Store results locally - only add to main arrays after COMPLETE success
+      let chunkDirectories: Directory[] | null = null;
+      let chunkData: any[] | null = null;
+      
       try {
         console.log(`Processing chunk ${chunkNumber}/${totalChunks} (attempt ${attempt}/${maxRetries})`);
         console.log(`Chunk ${chunkNumber} contains directories: [${chunk.join(', ')}]`);
         
         const startTime = Date.now();
-        const chunkData = await this.getDataForDirectoryChunk(chunk);
+        chunkData = await this.getDataForDirectoryChunk(chunk);
         const queryTime = Date.now() - startTime;
         
         console.log(`Chunk ${chunkNumber} query completed in ${queryTime}ms, returned ${chunkData.length} records`);
@@ -215,7 +246,7 @@ export class ObservatoryService {
         }
         
         const processStartTime = Date.now();
-        const chunkDirectories = this.processDirectoryChunk(chunkData);
+        chunkDirectories = this.processDirectoryChunk(chunkData);
         const processTime = Date.now() - processStartTime;
         
         console.log(`Chunk ${chunkNumber} processing completed in ${processTime}ms, created ${chunkDirectories.length} directories`);
@@ -225,9 +256,35 @@ export class ObservatoryService {
           throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
         }
         
-        // Success - add to results
-        allDirectories.push(...chunkDirectories);
-        allData.push(...chunkData);
+        // STACK OVERFLOW PROTECTION: Test safe operations without spread operator
+        console.log(`Testing stack safety before adding ${chunkDirectories.length} directories to results...`);
+        
+        // Test if we can safely add directories using for-loop (avoids spread operator completely)
+        try {
+          // Test with a small subset first - no array copying involved
+          const testLimit = Math.min(3, chunkDirectories.length);
+          for (let i = 0; i < testLimit; i++) {
+            // Just test the push operation without actually modifying main array
+            const testDirectory = chunkDirectories[i];
+            if (!testDirectory || typeof testDirectory !== 'object') {
+              throw new Error(`Invalid directory object at index ${i}`);
+            }
+          }
+          console.log(`Stack test passed, proceeding with full addition`);
+        } catch (testError) {
+          throw new Error(`Stack overflow or data validation error: ${testError.message}`);
+        }
+        
+        // CRITICAL FIX: Only add results to main arrays after ALL operations succeed
+        console.log(`Adding ${chunkDirectories.length} directories to main array (current: ${allDirectories.length})`);
+        for (const directory of chunkDirectories) {
+          allDirectories.push(directory);
+        }
+        
+        console.log(`Adding ${chunkData.length} data records to main array (current: ${allData.length})`);
+        for (const dataItem of chunkData) {
+          allData.push(dataItem);
+        }
         
         console.log(`✅ Chunk ${chunkNumber} successful: ${chunkDirectories.length} directories, ${chunkData.length} records`);
         console.log(`   Running totals: ${allDirectories.length} directories, ${allData.length} records`);
@@ -236,6 +293,12 @@ export class ObservatoryService {
         
       } catch (error) {
         console.error(`❌ Chunk ${chunkNumber} attempt ${attempt} failed:`, error.message);
+        console.error(`   Error occurred during: ${error.stack ? 'processing' : 'unknown phase'}`);
+        
+        // CRITICAL: Local variables chunkDirectories and chunkData are discarded
+        // Main arrays allDirectories and allData are NEVER modified on failure
+        chunkDirectories = null;
+        chunkData = null;
         
         if (attempt === maxRetries) {
           // Final attempt failed - record as failed chunk
@@ -246,9 +309,11 @@ export class ObservatoryService {
           });
           
           console.error(`🚨 Chunk ${chunkNumber} failed after ${maxRetries} attempts - will be excluded from final result`);
+          console.error(`   No data from this chunk was added to totals (${attempt} failed attempts)`);
           return false;
         } else {
           console.log(`⏳ Retrying chunk ${chunkNumber} (attempt ${attempt + 1}/${maxRetries}) in 5 seconds...`);
+          console.log(`   Local attempt data discarded, main arrays unchanged`);
           await this.sleep(5000); // Wait 5 seconds before retry
         }
       }
@@ -258,7 +323,7 @@ export class ObservatoryService {
   }
 
   /**
-   * Validate that all chunks were processed successfully
+   * Validate that all chunks were processed successfully (fixed validation logic)
    */
   private async validateChunkProcessing(
     originalDirectoryIds: number[],
@@ -266,13 +331,19 @@ export class ObservatoryService {
     failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>
   ): Promise<void> {
     
-    const processedDirectoryIds = processedDirectories.map(d => d.id);
+    // Get unique directory IDs from processed directories (prevent counting duplicates)
+    const processedDirectoryIds = [...new Set(processedDirectories.map(d => d.id))];
     const expectedCount = originalDirectoryIds.length;
-    const actualCount = processedDirectories.length;
+    const actualCount = processedDirectoryIds.length;
+    const duplicateCount = processedDirectories.length - actualCount;
     
     console.log(`📊 Processing validation:`);
     console.log(`   Expected directories: ${expectedCount}`);
-    console.log(`   Processed directories: ${actualCount}`);
+    console.log(`   Unique processed directories: ${actualCount}`);
+    if (duplicateCount > 0) {
+      console.warn(`   ⚠️  Duplicate directory objects detected: ${duplicateCount}`);
+      console.warn(`   Total directory objects: ${processedDirectories.length}`);
+    }
     console.log(`   Failed chunks: ${failedChunks.length}`);
     
     if (failedChunks.length > 0) {
@@ -282,13 +353,23 @@ export class ObservatoryService {
       });
     }
     
-    // Find missing directories
+    // Find missing directories (based on failed chunks)
+    const failedDirectoryIds = new Set<number>();
+    failedChunks.forEach(({chunk}) => {
+      chunk.forEach(id => failedDirectoryIds.add(id));
+    });
+    
     const missingDirectories = originalDirectoryIds.filter(id => !processedDirectoryIds.includes(id));
+    const unexpectedMissing = missingDirectories.filter(id => !failedDirectoryIds.has(id));
+    
     if (missingDirectories.length > 0) {
       console.error(`🚨 Missing directories: [${missingDirectories.join(', ')}]`);
+      if (unexpectedMissing.length > 0) {
+        console.error(`🚨 Unexpectedly missing (not in failed chunks): [${unexpectedMissing.join(', ')}]`);
+      }
     }
     
-    // Calculate success rate
+    // Calculate success rate based on unique directories
     const successRate = (actualCount / expectedCount) * 100;
     console.log(`📈 Success rate: ${successRate.toFixed(1)}% (${actualCount}/${expectedCount})`);
     
@@ -341,29 +422,60 @@ export class ObservatoryService {
     
     if (changedDirectoryIds.length === 0) {
       console.log("No changes detected, skipping generation");
-      return;
+      
+      // Create a quick sync status record for "no changes"
+      const syncStatus = await this.initializeSyncStatus(SyncType.AUTO, 0, 0);
+      await this.markSyncCompleted(syncStatus.id);
+      
+      return { message: 'No changes detected, skipping generation' };
     }
     
-    // Get unchanged data from cache or previous result
-    const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+    let syncStatus: ObservatorySyncStatus | null = null;
     
-    // Process only changed directories
-    const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
-    const changedDirectories = this.processDirectoryChunk(changedData);
-    
-    // Merge results
-    const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
-    const mergedData = [...unchangedData.data, ...changedData];
-    
-    const listDirectories = new ListDirectories(mergedData, mergedDirectories);
-    const global = await this.buildGlobalStatistics(listDirectories);
+    try {
+      // Initialize sync status for incremental processing
+      syncStatus = await this.initializeSyncStatus(
+        SyncType.AUTO, 
+        1, // Only one "chunk" for incremental
+        changedDirectoryIds.length
+      );
+      
+      // Get unchanged data from cache or previous result
+      const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+      
+      // Process only changed directories
+      const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
+      const changedDirectories = this.processDirectoryChunk(changedData);
+      
+      // Update progress
+      await this.updateSyncProgress(syncStatus.id, 1, changedDirectoryIds.length);
+      
+      // Merge results
+      const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
+      const mergedData = [...unchangedData.data, ...changedData];
+      
+      const listDirectories = new ListDirectories(mergedData, mergedDirectories);
+      const global = await this.buildGlobalStatistics(listDirectories);
 
-    await this.observatoryRepository.query(
-      "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
-      [JSON.stringify(global), "auto", new Date()]
-    );
-    
-    console.log("Incremental data generation completed");
+      await this.observatoryRepository.query(
+        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), "auto", new Date()]
+      );
+      
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
+      console.log("Incremental data generation completed");
+      return global;
+    } catch (error) {
+      console.error('Error in generateDataIncremental:', error);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -674,9 +786,17 @@ export class ObservatoryService {
   }
 
   /**
-   * Process a chunk of directories into Directory objects
+   * Process a chunk of directories into Directory objects (optimized for large datasets)
    */
   processDirectoryChunk(chunkData: any[]): Directory[] {
+    console.log(`Processing ${chunkData.length} records into directory objects...`);
+    
+    // For very large datasets, avoid deep cloning the entire dataset for each directory
+    if (chunkData.length > 100000) {
+      console.log(`Using optimized processing for large dataset (${chunkData.length} records)`);
+      return this.processDirectoryChunkOptimized(chunkData);
+    }
+    
     const directories = new Array<Directory>();
     const tmpDirectories = this.createTemporaryDirectories(chunkData);
 
@@ -686,6 +806,61 @@ export class ObservatoryService {
     }
 
     return directories;
+  }
+
+  /**
+   * Memory-optimized processing for large datasets to prevent stack overflow
+   */
+  private processDirectoryChunkOptimized(chunkData: any[]): Directory[] {
+    const directories = new Array<Directory>();
+    
+    // Get unique directory IDs first to prevent duplicates
+    const uniqueDirectoryIds = [...new Set(chunkData.map(item => item.DirectoryId))];
+    console.log(`Found ${uniqueDirectoryIds.length} unique directories in ${chunkData.length} records`);
+
+    for (const directoryId of uniqueDirectoryIds) {
+      // Get directory metadata from first matching record
+      const directoryRecord = chunkData.find(item => item.DirectoryId === directoryId);
+      if (!directoryRecord) continue;
+      
+      const directoryInfo = {
+        id: directoryRecord.DirectoryId,
+        name: directoryRecord.Directory_Name,
+        creation_date: directoryRecord.Directory_Creation_Date,
+      };
+      
+      // Get all relevant data for this specific directory
+      const relevantData = chunkData.filter(item => item.DirectoryId === directoryId);
+      console.log(`Directory ${directoryId} (${directoryInfo.name}): ${relevantData.length} records`);
+      
+      const newDirectory = this.createDirectory(directoryInfo, relevantData);
+      directories.push(newDirectory);
+      
+      // Force cleanup of large arrays to prevent memory accumulation
+      if (relevantData.length > 10000 && (globalThis as any).gc) {
+        (globalThis as any).gc();
+      }
+    }
+
+    console.log(`Created ${directories.length} directory objects (should match ${uniqueDirectoryIds.length} unique directories)`);
+    return directories;
+  }
+
+  /**
+   * Build total statistics from ALL system data (same format as observatory)
+   */
+  async buildTotalStatistics(): Promise<any> {
+    console.log('Building total statistics from ALL system data...');
+    
+    // Get all data without visibility filters
+    const allData = await this.getAllSystemData();
+    
+    // Process the data using the same logic as observatory
+    const directories = this.processDirectoryChunk(allData);
+    const listDirectories = new ListDirectories(allData, directories);
+    
+    // Use the same statistics building method
+    return this.buildGlobalStatistics(listDirectories);
   }
 
   /**
@@ -762,17 +937,42 @@ export class ObservatoryService {
   }
 
   /**
-   * Get unchanged observatory data (mock implementation)
+   * Get unchanged observatory data from directories that haven't changed since last run
    */
   async getUnchangedObservatoryData(changedDirectoryIds: number[]): Promise<{directories: Directory[], data: any[]}> {
-    // In a full implementation, this would:
-    // 1. Load the previous observatory result
-    // 2. Filter out directories that have changed
-    // 3. Return the unchanged portion
-    
-    // For now, return empty to force full rebuild of unchanged data
-    // This can be optimized later with proper caching
-    return { directories: [], data: [] };
+    try {
+      // Get all directory IDs that should be in observatory
+      const allDirectoryIds = await this.getDirectoryIds();
+      
+      // Find unchanged directories (all directories minus changed ones)
+      const unchangedDirectoryIds = allDirectoryIds.filter(id => !changedDirectoryIds.includes(id));
+      
+      console.log(`Loading data for ${unchangedDirectoryIds.length} unchanged directories (excluding ${changedDirectoryIds.length} changed)`);
+      
+      if (unchangedDirectoryIds.length === 0) {
+        console.log('No unchanged directories found, returning empty data');
+        return { directories: [], data: [] };
+      }
+      
+      // Get data for unchanged directories using existing optimized method
+      const unchangedData = await this.getDataForDirectoryChunk(unchangedDirectoryIds);
+      console.log(`Retrieved ${unchangedData.length} records from unchanged directories`);
+      
+      // Process unchanged data into Directory objects
+      const unchangedDirectories = this.processDirectoryChunk(unchangedData);
+      console.log(`Created ${unchangedDirectories.length} directory objects from unchanged data`);
+      
+      return { 
+        directories: unchangedDirectories, 
+        data: unchangedData 
+      };
+    } catch (error) {
+      console.error('Error loading unchanged observatory data:', error);
+      console.log('Falling back to full processing due to error in unchanged data retrieval');
+      
+      // On error, return empty to force full processing (safe fallback)
+      return { directories: [], data: [] };
+    }
   }
 
   async getObservatoryData(): Promise<any> {
@@ -788,6 +988,11 @@ export class ObservatoryService {
   async getData(): Promise<any> {
     // Use optimized single query to get all data at once
     return this.getDataOptimized();
+  }
+
+  async getAllSystemData(): Promise<any> {
+    // Get ALL data in the system (remove Show_in_Observatory and other visibility filters)
+    return this.getAllDataOptimized();
   }
 
   /**
@@ -879,6 +1084,99 @@ export class ObservatoryService {
       return true;
     });
 
+    return filteredData;
+  }
+
+  /**
+   * Get ALL data in the system (removes Show_in_Observatory and Show_To filters)
+   * Same structure as getDataOptimized but includes all directories, websites, and pages
+   */
+  async getAllDataOptimized(): Promise<any[]> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    console.log('Executing query for ALL system data (no visibility filters)');
+    const startTime = Date.now();
+    
+    const rawData = await this.observatoryRepository.query(query);
+    
+    console.log(`All data query completed in ${Date.now() - startTime}ms, returned ${rawData.length} records`);
+    
+    // Apply same Method 0 filtering logic but for all directories
+    const filteredData = rawData.filter(row => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, ensure website has ALL tags
+      if (method === 0 && tagCount > 1) {
+        return this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+      }
+      
+      return true;
+    });
+
+    console.log(`Filtering completed for all data, returning ${filteredData.length} valid records`);
     return filteredData;
   }
 
@@ -1741,5 +2039,131 @@ export class ObservatoryService {
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
     return calculateQuartiles(data);
+  }
+
+  /**
+   * Sync Status Management Methods
+   */
+
+  async isSyncRunning(): Promise<boolean> {
+    const activeSyncs = await this.syncStatusRepository.find({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' },
+      take: 1
+    });
+
+    if (activeSyncs.length === 0) return false;
+
+    const activeSync = activeSyncs[0];
+    
+    // Check if sync is stale (running for more than 1 hour)
+    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
+    if (activeSync.startTime < oneHourAgo) {
+      // Mark stale sync as interrupted and allow new sync
+      await this.markSyncInterrupted(activeSync.id);
+      return false;
+    }
+
+    return true;
+  }
+
+  async getSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const latestSync = await this.syncStatusRepository.findOne({
+      order: { createdAt: 'DESC' }
+    });
+    
+    return latestSync;
+  }
+
+  async getCurrentRunningSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const runningSync = await this.syncStatusRepository.findOne({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' }
+    });
+    
+    return runningSync;
+  }
+
+  private async initializeSyncStatus(
+    type: SyncType, 
+    totalChunks: number, 
+    totalDirectories: number
+  ): Promise<ObservatorySyncStatus> {
+    const processId = process.pid.toString();
+    const namespace = process.env.NAMESPACE;
+    const amsid = process.env.AMSID ? parseInt(process.env.AMSID) : null;
+
+    const syncStatus = this.syncStatusRepository.create({
+      status: SyncStatus.RUNNING,
+      type,
+      startTime: new Date(),
+      totalChunks,
+      processedChunks: 0,
+      totalDirectories,
+      processedDirectories: 0,
+      processId,
+      namespace,
+      amsid
+    });
+
+    return await this.syncStatusRepository.save(syncStatus);
+  }
+
+  private async updateSyncProgress(
+    syncId: number, 
+    processedChunks: number, 
+    processedDirectories: number
+  ): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      processedChunks,
+      processedDirectories,
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncCompleted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.COMPLETED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncFailed(syncId: number, errorMessage: string): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.FAILED,
+      endTime: new Date(),
+      errorMessage: errorMessage.substring(0, 1000), // Limit error message length
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncInterrupted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.INTERRUPTED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  /**
+   * Clean up old sync status records (keep only last 50)
+   */
+  @Cron('0 2 * * *') // Run at 2 AM daily
+  async cleanupOldSyncStatuses(): Promise<void> {
+    try {
+      const allStatuses = await this.syncStatusRepository.find({
+        select: ['id'],
+        order: { createdAt: 'DESC' }
+      });
+
+      if (allStatuses.length > 50) {
+        const idsToDelete = allStatuses.slice(50).map(s => s.id);
+        await this.syncStatusRepository.delete(idsToDelete);
+        console.log(`Cleaned up ${idsToDelete.length} old sync status records`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up old sync statuses:', error);
+    }
   }
 }

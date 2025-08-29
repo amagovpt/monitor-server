@@ -44,6 +44,16 @@ export class PageService {
     return parsedData.nPages;
   }
 
+  async findNumberOfMyMonitor(): Promise<number> {
+    return (
+      await this.pageRepository.query(
+        `SELECT COUNT(distinct p.PageId) as Pages 
+        FROM Page as p, WebsitePage as wp, Website as w, User as u 
+        WHERE u.Type = "monitor" AND w.UserId = u.UserId AND wp.WebsiteId = w.WebsiteId AND p.PageId = wp.PageId`
+      )
+    )[0].Pages;
+  }
+
   async findAdminEvaluatingInEvaluationList(): Promise<number> {
     const result = await this.pageRepository.query(
       "SELECT COUNT(*) as Total FROM Evaluation_List WHERE UserId = -1 AND Is_Evaluating = 1"
@@ -107,6 +117,29 @@ export class PageService {
     return result;
   }
 
+  async getMyMonitorPagesWithError(): Promise<any> {
+    const result = await this.pageRepository.query(`
+      SELECT 
+        el.Url,
+        el.Error,
+        el.Creation_Date,
+        u.Username,
+        u.UserId,
+        w.Name as WebsiteName,
+        w.StartingUrl
+      FROM Evaluation_List el
+      JOIN User u ON u.UserId = el.UserId
+      LEFT JOIN Page p ON p.Uri = el.Url
+      LEFT JOIN WebsitePage wp ON wp.PageId = p.PageId  
+      LEFT JOIN Website w ON w.WebsiteId = wp.WebsiteId
+      WHERE u.Type = "monitor" 
+        AND el.Is_Evaluating = 0 
+        AND el.Error IS NOT NULL
+      ORDER BY el.Creation_Date DESC
+    `);
+    return result;
+  }
+
   async adminCount(search: string): Promise<any> {
     const count = await this.pageRepository.query(
       `SELECT COUNT(*) as Count
@@ -119,6 +152,10 @@ export class PageService {
     );
 
     return count[0].Count;
+  }
+
+  async count(): Promise<number> {
+    return this.pageRepository.count();
   }
 
   async findAll(

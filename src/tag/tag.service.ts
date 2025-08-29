@@ -129,22 +129,132 @@ export class TagService {
     }
   }
 
-  async findAll(): Promise<any> {
-    const tags = await this.tagRepository.query(`SELECT 
-        t.*,
-        COUNT(distinct tw.WebsiteId) as Websites 
-      FROM 
-        Tag as t
-        LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
-      WHERE
-        t.UserId IS NULL
-      GROUP BY t.TagId`);
+  async findAll(
+    size?: number,
+    page?: number,
+    sort?: string,
+    direction?: string,
+    search?: string
+  ): Promise<any> {
+    // If no pagination parameters provided, return all tags (existing behavior)
+    if (size === undefined) {
+      const tags = await this.tagRepository.query(`SELECT 
+          t.*,
+          COUNT(distinct tw.WebsiteId) as Websites 
+        FROM 
+          Tag as t
+          LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+        WHERE
+          t.UserId IS NULL
+        GROUP BY t.TagId`);
 
-    return tags;
+      return tags;
+    }
+
+    // Paginated version
+    const searchTerm = search?.trim() !== "" ? `%${search?.trim()}%` : "%";
+    
+    if (!direction?.trim()) {
+      // Without sorting
+      if (size !== -1) {
+        const tags = await this.tagRepository.query(
+          `SELECT 
+            t.*,
+            COUNT(distinct tw.WebsiteId) as Websites
+          FROM 
+            Tag as t
+            LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+          WHERE
+            t.UserId IS NULL AND t.Name LIKE ?
+          GROUP BY t.TagId
+          LIMIT ? OFFSET ?`,
+          [searchTerm, size, page * size]
+        );
+        return tags;
+      } else {
+        const tags = await this.tagRepository.query(
+          `SELECT 
+            t.*,
+            COUNT(distinct tw.WebsiteId) as Websites
+          FROM 
+            Tag as t
+            LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+          WHERE
+            t.UserId IS NULL AND t.Name LIKE ?
+          GROUP BY t.TagId`,
+          [searchTerm]
+        );
+        return tags;
+      }
+    } else {
+      // With sorting
+      let order = "";
+      switch (sort) {
+        case "Name":
+          order = "t.Name";
+          break;
+        case "Creation_Date":
+          order = "t.Creation_Date";
+          break;
+        case "Websites":
+          order = "Websites";
+          break;
+        default:
+          order = "t.Name";
+          break;
+      }
+
+      if (size !== -1) {
+        const tags = await this.tagRepository.query(
+          `SELECT 
+            t.*,
+            COUNT(distinct tw.WebsiteId) as Websites
+          FROM 
+            Tag as t
+            LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+          WHERE
+            t.UserId IS NULL AND t.Name LIKE ?
+          GROUP BY t.TagId
+          ORDER BY ${order} ${direction.toUpperCase()}
+          LIMIT ? OFFSET ?`,
+          [searchTerm, size, page * size]
+        );
+        return tags;
+      } else {
+        const tags = await this.tagRepository.query(
+          `SELECT 
+            t.*,
+            COUNT(distinct tw.WebsiteId) as Websites
+          FROM 
+            Tag as t
+            LEFT OUTER JOIN TagWebsite as tw ON tw.TagId = t.TagId
+          WHERE
+            t.UserId IS NULL AND t.Name LIKE ?
+          GROUP BY t.TagId
+          ORDER BY ${order} ${direction.toUpperCase()}`,
+          [searchTerm]
+        );
+        return tags;
+      }
+    }
   }
 
   async findAllOfficial(): Promise<any> {
     return this.tagRepository.find({ where: { UserId: IsNull() } });
+  }
+
+  async adminCount(search: string): Promise<any> {
+    const count = await this.tagRepository.query(
+      `SELECT COUNT(t.TagId) as Count
+      FROM Tag as t
+      WHERE t.UserId IS NULL AND t.Name LIKE ?`,
+      [search.trim() !== "" ? `%${search.trim()}%` : "%"]
+    );
+    return count[0].Count;
+  }
+
+  async count(): Promise<number> {
+    return this.tagRepository.count();
   }
 
   async findNumberOfStudyMonitor(): Promise<number> {
