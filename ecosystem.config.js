@@ -7,6 +7,7 @@ module.exports = {
       instances: 2,
       exec_mode: "cluster",
       increment_var: "AMPID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "AMP",
         AMPID: 0,
@@ -17,6 +18,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
       env_production: {
         NAMESPACE: "AMP",
@@ -28,6 +32,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
     },
     {
@@ -37,6 +44,7 @@ module.exports = {
       instances: 3,
       exec_mode: "cluster",
       increment_var: "AMSID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "ADMIN",
         AMSID: 0,
@@ -47,6 +55,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
       env_production: {
         NAMESPACE: "ADMIN",
@@ -58,6 +69,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
     },
     {
@@ -67,6 +81,7 @@ module.exports = {
       instances: 3,
       exec_mode: "cluster",
       increment_var: "USRID",
+      cron_restart: "45 0 * * *",
       env: {
         NAMESPACE: "USER",
         USRID: 0,
@@ -77,6 +92,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
       env_production: {
         NAMESPACE: "USER",
@@ -88,6 +106,9 @@ module.exports = {
         CLIENT_ID: "5369659202618878362",
         REDIRECT_URI: "http://10.55.37.17/mm/loginRedirect",
         SECRET_KEY: "vtUfe9I6Tc",
+        OBSERVATORY_CHUNK_SIZE: 5,
+        ENABLE_INCREMENTAL_OBSERVATORY: true,
+        ENABLE_OBSERVATORY_GC: true,
       },
     },
   ],

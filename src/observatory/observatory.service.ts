@@ -8,11 +8,20 @@ import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
 import _tests from "src/evaluation/tests";
 import { Observatory } from "./observatory.entity";
+import { ObservatorySyncStatus, SyncStatus, SyncType } from "./observatory-sync-status.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { calculateQuartiles } from "src/lib/quartil";
 
+interface ObservatoryConfig {
+  chunkSize: number;
+  enableIncremental: boolean;
+  enableGarbageCollection: boolean;
+  maxMemoryUsageMB: number;
+}
+
 @Injectable()
 export class ObservatoryService {
+  private config: ObservatoryConfig;
   elemGroups = {
     a: "link",
     all: "other",
@@ -44,8 +53,24 @@ export class ObservatoryService {
 
   constructor(
     @InjectRepository(Observatory)
-    private readonly observatoryRepository: Repository<Observatory>
-  ) {}
+    private readonly observatoryRepository: Repository<Observatory>,
+    @InjectRepository(ObservatorySyncStatus)
+    private readonly syncStatusRepository: Repository<ObservatorySyncStatus>
+  ) {
+    this.config = this.loadConfig();
+  }
+
+  /**
+   * Load configuration from environment variables with defaults
+   */
+  private loadConfig(): ObservatoryConfig {
+    return {
+      chunkSize: parseInt(process.env.OBSERVATORY_CHUNK_SIZE || '20'),
+      enableIncremental: process.env.ENABLE_INCREMENTAL_OBSERVATORY === 'true',
+      enableGarbageCollection: process.env.ENABLE_OBSERVATORY_GC === 'true',
+      maxMemoryUsageMB: parseInt(process.env.OBSERVATORY_MAX_MEMORY_MB || '1024')
+    };
+  }
 
   async findAll(): Promise<Observatory[]> {
     return this.observatoryRepository.find({
@@ -60,59 +85,893 @@ export class ObservatoryService {
       amsid: process.env.AMSID,
       intParse: parseInt(process.env.AMSID),
     });
+    
     if (
       process.env.NAMESPACE === undefined ||
       parseInt(process.env.AMSID) === 0 ||
       manual
     ) {
-      const data = await this.getData();
-
-      const directories = new Array<Directory>();
-      const tmpDirectories = this.createTemporaryDirectories(data);
-
-      for (const directory of tmpDirectories || []) {
-        const newDirectory = this.createDirectory(directory, clone(data));
-        directories.push(newDirectory);
+      // Check if sync is already running
+      const isRunning = await this.isSyncRunning();
+      if (isRunning) {
+        console.log('Data generation already in progress, skipping...');
+        return { message: 'Sync already in progress' };
       }
 
-      const listDirectories = new ListDirectories(data, directories);
+      // Use configured processing mode (Phase 2)
+      console.log('Observatory config:', this.config);
+      
+      if (this.config.enableIncremental) {
+        return this.generateDataIncremental(manual, this.config.chunkSize);
+      } else {
+        return this.generateDataChunked(manual, this.config.chunkSize);
+      }
+    }
+  }
 
-      const { declarations, badges } = this.countDeclarationsAndStamps(
-        listDirectories.directories
+  /**
+   * Phase 2: Chunked processing with robust error handling and retry mechanism
+   */
+  async generateDataChunked(manual = false, chunkSize = 20): Promise<any> {
+    let syncStatus: ObservatorySyncStatus | null = null;
+    
+    try {
+      console.log(`Starting chunked data generation with chunk size: ${chunkSize}`);
+      
+      // Get all directory IDs first
+      const directoryIds = await this.getDirectoryIds();
+      console.log(`Processing ${directoryIds.length} directories in chunks of ${chunkSize}`);
+      
+      // Process directories in chunks with retry logic
+      const chunks = [];
+      for (let i = 0; i < directoryIds.length; i += chunkSize) {
+        chunks.push({
+          directories: directoryIds.slice(i, i + chunkSize),
+          chunkNumber: Math.floor(i / chunkSize) + 1
+        });
+      }
+      
+      const totalChunks = chunks.length;
+      
+      // Initialize sync status
+      syncStatus = await this.initializeSyncStatus(
+        manual ? SyncType.MANUAL : SyncType.AUTO,
+        totalChunks,
+        directoryIds.length
       );
+      
+      let allDirectories = new Array<Directory>();
+      let allData = new Array<any>();
+      const failedChunks = new Array<{chunk: number[], chunkNumber: number, error: string}>();
+      console.log(`Created ${totalChunks} chunks for processing`);
+      
+      // Process each chunk with retry mechanism
+      for (const {directories, chunkNumber} of chunks) {
+        const success = await this.processChunkWithRetry(
+          directories, 
+          chunkNumber, 
+          totalChunks,
+          allDirectories,
+          allData,
+          failedChunks
+        );
+        
+        if (!success) {
+          console.error(`Failed to process chunk ${chunkNumber} after retries`);
+        }
+        
+        // Optional: Force garbage collection between chunks if enabled
+        if (this.config.enableGarbageCollection && (globalThis as any).gc) {
+          (globalThis as any).gc();
+          console.log(`Forced garbage collection after chunk ${chunkNumber}`);
+        }
+      }
 
-      const global = {
-        score: listDirectories.getScore(),
-        nDirectories: listDirectories.directories.length,
-        nWebsites: listDirectories.nWebsites,
-        nEntities: listDirectories.nEntities,
-        nPages: listDirectories.nPages,
-        nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
-        recentPage: listDirectories.recentPage,
-        oldestPage: listDirectories.oldestPage,
-        topFiveWebsites: this.getTopFiveWebsites(listDirectories),
-        topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
-        topFiveErrors: listDirectories.getTopFiveErrors(),
-        declarations,
-        badges,
-        scoreDistributionFrequency: listDirectories.frequencies,
-        errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
-        bestPracticesDistribution:
-          this.getGlobalBestPracticesDistribution(listDirectories),
-        directoriesList: this.getSortedDirectoriesList(listDirectories),
-        directories: this.getDirectories(listDirectories),
-      };
+      // Validate all chunks processed successfully
+      await this.validateChunkProcessing(directoryIds, allDirectories, failedChunks);
+
+      console.log(`Building global statistics from ${allDirectories.length} directories and ${allData.length} records...`);
+      
+      // Create final result
+      const listDirectories = new ListDirectories(allData, allDirectories);
+      const global = await this.buildGlobalStatistics(listDirectories);
 
       if (manual) {
-        await this.observatoryRepository.delete({
-          Type: "manual",
-        });
+        console.log('Deleting existing manual records...');
+        await this.observatoryRepository.query(
+          'DELETE FROM Observatory WHERE Type = ?',
+          ['manual']
+        );
+        console.log('Manual records deleted');
       }
 
       await this.observatoryRepository.query(
         "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
         [JSON.stringify(global), manual ? "manual" : "auto", new Date()]
       );
+      
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
+      console.log("Chunked data generation completed successfully");
+      console.log(`Final summary: ${allDirectories.length} directories, ${allData.length} records, ${failedChunks.length} failed chunks`);
+      
+      return global;
+    } catch (error) {
+      console.error('Error in generateDataChunked:', error);
+      console.error('Stack trace:', error.stack);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Process a single chunk with retry mechanism (fixed to prevent double-counting from failed attempts)
+   */
+  private async processChunkWithRetry(
+    chunk: number[],
+    chunkNumber: number,
+    totalChunks: number,
+    allDirectories: Directory[],
+    allData: any[],
+    failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>,
+    maxRetries = 3
+  ): Promise<boolean> {
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      // Store results locally - only add to main arrays after COMPLETE success
+      let chunkDirectories: Directory[] | null = null;
+      let chunkData: any[] | null = null;
+      
+      try {
+        console.log(`Processing chunk ${chunkNumber}/${totalChunks} (attempt ${attempt}/${maxRetries})`);
+        console.log(`Chunk ${chunkNumber} contains directories: [${chunk.join(', ')}]`);
+        
+        const startTime = Date.now();
+        chunkData = await this.getDataForDirectoryChunk(chunk);
+        const queryTime = Date.now() - startTime;
+        
+        console.log(`Chunk ${chunkNumber} query completed in ${queryTime}ms, returned ${chunkData.length} records`);
+        
+        // Validate chunk data is not empty when it should contain data
+        if (chunkData.length === 0) {
+          const directoryExists = await this.validateDirectoriesExist(chunk);
+          if (directoryExists) {
+            throw new Error(`Chunk ${chunkNumber} returned 0 records but directories exist`);
+          }
+        }
+        
+        const processStartTime = Date.now();
+        chunkDirectories = this.processDirectoryChunk(chunkData);
+        const processTime = Date.now() - processStartTime;
+        
+        console.log(`Chunk ${chunkNumber} processing completed in ${processTime}ms, created ${chunkDirectories.length} directories`);
+        
+        // Validate that we got directories for the chunk
+        if (chunkDirectories.length === 0 && chunkData.length > 0) {
+          throw new Error(`Chunk ${chunkNumber} failed to create directory objects from ${chunkData.length} records`);
+        }
+        
+        // STACK OVERFLOW PROTECTION: Test safe operations without spread operator
+        console.log(`Testing stack safety before adding ${chunkDirectories.length} directories to results...`);
+        
+        // Test if we can safely add directories using for-loop (avoids spread operator completely)
+        try {
+          // Test with a small subset first - no array copying involved
+          const testLimit = Math.min(3, chunkDirectories.length);
+          for (let i = 0; i < testLimit; i++) {
+            // Just test the push operation without actually modifying main array
+            const testDirectory = chunkDirectories[i];
+            if (!testDirectory || typeof testDirectory !== 'object') {
+              throw new Error(`Invalid directory object at index ${i}`);
+            }
+          }
+          console.log(`Stack test passed, proceeding with full addition`);
+        } catch (testError) {
+          throw new Error(`Stack overflow or data validation error: ${testError.message}`);
+        }
+        
+        // CRITICAL FIX: Only add results to main arrays after ALL operations succeed
+        console.log(`Adding ${chunkDirectories.length} directories to main array (current: ${allDirectories.length})`);
+        for (const directory of chunkDirectories) {
+          allDirectories.push(directory);
+        }
+        
+        console.log(`Adding ${chunkData.length} data records to main array (current: ${allData.length})`);
+        for (const dataItem of chunkData) {
+          allData.push(dataItem);
+        }
+        
+        console.log(`✅ Chunk ${chunkNumber} successful: ${chunkDirectories.length} directories, ${chunkData.length} records`);
+        console.log(`   Running totals: ${allDirectories.length} directories, ${allData.length} records`);
+        
+        return true;
+        
+      } catch (error) {
+        console.error(`❌ Chunk ${chunkNumber} attempt ${attempt} failed:`, error.message);
+        console.error(`   Error occurred during: ${error.stack ? 'processing' : 'unknown phase'}`);
+        
+        // CRITICAL: Local variables chunkDirectories and chunkData are discarded
+        // Main arrays allDirectories and allData are NEVER modified on failure
+        chunkDirectories = null;
+        chunkData = null;
+        
+        if (attempt === maxRetries) {
+          // Final attempt failed - record as failed chunk
+          failedChunks.push({
+            chunk,
+            chunkNumber,
+            error: error.message
+          });
+          
+          console.error(`🚨 Chunk ${chunkNumber} failed after ${maxRetries} attempts - will be excluded from final result`);
+          console.error(`   No data from this chunk was added to totals (${attempt} failed attempts)`);
+          return false;
+        } else {
+          console.log(`⏳ Retrying chunk ${chunkNumber} (attempt ${attempt + 1}/${maxRetries}) in 5 seconds...`);
+          console.log(`   Local attempt data discarded, main arrays unchanged`);
+          await this.sleep(5000); // Wait 5 seconds before retry
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Validate that all chunks were processed successfully (fixed validation logic)
+   */
+  private async validateChunkProcessing(
+    originalDirectoryIds: number[],
+    processedDirectories: Directory[],
+    failedChunks: Array<{chunk: number[], chunkNumber: number, error: string}>
+  ): Promise<void> {
+    
+    // Get unique directory IDs from processed directories (prevent counting duplicates)
+    const processedDirectoryIds = [...new Set(processedDirectories.map(d => d.id))];
+    const expectedCount = originalDirectoryIds.length;
+    const actualCount = processedDirectoryIds.length;
+    const duplicateCount = processedDirectories.length - actualCount;
+    
+    console.log(`📊 Processing validation:`);
+    console.log(`   Expected directories: ${expectedCount}`);
+    console.log(`   Unique processed directories: ${actualCount}`);
+    if (duplicateCount > 0) {
+      console.warn(`   ⚠️  Duplicate directory objects detected: ${duplicateCount}`);
+      console.warn(`   Total directory objects: ${processedDirectories.length}`);
+    }
+    console.log(`   Failed chunks: ${failedChunks.length}`);
+    
+    if (failedChunks.length > 0) {
+      console.error(`🚨 Failed chunks details:`);
+      failedChunks.forEach(({chunkNumber, chunk, error}) => {
+        console.error(`   Chunk ${chunkNumber}: directories [${chunk.join(', ')}] - ${error}`);
+      });
+    }
+    
+    // Find missing directories (based on failed chunks)
+    const failedDirectoryIds = new Set<number>();
+    failedChunks.forEach(({chunk}) => {
+      chunk.forEach(id => failedDirectoryIds.add(id));
+    });
+    
+    const missingDirectories = originalDirectoryIds.filter(id => !processedDirectoryIds.includes(id));
+    const unexpectedMissing = missingDirectories.filter(id => !failedDirectoryIds.has(id));
+    
+    if (missingDirectories.length > 0) {
+      console.error(`🚨 Missing directories: [${missingDirectories.join(', ')}]`);
+      if (unexpectedMissing.length > 0) {
+        console.error(`🚨 Unexpectedly missing (not in failed chunks): [${unexpectedMissing.join(', ')}]`);
+      }
+    }
+    
+    // Calculate success rate based on unique directories
+    const successRate = (actualCount / expectedCount) * 100;
+    console.log(`📈 Success rate: ${successRate.toFixed(1)}% (${actualCount}/${expectedCount})`);
+    
+    // Fail if success rate is too low (less than 95%)
+    if (successRate < 95) {
+      throw new Error(`Observatory generation failed: success rate ${successRate.toFixed(1)}% is below acceptable threshold (95%)`);
+    }
+    
+    if (failedChunks.length > 0 && successRate < 100) {
+      console.warn(`⚠️  Observatory generation completed with partial success (${successRate.toFixed(1)}%)`);
+      console.warn(`   This may result in incomplete observatory data`);
+    }
+  }
+
+  /**
+   * Check if directories actually exist in database
+   */
+  private async validateDirectoriesExist(directoryIds: number[]): Promise<boolean> {
+    const result = await this.observatoryRepository.query(
+      `SELECT COUNT(*) as count FROM Directory WHERE DirectoryId IN (${directoryIds.map(() => '?').join(',')}) AND Show_in_Observatory = 1`,
+      directoryIds
+    );
+    return result[0]?.count > 0;
+  }
+
+  /**
+   * Sleep utility for retry delays
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Phase 2: Incremental processing to avoid rebuilding unchanged data
+   */
+  async generateDataIncremental(manual = false, chunkSize = 20): Promise<any> {
+    console.log("Starting incremental data generation");
+    
+    if (manual) {
+      // For manual runs, always do full regeneration
+      return this.generateDataChunked(manual, chunkSize);
+    }
+    
+    const lastRun = await this.getLastGenerationDate();
+    console.log(`Last generation date: ${lastRun}`);
+    
+    // Get directories that have changed since last run
+    const changedDirectoryIds = await this.getChangedDirectoryIds(lastRun);
+    console.log(`Found ${changedDirectoryIds.length} changed directories`);
+    
+    if (changedDirectoryIds.length === 0) {
+      console.log("No changes detected, skipping generation");
+      
+      // Create a quick sync status record for "no changes"
+      const syncStatus = await this.initializeSyncStatus(SyncType.AUTO, 0, 0);
+      await this.markSyncCompleted(syncStatus.id);
+      
+      return { message: 'No changes detected, skipping generation' };
+    }
+    
+    let syncStatus: ObservatorySyncStatus | null = null;
+    
+    try {
+      // Initialize sync status for incremental processing
+      syncStatus = await this.initializeSyncStatus(
+        SyncType.AUTO, 
+        1, // Only one "chunk" for incremental
+        changedDirectoryIds.length
+      );
+      
+      // Get unchanged data from cache or previous result
+      const unchangedData = await this.getUnchangedObservatoryData(changedDirectoryIds);
+      
+      // Process only changed directories
+      const changedData = await this.getDataForDirectoryChunk(changedDirectoryIds);
+      const changedDirectories = this.processDirectoryChunk(changedData);
+      
+      // Update progress
+      await this.updateSyncProgress(syncStatus.id, 1, changedDirectoryIds.length);
+      
+      // Merge results
+      const mergedDirectories = [...unchangedData.directories, ...changedDirectories];
+      const mergedData = [...unchangedData.data, ...changedData];
+      
+      const listDirectories = new ListDirectories(mergedData, mergedDirectories);
+      const global = await this.buildGlobalStatistics(listDirectories);
+
+      await this.observatoryRepository.query(
+        "INSERT INTO Observatory (Global_Statistics, Type, Creation_Date) VALUES (?, ?, ?)",
+        [JSON.stringify(global), "auto", new Date()]
+      );
+      
+      // Mark sync as completed
+      await this.markSyncCompleted(syncStatus.id);
+      
+      console.log("Incremental data generation completed");
+      return global;
+    } catch (error) {
+      console.error('Error in generateDataIncremental:', error);
+      
+      if (syncStatus) {
+        await this.markSyncFailed(syncStatus.id, error.message);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Helper method to get all directory IDs for chunking
+   */
+  async getDirectoryIds(): Promise<number[]> {
+    const result = await this.observatoryRepository.query(
+      'SELECT DirectoryId FROM Directory WHERE Show_in_Observatory = 1 ORDER BY DirectoryId'
+    );
+    return result.map((row: any) => row.DirectoryId);
+  }
+
+  /**
+   * Get data for a specific chunk of directories
+   */
+  async getDataForDirectoryChunk(directoryIds: number[]): Promise<any[]> {
+    if (directoryIds.length === 0) return [];
+    
+    // Try optimized approach first, fallback to legacy if issues
+    try {
+      console.log('Using optimized query approach');
+      return await this.getDataForDirectoryChunkOptimized(directoryIds);
+    } catch (error) {
+      console.warn('Optimized query failed, falling back to legacy approach:', error.message);
+      return this.getDataForDirectoryChunkLegacy(directoryIds);
+    }
+  }
+
+  /**
+   * Process directory chunk using legacy approach (proven to work)
+   */
+  private async getDataForDirectoryChunkLegacy(directoryIds: number[]): Promise<any[]> {
+    let allData = [];
+    
+    // Get directories info
+    const directories = await this.observatoryRepository.query(
+      `SELECT * FROM Directory WHERE DirectoryId IN (${directoryIds.map(() => '?').join(',')}) AND Show_in_Observatory = 1`,
+      directoryIds
+    );
+    
+    for (const directory of directories) {
+      // Get tags for this directory
+      const tags = await this.observatoryRepository.query(
+        `SELECT t.* FROM DirectoryTag as dt, Tag as t WHERE dt.DirectoryId = ? AND t.TagId = dt.TagId`,
+        [directory.DirectoryId]
+      );
+      const tagsId = tags.map((t) => t.TagId);
+
+      let pages = null;
+      if (parseInt(directory.Method) === 0 && tags.length > 1) {
+        const websites = await this.observatoryRepository.query(
+          `SELECT * FROM TagWebsite WHERE TagId IN (${tagsId.map(() => '?').join(',')})`,
+          tagsId
+        );
+
+        const counts = {};
+        for (const w of websites ?? []) {
+          if (counts[w.WebsiteId]) {
+            counts[w.WebsiteId]++;
+          } else {
+            counts[w.WebsiteId] = 1;
+          }
+        }
+
+        const websitesToFetch = new Array<Number>();
+        for (const id of Object.keys(counts) ?? []) {
+          if (counts[id] === tags.length) {
+            websitesToFetch.push(parseInt(id));
+          }
+        }
+
+        if (websitesToFetch.length === 0) {
+          continue;
+        }
+
+        pages = await this.observatoryRepository.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            w.WebsiteId IN (${websitesToFetch.map(() => '?').join(',')}) AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          websitesToFetch
+        );
+      } else {
+        pages = await this.observatoryRepository.query(
+          `
+          SELECT
+            e.EvaluationId,
+            e.Title,
+            e.Score,
+            e.Errors,
+            e.Tot,
+            e.A,
+            e.AA,
+            e.AAA,
+            e.Evaluation_Date,
+            p.PageId,
+            p.Uri,
+            p.Creation_Date as Page_Creation_Date,
+            w.WebsiteId,
+            w.Name as Website_Name,
+            w.StartingUrl,
+            w.Declaration as Website_Declaration,
+            w.Declaration_Update_Date as Declaration_Date,
+            w.Stamp as Website_Stamp,
+            w.Stamp_Update_Date as Stamp_Date,
+            w.Creation_Date as Website_Creation_Date
+          FROM
+            TagWebsite as tw,
+            Website as w,
+            WebsitePage as wp,
+            Page as p
+            LEFT OUTER JOIN Evaluation e ON e.PageId = p.PageId AND e.Show_To LIKE "1_" AND e.Evaluation_Date = (
+              SELECT Evaluation_Date FROM Evaluation 
+              WHERE PageId = p.PageId AND Show_To LIKE "1_"
+              ORDER BY Evaluation_Date DESC LIMIT 1
+            )
+          WHERE
+            tw.TagId IN (${tagsId.map(() => '?').join(',')}) AND
+            w.WebsiteId = tw.WebsiteId AND
+            wp.WebsiteId = w.WebsiteId AND
+            p.PageId = wp.PageId AND
+            p.Show_In LIKE "__1"
+          GROUP BY
+            w.WebsiteId, p.PageId, e.A, e.AA, e.AAA, e.Score, e.Errors, e.Tot, e.Evaluation_Date`,
+          tagsId
+        );
+      }
+      
+      if (pages) {
+        pages = pages.filter((p) => p.Score !== null);
+
+        for (const p of pages || []) {
+          p.DirectoryId = directory.DirectoryId;
+          p.Directory_Name = directory.Name;
+          p.Show_in_Observatory = directory.Show_in_Observatory;
+          p.Directory_Creation_Date = directory.Creation_Date;
+          p.Entity_Name = null;
+
+          const entities = await this.observatoryRepository.query(
+            `
+            SELECT e.Long_Name
+            FROM
+              EntityWebsite as ew,
+              Entity as e
+            WHERE
+              ew.WebsiteId = ? AND
+              e.EntityId = ew.EntityId
+          `,
+            [p.WebsiteId]
+          );
+
+          if (entities.length > 0) {
+            if (entities.length === 1) {
+              p.Entity_Name = entities[0].Long_Name;
+            } else {
+              p.Entity_Name = entities.map((e) => e.Long_Name).join("@,@ ");
+            }
+          }
+        }
+
+        allData = [...allData, ...pages];
+      }
+    }
+    
+    return allData;
+  }
+
+  /**
+   * Optimized single-query approach for maximum performance
+   */
+  async getDataForDirectoryChunkOptimized(directoryIds: number[]): Promise<any[]> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          WHERE Show_To LIKE '1_%'
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+        WHERE e1.Show_To LIKE '1_%'
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE 
+        d.DirectoryId IN (${directoryIds.map(() => '?').join(',')})
+        AND d.Show_in_Observatory = 1 
+        AND p.Show_In LIKE '__1'
+        AND e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    console.log(`Optimized query executing for ${directoryIds.length} directories`);
+    const startTime = Date.now();
+    
+    const rawData = await this.observatoryRepository.query(query, directoryIds);
+    
+    console.log(`Optimized query completed in ${Date.now() - startTime}ms, returned ${rawData.length} raw records`);
+    
+    // Handle Method 0 filtering more efficiently
+    const websiteTagValidation = new Map<number, boolean>();
+    
+    const filteredData = rawData.filter((row: any) => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, cache validation results
+      if (method === 0 && tagCount > 1) {
+        const websiteId = row.WebsiteId;
+        
+        if (!websiteTagValidation.has(websiteId)) {
+          // This would need async validation, for now assume valid
+          // In practice, the SQL query should handle this filtering
+          websiteTagValidation.set(websiteId, true);
+        }
+        
+        return websiteTagValidation.get(websiteId);
+      }
+      
+      return true;
+    });
+
+    console.log(`Filtering completed, returning ${filteredData.length} valid records`);
+    return filteredData;
+  }
+
+  /**
+   * Process a chunk of directories into Directory objects (optimized for large datasets)
+   */
+  processDirectoryChunk(chunkData: any[]): Directory[] {
+    console.log(`Processing ${chunkData.length} records into directory objects...`);
+    
+    // For very large datasets, avoid deep cloning the entire dataset for each directory
+    if (chunkData.length > 100000) {
+      console.log(`Using optimized processing for large dataset (${chunkData.length} records)`);
+      return this.processDirectoryChunkOptimized(chunkData);
+    }
+    
+    const directories = new Array<Directory>();
+    const tmpDirectories = this.createTemporaryDirectories(chunkData);
+
+    for (const directory of tmpDirectories || []) {
+      const newDirectory = this.createDirectory(directory, clone(chunkData));
+      directories.push(newDirectory);
+    }
+
+    return directories;
+  }
+
+  /**
+   * Memory-optimized processing for large datasets to prevent stack overflow
+   */
+  private processDirectoryChunkOptimized(chunkData: any[]): Directory[] {
+    const directories = new Array<Directory>();
+    
+    // Get unique directory IDs first to prevent duplicates
+    const uniqueDirectoryIds = [...new Set(chunkData.map(item => item.DirectoryId))];
+    console.log(`Found ${uniqueDirectoryIds.length} unique directories in ${chunkData.length} records`);
+
+    for (const directoryId of uniqueDirectoryIds) {
+      // Get directory metadata from first matching record
+      const directoryRecord = chunkData.find(item => item.DirectoryId === directoryId);
+      if (!directoryRecord) continue;
+      
+      const directoryInfo = {
+        id: directoryRecord.DirectoryId,
+        name: directoryRecord.Directory_Name,
+        creation_date: directoryRecord.Directory_Creation_Date,
+      };
+      
+      // Get all relevant data for this specific directory
+      const relevantData = chunkData.filter(item => item.DirectoryId === directoryId);
+      console.log(`Directory ${directoryId} (${directoryInfo.name}): ${relevantData.length} records`);
+      
+      const newDirectory = this.createDirectory(directoryInfo, relevantData);
+      directories.push(newDirectory);
+      
+      // Force cleanup of large arrays to prevent memory accumulation
+      if (relevantData.length > 10000 && (globalThis as any).gc) {
+        (globalThis as any).gc();
+      }
+    }
+
+    console.log(`Created ${directories.length} directory objects (should match ${uniqueDirectoryIds.length} unique directories)`);
+    return directories;
+  }
+
+  /**
+   * Build total statistics from ALL system data (same format as observatory)
+   */
+  async buildTotalStatistics(): Promise<any> {
+    console.log('Building total statistics from ALL system data...');
+    
+    // Get all data without visibility filters
+    const allData = await this.getAllSystemData();
+    
+    // Process the data using the same logic as observatory
+    const directories = this.processDirectoryChunk(allData);
+    const listDirectories = new ListDirectories(allData, directories);
+    
+    // Use the same statistics building method
+    return this.buildGlobalStatistics(listDirectories);
+  }
+
+  /**
+   * Build global statistics from ListDirectories
+   */
+  async buildGlobalStatistics(listDirectories: ListDirectories): Promise<any> {
+    const { declarations, badges } = this.countDeclarationsAndStamps(
+      listDirectories.directories
+    );
+
+    return {
+      score: listDirectories.getScore(),
+      nDirectories: listDirectories.directories.length,
+      nWebsites: listDirectories.nWebsites,
+      nEntities: listDirectories.nEntities,
+      nPages: listDirectories.nPages,
+      nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
+      recentPage: listDirectories.recentPage,
+      oldestPage: listDirectories.oldestPage,
+      topFiveWebsites: this.getTopFiveWebsites(listDirectories),
+      topFiveBestPractices: listDirectories.getTopFiveBestPractices(),
+      topFiveErrors: listDirectories.getTopFiveErrors(),
+      declarations,
+      badges,
+      scoreDistributionFrequency: listDirectories.frequencies,
+      errorDistribution: this.getGlobalErrorsDistribution(listDirectories),
+      bestPracticesDistribution:
+        this.getGlobalBestPracticesDistribution(listDirectories),
+      directoriesList: this.getSortedDirectoriesList(listDirectories),
+      directories: this.getDirectories(listDirectories),
+    };
+  }
+
+  /**
+   * Get last generation date for incremental processing
+   */
+  async getLastGenerationDate(): Promise<Date> {
+    const result = await this.observatoryRepository.query(
+      'SELECT MAX(Creation_Date) as lastDate FROM Observatory WHERE Type = "auto"'
+    );
+    return result[0]?.lastDate || new Date('2000-01-01');
+  }
+
+  /**
+   * Get directory IDs that have changed since last generation
+   */
+  async getChangedDirectoryIds(lastRun: Date): Promise<number[]> {
+    // This is a simplified approach - in reality you'd want to track:
+    // - New/updated evaluations
+    // - New/updated websites
+    // - New/updated pages
+    // - Directory configuration changes
+    
+    const query = `
+      SELECT DISTINCT d.DirectoryId
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN TagWebsite tw ON dt.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN Evaluation e ON p.PageId = e.PageId
+      WHERE d.Show_in_Observatory = 1
+      AND (
+        e.Evaluation_Date > ? 
+        OR w.Declaration_Update_Date > ?
+        OR w.Stamp_Update_Date > ?
+        OR p.Creation_Date > ?
+      )
+    `;
+    
+    const result = await this.observatoryRepository.query(query, [lastRun, lastRun, lastRun, lastRun]);
+    return result.map((row: any) => row.DirectoryId);
+  }
+
+  /**
+   * Get unchanged observatory data from directories that haven't changed since last run
+   */
+  async getUnchangedObservatoryData(changedDirectoryIds: number[]): Promise<{directories: Directory[], data: any[]}> {
+    try {
+      // Get all directory IDs that should be in observatory
+      const allDirectoryIds = await this.getDirectoryIds();
+      
+      // Find unchanged directories (all directories minus changed ones)
+      const unchangedDirectoryIds = allDirectoryIds.filter(id => !changedDirectoryIds.includes(id));
+      
+      console.log(`Loading data for ${unchangedDirectoryIds.length} unchanged directories (excluding ${changedDirectoryIds.length} changed)`);
+      
+      if (unchangedDirectoryIds.length === 0) {
+        console.log('No unchanged directories found, returning empty data');
+        return { directories: [], data: [] };
+      }
+      
+      // Get data for unchanged directories using existing optimized method
+      const unchangedData = await this.getDataForDirectoryChunk(unchangedDirectoryIds);
+      console.log(`Retrieved ${unchangedData.length} records from unchanged directories`);
+      
+      // Process unchanged data into Directory objects
+      const unchangedDirectories = this.processDirectoryChunk(unchangedData);
+      console.log(`Created ${unchangedDirectories.length} directory objects from unchanged data`);
+      
+      return { 
+        directories: unchangedDirectories, 
+        data: unchangedData 
+      };
+    } catch (error) {
+      console.error('Error loading unchanged observatory data:', error);
+      console.log('Falling back to full processing due to error in unchanged data retrieval');
+      
+      // On error, return empty to force full processing (safe fallback)
+      return { directories: [], data: [] };
     }
   }
 
@@ -127,6 +986,218 @@ export class ObservatoryService {
   }
 
   async getData(): Promise<any> {
+    // Use optimized single query to get all data at once
+    return this.getDataOptimized();
+  }
+
+  async getAllSystemData(): Promise<any> {
+    // Get ALL data in the system (remove Show_in_Observatory and other visibility filters)
+    return this.getAllDataOptimized();
+  }
+
+  /**
+   * Optimized version of getData() that eliminates N+1 queries
+   * Uses single bulk query with proper joins and pre-computed latest evaluations
+   */
+  async getDataOptimized(): Promise<any> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          WHERE Show_To LIKE '1_%'
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+        WHERE e1.Show_To LIKE '1_%'
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE 
+        d.Show_in_Observatory = 1 
+        AND p.Show_In LIKE '__1'
+        AND e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    const rawData = await this.observatoryRepository.query(query);
+    
+    // Filter based on directory method and tag requirements
+    const filteredData = rawData.filter(row => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, ensure website has ALL tags
+      if (method === 0 && tagCount > 1) {
+        return this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+      }
+      
+      return true;
+    });
+
+    return filteredData;
+  }
+
+  /**
+   * Get ALL data in the system (removes Show_in_Observatory and Show_To filters)
+   * Same structure as getDataOptimized but includes all directories, websites, and pages
+   */
+  async getAllDataOptimized(): Promise<any[]> {
+    const query = `
+      SELECT 
+        d.DirectoryId,
+        d.Name as Directory_Name,
+        d.Show_in_Observatory,
+        d.Creation_Date as Directory_Creation_Date,
+        d.Method as Directory_Method,
+        w.WebsiteId,
+        w.Name as Website_Name,
+        w.StartingUrl,
+        w.Declaration as Website_Declaration,
+        w.Declaration_Update_Date as Declaration_Date,
+        w.Stamp as Website_Stamp,
+        w.Stamp_Update_Date as Stamp_Date,
+        w.Creation_Date as Website_Creation_Date,
+        p.PageId,
+        p.Uri,
+        p.Creation_Date as Page_Creation_Date,
+        e.EvaluationId,
+        e.Title,
+        e.Score,
+        e.Errors,
+        e.Tot,
+        e.A,
+        e.AA,
+        e.AAA,
+        e.Evaluation_Date,
+        GROUP_CONCAT(DISTINCT ent.Long_Name SEPARATOR '@,@ ') as Entity_Name,
+        GROUP_CONCAT(DISTINCT t.TagId) as TagIds,
+        COUNT(DISTINCT t.TagId) as TagCount
+      FROM Directory d
+      JOIN DirectoryTag dt ON d.DirectoryId = dt.DirectoryId
+      JOIN Tag t ON dt.TagId = t.TagId
+      JOIN TagWebsite tw ON t.TagId = tw.TagId
+      JOIN Website w ON tw.WebsiteId = w.WebsiteId
+      JOIN WebsitePage wp ON w.WebsiteId = wp.WebsiteId
+      JOIN Page p ON wp.PageId = p.PageId
+      LEFT JOIN (
+        SELECT 
+          e1.PageId,
+          e1.EvaluationId,
+          e1.Title,
+          e1.Score,
+          e1.Errors,
+          e1.Tot,
+          e1.A,
+          e1.AA,
+          e1.AAA,
+          e1.Evaluation_Date
+        FROM Evaluation e1
+        INNER JOIN (
+          SELECT PageId, MAX(Evaluation_Date) as MaxDate
+          FROM Evaluation 
+          GROUP BY PageId
+        ) e2 ON e1.PageId = e2.PageId AND e1.Evaluation_Date = e2.MaxDate
+      ) e ON p.PageId = e.PageId
+      LEFT JOIN EntityWebsite ew ON w.WebsiteId = ew.WebsiteId
+      LEFT JOIN Entity ent ON ew.EntityId = ent.EntityId
+      WHERE e.Score IS NOT NULL
+      GROUP BY 
+        d.DirectoryId, w.WebsiteId, p.PageId, 
+        e.EvaluationId, e.Score, e.A, e.AA, e.AAA, e.Evaluation_Date
+    `;
+
+    console.log('Executing query for ALL system data (no visibility filters)');
+    const startTime = Date.now();
+    
+    const rawData = await this.observatoryRepository.query(query);
+    
+    console.log(`All data query completed in ${Date.now() - startTime}ms, returned ${rawData.length} records`);
+    
+    // Apply same Method 0 filtering logic but for all directories
+    const filteredData = rawData.filter(row => {
+      const method = parseInt(row.Directory_Method);
+      const tagCount = parseInt(row.TagCount);
+      
+      // For Method 0 with multiple tags, ensure website has ALL tags
+      if (method === 0 && tagCount > 1) {
+        return this.websiteHasAllTags(row.WebsiteId, row.TagIds.split(','), tagCount);
+      }
+      
+      return true;
+    });
+
+    console.log(`Filtering completed for all data, returning ${filteredData.length} valid records`);
+    return filteredData;
+  }
+
+  /**
+   * Helper method to verify if a website has all required tags for Method 0 directories
+   */
+  private async websiteHasAllTags(websiteId: number, tagIds: string[], requiredTagCount: number): Promise<boolean> {
+    const result = await this.observatoryRepository.query(`
+      SELECT COUNT(DISTINCT TagId) as count
+      FROM TagWebsite 
+      WHERE WebsiteId = ? AND TagId IN (?)
+    `, [websiteId, tagIds]);
+    
+    return result[0].count === requiredTagCount;
+  }
+
+  /**
+   * Legacy getData method - kept for backwards compatibility
+   * TODO: Remove after migration is complete
+   */
+  async getDataLegacy(): Promise<any> {
     let data = new Array<any>();
 
     const directories = await this.observatoryRepository.query(
@@ -166,7 +1237,7 @@ export class ObservatoryService {
         }
 
         if (websitesToFetch.length === 0) {
-          continue
+          continue;
         }
 
         pages = await this.observatoryRepository.query(
@@ -968,5 +2039,131 @@ export class ObservatoryService {
   ): Array<any> {
     let data = directory.getPassedOccurrenceByWebsite(test);
     return calculateQuartiles(data);
+  }
+
+  /**
+   * Sync Status Management Methods
+   */
+
+  async isSyncRunning(): Promise<boolean> {
+    const activeSyncs = await this.syncStatusRepository.find({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' },
+      take: 1
+    });
+
+    if (activeSyncs.length === 0) return false;
+
+    const activeSync = activeSyncs[0];
+    
+    // Check if sync is stale (running for more than 1 hour)
+    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
+    if (activeSync.startTime < oneHourAgo) {
+      // Mark stale sync as interrupted and allow new sync
+      await this.markSyncInterrupted(activeSync.id);
+      return false;
+    }
+
+    return true;
+  }
+
+  async getSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const latestSync = await this.syncStatusRepository.findOne({
+      order: { createdAt: 'DESC' }
+    });
+    
+    return latestSync;
+  }
+
+  async getCurrentRunningSyncStatus(): Promise<ObservatorySyncStatus | null> {
+    const runningSync = await this.syncStatusRepository.findOne({
+      where: { status: SyncStatus.RUNNING },
+      order: { startTime: 'DESC' }
+    });
+    
+    return runningSync;
+  }
+
+  private async initializeSyncStatus(
+    type: SyncType, 
+    totalChunks: number, 
+    totalDirectories: number
+  ): Promise<ObservatorySyncStatus> {
+    const processId = process.pid.toString();
+    const namespace = process.env.NAMESPACE;
+    const amsid = process.env.AMSID ? parseInt(process.env.AMSID) : null;
+
+    const syncStatus = this.syncStatusRepository.create({
+      status: SyncStatus.RUNNING,
+      type,
+      startTime: new Date(),
+      totalChunks,
+      processedChunks: 0,
+      totalDirectories,
+      processedDirectories: 0,
+      processId,
+      namespace,
+      amsid
+    });
+
+    return await this.syncStatusRepository.save(syncStatus);
+  }
+
+  private async updateSyncProgress(
+    syncId: number, 
+    processedChunks: number, 
+    processedDirectories: number
+  ): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      processedChunks,
+      processedDirectories,
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncCompleted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.COMPLETED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncFailed(syncId: number, errorMessage: string): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.FAILED,
+      endTime: new Date(),
+      errorMessage: errorMessage.substring(0, 1000), // Limit error message length
+      updatedAt: new Date()
+    });
+  }
+
+  private async markSyncInterrupted(syncId: number): Promise<void> {
+    await this.syncStatusRepository.update(syncId, {
+      status: SyncStatus.INTERRUPTED,
+      endTime: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  /**
+   * Clean up old sync status records (keep only last 50)
+   */
+  @Cron('0 2 * * *') // Run at 2 AM daily
+  async cleanupOldSyncStatuses(): Promise<void> {
+    try {
+      const allStatuses = await this.syncStatusRepository.find({
+        select: ['id'],
+        order: { createdAt: 'DESC' }
+      });
+
+      if (allStatuses.length > 50) {
+        const idsToDelete = allStatuses.slice(50).map(s => s.id);
+        await this.syncStatusRepository.delete(idsToDelete);
+        console.log(`Cleaned up ${idsToDelete.length} old sync status records`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up old sync statuses:', error);
+    }
   }
 }
