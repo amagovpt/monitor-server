@@ -864,6 +864,23 @@ export class ObservatoryService {
   }
 
   /**
+   * Build new comprehensive totals structure
+   */
+  async buildComprehensiveTotals(): Promise<any> {
+    console.log('Building comprehensive totals from ALL system data...');
+    
+    // Get all data without visibility filters
+    const allData = await this.getAllSystemData();
+    
+    // Process the data using the same logic as observatory
+    const directories = this.processDirectoryChunk(allData);
+    const listDirectories = new ListDirectories(allData, directories);
+    
+    // Build new comprehensive structure
+    return this.buildComprehensiveStatistics(allData, listDirectories);
+  }
+
+  /**
    * Build global statistics from ListDirectories
    */
   async buildGlobalStatistics(listDirectories: ListDirectories): Promise<any> {
@@ -892,6 +909,174 @@ export class ObservatoryService {
       directoriesList: this.getSortedDirectoriesList(listDirectories),
       directories: this.getDirectories(listDirectories),
     };
+  }
+
+  /**
+   * Build comprehensive statistics with new required structure
+   */
+  buildComprehensiveStatistics(allData: any[], listDirectories: ListDirectories): any {
+    console.log('Building comprehensive statistics structure...');
+    
+    // Phase 1: Efficient Core Metrics
+    const totalPages = allData.length;
+    const totalScore = allData.reduce((sum: number, page: any) => sum + (parseFloat(page.Score) || 0), 0);
+    const evaluationDates = allData
+      .filter((page: any) => page.Evaluation_Date)
+      .map((page: any) => new Date(page.Evaluation_Date));
+    
+    // Phase 2: Conformance Analysis
+    const conformanceAnalysis = this.buildConformanceAnalysis(allData);
+    
+    // Phase 3: Score Distribution (0-1, 1-2, 2-3, etc.)
+    const scoreDistribution = this.buildScoreDistribution(allData);
+    
+    // Phase 4: Directory Average Scores
+    const directoryScores = this.buildDirectoryAverageScores(listDirectories);
+    
+    // Phase 5: Complete Practice Table
+    const practiceTable = this.buildCompletePracticeTable(listDirectories);
+    
+    return {
+      averageScore: totalScore / totalPages,
+      oldestEvaluation: evaluationDates.length > 0 ? new Date(Math.min(...evaluationDates.map(d => d.getTime()))) : null,
+      mostRecentEvaluation: evaluationDates.length > 0 ? new Date(Math.max(...evaluationDates.map(d => d.getTime()))) : null,
+      directories: listDirectories.directories.length,
+      entities: listDirectories.nEntities,
+      websites: listDirectories.nWebsites,
+      pages: listDirectories.nPages,
+      nonConformingWebsites: conformanceAnalysis.nonConforming,
+      conformingWebsites: conformanceAnalysis.conforming,
+      levelAConformingWebsites: conformanceAnalysis.levelA,
+      levelAAConformingWebsites: conformanceAnalysis.levelAA,
+      levelAAAConformingWebsites: conformanceAnalysis.levelAAA,
+      scoreRangeDistribution: scoreDistribution,
+      directoryAverageScores: directoryScores,
+      practiceTable: practiceTable
+    };
+  }
+
+  /**
+   * Build conformance analysis for websites
+   */
+  private buildConformanceAnalysis(allData: any[]): any {
+    // Group by website to analyze conformance at website level
+    const websiteScores = new Map<number, { A: number, AA: number, AAA: number }>();
+    
+    for (const page of allData) {
+      const websiteId = page.WebsiteId;
+      if (!websiteScores.has(websiteId)) {
+        websiteScores.set(websiteId, { A: 0, AA: 0, AAA: 0 });
+      }
+      
+      const website = websiteScores.get(websiteId)!;
+      website.A += parseInt(page.A) || 0;
+      website.AA += parseInt(page.AA) || 0;
+      website.AAA += parseInt(page.AAA) || 0;
+    }
+    
+    let nonConforming = 0;
+    let conforming = 0;
+    let levelA = 0;
+    let levelAA = 0;
+    let levelAAA = 0;
+    
+    for (const [, scores] of websiteScores) {
+      if (scores.A > 0) {
+        nonConforming++;
+      } else {
+        conforming++;
+        levelA++;
+        
+        if (scores.AA === 0) {
+          levelAA++;
+          
+          if (scores.AAA === 0) {
+            levelAAA++;
+          }
+        }
+      }
+    }
+    
+    return { nonConforming, conforming, levelA, levelAA, levelAAA };
+  }
+
+  /**
+   * Build score distribution in increments of 1 (0-1, 1-2, 2-3, etc.)
+   */
+  private buildScoreDistribution(allData: any[]): { range: string, pages: number }[] {
+    const distribution = Array.from({ length: 10 }, (_, i) => ({
+      range: `${i}-${i + 1}`,
+      pages: 0
+    }));
+    
+    for (const page of allData) {
+      const score = parseFloat(page.Score) || 0;
+      const bucket = Math.min(Math.floor(score), 9); // Cap at 9 for 9-10 range
+      distribution[bucket].pages++;
+    }
+    
+    return distribution;
+  }
+
+  /**
+   * Build directory average scores mapping
+   */
+  private buildDirectoryAverageScores(listDirectories: ListDirectories): { directoryId: number, directoryName: string, averageScore: number }[] {
+    return listDirectories.directories.map(directory => ({
+      directoryId: directory.id,
+      directoryName: directory.name,
+      averageScore: directory.getScore()
+    }));
+  }
+
+  /**
+   * Build complete practice table with metadata
+   */
+  private buildCompletePracticeTable(listDirectories: ListDirectories): any[] {
+    const practiceTable: any[] = [];
+    const processedPractices = new Set<string>();
+    
+    // Process successful practices
+    for (const practice in listDirectories.success || {}) {
+      if (processedPractices.has(practice)) continue;
+      processedPractices.add(practice);
+      
+      const practiceData = listDirectories.success[practice];
+      const testMetadata = _tests[practice];
+      
+      if (testMetadata) {
+        practiceTable.push({
+          practice: practice,
+          pages: practiceData.n_pages,
+          elements: practiceData.n_occurrences,
+          level: testMetadata.level.toUpperCase(),
+          successCriteria: testMetadata.scs,
+          isGoodPractice: testMetadata.result === 'passed'
+        });
+      }
+    }
+    
+    // Process error practices
+    for (const practice in listDirectories.errors || {}) {
+      if (processedPractices.has(practice)) continue;
+      processedPractices.add(practice);
+      
+      const practiceData = listDirectories.errors[practice];
+      const testMetadata = _tests[practice];
+      
+      if (testMetadata) {
+        practiceTable.push({
+          practice: practice,
+          pages: practiceData.n_pages,
+          elements: practiceData.n_occurrences,
+          level: testMetadata.level.toUpperCase(),
+          successCriteria: testMetadata.scs,
+          isGoodPractice: testMetadata.result === 'passed'
+        });
+      }
+    }
+    
+    return practiceTable.sort((a, b) => b.pages - a.pages); // Sort by page count descending
   }
 
   /**

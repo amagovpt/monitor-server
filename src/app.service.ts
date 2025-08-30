@@ -92,8 +92,8 @@ export class AppService {
   }
 
   async getTotalsData(): Promise<any> {
-    // Return observatory-format data but including ALL system data
+    // Return new comprehensive structure including ALL system data
     // (observatory + mymonitor + AMS-only data)
-    return await this.observatoryService.buildTotalStatistics();
+    return await this.observatoryService.buildComprehensiveTotals();
   }
 }
