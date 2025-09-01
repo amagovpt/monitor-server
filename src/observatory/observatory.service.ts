@@ -1142,7 +1142,7 @@ export class ObservatoryService {
           const tot = JSON.parse(Buffer.from(record.Tot, "base64").toString());
           const errors = record.Errors ? JSON.parse(Buffer.from(record.Errors, "base64").toString()) : {};
           
-          // Process ALL results - don't filter by tests metadata for now
+          // Process ALL results - check if they're passed or failed based on tests metadata
           for (const key in tot.results || {}) {
             // Get occurrences from errors, defaulting to 1
             const occurrences = 1; // Simplified for now
@@ -1160,8 +1160,14 @@ export class ObservatoryService {
             stats.pages.add(record.Uri);
             stats.websites.add(record.Website_Name);
             
-            // For now, assume all practices are "failed" (errors) - we'll refine this
-            stats.failed += occurrences;
+            // Check if this is a passed or failed practice based on tests metadata
+            const testMetadata = tests[key];
+            if (testMetadata && testMetadata.result === "passed") {
+              stats.passed += occurrences;
+            } else {
+              // Default to failed if no metadata or if result is "failed"
+              stats.failed += occurrences;
+            }
           }
         } catch (e) {
           // Skip invalid Base64 or JSON - could be due to corrupted data
