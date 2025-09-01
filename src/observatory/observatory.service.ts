@@ -1137,6 +1137,8 @@ export class ObservatoryService {
     practiceStats: Map<string, any>
   ): Promise<void> {
     const tests = require('../evaluation/tests');
+    let processedRecords = 0;
+    let totalPracticesFound = 0;
     
     chunk.forEach(record => {
       // Look for practice data in the Tot field (Base64 encoded JSON) - decode like Evaluation class does
@@ -1146,11 +1148,27 @@ export class ObservatoryService {
           const tot = JSON.parse(Buffer.from(record.Tot, "base64").toString());
           const errors = record.Errors ? JSON.parse(Buffer.from(record.Errors, "base64").toString()) : {};
           
-          // Process the results like the original Website class does
+          // Debug first record structure
+          if (processedRecords === 0) {
+            console.log('First evaluation record structure:', {
+              totKeys: Object.keys(tot),
+              hasResults: !!tot.results,
+              resultsKeys: tot.results ? Object.keys(tot.results).slice(0, 5) : 'none',
+              errorsKeys: Object.keys(errors).slice(0, 5)
+            });
+          }
+          
+          processedRecords++;
+          const practicesInThisRecord = Object.keys(tot.results || {}).length;
+          totalPracticesFound += practicesInThisRecord;
+          
+          // Process ALL results like the original Website class does
+          let validPracticesInRecord = 0;
           for (const key in tot.results || {}) {
             if (tests[key]) {
+              validPracticesInRecord++;
               const test = tests[key]["test"];
-              const result = tests[key]["result"];
+              const result = tests[key]["result"]; // This is the metadata result type
               const occurrences = errors[test] === undefined || errors[test] < 1 ? 1 : errors[test];
               
               if (!practiceStats.has(key)) {
@@ -1166,13 +1184,20 @@ export class ObservatoryService {
               stats.pages.add(record.Uri);
               stats.websites.add(record.Website_Name);
               
-              // Count by result type (like original logic)
+              // Count by metadata result type (like original logic)
+              // If metadata says this practice type is "passed", count as passed
+              // If metadata says this practice type is "failed", count as failed  
               if (result === 'passed') {
                 stats.passed += occurrences;
               } else if (result === 'failed') {
                 stats.failed += occurrences;
               }
+              // Note: Some practices might have other result types - still count the practice
             }
+          }
+          
+          if (validPracticesInRecord !== practicesInThisRecord) {
+            console.log(`Record ${record.EvaluationId}: Found ${practicesInThisRecord} practices in tot.results, but only ${validPracticesInRecord} exist in tests metadata`);
           }
         } catch (e) {
           // Skip invalid Base64 or JSON - could be due to corrupted data
@@ -1180,6 +1205,10 @@ export class ObservatoryService {
         }
       }
     });
+    
+    if (processedRecords > 0) {
+      console.log(`Chunk processed: ${processedRecords} records with evaluation data, ${totalPracticesFound} total practice instances found`);
+    }
   }
   
   /**
