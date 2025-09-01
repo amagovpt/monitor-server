@@ -1106,6 +1106,7 @@ export class ObservatoryService {
     // Convert aggregated data to practice table format
     const practiceTable: any[] = [];
     
+    // Process practices and get metadata
     practiceStats.forEach((stats, practice) => {
       const totalTests = stats.passed + stats.failed;
       if (totalTests > 0) {
@@ -1119,7 +1120,7 @@ export class ObservatoryService {
           passed: stats.passed,
           failed: stats.failed,
           level: testMetadata?.level?.toUpperCase() || 'UNKNOWN',
-          successCriteria: testMetadata?.scs || [],
+          successCriteria: testMetadata?.scs ? testMetadata.scs.split(',') : [],
           isGoodPractice: stats.passed > stats.failed,
           hasMetadata: !!testMetadata // Indicate if we have metadata for this practice
         });
@@ -1137,7 +1138,8 @@ export class ObservatoryService {
     chunk: any[], 
     practiceStats: Map<string, any>
   ): Promise<void> {
-    const tests = require('../evaluation/tests');
+    const testsModule = require('../evaluation/tests');
+    const tests = testsModule.default || testsModule;
     let processedRecords = 0;
     let totalPracticesFound = 0;
     
@@ -1162,6 +1164,7 @@ export class ObservatoryService {
             const testsKeys = Object.keys(tests).slice(0, 10);
             console.log('Sample tests metadata keys:', testsKeys);
             console.log('Sample tot.results keys:', tot.results ? Object.keys(tot.results).slice(0, 10) : 'none');
+            console.log('Tests metadata loading test:', tests.img_01a ? 'SUCCESS - Found img_01a' : 'FAILED - No img_01a');
           }
           
           processedRecords++;
@@ -1193,9 +1196,7 @@ export class ObservatoryService {
             stats.failed += occurrences;
           }
           
-          if (validPracticesInRecord !== practicesInThisRecord) {
-            console.log(`Record ${record.EvaluationId}: Found ${practicesInThisRecord} practices in tot.results, but only ${validPracticesInRecord} exist in tests metadata`);
-          }
+          // Now we process all practices regardless of metadata availability
         } catch (e) {
           // Skip invalid Base64 or JSON - could be due to corrupted data
           // console.log('Failed to decode evaluation data:', e.message);
@@ -1282,7 +1283,8 @@ export class ObservatoryService {
    */
   private getTestMetadata(practice: string): any {
     try {
-      const tests = require('../evaluation/tests');
+      const testsModule = require('../evaluation/tests');
+      const tests = testsModule.default || testsModule;
       return tests[practice] || null;
     } catch (e) {
       return null;
