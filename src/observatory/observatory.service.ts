@@ -1057,21 +1057,26 @@ export class ObservatoryService {
     // Build practice table using chunked processing
     const practiceTable = await this.buildPracticeTableChunked(allData);
     
+    const isObservatoryFallback = practiceTable.length > 0 && practiceTable[0].source === 'observatory';
+    
     return {
       practiceTable,
       metadata: {
         totalRecords: allData.length,
         practiceCount: practiceTable.length,
-        dataSource: practiceTable.length > 0 && practiceTable[0].source === 'observatory' 
-          ? 'Observatory system only' 
-          : 'All systems (Observatory + MyMonitor + AMS)'
+        dataSource: isObservatoryFallback 
+          ? 'Observatory system only (fallback)' 
+          : 'All systems (Observatory + MyMonitor + AMS)',
+        processingMethod: isObservatoryFallback 
+          ? 'Cached observatory statistics' 
+          : 'Chunked processing of evaluation records'
       }
     };
   }
 
   /**
-   * Build practice table with fallback to observatory data
-   * Note: Due to empty Tot fields in database, falls back to observatory-only practice data
+   * Build practice table from all system data using chunked processing
+   * Decodes Base64 encoded Tot/Errors fields like the Evaluation model
    */
   private async buildPracticeTableChunked(allData: any[]): Promise<any[]> {
     console.log(`Building practice table from ${allData.length} records using chunked processing...`);
@@ -1092,9 +1097,11 @@ export class ObservatoryService {
     
     // If no practice data found in chunks, fall back to observatory data
     if (practiceStats.size === 0) {
-      console.log('No practice data found in evaluation records, falling back to observatory practice data');
+      console.log('No practice data found in evaluation records (after Base64 decoding), falling back to observatory practice data');
       return await this.getObservatoryPracticeTableFallback();
     }
+    
+    console.log(`Successfully processed ${practiceStats.size} unique practices from all system evaluation data`);
     
     // Convert aggregated data to practice table format
     const practiceTable: any[] = [];
@@ -1132,11 +1139,12 @@ export class ObservatoryService {
     const tests = require('../evaluation/tests');
     
     chunk.forEach(record => {
-      // Look for practice data in the Tot field (JSON format) - this matches the original logic
+      // Look for practice data in the Tot field (Base64 encoded JSON) - decode like Evaluation class does
       if (record.Tot && record.Tot !== '{}' && record.Tot !== 'null') {
         try {
-          const tot = JSON.parse(record.Tot);
-          const errors = record.Errors ? JSON.parse(record.Errors) : {};
+          // Decode Base64 to JSON like the Evaluation model does
+          const tot = JSON.parse(Buffer.from(record.Tot, "base64").toString());
+          const errors = record.Errors ? JSON.parse(Buffer.from(record.Errors, "base64").toString()) : {};
           
           // Process the results like the original Website class does
           for (const key in tot.results || {}) {
@@ -1167,7 +1175,8 @@ export class ObservatoryService {
             }
           }
         } catch (e) {
-          // Skip invalid JSON
+          // Skip invalid Base64 or JSON - could be due to corrupted data
+          // console.log('Failed to decode evaluation data:', e.message);
         }
       }
     });
