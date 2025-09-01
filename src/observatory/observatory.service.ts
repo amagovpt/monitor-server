@@ -883,21 +883,49 @@ export class ObservatoryService {
   private buildLightweightComprehensiveStatistics(allData: any[]): any {
     console.log('Building lightweight comprehensive statistics...');
     
-    // Basic counts using direct array operations
-    const uniqueDirectories = [...new Set(allData.map(r => r.DirectoryId))];
-    const uniqueEntities = [...new Set(allData.map(r => r.Entity_Name))];
-    const uniqueWebsites = [...new Set(allData.map(r => r.Website_Name))];
-    const uniquePages = [...new Set(allData.map(r => r.Uri))];
+    // Process all data in a single pass to minimize memory usage
+    const uniqueDirectories = new Set<number>();
+    const uniqueEntities = new Set<string>();
+    const uniqueWebsites = new Set<string>();
+    const uniquePages = new Set<string>();
     
-    // Score calculations
-    const validScores = allData.filter(r => r.Score !== null && r.Score !== undefined).map(r => parseFloat(r.Score));
-    const totalScore = validScores.reduce((sum, score) => sum + score, 0);
-    const averageScore = validScores.length > 0 ? totalScore / validScores.length : 0;
+    let totalScore = 0;
+    let scoreCount = 0;
+    let oldestTime = Number.MAX_SAFE_INTEGER;
+    let mostRecentTime = 0;
+    let hasValidDates = false;
     
-    // Date calculations
-    const evaluationDates = allData.filter(r => r.Evaluation_Date).map(r => new Date(r.Evaluation_Date));
-    const oldestEvaluation = evaluationDates.length > 0 ? new Date(Math.min(...evaluationDates.map(d => d.getTime()))) : null;
-    const mostRecentEvaluation = evaluationDates.length > 0 ? new Date(Math.max(...evaluationDates.map(d => d.getTime()))) : null;
+    // Single pass through all data
+    allData.forEach(record => {
+      // Collect unique values
+      uniqueDirectories.add(record.DirectoryId);
+      uniqueEntities.add(record.Entity_Name);
+      uniqueWebsites.add(record.Website_Name);
+      uniquePages.add(record.Uri);
+      
+      // Process scores
+      if (record.Score !== null && record.Score !== undefined) {
+        const score = parseFloat(record.Score);
+        if (!isNaN(score)) {
+          totalScore += score;
+          scoreCount++;
+        }
+      }
+      
+      // Process dates
+      if (record.Evaluation_Date) {
+        const time = new Date(record.Evaluation_Date).getTime();
+        if (!isNaN(time)) {
+          hasValidDates = true;
+          if (time < oldestTime) oldestTime = time;
+          if (time > mostRecentTime) mostRecentTime = time;
+        }
+      }
+    });
+    
+    const averageScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+    const oldestEvaluation = hasValidDates ? new Date(oldestTime) : null;
+    const mostRecentEvaluation = hasValidDates ? new Date(mostRecentTime) : null;
     
     // Conformance analysis - lightweight version
     const conformanceAnalysis = this.buildLightweightConformanceAnalysis(allData);
@@ -915,10 +943,10 @@ export class ObservatoryService {
       averageScore: Math.round(averageScore * 100) / 100,
       oldestEvaluation,
       mostRecentEvaluation,
-      directories: uniqueDirectories.length,
-      entities: uniqueEntities.length,
-      websites: uniqueWebsites.length,
-      pages: uniquePages.length,
+      directories: uniqueDirectories.size,
+      entities: uniqueEntities.size,
+      websites: uniqueWebsites.size,
+      pages: uniquePages.size,
       nonConformingWebsites: conformanceAnalysis.nonConforming,
       conformingWebsites: conformanceAnalysis.conforming,
       levelAConformingWebsites: conformanceAnalysis.levelA,
