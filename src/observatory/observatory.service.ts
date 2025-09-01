@@ -1048,11 +1048,8 @@ export class ObservatoryService {
    * Build comprehensive practices data for separate endpoint
    */
   async buildComprehensivePracticesData(): Promise<any> {
-    console.log('Building comprehensive practices data from ALL system data...');
-    
     // Get all data without visibility filters
     const allData = await this.getAllSystemData();
-    console.log(`Processing ${allData.length} records for practices calculation...`);
     
     // Build practice table using chunked processing
     const practiceTable = await this.buildPracticeTableChunked(allData);
@@ -1079,7 +1076,7 @@ export class ObservatoryService {
    * Decodes Base64 encoded Tot/Errors fields like the Evaluation model
    */
   private async buildPracticeTableChunked(allData: any[]): Promise<any[]> {
-    console.log(`Building practice table from ${allData.length} records using chunked processing...`);
+    // Process large dataset in chunks to avoid memory issues
     
     const CHUNK_SIZE = 5000; // Process 5K records at a time
     const practiceStats = new Map<string, any>();
@@ -1087,7 +1084,6 @@ export class ObservatoryService {
     // Try to process data in chunks first
     for (let i = 0; i < allData.length; i += CHUNK_SIZE) {
       const chunk = allData.slice(i, i + CHUNK_SIZE);
-      console.log(`Processing chunk ${Math.floor(i / CHUNK_SIZE) + 1}/${Math.ceil(allData.length / CHUNK_SIZE)} (${chunk.length} records)`);
       
       await this.processChunkForPracticeTable(chunk, practiceStats);
       
@@ -1097,11 +1093,8 @@ export class ObservatoryService {
     
     // If no practice data found in chunks, fall back to observatory data
     if (practiceStats.size === 0) {
-      console.log('No practice data found in evaluation records (after Base64 decoding), falling back to observatory practice data');
       return await this.getObservatoryPracticeTableFallback();
     }
-    
-    console.log(`Successfully processed ${practiceStats.size} unique practices from all system evaluation data`);
     
     // Convert aggregated data to practice table format
     const practiceTable: any[] = [];
@@ -1127,7 +1120,7 @@ export class ObservatoryService {
       }
     });
     
-    console.log(`Built practice table with ${practiceTable.length} practices from all system data`);
+    console.log(`Built practice table: ${practiceTable.length} practices from all systems`);
     return practiceTable;
   }
   
@@ -1140,8 +1133,6 @@ export class ObservatoryService {
   ): Promise<void> {
     const testsModule = require('../evaluation/tests');
     const tests = testsModule.default || testsModule;
-    let processedRecords = 0;
-    let totalPracticesFound = 0;
     
     chunk.forEach(record => {
       // Look for practice data in the Tot field (Base64 encoded JSON) - decode like Evaluation class does
@@ -1151,31 +1142,8 @@ export class ObservatoryService {
           const tot = JSON.parse(Buffer.from(record.Tot, "base64").toString());
           const errors = record.Errors ? JSON.parse(Buffer.from(record.Errors, "base64").toString()) : {};
           
-          // Debug first record structure
-          if (processedRecords === 0) {
-            console.log('First evaluation record structure:', {
-              totKeys: Object.keys(tot),
-              hasResults: !!tot.results,
-              resultsKeys: tot.results ? Object.keys(tot.results).slice(0, 10) : 'none',
-              errorsKeys: Object.keys(errors).slice(0, 5)
-            });
-            
-            // Show sample tests metadata keys for comparison
-            const testsKeys = Object.keys(tests).slice(0, 10);
-            console.log('Sample tests metadata keys:', testsKeys);
-            console.log('Sample tot.results keys:', tot.results ? Object.keys(tot.results).slice(0, 10) : 'none');
-            console.log('Tests metadata loading test:', tests.img_01a ? 'SUCCESS - Found img_01a' : 'FAILED - No img_01a');
-          }
-          
-          processedRecords++;
-          const practicesInThisRecord = Object.keys(tot.results || {}).length;
-          totalPracticesFound += practicesInThisRecord;
-          
           // Process ALL results - don't filter by tests metadata for now
-          let validPracticesInRecord = 0;
           for (const key in tot.results || {}) {
-            validPracticesInRecord++;
-            
             // Get occurrences from errors, defaulting to 1
             const occurrences = 1; // Simplified for now
             
@@ -1195,18 +1163,11 @@ export class ObservatoryService {
             // For now, assume all practices are "failed" (errors) - we'll refine this
             stats.failed += occurrences;
           }
-          
-          // Now we process all practices regardless of metadata availability
         } catch (e) {
           // Skip invalid Base64 or JSON - could be due to corrupted data
-          // console.log('Failed to decode evaluation data:', e.message);
         }
       }
     });
-    
-    if (processedRecords > 0) {
-      console.log(`Chunk processed: ${processedRecords} records with evaluation data, ${totalPracticesFound} total practice instances found`);
-    }
   }
   
   /**
@@ -1265,16 +1226,14 @@ export class ObservatoryService {
           }
           
           if (practiceTable.length > 0) {
-            console.log(`Built practice table from observatory data with ${practiceTable.length} practices (Observatory system only)`);
             return practiceTable;
           }
         }
       }
     } catch (e) {
-      console.log('Could not get observatory practice table fallback:', e.message);
+      // Failed to get fallback data
     }
     
-    console.log('No practice data available from any source');
     return [];
   }
 
