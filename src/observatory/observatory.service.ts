@@ -1118,9 +1118,10 @@ export class ObservatoryService {
           websites: stats.websites.size,
           passed: stats.passed,
           failed: stats.failed,
-          level: testMetadata?.level?.toUpperCase() || 'A',
+          level: testMetadata?.level?.toUpperCase() || 'UNKNOWN',
           successCriteria: testMetadata?.scs || [],
-          isGoodPractice: stats.passed > stats.failed
+          isGoodPractice: stats.passed > stats.failed,
+          hasMetadata: !!testMetadata // Indicate if we have metadata for this practice
         });
       }
     });
@@ -1153,47 +1154,43 @@ export class ObservatoryService {
             console.log('First evaluation record structure:', {
               totKeys: Object.keys(tot),
               hasResults: !!tot.results,
-              resultsKeys: tot.results ? Object.keys(tot.results).slice(0, 5) : 'none',
+              resultsKeys: tot.results ? Object.keys(tot.results).slice(0, 10) : 'none',
               errorsKeys: Object.keys(errors).slice(0, 5)
             });
+            
+            // Show sample tests metadata keys for comparison
+            const testsKeys = Object.keys(tests).slice(0, 10);
+            console.log('Sample tests metadata keys:', testsKeys);
+            console.log('Sample tot.results keys:', tot.results ? Object.keys(tot.results).slice(0, 10) : 'none');
           }
           
           processedRecords++;
           const practicesInThisRecord = Object.keys(tot.results || {}).length;
           totalPracticesFound += practicesInThisRecord;
           
-          // Process ALL results like the original Website class does
+          // Process ALL results - don't filter by tests metadata for now
           let validPracticesInRecord = 0;
           for (const key in tot.results || {}) {
-            if (tests[key]) {
-              validPracticesInRecord++;
-              const test = tests[key]["test"];
-              const result = tests[key]["result"]; // This is the metadata result type
-              const occurrences = errors[test] === undefined || errors[test] < 1 ? 1 : errors[test];
-              
-              if (!practiceStats.has(key)) {
-                practiceStats.set(key, {
-                  passed: 0,
-                  failed: 0,
-                  pages: new Set<string>(),
-                  websites: new Set<string>()
-                });
-              }
-              
-              const stats = practiceStats.get(key);
-              stats.pages.add(record.Uri);
-              stats.websites.add(record.Website_Name);
-              
-              // Count by metadata result type (like original logic)
-              // If metadata says this practice type is "passed", count as passed
-              // If metadata says this practice type is "failed", count as failed  
-              if (result === 'passed') {
-                stats.passed += occurrences;
-              } else if (result === 'failed') {
-                stats.failed += occurrences;
-              }
-              // Note: Some practices might have other result types - still count the practice
+            validPracticesInRecord++;
+            
+            // Get occurrences from errors, defaulting to 1
+            const occurrences = 1; // Simplified for now
+            
+            if (!practiceStats.has(key)) {
+              practiceStats.set(key, {
+                passed: 0,
+                failed: 0,
+                pages: new Set<string>(),
+                websites: new Set<string>()
+              });
             }
+            
+            const stats = practiceStats.get(key);
+            stats.pages.add(record.Uri);
+            stats.websites.add(record.Website_Name);
+            
+            // For now, assume all practices are "failed" (errors) - we'll refine this
+            stats.failed += occurrences;
           }
           
           if (validPracticesInRecord !== practicesInThisRecord) {
