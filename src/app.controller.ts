@@ -61,4 +61,15 @@ export class AppController {
   async getTotalsData(): Promise<any> {
     return success(await this.appService.getTotalsData());
   }
+
+  @ApiOperation({ summary: "Get totals practice table data" })
+  @ApiResponse({
+    status: 200,
+    description: "Success - Returns practice table with accessibility test results",
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Get("totals/practices")
+  async getTotalsPracticesData(): Promise<any> {
+    return success(await this.appService.getTotalsPracticesData());
+  }
 }

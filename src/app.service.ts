@@ -96,4 +96,9 @@ export class AppService {
     // (observatory + mymonitor + AMS-only data)
     return await this.observatoryService.buildComprehensiveTotals();
   }
+
+  async getTotalsPracticesData(): Promise<any> {
+    // Return practice table data from all system data
+    return await this.observatoryService.buildComprehensivePracticesData();
+  }
 }

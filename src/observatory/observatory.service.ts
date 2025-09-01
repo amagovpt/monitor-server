@@ -936,8 +936,7 @@ export class ObservatoryService {
     // Directory averages - lightweight version
     const directoryAverageScores = this.buildLightweightDirectoryAverageScores(allData);
     
-    // Practice table - process all system data in chunks to avoid stack overflow
-    const practiceTable = await this.buildPracticeTableChunked(allData);
+    // Practice table moved to separate endpoint /totals/practices
     
     return {
       averageScore: Math.round(averageScore * 100) / 100,
@@ -953,8 +952,7 @@ export class ObservatoryService {
       levelAAConformingWebsites: conformanceAnalysis.levelAA,
       levelAAAConformingWebsites: conformanceAnalysis.levelAAA,
       scoreRanges: scoreDistribution,
-      directoryAverageScores,
-      practiceTable
+      directoryAverageScores
     };
   }
 
@@ -1044,6 +1042,31 @@ export class ObservatoryService {
     });
     
     return result;
+  }
+
+  /**
+   * Build comprehensive practices data for separate endpoint
+   */
+  async buildComprehensivePracticesData(): Promise<any> {
+    console.log('Building comprehensive practices data from ALL system data...');
+    
+    // Get all data without visibility filters
+    const allData = await this.getAllSystemData();
+    console.log(`Processing ${allData.length} records for practices calculation...`);
+    
+    // Build practice table using chunked processing
+    const practiceTable = await this.buildPracticeTableChunked(allData);
+    
+    return {
+      practiceTable,
+      metadata: {
+        totalRecords: allData.length,
+        practiceCount: practiceTable.length,
+        dataSource: practiceTable.length > 0 && practiceTable[0].source === 'observatory' 
+          ? 'Observatory system only' 
+          : 'All systems (Observatory + MyMonitor + AMS)'
+      }
+    };
   }
 
   /**
