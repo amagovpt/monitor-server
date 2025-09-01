@@ -871,13 +871,186 @@ export class ObservatoryService {
     
     // Get all data without visibility filters
     const allData = await this.getAllSystemData();
+    console.log(`Processing ${allData.length} records for totals calculation...`);
     
-    // Process the data using the same logic as observatory
-    const directories = this.processDirectoryChunk(allData);
-    const listDirectories = new ListDirectories(allData, directories);
+    // Build comprehensive structure directly without heavy processing
+    return this.buildLightweightComprehensiveStatistics(allData);
+  }
+
+  /**
+   * Lightweight version that processes data directly without heavy ListDirectories processing
+   */
+  private buildLightweightComprehensiveStatistics(allData: any[]): any {
+    console.log('Building lightweight comprehensive statistics...');
     
-    // Build new comprehensive structure
-    return this.buildComprehensiveStatistics(allData, listDirectories);
+    // Basic counts using direct array operations
+    const uniqueDirectories = [...new Set(allData.map(r => r.DirectoryId))];
+    const uniqueEntities = [...new Set(allData.map(r => r.Entity_Name))];
+    const uniqueWebsites = [...new Set(allData.map(r => r.Website_Name))];
+    const uniquePages = [...new Set(allData.map(r => r.Uri))];
+    
+    // Score calculations
+    const validScores = allData.filter(r => r.Score !== null && r.Score !== undefined).map(r => parseFloat(r.Score));
+    const totalScore = validScores.reduce((sum, score) => sum + score, 0);
+    const averageScore = validScores.length > 0 ? totalScore / validScores.length : 0;
+    
+    // Date calculations
+    const evaluationDates = allData.filter(r => r.Evaluation_Date).map(r => new Date(r.Evaluation_Date));
+    const oldestEvaluation = evaluationDates.length > 0 ? new Date(Math.min(...evaluationDates.map(d => d.getTime()))) : null;
+    const mostRecentEvaluation = evaluationDates.length > 0 ? new Date(Math.max(...evaluationDates.map(d => d.getTime()))) : null;
+    
+    // Conformance analysis - lightweight version
+    const conformanceAnalysis = this.buildLightweightConformanceAnalysis(allData);
+    
+    // Score distribution - lightweight version  
+    const scoreDistribution = this.buildLightweightScoreDistribution(allData);
+    
+    // Directory averages - lightweight version
+    const directoryAverageScores = this.buildLightweightDirectoryAverageScores(allData);
+    
+    // Practice table - lightweight version
+    const practiceTable = this.buildLightweightPracticeTable(allData);
+    
+    return {
+      averageScore: Math.round(averageScore * 100) / 100,
+      oldestEvaluation,
+      mostRecentEvaluation,
+      directories: uniqueDirectories.length,
+      entities: uniqueEntities.length,
+      websites: uniqueWebsites.length,
+      pages: uniquePages.length,
+      nonConformingWebsites: conformanceAnalysis.nonConforming,
+      conformingWebsites: conformanceAnalysis.conforming,
+      levelAConformingWebsites: conformanceAnalysis.levelA,
+      levelAAConformingWebsites: conformanceAnalysis.levelAA,
+      levelAAAConformingWebsites: conformanceAnalysis.levelAAA,
+      scoreRanges: scoreDistribution,
+      directoryAverageScores,
+      practiceTable
+    };
+  }
+
+  /**
+   * Lightweight conformance analysis without heavy processing
+   */
+  private buildLightweightConformanceAnalysis(allData: any[]): any {
+    const websiteScores = new Map<string, number[]>();
+    
+    // Group scores by website
+    allData.forEach(record => {
+      if (record.Score !== null && record.Score !== undefined) {
+        const key = record.Website_Name;
+        if (!websiteScores.has(key)) {
+          websiteScores.set(key, []);
+        }
+        websiteScores.get(key).push(parseFloat(record.Score));
+      }
+    });
+    
+    let levelA = 0, levelAA = 0, levelAAA = 0, conforming = 0, nonConforming = 0;
+    
+    websiteScores.forEach(scores => {
+      const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+      if (avgScore >= 7.5) {
+        levelAAA++;
+        conforming++;
+      } else if (avgScore >= 6.0) {
+        levelAA++;
+        conforming++;
+      } else if (avgScore >= 4.5) {
+        levelA++;
+        conforming++;
+      } else {
+        nonConforming++;
+      }
+    });
+    
+    return { levelA, levelAA, levelAAA, conforming, nonConforming };
+  }
+
+  /**
+   * Lightweight score distribution without heavy processing
+   */
+  private buildLightweightScoreDistribution(allData: any[]): any {
+    const ranges = {};
+    for (let i = 1; i <= 10; i++) {
+      ranges[i.toString()] = 0;
+    }
+    
+    allData.forEach(record => {
+      if (record.Score !== null && record.Score !== undefined) {
+        const score = parseFloat(record.Score);
+        const range = Math.ceil(score).toString();
+        if (ranges[range] !== undefined) {
+          ranges[range]++;
+        }
+      }
+    });
+    
+    return ranges;
+  }
+
+  /**
+   * Lightweight directory averages without heavy processing
+   */
+  private buildLightweightDirectoryAverageScores(allData: any[]): any {
+    const directoryScores = new Map<number, number[]>();
+    const directoryNames = new Map<number, string>();
+    
+    allData.forEach(record => {
+      if (record.Score !== null && record.Score !== undefined) {
+        const dirId = record.DirectoryId;
+        if (!directoryScores.has(dirId)) {
+          directoryScores.set(dirId, []);
+          directoryNames.set(dirId, record.Directory_Name);
+        }
+        directoryScores.get(dirId).push(parseFloat(record.Score));
+      }
+    });
+    
+    const result = {};
+    directoryScores.forEach((scores, dirId) => {
+      const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+      const dirName = directoryNames.get(dirId);
+      result[dirName] = Math.round(avgScore * 100) / 100;
+    });
+    
+    return result;
+  }
+
+  /**
+   * Lightweight practice table without heavy processing
+   */
+  private buildLightweightPracticeTable(allData: any[]): any {
+    // Use the existing aggregated practice data approach but simplified
+    const practiceStats = new Map();
+    
+    allData.forEach(record => {
+      if (record.A11Y_Score && record.A11Y_Score !== '{}') {
+        try {
+          const practices = JSON.parse(record.A11Y_Score);
+          Object.entries(practices).forEach(([practice, data]: [string, any]) => {
+            if (!practiceStats.has(practice)) {
+              practiceStats.set(practice, { passed: 0, warning: 0, failed: 0, inapplicable: 0 });
+            }
+            const stats = practiceStats.get(practice);
+            if (data.passed) stats.passed += data.passed;
+            if (data.warning) stats.warning += data.warning;
+            if (data.failed) stats.failed += data.failed;
+            if (data.inapplicable) stats.inapplicable += data.inapplicable;
+          });
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+    });
+    
+    const result = {};
+    practiceStats.forEach((stats, practice) => {
+      result[practice] = stats;
+    });
+    
+    return result;
   }
 
   /**
