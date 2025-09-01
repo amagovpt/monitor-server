@@ -874,13 +874,13 @@ export class ObservatoryService {
     console.log(`Processing ${allData.length} records for totals calculation...`);
     
     // Build comprehensive structure directly without heavy processing
-    return this.buildLightweightComprehensiveStatistics(allData);
+    return await this.buildLightweightComprehensiveStatistics(allData);
   }
 
   /**
    * Lightweight version that processes data directly without heavy ListDirectories processing
    */
-  private buildLightweightComprehensiveStatistics(allData: any[]): any {
+  private async buildLightweightComprehensiveStatistics(allData: any[]): Promise<any> {
     console.log('Building lightweight comprehensive statistics...');
     
     // Process all data in a single pass to minimize memory usage
@@ -936,8 +936,8 @@ export class ObservatoryService {
     // Directory averages - lightweight version
     const directoryAverageScores = this.buildLightweightDirectoryAverageScores(allData);
     
-    // Practice table - lightweight version
-    const practiceTable = this.buildLightweightPracticeTable(allData);
+    // Practice table - process all system data in chunks to avoid stack overflow
+    const practiceTable = await this.buildPracticeTableChunked(allData);
     
     return {
       averageScore: Math.round(averageScore * 100) / 100,
@@ -1047,38 +1047,188 @@ export class ObservatoryService {
   }
 
   /**
-   * Lightweight practice table without heavy processing
+   * Build practice table with fallback to observatory data
+   * Note: Due to empty Tot fields in database, falls back to observatory-only practice data
    */
-  private buildLightweightPracticeTable(allData: any[]): any {
-    // Use the existing aggregated practice data approach but simplified
-    const practiceStats = new Map();
+  private async buildPracticeTableChunked(allData: any[]): Promise<any[]> {
+    console.log(`Building practice table from ${allData.length} records using chunked processing...`);
     
-    allData.forEach(record => {
-      if (record.A11Y_Score && record.A11Y_Score !== '{}') {
+    const CHUNK_SIZE = 5000; // Process 5K records at a time
+    const practiceStats = new Map<string, any>();
+    
+    // Try to process data in chunks first
+    for (let i = 0; i < allData.length; i += CHUNK_SIZE) {
+      const chunk = allData.slice(i, i + CHUNK_SIZE);
+      console.log(`Processing chunk ${Math.floor(i / CHUNK_SIZE) + 1}/${Math.ceil(allData.length / CHUNK_SIZE)} (${chunk.length} records)`);
+      
+      await this.processChunkForPracticeTable(chunk, practiceStats);
+      
+      // Allow event loop to process other tasks
+      await new Promise(resolve => setImmediate(resolve));
+    }
+    
+    // If no practice data found in chunks, fall back to observatory data
+    if (practiceStats.size === 0) {
+      console.log('No practice data found in evaluation records, falling back to observatory practice data');
+      return await this.getObservatoryPracticeTableFallback();
+    }
+    
+    // Convert aggregated data to practice table format
+    const practiceTable: any[] = [];
+    
+    practiceStats.forEach((stats, practice) => {
+      const totalTests = stats.passed + stats.failed;
+      if (totalTests > 0) {
+        const testMetadata = this.getTestMetadata(practice);
+        
+        practiceTable.push({
+          practice: practice,
+          pages: stats.pages.size,
+          elements: totalTests,
+          websites: stats.websites.size,
+          passed: stats.passed,
+          failed: stats.failed,
+          level: testMetadata?.level?.toUpperCase() || 'A',
+          successCriteria: testMetadata?.scs || [],
+          isGoodPractice: stats.passed > stats.failed
+        });
+      }
+    });
+    
+    console.log(`Built practice table with ${practiceTable.length} practices from all system data`);
+    return practiceTable;
+  }
+  
+  /**
+   * Process a chunk of data for practice table aggregation
+   */
+  private async processChunkForPracticeTable(
+    chunk: any[], 
+    practiceStats: Map<string, any>
+  ): Promise<void> {
+    const tests = require('../evaluation/tests');
+    
+    chunk.forEach(record => {
+      // Look for practice data in the Tot field (JSON format) - this matches the original logic
+      if (record.Tot && record.Tot !== '{}' && record.Tot !== 'null') {
         try {
-          const practices = JSON.parse(record.A11Y_Score);
-          Object.entries(practices).forEach(([practice, data]: [string, any]) => {
-            if (!practiceStats.has(practice)) {
-              practiceStats.set(practice, { passed: 0, warning: 0, failed: 0, inapplicable: 0 });
+          const tot = JSON.parse(record.Tot);
+          const errors = record.Errors ? JSON.parse(record.Errors) : {};
+          
+          // Process the results like the original Website class does
+          for (const key in tot.results || {}) {
+            if (tests[key]) {
+              const test = tests[key]["test"];
+              const result = tests[key]["result"];
+              const occurrences = errors[test] === undefined || errors[test] < 1 ? 1 : errors[test];
+              
+              if (!practiceStats.has(key)) {
+                practiceStats.set(key, {
+                  passed: 0,
+                  failed: 0,
+                  pages: new Set<string>(),
+                  websites: new Set<string>()
+                });
+              }
+              
+              const stats = practiceStats.get(key);
+              stats.pages.add(record.Uri);
+              stats.websites.add(record.Website_Name);
+              
+              // Count by result type (like original logic)
+              if (result === 'passed') {
+                stats.passed += occurrences;
+              } else if (result === 'failed') {
+                stats.failed += occurrences;
+              }
             }
-            const stats = practiceStats.get(practice);
-            if (data.passed) stats.passed += data.passed;
-            if (data.warning) stats.warning += data.warning;
-            if (data.failed) stats.failed += data.failed;
-            if (data.inapplicable) stats.inapplicable += data.inapplicable;
-          });
+          }
         } catch (e) {
           // Skip invalid JSON
         }
       }
     });
+  }
+  
+  /**
+   * Fallback method to get practice table from observatory data
+   */
+  private async getObservatoryPracticeTableFallback(): Promise<any[]> {
+    try {
+      const latestObservatory = await this.observatoryRepository.query(
+        "SELECT Global_Statistics FROM Observatory ORDER BY Creation_Date DESC LIMIT 1"
+      );
+      
+      if (latestObservatory && latestObservatory[0] && latestObservatory[0].Global_Statistics) {
+        const stats = JSON.parse(latestObservatory[0].Global_Statistics);
+        if (stats) {
+          const practiceTable = [];
+          
+          // Use topFiveBestPractices data if available
+          if (stats.topFiveBestPractices && Array.isArray(stats.topFiveBestPractices)) {
+            stats.topFiveBestPractices.forEach(practice => {
+              if (practice && practice.key && practice.n_pages && practice.n_occurrences) {
+                const testMetadata = this.getTestMetadata(practice.key);
+                practiceTable.push({
+                  practice: practice.key,
+                  pages: practice.n_pages,
+                  elements: practice.n_occurrences,
+                  websites: practice.n_websites || 0,
+                  level: testMetadata?.level?.toUpperCase() || 'A',
+                  successCriteria: testMetadata?.scs || [],
+                  isGoodPractice: true,
+                  source: 'observatory' // Mark as observatory-only data
+                });
+              }
+            });
+          }
+          
+          // Use bestPracticesDistribution if available
+          if (stats.bestPracticesDistribution && typeof stats.bestPracticesDistribution === 'object') {
+            Object.entries(stats.bestPracticesDistribution).forEach(([practice, data]: [string, any]) => {
+              if (data && data.n_pages && data.n_occurrences) {
+                const exists = practiceTable.some(p => p.practice === practice);
+                if (!exists) {
+                  const testMetadata = this.getTestMetadata(practice);
+                  practiceTable.push({
+                    practice: practice,
+                    pages: data.n_pages,
+                    elements: data.n_occurrences,
+                    websites: data.n_websites || 0,
+                    level: testMetadata?.level?.toUpperCase() || 'A',
+                    successCriteria: testMetadata?.scs || [],
+                    isGoodPractice: true,
+                    source: 'observatory' // Mark as observatory-only data
+                  });
+                }
+              }
+            });
+          }
+          
+          if (practiceTable.length > 0) {
+            console.log(`Built practice table from observatory data with ${practiceTable.length} practices (Observatory system only)`);
+            return practiceTable;
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Could not get observatory practice table fallback:', e.message);
+    }
     
-    const result = {};
-    practiceStats.forEach((stats, practice) => {
-      result[practice] = stats;
-    });
-    
-    return result;
+    console.log('No practice data available from any source');
+    return [];
+  }
+
+  /**
+   * Get test metadata if available
+   */
+  private getTestMetadata(practice: string): any {
+    try {
+      const tests = require('../evaluation/tests');
+      return tests[practice] || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   /**
