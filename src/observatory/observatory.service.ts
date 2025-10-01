@@ -878,6 +878,8 @@ export class ObservatoryService {
       nEntities: listDirectories.nEntities,
       nPages: listDirectories.nPages,
       nPagesWithoutErrors: listDirectories.nPagesWithoutErrors,
+      nTags: listDirectories.nTags,
+      nCategories: listDirectories.nTags,
       recentPage: listDirectories.recentPage,
       oldestPage: listDirectories.oldestPage,
       topFiveWebsites: this.getTopFiveWebsites(listDirectories),
