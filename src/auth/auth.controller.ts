@@ -85,10 +85,10 @@ export class AuthController {
     const REDIRECT_URI = process.env.REDIRECT_URI;
     const CLIENT_ID = process.env.CLIENT_ID;
     response.redirect(
-      `https://autenticacao.gov.pt/oauth/askauthorization?redirect_uri=${REDIRECT_URI}&client_id=${CLIENT_ID}&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NIC%20http://interop.gov.pt/MDC/Cidadao/NomeCompleto`
+      `https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=${REDIRECT_URI}&client_id=${CLIENT_ID}&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NIC%20http://interop.gov.pt/MDC/Cidadao/NomeCompleto`
     );
   }
-
+  
   @ApiOperation({
     summary:
       "After a successful login in AGov the user is redirected to this operation to verify the AGov token and login the user in MyMonitor",
