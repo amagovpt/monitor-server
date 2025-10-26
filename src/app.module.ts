@@ -20,7 +20,7 @@ import { TagModule } from "./tag/tag.module";
 import { WebsiteModule } from "./website/website.module";
 // import { ApplicationModule } from "./application/application.module";
 import { EntityModule } from "./entity/entity.module";
-import { AppsEntityModule } from "./apps-entity/apps-entity.module";
+// import { AppsEntityModule } from "./apps-entity/apps-entity.module";
 import { EvaluationModule } from "./evaluation/evaluation.module";
 // import { AppsEvaluationModule } from "./apps-evaluation/apps-evaluation.module";
 import { ContentAspectsModule } from "./content-aspects/content-aspects.module";
@@ -108,7 +108,7 @@ const databaseConfig = JSON.parse(
     WebsiteModule,
     // ApplicationModule,
     EntityModule,
-    AppsEntityModule,
+    // AppsEntityModule,
     EvaluationModule,
     // AppsEvaluationModule,
     ContentAspectsModule,
