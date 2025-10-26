@@ -47,6 +47,46 @@ export class EvaluationController {
   }
 
   @ApiOperation({
+    summary: "Upload evaluation results from the AccessMonitor Extension on AMS",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Evaluation,
+  })
+  @UseGuards(AuthGuard("jwt-admin"))
+  @Post("amp/extension/:pageId")
+  async postAMPExtensionEvaluation(
+    @Request() req: any,
+    @Param("pageId") pageId: number
+  ): Promise<any> {
+    const data = req.body.data;
+    return success(
+      await this.evaluationService.postAMPExtensionEvaluation(pageId, data)
+    );
+  }
+
+  @ApiOperation({
+    summary: "Upload evaluation results from the AccessMonitor Extension on My Monitor",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Success",
+    type: Evaluation,
+  })
+  @UseGuards(AuthGuard("jwt-monitor"))
+  @Post("myMonitor/amp/extension/:pageId")
+  async postMyMonitorAMPExtensionEvaluation(
+    @Request() req: any,
+    @Param("pageId") pageId: number
+  ): Promise<any> {
+    const data = req.body.data;
+    return success(
+      await this.evaluationService.postMyMonitorAMPExtensionEvaluation(pageId, data)
+    );
+  }
+
+  @ApiOperation({
     summary: "Find number of requests done to My Monitor from the start date",
   })
   @ApiResponse({

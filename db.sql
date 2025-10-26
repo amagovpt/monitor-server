@@ -38,6 +38,15 @@ CREATE TABLE `Invalid_Token` (
   UNIQUE KEY `TokenId_UNIQUE` (`TokenId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DROP TABLE IF EXISTS `Apps_Invalid_Token`;
+-- CREATE TABLE `Apps_Invalid_Token` (
+--   `AppsTokenId` int(11) NOT NULL AUTO_INCREMENT,
+--   `AppsToken` text NOT NULL,
+--   `Expiration_Date` datetime NOT NULL,
+--   PRIMARY KEY (`AppsTokenId`),
+--   UNIQUE KEY `AppsTokenId_UNIQUE` (`AppsTokenId`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `Observatory`;
 CREATE TABLE `Observatory` (
   `ObservatoryId` int(11) NOT NULL AUTO_INCREMENT,
@@ -47,6 +56,16 @@ CREATE TABLE `Observatory` (
   PRIMARY KEY (`ObservatoryId`),
   UNIQUE KEY `ObservatoryId_UNIQUE` (`ObservatoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DROP TABLE IF EXISTS `AppsObservatory`;
+-- CREATE TABLE `AppsObservatory` (
+--   `AppsObservatoryId` int(11) NOT NULL AUTO_INCREMENT,
+--   `Global_Statistics` text NOT NULL,
+--   `Type` varchar(255) NOT NULL DEFAULT "auto",
+--   `Creation_Date` DATETIME NOT NULL,
+--   PRIMARY KEY (`AppsObservatoryId`),
+--   UNIQUE KEY `AppsObservatoryId_UNIQUE` (`AppsObservatoryId`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Evaluation_Request_Counter`;
 CREATE TABLE `Evaluation_Request_Counter` (
@@ -87,6 +106,16 @@ CREATE TABLE `Directory` (
   UNIQUE KEY `DirectoryId_UNIQUE` (`DirectoryId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DROP TABLE IF EXISTS `AppsDirectory`;
+-- CREATE TABLE `AppsDirectory` (
+--   `AppsDirectoryId` int (11) NOT NULL AUTO_INCREMENT,
+--   `Name` varchar (255) NOT NULL,
+--   `Method` tinyint(1) NOT NULL DEFAULT '0',
+--   `Creation_Date` datetime NOT NULL,
+--   PRIMARY KEY (`AppsDirectoryId`),
+--   UNIQUE KEY `AppsDirectoryId_UNIQUE` (`AppsDirectoryId`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `Tag`;
 CREATE TABLE `Tag` (
   `TagId` int(11) NOT NULL AUTO_INCREMENT,
@@ -100,6 +129,19 @@ CREATE TABLE `Tag` (
   CONSTRAINT `UserId_fk` FOREIGN KEY (`UserId`) REFERENCES `User` (`UserId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DROP TABLE IF EXISTS `AppsCategory`;
+-- CREATE TABLE `AppsCategory` (
+--   `AppsCategoryId` int(11) NOT NULL AUTO_INCREMENT,
+--   `UserId` int(11) DEFAULT NULL,
+--   `Name` varchar(255) NOT NULL,
+--   `Creation_Date` datetime NOT NULL,
+--   PRIMARY KEY (`AppsCategoryId`),
+--   UNIQUE KEY `AppsCategoryId_UNIQUE` (`AppsCategoryId`),
+--   UNIQUE KEY `UserAppsCategory` (`UserId`,`Name`),
+--   KEY `CUserId_fk_idx` (`UserId`),
+--   CONSTRAINT `CUserId_fk` FOREIGN KEY (`UserId`) REFERENCES `User` (`UserId`) ON DELETE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `Entity`;
 CREATE TABLE `Entity` (
   `EntityId` int(11) NOT NULL AUTO_INCREMENT,
@@ -110,6 +152,17 @@ CREATE TABLE `Entity` (
   UNIQUE KEY `EntityId_UNIQUE` (`EntityId`),
   UNIQUE KEY `ShortLongName` (`Short_name`,`Long_Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DROP TABLE IF EXISTS `AppsEntity`;
+-- CREATE TABLE `AppsEntity` (
+--   `AppsEntityId` int(11) NOT NULL AUTO_INCREMENT,
+--   `Short_Name` varchar(45) NOT NULL,
+--   `Long_Name` varchar(255) NOT NULL,
+--   `Creation_Date` datetime NOT NULL,
+--   PRIMARY KEY (`AppsEntityId`),
+--   UNIQUE KEY `AppsEntityId_UNIQUE` (`AppsEntityId`),
+--   UNIQUE KEY `ShortLongName` (`Short_name`,`Long_Name`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Website`;
 CREATE TABLE `Website` (
@@ -125,6 +178,22 @@ CREATE TABLE `Website` (
   PRIMARY KEY (`WebsiteId`),
   UNIQUE KEY `WebsiteId_UNIQUE` (`WebsiteId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DROP TABLE IF EXISTS `Application`;
+-- CREATE TABLE `Application` (
+--   `ApplicationId` int(11) NOT NULL AUTO_INCREMENT,
+--   `UserId` int(11) DEFAULT NULL,
+--   `Name` varchar(255) NOT NULL,
+--   `DownloadUrl` varchar(255) NOT NULL,
+--   `OperatingSystem` varchar(10) NOT NULL,
+--   `Declaration` int(3),
+--   `DeclarationUpdateDate` DATETIME,
+--   `Stamp` int(3),
+--   `StampUpdateDate` DATETIME,
+--   `CreationDate` datetime NOT NULL,
+--   PRIMARY KEY (`ApplicationId`),
+--   UNIQUE KEY `ApplicationId_UNIQUE` (`ApplicationId`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `Page`;
 CREATE TABLE `Page` (
@@ -161,6 +230,60 @@ CREATE TABLE `Evaluation` (
   CONSTRAINT `PageId_fk` FOREIGN KEY (`PageId`) REFERENCES `Page` (`PageId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `ContentAspects`;
+CREATE TABLE `ContentAspects` (
+  `ContentAspectsId` int(11) NOT NULL AUTO_INCREMENT,
+  `WebsiteId` int(11) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Conformance` decimal(4,1) NOT NULL,
+  `Result` MEDIUMTEXT NOT NULL,
+  PRIMARY KEY (`ContentAspectsId`),
+  UNIQUE KEY `ContentAspectsId_UNIQUE` (`ContentAspectsId`),
+  KEY `WebsiteId_CA_fk_idx` (`WebsiteId`),
+  CONSTRAINT `WebsiteId_CA_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `FunctionalAspects`;
+CREATE TABLE `FunctionalAspects` (
+  `FunctionalAspectsId` int(11) NOT NULL AUTO_INCREMENT,
+  `WebsiteId` int(11) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Conformance` decimal(4,1) NOT NULL,
+  `Result` MEDIUMTEXT NOT NULL,
+  PRIMARY KEY (`FunctionalAspectsId`),
+  UNIQUE KEY `FunctionalAspectsId_UNIQUE` (`FunctionalAspectsId`),
+  KEY `WebsiteId_FA_fk_idx` (`WebsiteId`),
+  CONSTRAINT `WebsiteId_FA_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `TransactionAspects`;
+CREATE TABLE `TransactionAspects` (
+  `TransactionAspectsId` int(11) NOT NULL AUTO_INCREMENT,
+  `WebsiteId` int(11) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Conformance` decimal(4,1) NOT NULL,
+  `Result` MEDIUMTEXT NOT NULL,
+  PRIMARY KEY (`TransactionAspectsId`),
+  UNIQUE KEY `TransactionAspectsId_UNIQUE` (`TransactionAspectsId`),
+  KEY `WebsiteId_TA_fk_idx` (`WebsiteId`),
+  CONSTRAINT `WebsiteId_TA_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DROP TABLE IF EXISTS `AppsEvaluation`;
+-- CREATE TABLE `AppsEvaluation` (
+--   `AppsEvaluationId` int(11) NOT NULL AUTO_INCREMENT,
+--   `AppId` int(11) NOT NULL,
+--   `Title` varchar(1024) DEFAULT NULL,
+--   `Show_To` varchar(2) NOT NULL DEFAULT '00',
+--   `Conformance` decimal(4,1) NOT NULL,
+--   `Result` text NOT NULL,
+--   `Date` datetime NOT NULL,
+--   PRIMARY KEY (`AppsEvaluationId`),
+--   UNIQUE KEY `AppsEvaluationId_UNIQUE` (`AppsEvaluationId`),
+--   KEY `AppId_fk_idx` (`AppId`),
+--   CONSTRAINT `AppId_fk` FOREIGN KEY (`AppId`) REFERENCES `Application` (`ApplicationId`) ON DELETE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `Evaluation_List`;
 CREATE TABLE `Evaluation_List` (
   `EvaluationListId` int(11) NOT NULL AUTO_INCREMENT,
@@ -188,6 +311,17 @@ CREATE TABLE `DirectoryTag` (
   CONSTRAINT `DTTagId_fk` FOREIGN KEY (`TagId`) REFERENCES `Tag` (`TagId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DROP TABLE IF EXISTS `AppsDirectoryAppsCategory`;
+-- CREATE TABLE `AppsDirectoryAppsCategory` (
+--   `AppsDirectoryId` int (11) NOT NULL,
+--   `AppsCategoryId` int (11) NOT NULL,
+--   PRIMARY KEY (`AppsDirectoryId`,`AppsCategoryId`),
+--   UNIQUE KEY `AppsDirectoryAppsCategory` (`AppsDirectoryId`,`AppsCategoryId`),
+--   KEY `AppsCategoryId_fk_idx` (`AppsCategoryId`),
+--   CONSTRAINT `DCAppsDirectoryId_fk` FOREIGN KEY (`AppsDirectoryId`) REFERENCES `AppsDirectory` (`AppsDirectoryId`) ON DELETE CASCADE,
+--   CONSTRAINT `DCAppsCategoryId_fk` FOREIGN KEY (`AppsCategoryId`) REFERENCES `AppsCategory` (`AppsCategoryId`) ON DELETE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `TagWebsite`;
 CREATE TABLE `TagWebsite` (
   `TagId` int(11) NOT NULL,
@@ -199,6 +333,17 @@ CREATE TABLE `TagWebsite` (
   CONSTRAINT `TWWebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- DROP TABLE IF EXISTS `AppsCategoryApplication`;
+-- CREATE TABLE `AppsCategoryApplication` (
+--   `AppsCategoryId` int(11) NOT NULL,
+--   `ApplicationId` int(11) NOT NULL,
+--   PRIMARY KEY (`AppsCategoryId`,`ApplicationId`),
+--   UNIQUE KEY `AppsCategoryApplication` (`AppsCategoryId`,`ApplicationId`),
+--   KEY `ApplicationId_fk_idx` (`ApplicationId`),
+--   CONSTRAINT `CAAppsCategoryId_fk` FOREIGN KEY (`AppsCategoryId`) REFERENCES `AppsCategory` (`AppsCategoryId`) ON DELETE CASCADE,
+--   CONSTRAINT `CAApplicationId_fk` FOREIGN KEY (`ApplicationId`) REFERENCES `Application` (`ApplicationId`) ON DELETE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `EntityWebsite`;
 CREATE TABLE `EntityWebsite` (
   `EntityId` int(11) NOT NULL,
@@ -209,6 +354,17 @@ CREATE TABLE `EntityWebsite` (
   CONSTRAINT `EWEntityId_fk` FOREIGN KEY (`EntityId`) REFERENCES `Entity` (`EntityId`) ON DELETE CASCADE,
   CONSTRAINT `EWWebsiteId_fk` FOREIGN KEY (`WebsiteId`) REFERENCES `Website` (`WebsiteId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DROP TABLE IF EXISTS `AppsEntityApplication`;
+-- CREATE TABLE `AppsEntityApplication` (
+--   `AppsEntityId` int(11) NOT NULL,
+--   `ApplicationId` int(11) NOT NULL,
+--   PRIMARY KEY (`AppsEntityId`,`ApplicationId`),
+--   UNIQUE KEY `AppsEntityApplication` (`AppsEntityId`,`ApplicationId`),
+--   KEY `ApplicationId_fk_idx` (`ApplicationId`),
+--   CONSTRAINT `EAEntityId_fk` FOREIGN KEY (`AppsEntityId`) REFERENCES `AppsEntity` (`AppsEntityId`) ON DELETE CASCADE,
+--   CONSTRAINT `EAApplicationId_fk` FOREIGN KEY (`ApplicationId`) REFERENCES `Application` (`ApplicationId`) ON DELETE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `WebsitePage`;
 CREATE TABLE `WebsitePage` (
