@@ -431,17 +431,17 @@ export class EvaluationService {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
 
-    newEvaluation.Score = splittedData[7].replace(",", ".");
-    newEvaluation.Pagecode = splittedData[0];
-    newEvaluation.Tot = splittedData[2];
-    newEvaluation.Nodes = splittedData[3];
-    newEvaluation.Errors = splittedData[4];
-    newEvaluation.Tag_Count = splittedData[5];
-    newEvaluation.Element_Count = splittedData[6];
-    newEvaluation.A = parseInt(splittedData[1].split("@")[0]);
-    newEvaluation.AA = parseInt(splittedData[1].split("@")[1]);
-    newEvaluation.AAA = parseInt(splittedData[1].split("@")[2]);
-    newEvaluation.Evaluation_Date = new Date(splittedData[8]);
+    newEvaluation.Score = splittedData[8].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[1];
+    newEvaluation.Tot = splittedData[3];
+    newEvaluation.Nodes = splittedData[4];
+    newEvaluation.Errors = splittedData[5];
+    newEvaluation.Tag_Count = splittedData[6];
+    newEvaluation.Element_Count = splittedData[7];
+    newEvaluation.A = parseInt(splittedData[2].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[2].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[2].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[9]);
     newEvaluation.Show_To = "10";
 
     return this.createOne(newEvaluation);
@@ -453,17 +453,17 @@ export class EvaluationService {
     const newEvaluation = new Evaluation();
     newEvaluation.PageId = pageId;
 
-    newEvaluation.Score = splittedData[7].replace(",", ".");
-    newEvaluation.Pagecode = splittedData[0];
-    newEvaluation.Tot = splittedData[2];
-    newEvaluation.Nodes = splittedData[3];
-    newEvaluation.Errors = splittedData[4];
-    newEvaluation.Tag_Count = splittedData[5];
-    newEvaluation.Element_Count = splittedData[6];
-    newEvaluation.A = parseInt(splittedData[1].split("@")[0]);
-    newEvaluation.AA = parseInt(splittedData[1].split("@")[1]);
-    newEvaluation.AAA = parseInt(splittedData[1].split("@")[2]);
-    newEvaluation.Evaluation_Date = new Date(splittedData[8]);
+    newEvaluation.Score = splittedData[8].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[1];
+    newEvaluation.Tot = splittedData[3];
+    newEvaluation.Nodes = splittedData[4];
+    newEvaluation.Errors = splittedData[5];
+    newEvaluation.Tag_Count = splittedData[6];
+    newEvaluation.Element_Count = splittedData[7];
+    newEvaluation.A = parseInt(splittedData[2].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[2].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[2].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[9]);
     newEvaluation.Show_To = "01";
 
     return this.createOne(newEvaluation);
