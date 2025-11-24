@@ -83,11 +83,11 @@ export class WebsiteService {
           `
           SELECT DISTINCT d.Name
           FROM
-            TagWebsite as tw
-            INNER JOIN Tag as t ON t.TagId = tw.TagId
-            INNER JOIN DirectoryTag as dt ON dt.TagId = t.TagId
-            INNER JOIN Directory as d ON d.DirectoryId = dt.DirectoryId AND d.Show_in_Observatory = 1
+            Directory as d
+            INNER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+            INNER JOIN TagWebsite as tw ON tw.TagId = dt.TagId
           WHERE
+            d.Show_in_Observatory = 1 AND
             tw.WebsiteId = ?
           ORDER BY d.Name
           `,
