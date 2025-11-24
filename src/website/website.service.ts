@@ -77,6 +77,25 @@ export class WebsiteService {
         const pages = await this.findAllPages(id);
         website["numberOfPages"] = pages.length;
         website["averagePoints"] = this.averagePointsPageEvaluation(pages);
+
+        // Fetch Observatory directories for this website
+        const directories = await this.websiteRepository.query(
+          `
+          SELECT DISTINCT d.Name
+          FROM
+            TagWebsite as tw
+            INNER JOIN Tag as t ON t.TagId = tw.TagId
+            INNER JOIN DirectoryTag as dt ON dt.TagId = t.TagId
+            INNER JOIN Directory as d ON d.DirectoryId = dt.DirectoryId AND d.Show_in_Observatory = 1
+          WHERE
+            tw.WebsiteId = ?
+          ORDER BY d.Name
+          `,
+          [id]
+        );
+
+        website["directories"] = directories.map(dir => dir.Name);
+
         return website;
       })
     );
