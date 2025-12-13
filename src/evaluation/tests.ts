@@ -184,9 +184,10 @@ export default {
     trust: "1",
     top: 1,
     steps: 1,
-    ref: "H50",
+    ref: "H97",
     scs: "2.4.1",
     dis: "54253",
+    result: "failed",
   },
   a_01a: {
     type: "true",
