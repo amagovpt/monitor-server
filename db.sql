@@ -469,7 +469,9 @@ CREATE TABLE `GovUser` (
   `registerDate` datetime NOT NULL,
    `lastLogin` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UserId_UNIQUE` (`id`)
+  UNIQUE KEY `UserId_UNIQUE` (`id`),
+  UNIQUE KEY `ccNumber_UNIQUE` (`ccNumber`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `UserGovUser`;
