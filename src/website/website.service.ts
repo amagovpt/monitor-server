@@ -286,7 +286,7 @@ export class WebsiteService {
         LEFT OUTER JOIN EntityWebsite as ew ON ew.WebsiteId = w.WebsiteId
         LEFT OUTER JOIN Entity as e ON e.EntityId = ew.EntityId
         LEFT OUTER JOIN WebsitePage as wp ON wp.WebsiteId = w.WebsiteId
-        LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId
+        LEFT OUTER JOIN Page as p ON p.PageId = wp.PageId AND p.Show_In LIKE "1__"
         LEFT OUTER JOIN Evaluation as ev ON ev.PageId = p.PageId AND ev.Evaluation_Date IN (
           SELECT max(Evaluation_Date) FROM Evaluation WHERE PageId = p.PageId
         )
@@ -309,6 +309,25 @@ export class WebsiteService {
         `SELECT e.* FROM Entity as e, EntityWebsite as ew WHERE ew.WebsiteId = ? AND e.EntityId = ew.EntityId`,
         [websiteId]
       );
+
+      // Fetch Observatory directories for this website
+      const directories = await this.websiteRepository.query(
+        `
+        SELECT DISTINCT d.Name
+        FROM
+          Directory as d
+          INNER JOIN DirectoryTag as dt ON dt.DirectoryId = d.DirectoryId
+          INNER JOIN TagWebsite as tw ON tw.TagId = dt.TagId
+        WHERE
+          d.Show_in_Observatory = 1 AND
+          tw.WebsiteId = ?
+        ORDER BY d.Name
+        `,
+        [websiteId]
+      );
+
+      website.directories = directories.map((dir: any) => dir.Name);
+
       return website;
     } else {
       throw new InternalServerErrorException();

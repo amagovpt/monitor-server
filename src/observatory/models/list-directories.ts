@@ -9,6 +9,7 @@ export class ListDirectories {
   nWebsites: number;
   nPages: number;
   nPagesWithoutErrors: number;
+  nTags: number;
   score: number;
   A: number;
   AA: number;
@@ -42,6 +43,13 @@ export class ListDirectories {
       .filter((v, i, self) => {
         return self.indexOf(v) === i;
       }).length;
+
+    // Count unique tags (categories) from the result data
+    const allTagIds = result
+      .filter((r) => r.TagIds)
+      .flatMap((r) => r.TagIds.split(','))
+      .filter((id) => id && id.trim() !== '');
+    this.nTags = [...new Set(allTagIds)].length;
 
     let score = 0;
     const size = directories.length;

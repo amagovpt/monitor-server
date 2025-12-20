@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ConflictException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
@@ -15,7 +15,27 @@ export class GovUserService {
     private userService: UserService
   ) {}
 
-  create(createGovUserDto: CreateGovUserDto) {
+  async create(createGovUserDto: CreateGovUserDto) {
+    // Check for duplicate ccNumber
+    const existingByCC = await this.govUserRepository.findOne({
+      where: { ccNumber: createGovUserDto.ccNumber },
+    });
+    if (existingByCC) {
+      throw new ConflictException(
+        `GovUser with citizen card number '${createGovUserDto.ccNumber}' already exists`
+      );
+    }
+
+    // Check for duplicate name
+    const existingByName = await this.govUserRepository.findOne({
+      where: { name: createGovUserDto.name },
+    });
+    if (existingByName) {
+      throw new ConflictException(
+        `GovUser with name '${createGovUserDto.name}' already exists`
+      );
+    }
+
     return this.addToDB(createGovUserDto);
   }
   addToDB(createGovUserDto: CreateGovUserDto) {
@@ -159,13 +179,44 @@ export class GovUserService {
   }
 
   async update(updateGovUserDto: UpdateGovUserDto) {
-    const users = updateGovUserDto.entities;
-    const entities = await Promise.all(
-      users.map(async (user) => {
-        return this.userService.findById(user.UserId + "");
-      })
-    );
-    return this.govUserRepository.save({ entities, ...updateGovUserDto });
+    // Check for duplicate name if name is being updated
+    if (updateGovUserDto.name) {
+      const existingByName = await this.govUserRepository.findOne({
+        where: { name: updateGovUserDto.name },
+      });
+      if (existingByName && existingByName.id !== updateGovUserDto.id) {
+        throw new ConflictException(
+          `GovUser with name '${updateGovUserDto.name}' already exists`
+        );
+      }
+    }
+
+    // Check for duplicate ccNumber if ccNumber is being updated
+    if (updateGovUserDto.ccNumber) {
+      const existingByCC = await this.govUserRepository.findOne({
+        where: { ccNumber: updateGovUserDto.ccNumber },
+      });
+      if (existingByCC && existingByCC.id !== updateGovUserDto.id) {
+        throw new ConflictException(
+          `GovUser with citizen card number '${updateGovUserDto.ccNumber}' already exists`
+        );
+      }
+    }
+
+    let entities;
+    if (updateGovUserDto.entities) {
+      const users = updateGovUserDto.entities;
+      entities = await Promise.all(
+        users.map(async (user) => {
+          return this.userService.findById(user.UserId + "");
+        })
+      );
+    }
+
+    return this.govUserRepository.save({
+      ...(entities && { entities }),
+      ...updateGovUserDto
+    });
   }
 
   remove(id: number) {

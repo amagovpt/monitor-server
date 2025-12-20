@@ -425,6 +425,50 @@ export class EvaluationService {
     const savedEvaluation = await queryRunner.manager.save(newEvaluation);
   }
 
+  async postAMPExtensionEvaluation(pageId: number, data: string): Promise<any> {
+    const splittedData = data.split(";");
+
+    const newEvaluation = new Evaluation();
+    newEvaluation.PageId = pageId;
+
+    newEvaluation.Score = splittedData[8].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[1];
+    newEvaluation.Tot = splittedData[3];
+    newEvaluation.Nodes = splittedData[4];
+    newEvaluation.Errors = splittedData[5];
+    newEvaluation.Tag_Count = splittedData[6];
+    newEvaluation.Element_Count = splittedData[7];
+    newEvaluation.A = parseInt(splittedData[2].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[2].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[2].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[9]);
+    newEvaluation.Show_To = "10";
+
+    return this.createOne(newEvaluation);
+  }
+
+  async postMyMonitorAMPExtensionEvaluation(pageId: number, data: string): Promise<any> {
+    const splittedData = data.split(";");
+
+    const newEvaluation = new Evaluation();
+    newEvaluation.PageId = pageId;
+
+    newEvaluation.Score = splittedData[8].replace(",", ".");
+    newEvaluation.Pagecode = splittedData[1];
+    newEvaluation.Tot = splittedData[3];
+    newEvaluation.Nodes = splittedData[4];
+    newEvaluation.Errors = splittedData[5];
+    newEvaluation.Tag_Count = splittedData[6];
+    newEvaluation.Element_Count = splittedData[7];
+    newEvaluation.A = parseInt(splittedData[2].split("@")[0]);
+    newEvaluation.AA = parseInt(splittedData[2].split("@")[1]);
+    newEvaluation.AAA = parseInt(splittedData[2].split("@")[2]);
+    newEvaluation.Evaluation_Date = new Date(splittedData[9]);
+    newEvaluation.Show_To = "01";
+
+    return this.createOne(newEvaluation);
+  }
+
   async increaseAMSObservatoryRequestCounter(): Promise<void> {
     await this.connection.query(
       `UPDATE Evaluation_Request_Counter SET Counter = Counter + 1, Last_Request = NOW() WHERE Application = "AMS/Observatory"`

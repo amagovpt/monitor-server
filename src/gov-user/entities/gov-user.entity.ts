@@ -12,10 +12,10 @@ export class GovUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 100, nullable: false })
+  @Column({ type: "varchar", length: 100, nullable: false, unique: true })
   name: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: "varchar", nullable: false, unique: true })
   ccNumber: string;
 
   @ManyToMany((type) => User, (user) => user.govUsers)

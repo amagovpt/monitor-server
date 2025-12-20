@@ -12,7 +12,7 @@ export async function evaluate(params: any): Promise<any> {
 
   const options: QualwebOptions = {
     modules: [actInstances, wcagInstances, bpInstances, counterInstances],
-    waitUntil: ["load", "networkidle0"],
+    waitUntil: ["load", "networkidle2"],
   };
 
   if (params.url || params.urls) {
