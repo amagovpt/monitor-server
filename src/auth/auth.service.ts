@@ -158,12 +158,12 @@ export class AuthService {
       "http://interop.gov.pt/MDC/Cidadao/NomeCompleto",
     ];
     const responseStart = await axios.post(
-      "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
+      "https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
       { token, atributesName }
     );
     const authenticationContextId = responseStart.data.authenticationContextId;
     const responseAtributes = await axios.get(
-      `https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`
+      `https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`
     );
     return this.parseAtributes(responseAtributes.data);
   }
