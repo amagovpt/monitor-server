@@ -48,13 +48,15 @@ export class AmpController {
     @Request() req: any,
     @Param("url") url: string
   ): Promise<any> {
+
     if (process.env.NAMESPACE !== undefined && process.env.REFERER) {
       if (!req.headers.referer?.startsWith(process.env.REFERER)) {
         return accessDenied();
       }
     }
+    const urlDecoded = this.decodeBase64Url(url);
 
-    const isValid = await this.checkIfValidUrl(decodeURIComponent(url));
+    const isValid = await this.checkIfValidUrl(decodeURIComponent(urlDecoded));
 
     if (!isValid) {
       return accessDenied();
@@ -63,7 +65,7 @@ export class AmpController {
     await this.evaluationService.increaseAccessMonitorRequestCounter();
 
     return success(
-      await this.evaluationService.evaluateUrl(decodeURIComponent(url))
+      await this.evaluationService.evaluateUrl(decodeURIComponent(urlDecoded))
     );
   }
 
@@ -77,6 +79,10 @@ export class AmpController {
   async evaluateHtml(@Request() req: any): Promise<any> {
     await this.evaluationService.increaseAccessMonitorRequestCounter();
     return success(await this.evaluationService.evaluateHtml(req.body.html));
+  }
+
+  private decodeBase64Url(url: string): string {
+    return Buffer.from(url, "base64").toString("utf-8");
   }
 
   private checkIfValidUrl(url: string): Promise<boolean> {
