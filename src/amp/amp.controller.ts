@@ -20,7 +20,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 
-const blackList = readFileSync("../black-list.txt").toString().split("\n");
+const blackList = readFileSync("./black-list.txt").toString().split("\n");
 
 @ApiBasicAuth()
 @ApiTags("amp")
