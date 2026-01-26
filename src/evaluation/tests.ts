@@ -2048,7 +2048,7 @@ export default {
     elem: "li",
     test: "liNotSemantically",
     score: 3,
-    level: "AA",
+    level: "A",
     trust: "1",
     ref: "H48",
     scs: "1.3.1",
