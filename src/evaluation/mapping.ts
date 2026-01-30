@@ -656,6 +656,15 @@ function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
       "colorContrast",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
+  }else if (rule.metadata.outcome === "passed") {
+   
+    addToElements(elements, "colorContrastOk", rule.metadata.passed);
+    addToResults(results, "color_02_b");
+    addToNodes(
+      nodes,
+      "colorContrastOk",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
   }
 }
 
