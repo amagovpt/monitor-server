@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { DirectoryService } from "./directory/directory.service";
 import { TagService } from "./tag/tag.service";
 import { EntityService } from "./entity/entity.service";
@@ -7,10 +7,14 @@ import { PageService } from "./page/page.service";
 import { UserService } from "./user/user.service";
 import { GovUserService } from "./gov-user/gov-user.service";
 import { ObservatoryService } from "./observatory/observatory.service";
+import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
+
 
 @Injectable()
-export class AppService {
-  constructor(
+export class AppService implements OnModuleInit {
+  private readonly logger = new Logger('Bootstrap');
+  constructor(private configService: ConfigService,
     private readonly directoryService: DirectoryService,
     private readonly tagService: TagService,
     private readonly entityService: EntityService,
@@ -20,7 +24,19 @@ export class AppService {
     private readonly govUserService: GovUserService,
     private readonly observatoryService: ObservatoryService
   ) {}
-
+  onModuleInit() {
+    const nodeEnv = this.configService.get('NODE_ENV'); 
+    const authMethod = this.configService.get('APP_AUTH_METHOD');
+    const secretKey = this.configService.get('SECRET_KEY');
+    const secretStatus = secretKey ? '✅ PRESENT' : '❌ MISSING';
+    this.logger.log('┌──────────────────────────────────────────┐');
+    this.logger.log('│          CONFIGURATION AUDIT             │');
+    this.logger.log('├──────────────────────────────────────────┤');
+    this.logger.log(`│ NODE_ENV    : ${nodeEnv.padEnd(26)} │`);
+    this.logger.log(`│ AUTH_METHOD : ${authMethod.padEnd(26)} │`);
+    this.logger.log(`│ SECRET_KEY  : ${secretStatus.padEnd(26)}│`);
+    this.logger.log('└──────────────────────────────────────────┘');
+  }
   getHello(): string {
     return "Hello World!";
   }

@@ -4,7 +4,7 @@ import mysqldump from "mysqldump";
 
 @Injectable()
 export class DumpService {
-  databaseConfig = JSON.parse(readFileSync("../monitor_db.json").toString());
+  databaseConfig = JSON.parse(readFileSync("./monitor_db.json").toString());
   path = "./dump.sql.gz";
   createDump() {
     mysqldump({

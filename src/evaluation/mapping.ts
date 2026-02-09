@@ -59,7 +59,7 @@ const wcag_mapping = {
   "QW-WCAG-T9": QW_WCAG_T9,
   "QW-WCAG-T14": QW_WCAG_T14,
   "QW-WCAG-T15": QW_WCAG_T15,
-  "QW-WCAG-T16": QW_WCAG_T16,
+//   "QW-WCAG-T16": QW_WCAG_T16,
   "QW-WCAG-T17": QW_WCAG_T17,
   "QW-WCAG-T18": QW_WCAG_T18,
   "QW-WCAG-T19": QW_WCAG_T19,
@@ -655,6 +655,15 @@ function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
       nodes,
       "colorContrast",
       rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }else if (rule.metadata.outcome === "passed") {
+   
+    addToElements(elements, "colorContrastOk", rule.metadata.passed);
+    addToResults(results, "color_02_b");
+    addToNodes(
+      nodes,
+      "colorContrastOk",
+      rule.results.filter((r: any) => r.verdict === "passed")
     );
   }
 }

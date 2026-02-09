@@ -1,3 +1,4 @@
+
 module.exports = {
   apps: [
     {
@@ -9,6 +10,7 @@ module.exports = {
       increment_var: "AMPID",
       cron_restart: "45 0 * * *",
       env: {
+        APP_AUTH_METHOD: "local",
         NAMESPACE: "AMP",
         AMPID: 0,
         PORT: 3000,
@@ -24,6 +26,7 @@ module.exports = {
       },
       env_production: {
         NAMESPACE: "AMP",
+        APP_AUTH_METHOD: "gov", 
         AMPID: 0,
         PORT: 3000,
         NODE_ENV: "production",
@@ -46,6 +49,7 @@ module.exports = {
       increment_var: "AMSID",
       cron_restart: "45 0 * * *",
       env: {
+        APP_AUTH_METHOD: "local",
         NAMESPACE: "ADMIN",
         AMSID: 0,
         PORT: 3000,
@@ -64,6 +68,7 @@ module.exports = {
         AMSID: 0,
         PORT: 3000,
         NODE_ENV: "production",
+        APP_AUTH_METHOD: "gov",
         VALIDATOR: "http://10.55.37.17/validate/",
         REFERER: "http://10.55.37.17/",
         CLIENT_ID: "5369659202618878362",
@@ -87,6 +92,7 @@ module.exports = {
         USRID: 0,
         PORT: 3000,
         NODE_ENV: "development",
+        APP_AUTH_METHOD: "local",
         VALIDATOR: "http://10.55.37.17/validate/",
         REFERER: "http://10.55.37.17/",
         CLIENT_ID: "5369659202618878362",
@@ -101,6 +107,7 @@ module.exports = {
         USRID: 0,
         PORT: 3000,
         NODE_ENV: "production",
+        APP_AUTH_METHOD: "gov",
         VALIDATOR: "http://10.55.37.17/validate/",
         REFERER: "http://10.55.37.17/",
         CLIENT_ID: "5369659202618878362",

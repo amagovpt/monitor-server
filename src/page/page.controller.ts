@@ -374,11 +374,13 @@ export class PageController {
     const uris = JSON.parse(req.body.uris).map((uri: string) =>
       decodeURIComponent(uri)
     );
+
+    const uniqueUris: string[] = Array.from(new Set(uris));
     const observatory = JSON.parse(req.body.observatory).map((uri: string) =>
       decodeURIComponent(uri)
     );
     return success(
-      await this.pageService.addPages(websiteId, uris, observatory)
+      await this.pageService.addPages(websiteId, uniqueUris, observatory)
     );
   }
 
