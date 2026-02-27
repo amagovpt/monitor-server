@@ -6,7 +6,7 @@ import { Directory } from "./models/directory";
 import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
-import _tests from "src/evaluation/tests";
+import  {ruleset } from "@arte-pt/accessmonitor-rulesets";
 import { Observatory } from "./observatory.entity";
 import { ObservatorySyncStatus, SyncStatus, SyncType } from "./observatory-sync-status.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -1420,7 +1420,7 @@ export class ObservatoryService {
       processedPractices.add(practice);
       
       const practiceData = listDirectories.success[practice];
-      const testMetadata = _tests[practice];
+      const testMetadata = ruleset[practice];
       
       if (testMetadata) {
         practiceTable.push({
@@ -1440,7 +1440,7 @@ export class ObservatoryService {
       processedPractices.add(practice);
       
       const practiceData = listDirectories.errors[practice];
-      const testMetadata = _tests[practice];
+      const testMetadata = ruleset[practice];
       
       if (testMetadata) {
         practiceTable.push({
@@ -2211,12 +2211,12 @@ export class ObservatoryService {
 
     for (const k in listDirectories.errors) {
       const v = listDirectories.errors[k];
-      if (_tests[k]["result"] === "failed") {
+      if (ruleset[k]["result"] === "failed") {
         let key = k;
-        let elem = _tests[key]["elem"];
+        let elem = ruleset[key]["elem"];
         let n_pages = v["n_pages"];
         let n_websites = v["n_websites"];
-        let result = _tests[key]["result"];
+        let result = ruleset[key]["result"];
 
         let quartiles = this.calculateQuartilesGlobalErrors(listDirectories, k);
 
@@ -2246,12 +2246,12 @@ export class ObservatoryService {
 
     for (const k in listDirectories.success) {
       const v = listDirectories.success[k];
-      if (_tests[k]["result"] === "passed") {
+      if (ruleset[k]["result"] === "passed") {
         let key = k;
-        let elem = _tests[key]["elem"];
+        let elem = ruleset[key]["elem"];
         let n_pages = v["n_pages"];
         let n_websites = v["n_websites"];
-        let result = _tests[key]["result"];
+        let result = ruleset[key]["result"];
 
         let quartiles = this.calculateQuartilesGlobalBestPractices(
           listDirectories,
@@ -2280,13 +2280,13 @@ export class ObservatoryService {
   private addToTableData(key: string, tot: any, quartiles: any): any {
     return {
       key: key,
-      level: _tests[key]["level"].toUpperCase(),
-      elem: _tests[key]["elem"],
+      level: ruleset[key]["level"].toUpperCase(),
+      elem: ruleset[key]["elem"],
       websites: tot["n_websites"],
       pages: tot["n_pages"],
-      elems: _tests[key]["result"] === "passed" ? -1 : tot["n_occurrences"],
+      elems: ruleset[key]["result"] === "passed" ? -1 : tot["n_occurrences"],
       quartiles: quartiles,
-      elemGroup: this.elemGroups[_tests[key]["elem"]],
+      elemGroup: this.elemGroups[ruleset[key]["elem"]],
     };
   }
 
@@ -2360,12 +2360,12 @@ export class ObservatoryService {
 
     for (const k in directory.errors) {
       const v = directory.errors[k];
-      if (_tests[k]["result"] === "failed") {
+      if (ruleset[k]["result"] === "failed") {
         let key = k;
-        let elem = _tests[key]["elem"];
+        let elem = ruleset[key]["elem"];
         let n_pages = v["n_pages"];
         let n_websites = v["n_websites"];
-        let result = _tests[key]["result"];
+        let result = ruleset[key]["result"];
 
         let quartiles = this.calculateQuartilesDirectoryErrors(directory, k);
 
@@ -2395,12 +2395,12 @@ export class ObservatoryService {
 
     for (const k in directory.success) {
       const v = directory.success[k];
-      if (_tests[k]["result"] === "passed") {
+      if (ruleset[k]["result"] === "passed") {
         let key = k;
-        let elem = _tests[key]["elem"];
+        let elem = ruleset[key]["elem"];
         let n_pages = v["n_pages"];
         let n_websites = v["n_websites"];
-        let result = _tests[key]["result"];
+        let result = ruleset[key]["result"];
 
         let quartiles = this.calculateQuartilesDirectoryBestPractices(
           directory,
@@ -2530,7 +2530,7 @@ export class ObservatoryService {
           key,
           n_occurrences: website.success[key].n_occurrences,
           n_pages: website.success[key].n_pages,
-          lvl: _tests[key].level.toUpperCase(),
+          lvl: ruleset[key].level.toUpperCase(),
           quartiles: calculateQuartiles(
             website.getPassedOccurrencesByPage(key)
           ),
@@ -2556,7 +2556,7 @@ export class ObservatoryService {
           key,
           n_occurrences: website.errors[key].n_occurrences,
           n_pages: website.errors[key].n_pages,
-          lvl: _tests[key].level.toUpperCase(),
+          lvl: ruleset[key].level.toUpperCase(),
           quartiles: calculateQuartiles(website.getErrorOccurrencesByPage(key)),
         });
       }
