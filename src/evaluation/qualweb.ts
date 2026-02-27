@@ -5,11 +5,17 @@ import { BestPractices } from "@qualweb/best-practices";
 import { Counter } from '@qualweb/counter';
 
 export async function evaluate(params: any): Promise<any> {
-  const actInstances = new ACTRules();
+
+
   const wcagInstances = new WCAGTechniques();  
   const bpInstances = new BestPractices();
   const counterInstances = new Counter();
+  const excludeRules = [
 
+  ];
+
+    const actInstances = new ACTRules( { exclude: excludeRules } );
+  
   const options: QualwebOptions = {
     modules: [actInstances, wcagInstances, bpInstances, counterInstances],
     waitUntil: ["load", "networkidle2"],
@@ -33,7 +39,21 @@ export async function evaluate(params: any): Promise<any> {
     { maxConcurrency: 2, timeout: 1000 * 240 * 2 },
     {
       headless: true,
-      args: ["--no-sandbox", "--ignore-certificate-errors", "--lang=pt-pt,pt"]
+      args: [
+        "--no-sandbox", 
+        "--ignore-certificate-errors",
+        "--disable-features=IsolateSandboxedIframes",
+        '--disable-site-isolation-trials',
+        "--disable-setuid-sandbox",
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--disable-blink-features=AutomationControlled",
+        "--disable-extensions",
+         "--no-zygote",
+        '--user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"',
+         "--lang=pt-pt,pt"]
     },    
   );
 
