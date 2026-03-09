@@ -6,7 +6,7 @@ import { Directory } from "./models/directory";
 import { Website } from "./models/website";
 import clone from "lodash.clonedeep";
 import orderBy from "lodash.orderby";
-import  {ruleset } from "@arte-pt/accessmonitor-rulesets";
+import  {ruleset } from "@a12e/accessmonitor-rulesets";
 import { Observatory } from "./observatory.entity";
 import { ObservatorySyncStatus, SyncStatus, SyncType } from "./observatory-sync-status.entity";
 import { InjectRepository } from "@nestjs/typeorm";

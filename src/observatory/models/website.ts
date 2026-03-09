@@ -1,6 +1,6 @@
 import { Page } from "./page";
 import orderBy from "lodash.orderby";
-import {ruleset} from "@arte-pt/accessmonitor-rulesets";
+import {ruleset} from "@a12e/accessmonitor-rulesets";
 
 export class Website {
   id: number;

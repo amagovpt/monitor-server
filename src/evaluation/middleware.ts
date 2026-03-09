@@ -3,7 +3,7 @@ import * as CSSselect from "css-select";
 import clone  from "lodash.clone";
 import * as qualweb from "./qualweb";
 
-import  {testColors,ruleset}  from "@arte-pt/accessmonitor-rulesets";
+import  {testColors,ruleset}  from "@a12e/accessmonitor-rulesets";
 import { generateMd5Hash } from "../lib/security";
 import { getElementsMapping } from "./mapping";
 

@@ -1,5 +1,5 @@
 import orderBy from "lodash.orderby";
-import {ruleset} from "@arte-pt/accessmonitor-rulesets";
+import {ruleset} from "@a12e/accessmonitor-rulesets";
 import { Website } from "./website";
 
 export class Directory {
