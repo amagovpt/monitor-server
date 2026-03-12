@@ -241,6 +241,18 @@ function calculateConform(results: any): string {
   return `${errors.A}@${errors.AA}@${errors.AAA}`;
 }
 
+function calculateTotalElements(elementsCounter:Record<string,number>):number {
+  if (!elementsCounter || typeof elementsCounter !== 'object') {
+    return 0;
+  }
+
+    return Object.values(elementsCounter).reduce((total, count) => {
+    const num = Number(count);
+    return total + (isNaN(num) ? 0 : num);
+  }, 0);
+  
+};
+
 function parseEvaluation(evaluation: any): any {
   const { elements, results, nodes } = getElementsMapping(evaluation);
  
@@ -261,14 +273,11 @@ function parseEvaluation(evaluation: any): any {
   report["data"].tot.info.url = clone(report["data"].rawUrl);
   report["data"].tot.info.title = clone(report["data"].title);
   report["data"].tot.info.date = clone(report["data"].date);
-  console.log({ elementCount: evaluation.system.page.dom.elementCount });
-  report["data"].tot.info.htmlTags = evaluation.system.page.dom.elementCount; //count_html_tags(evaluation.postProcessingHTML);
+  report["data"].tot.info.htmlTags = calculateTotalElements(evaluation.modules.counter.data.tags); 
   report["data"].tot.info.roles = evaluation.modules.counter.data.roles;
-  console.log({ cTags: evaluation.modules.counter.data.tags });
   report["data"].tot.info.cTags = evaluation.modules.counter.data.tags;
   report["data"].tot.info.size = 
     encodeURI(report.pagecode).split(/%..|./).length - 1;
-  //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
   report["data"].tot.info.encoding = "utf-8";
   report["data"].tot.info.lang = getHtmlLang(evaluation.system.page.dom.html);
   report["data"].tot.info.content = "text/html";
