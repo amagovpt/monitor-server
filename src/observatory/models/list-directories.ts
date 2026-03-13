@@ -1,5 +1,5 @@
 import orderBy from "lodash.orderby";
-import tests from "src/evaluation/tests";
+import {ruleset} from "@a12e/accessmonitor-rulesets";
 import { Directory } from "./directory";
 import { Website } from "./website";
 
@@ -182,7 +182,7 @@ export class ListDirectories {
     const occurrences = new Array<number>();
 
     for (const directory of this.directories || []) {
-      if (directory.success[test] && tests[test]["result"] !== "failed") {
+      if (directory.success[test] && ruleset[test]["result"] !== "failed") {
         occurrences.push(directory.success[test]["n_occurrences"]);
       }
     }
@@ -193,7 +193,7 @@ export class ListDirectories {
     const occurrences = new Array<number>();
 
     for (const directory of this.directories || []) {
-      if (directory.success[test] && tests[test]["result"] === "passed") {
+      if (directory.success[test] && ruleset[test]["result"] === "passed") {
         occurrences.push(directory.success[test]["n_occurrences"]);
       }
     }
@@ -204,7 +204,7 @@ export class ListDirectories {
     const occurrences = new Array<number>();
 
     for (const directory of this.directories || []) {
-      if (directory.errors[test] && tests[test]["result"] === "failed") {
+      if (directory.errors[test] && ruleset[test]["result"] === "failed") {
         occurrences.push(directory.errors[test]["n_occurrences"]);
       }
     }

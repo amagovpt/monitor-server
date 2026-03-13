@@ -23,6 +23,7 @@
     "test:aStatement": "jest accessibility-statement/page-parser-test.spec.ts"
   },
   "dependencies": {
+    "@a12e/accessmonitor-rulesets": "1.0.0",
     "@nestjs/axios": "2.0.0",
     "@nestjs/common": "^9.3.9",
     "@nestjs/config": "^3.3.0",

@@ -1,5 +1,5 @@
 import orderBy from "lodash.orderby";
-import tests from "src/evaluation/tests";
+import {ruleset} from "@a12e/accessmonitor-rulesets";
 import { Website } from "./website";
 
 export class Directory {
@@ -158,7 +158,7 @@ export class Directory {
     const occurrences = new Array<number>();
 
     for (const website of this.websites || []) {
-      if (website.success[test] && tests[test]["result"] === "passed") {
+      if (website.success[test] && ruleset[test]["result"] === "passed") {
         occurrences.push(website.success[test]["n_occurrences"]);
       }
     }
@@ -169,7 +169,7 @@ export class Directory {
     const occurrences = new Array<number>();
 
     for (const website of this.websites || []) {
-      if (website.errors[test] && tests[test]["result"] === "failed") {
+      if (website.errors[test] && ruleset[test]["result"] === "failed") {
         occurrences.push(website.errors[test]["n_occurrences"]);
       }
     }

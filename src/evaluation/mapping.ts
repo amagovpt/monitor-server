@@ -1,3 +1,4 @@
+
 const act_mapping = {
   "QW-ACT-R1": QW_ACT_R1,
   "QW-ACT-R2": QW_ACT_R2,
@@ -659,7 +660,7 @@ function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
   }else if (rule.metadata.outcome === "passed") {
    
     addToElements(elements, "colorContrastOk", rule.metadata.passed);
-    addToResults(results, "color_02_b");
+    addToResults(results, "color_02b");
     addToNodes(
       nodes,
       "colorContrastOk",
