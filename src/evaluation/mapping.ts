@@ -1562,7 +1562,6 @@ function QW_WCAG_T35(elements: any, results: any, nodes: any, rule: any): void {
 
 function QW_BP1(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "hxNone", technique.metadata.failed);
     addToResults(results, "hx_01a");
     addToNodes(
       nodes,
