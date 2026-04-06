@@ -1200,10 +1200,18 @@ function QW_WCAG_T17(
   const incorrectLabelResults = technique.results.filter(
     (r: any) => r.verdict === "failed"
   );
+  const warningLabelResults = technique.results.filter(
+    (r: any) => r.verdict === "warning"
+  );
   if (incorrectLabelResults.length > 0) {
     addToElements(elements, "labelPosNo", incorrectLabelResults.length);
     addToResults(results, "label_02");
     addToNodes(nodes, "labelPosNo", incorrectLabelResults);
+  }
+  if (warningLabelResults.length > 0) {
+    addToElements(elements, "labelPosWarn", warningLabelResults.length);
+    addToResults(results, "label_02b");
+    addToNodes(nodes, "labelPosWarn", warningLabelResults);
   }
 }
 
