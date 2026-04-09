@@ -78,7 +78,6 @@ const wcag_mapping = {
   "QW-WCAG-T31": QW_WCAG_T31,
   "QW-WCAG-T33": QW_WCAG_T33,
   "QW-WCAG-T34": QW_WCAG_T34,
-  "QW-WCAG-T35": QW_WCAG_T35,
 };
 
 const bp_mapping = {
@@ -108,6 +107,7 @@ const bp_mapping = {
   "QW-BP27": QW_BP27,
   "QW-BP28": QW_BP28,
   "QW-BP29": QW_BP29,
+  "QW-BP30": QW_BP30,
 };
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
@@ -1548,26 +1548,6 @@ function QW_WCAG_T34(
   }
 }
 
-function QW_WCAG_T35(elements: any, results: any, nodes: any, rule: any): void {
-  if (rule.metadata.outcome === "passed") {
-    addToElements(elements, "idAtt", rule.metadata.passed);
-    addToResults(results, "id_01");
-    addToNodes(
-      nodes,
-      "idAtt",
-      rule.results.filter((r: any) => r.verdict === "passed")
-    );
-  } else if (rule.metadata.outcome === "failed") {
-    addToElements(elements, "idAttNot", rule.metadata.failed);
-    addToResults(results, "id_02");
-    addToNodes(
-      nodes,
-      "idAttNot",
-      rule.results.filter((r: any) => r.verdict === "failed")
-    );
-  }
-}
-
 function QW_BP1(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === "failed") {
     addToResults(results, "hx_01a");
@@ -2052,6 +2032,26 @@ function QW_BP29(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "langMatchNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+
+function QW_BP30(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "idAtt", rule.metadata.passed);
+    addToResults(results, "id_01");
+    addToNodes(
+      nodes,
+      "idAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "idAttNot", rule.metadata.failed);
+    addToResults(results, "id_02");
+    addToNodes(
+      nodes,
+      "idAttNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }
