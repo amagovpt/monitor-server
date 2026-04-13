@@ -1,6 +1,6 @@
 import { Page } from "./page";
 import orderBy from "lodash.orderby";
-import tests from "src/evaluation/tests";
+import {ruleset} from "@a12e/accessmonitor-rulesets";
 
 export class Website {
   id: number;
@@ -106,13 +106,13 @@ export class Website {
     const pageErrors = page.evaluation.errors;
 
     for (const key in page.evaluation.tot.results || {}) {
-      const test = tests[key]["test"];
-      const elem = tests[key]["elem"];
+      const test = ruleset[key]["test"];
+      const elem = ruleset[key]["elem"];
       const occurrences =
         pageErrors[test] === undefined || pageErrors[test] < 1
           ? 1
           : pageErrors[test];
-      const result = tests[key]["result"];
+      const result = ruleset[key]["result"];
 
       if (result === "failed") {
         if (Object.keys(this.errors).includes(key)) {
@@ -203,10 +203,10 @@ export class Website {
   getPassedOccurrencesByPage(test: string): Array<number> {
     const occurrences = new Array<number>();
     for (const page of this.pages || []) {
-      const practice = page.evaluation.tot.elems[tests[test]["test"]];
+      const practice = page.evaluation.tot.elems[ruleset[test]["test"]];
       if (
         page.evaluation.tot.results[test] &&
-        tests[test]["result"] === "passed"
+        ruleset[test]["result"] === "passed"
       ) {
         if (!practice) {
           occurrences.push(1);
@@ -222,10 +222,10 @@ export class Website {
     const occurrences = new Array<number>();
 
     for (const page of this.pages || []) {
-      const error = page.evaluation.tot.elems[tests[test]["test"]];
+      const error = page.evaluation.tot.elems[ruleset[test]["test"]];
       if (
         page.evaluation.tot.results[test] &&
-        tests[test]["result"] === "failed"
+        ruleset[test]["result"] === "failed"
       ) {
         if (!error) {
           occurrences.push(1);

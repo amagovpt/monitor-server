@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync } from "fs";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { PageService } from "src/page/page.service";
-import { BrowserContext } from "puppeteer";
+import { BrowserContext, Page } from "puppeteer";
 
 @Injectable()
 export class CrawlerService {
@@ -28,6 +28,7 @@ export class CrawlerService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async nestAdminCrawl(): Promise<void> {
+    
     if (
       process.env.NAMESPACE === undefined ||
       (process.env.NAMESPACE === "ADMIN" && process.env.AMSID === "0")
@@ -44,12 +45,14 @@ export class CrawlerService {
           const website = await queryRunner.manager.query(
             `SELECT * FROM CrawlWebsite WHERE UserId = -1 AND Done = 0 ORDER BY Creation_Date ASC LIMIT 1`
           );
-
+          
           if (website.length > 0) {
+
             const browser = await puppeteer.launch({
               headless: true,
               args: ["--no-sandbox", "--ignore-certificate-errors"],
             });
+  
             const incognito: any =
               await browser.createBrowserContext();
             const urls = await this.MSCrawl(incognito, website[0].StartingUrl);
@@ -82,11 +85,9 @@ export class CrawlerService {
           }
           await queryRunner.commitTransaction();
         } catch (err) {
-          // since we have errors lets rollback the changes we made
           await queryRunner.rollbackTransaction();
           console.error(err);
         } finally {
-          // you need to release a queryRunner which was manually instantiated
           await queryRunner.release();
         }
 
@@ -385,22 +386,58 @@ export class CrawlerService {
 
     return website[0].WebsiteId;
   }
+private async waitForVisualStability(page: Page, stabilityDuration = 1000, maxWait = 20000): Promise<void> {
+    const checkInterval = 100
+    let stableIntervals = 0;
+    const requiredIntervals = stabilityDuration / checkInterval;
+    
+    let lastMetrics = await page.metrics();
+    const startTime = Date.now();
 
+    while (Date.now() - startTime < maxWait) {
+        await new Promise(r => setTimeout(r, checkInterval));
+        
+        const currentMetrics = await page.metrics();
+        
+        if (currentMetrics.LayoutCount === lastMetrics.LayoutCount && 
+            currentMetrics.Nodes === lastMetrics.Nodes) {
+            stableIntervals++;
+        } else {
+            stableIntervals = 0; 
+        }
+
+        if (stableIntervals >= requiredIntervals) {
+            return;
+        }
+
+        lastMetrics = currentMetrics;
+    }
+}
   private async MSCrawl(
     browser: BrowserContext,
     pageURL: string
   ): Promise<string[]> {
+    let page = null;
     try {
-      const page = await browser.newPage();
-      await page.goto(pageURL, { waitUntil: "domcontentloaded" });
+      page = await browser.newPage();
+
+      await page.goto(pageURL, { waitUntil: "domcontentloaded", timeout: 15000 });
+
+      await this.waitForVisualStability(page);
+
+ 
       const urls = await page.evaluate(
         (pageURL) => {
           const notHtml =
             "css|jpg|jpeg|gif|svg|pdf|docx|js|png|ico|xml|mp4|mp3|mkv|wav|rss|json|pptx|txt|zip".split(
               "|"
             );
+          
           const links = document.querySelectorAll("body a");
-          const urls = new Array<string>();
+          if(links.length===0){
+            return [];
+          }
+          const urls = new Set<string>();
           links.forEach((link: Element) => {
             if (link.hasAttribute("href")) {
               let href = link.getAttribute("href").trim();
@@ -442,21 +479,29 @@ export class CrawlerService {
                   } else {
                     correctUrl = pageURL + href;
                   }
-                  if (!urls.includes(correctUrl)) {
-                    urls.push(correctUrl);
+                  if (!urls.has(correctUrl)) {
+                    urls.add(correctUrl);
                   }
                 }
               }
             }
           });
-          return urls;
+          return Array.from(urls);
         },
         pageURL.endsWith("/") ? pageURL : pageURL + "/"
       );
-      return urls;
+      return Array.from(urls);
     } catch (e) {
       console.log("Problem during crawling", e);
       return [];
+    }finally {
+      if (page) {
+        await page.close();
+      }
     }
   }
+
+
+
+
 }

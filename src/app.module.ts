@@ -6,6 +6,8 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { RateLimiterModule, RateLimiterGuard } from "nestjs-rate-limiter";
 import { readFileSync } from "fs";
 import { join } from "path";
+import * as Joi from 'joi';
+import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -45,13 +47,23 @@ import {
 import { LogModule } from "./log/log.module";
 import { DumpModule } from "./dump/dump.module";
 import { ApiSeloModule } from "./api-selo/api-selo.module";
+import { HealthModule } from "./health/heath.module";
 
 const databaseConfig = JSON.parse(
-  readFileSync("../monitor_db.json").toString()
+  readFileSync("./monitor_db.json").toString()
 );
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV == 'production' ? 'prod' : 'dev'}`,
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'production', 'staging', 'test').required(),
+        APP_AUTH_METHOD: Joi.string().valid('local', 'gov').required(),
+        SECRET_KEY: Joi.string().required()
+      }),
+    }),
     WinstonModule.forRoot({
       transports: [
         new winston.transports.DailyRotateFile({
@@ -97,6 +109,7 @@ const databaseConfig = JSON.parse(
     RateLimiterModule.register({
       points: 1000,
     }),
+    HealthModule,
     AuthModule,
     // AppsAuthModule,
     UserModule,

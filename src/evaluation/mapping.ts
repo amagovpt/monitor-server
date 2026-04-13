@@ -1,3 +1,4 @@
+
 const act_mapping = {
   "QW-ACT-R1": QW_ACT_R1,
   "QW-ACT-R2": QW_ACT_R2,
@@ -59,7 +60,7 @@ const wcag_mapping = {
   "QW-WCAG-T9": QW_WCAG_T9,
   "QW-WCAG-T14": QW_WCAG_T14,
   "QW-WCAG-T15": QW_WCAG_T15,
-  "QW-WCAG-T16": QW_WCAG_T16,
+//   "QW-WCAG-T16": QW_WCAG_T16,
   "QW-WCAG-T17": QW_WCAG_T17,
   "QW-WCAG-T18": QW_WCAG_T18,
   "QW-WCAG-T19": QW_WCAG_T19,
@@ -77,7 +78,6 @@ const wcag_mapping = {
   "QW-WCAG-T31": QW_WCAG_T31,
   "QW-WCAG-T33": QW_WCAG_T33,
   "QW-WCAG-T34": QW_WCAG_T34,
-  "QW-WCAG-T35": QW_WCAG_T35,
 };
 
 const bp_mapping = {
@@ -107,6 +107,7 @@ const bp_mapping = {
   "QW-BP27": QW_BP27,
   "QW-BP28": QW_BP28,
   "QW-BP29": QW_BP29,
+  "QW-BP30": QW_BP30,
 };
 
 function QW_ACT_R1(elements: any, results: any, nodes: any, rule: any): void {
@@ -656,6 +657,15 @@ function QW_ACT_R37(elements: any, results: any, nodes: any, rule: any): void {
       "colorContrast",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
+  }else if (rule.metadata.outcome === "passed") {
+   
+    addToElements(elements, "colorContrastOk", rule.metadata.passed);
+    addToResults(results, "color_02b");
+    addToNodes(
+      nodes,
+      "colorContrastOk",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
   }
 }
 
@@ -1190,10 +1200,18 @@ function QW_WCAG_T17(
   const incorrectLabelResults = technique.results.filter(
     (r: any) => r.verdict === "failed"
   );
+  const warningLabelResults = technique.results.filter(
+    (r: any) => r.verdict === "warning"
+  );
   if (incorrectLabelResults.length > 0) {
     addToElements(elements, "labelPosNo", incorrectLabelResults.length);
     addToResults(results, "label_02");
     addToNodes(nodes, "labelPosNo", incorrectLabelResults);
+  }
+  if (warningLabelResults.length > 0) {
+    addToElements(elements, "labelPosWarn", warningLabelResults.length);
+    addToResults(results, "label_02b");
+    addToNodes(nodes, "labelPosWarn", warningLabelResults);
   }
 }
 
@@ -1530,29 +1548,8 @@ function QW_WCAG_T34(
   }
 }
 
-function QW_WCAG_T35(elements: any, results: any, nodes: any, rule: any): void {
-  if (rule.metadata.outcome === "passed") {
-    addToElements(elements, "idAtt", rule.metadata.passed);
-    addToResults(results, "id_01");
-    addToNodes(
-      nodes,
-      "idAtt",
-      rule.results.filter((r: any) => r.verdict === "passed")
-    );
-  } else if (rule.metadata.outcome === "failed") {
-    addToElements(elements, "idAttNot", rule.metadata.failed);
-    addToResults(results, "id_02");
-    addToNodes(
-      nodes,
-      "idAttNot",
-      rule.results.filter((r: any) => r.verdict === "failed")
-    );
-  }
-}
-
 function QW_BP1(elements: any, results: any, nodes: any, technique: any): void {
   if (technique.metadata.outcome === "failed") {
-    addToElements(elements, "hxNone", technique.metadata.failed);
     addToResults(results, "hx_01a");
     addToNodes(
       nodes,
@@ -2035,6 +2032,26 @@ function QW_BP29(elements: any, results: any, nodes: any, rule: any): void {
     addToNodes(
       nodes,
       "langMatchNo",
+      rule.results.filter((r: any) => r.verdict === "failed")
+    );
+  }
+}
+
+function QW_BP30(elements: any, results: any, nodes: any, rule: any): void {
+  if (rule.metadata.outcome === "passed") {
+    addToElements(elements, "idAtt", rule.metadata.passed);
+    addToResults(results, "id_01");
+    addToNodes(
+      nodes,
+      "idAtt",
+      rule.results.filter((r: any) => r.verdict === "passed")
+    );
+  } else if (rule.metadata.outcome === "failed") {
+    addToElements(elements, "idAttNot", rule.metadata.failed);
+    addToResults(results, "id_02");
+    addToNodes(
+      nodes,
+      "idAttNot",
       rule.results.filter((r: any) => r.verdict === "failed")
     );
   }

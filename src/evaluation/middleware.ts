@@ -1,11 +1,9 @@
 import * as htmlparser from "htmlparser2";
 import * as CSSselect from "css-select";
-import clone from "lodash.clone";
+import clone  from "lodash.clone";
 import * as qualweb from "./qualweb";
 
-import tests from "./tests";
-import testsColors from "./testsColors";
-
+import  {testColors,ruleset}  from "@a12e/accessmonitor-rulesets";
 import { generateMd5Hash } from "../lib/security";
 import { getElementsMapping } from "./mapping";
 
@@ -89,7 +87,7 @@ function generateScore(report: any): string {
   let pon = 0;
 
   for (const test in report.data.tot.results) {
-    const value = tests[test];
+    const value = ruleset[test];
 
     if (value.result === "warning") {
       continue;
@@ -132,9 +130,9 @@ function generateScore(report: any): string {
 
     if (calc) {
       let temp = null;
-      if (tests[test]["type"] === "prop") {
+      if (ruleset[test]["type"] === "prop") {
         temp = calculateProp(value, report);
-      } else if (tests[test]["type"] === "decr") {
+      } else if (ruleset[test]["type"] === "decr") {
         temp = calculateDecr(value, report);
       } else {
         temp = calculateTrueFalse(value);
@@ -230,10 +228,11 @@ function calculateConform(results: any): string {
     AA: 0,
     AAA: 0,
   };
+  
   for (const ee in results || {}) {
     if (ee) {
-      let level = tests[ee]["level"].toUpperCase();
-      if (testsColors[ee] === "R") {
+      let level =  ruleset[ee].level.toUpperCase();
+      if (testColors[ee] === "R") {
         errors[level]++;
       }
     }
@@ -242,9 +241,21 @@ function calculateConform(results: any): string {
   return `${errors.A}@${errors.AA}@${errors.AAA}`;
 }
 
+function calculateTotalElements(elementsCounter:Record<string,number>):number {
+  if (!elementsCounter || typeof elementsCounter !== 'object') {
+    return 0;
+  }
+
+    return Object.values(elementsCounter).reduce((total, count) => {
+    const num = Number(count);
+    return total + (isNaN(num) ? 0 : num);
+  }, 0);
+  
+};
+
 function parseEvaluation(evaluation: any): any {
   const { elements, results, nodes } = getElementsMapping(evaluation);
-
+ 
   const report: any = {};
 
   report.pagecode = evaluation.system.page.dom.html;
@@ -262,12 +273,11 @@ function parseEvaluation(evaluation: any): any {
   report["data"].tot.info.url = clone(report["data"].rawUrl);
   report["data"].tot.info.title = clone(report["data"].title);
   report["data"].tot.info.date = clone(report["data"].date);
-  report["data"].tot.info.htmlTags = evaluation.system.page.dom.elementCount; //count_html_tags(evaluation.postProcessingHTML);
+  report["data"].tot.info.htmlTags = calculateTotalElements(evaluation.modules.counter.data.tags); 
   report["data"].tot.info.roles = evaluation.modules.counter.data.roles;
   report["data"].tot.info.cTags = evaluation.modules.counter.data.tags;
-  report["data"].tot.info.size =
+  report["data"].tot.info.size = 
     encodeURI(report.pagecode).split(/%..|./).length - 1;
-  //report['data'].tot.info.cssRules = calculateCssRules(evaluation);
   report["data"].tot.info.encoding = "utf-8";
   report["data"].tot.info.lang = getHtmlLang(evaluation.system.page.dom.html);
   report["data"].tot.info.content = "text/html";
