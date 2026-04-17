@@ -1,8 +1,9 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {  Injectable, InternalServerErrorException, OnModuleInit } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import clone from "lodash.clone";
-import fs from "fs";
+import fs, { createReadStream } from "node:fs";
+import * as readline from 'node:readline';
+import { readdir, stat } from 'node:fs/promises';
 import { Evaluation } from "./evaluation.entity";
 import {
   executeUrlEvaluation,
@@ -12,22 +13,85 @@ import {
 import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
-export class EvaluationService {
-  private isEvaluatingAdminInstance: boolean;
-  private isEvaluatingUserInstance: boolean;
-  private SKIP = 20;
-
+export class EvaluationService  implements OnModuleInit {
+  private currentProcessingIds: number[] = [];
+  private APP_INSTANCE = process.env.NODE_APP_INSTANCE || '0';
   constructor(
     @InjectDataSource()
     private readonly connection: DataSource,
     @InjectRepository(Evaluation)
     private readonly evaluationRepository: Repository<Evaluation>
   ) {
-    this.isEvaluatingAdminInstance = false;
-    this.isEvaluatingUserInstance = false;
+  }
+  async onModuleInit() {
+    const instanceId = `LOCK_${process.env.NAMESPACE}_${this.APP_INSTANCE}`;
+
+
+    console.log(`[BOOT] NODE_APP_INSTANCE: ${this.APP_INSTANCE} initialized. Checking if any orphan evaluations exist...`);
+
+    try {
+
+      const result = await this.connection.query(
+        `UPDATE Evaluation_List 
+         SET Is_Evaluating = 0, Error = NULL 
+         WHERE Is_Evaluating = 1 
+           AND Error = ?`,
+        [instanceId]
+      );
+
+      if (result.affectedRows > 0) {
+        console.warn(
+          `[SELF-HEALING] APP_INSTANCE:${this.APP_INSTANCE} - Successs: ${result.affectedRows} evaluations orphan cleaned.`.green
+        );
+      } else {
+        console.log(`[BOOT] APP_INSTANCE:${this.APP_INSTANCE} - No orphan evaluations found  .`.green);
+      }
+    } catch (err) {
+      console.error(`[BOOT-ERROR] APP_INSTANCE:${this.APP_INSTANCE} - Failed while trying to clean orphan evaluations: ${err.message}`.red);
+    }
+  
+      this.setupShutdownHandlers();
+  }
+  private setupShutdownHandlers() {
+    
+  const signals = ['SIGINT', 'SIGTERM'];
+
+  signals.forEach((signal) => {
+    
+    process.on(signal, async () => {
+      
+      console.warn(`\n[${signal}] Shutdown detected. Releasing resources...`.yellow);
+
+      if (this.currentProcessingIds.length > 0) {
+        try {
+          console.log(`[CLEANUP] Releasing IDs in DB: ${this.currentProcessingIds}`.yellow);
+          
+          await this.connection.query(
+            `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE EvaluationListId IN (?)`,
+            [this.currentProcessingIds]
+          );
+          
+          console.log(`[CLEANUP] Success: Evaluations with IDs [${this.currentProcessingIds}] released. `.green);
+        } catch (err) {
+          console.error(`[CLEANUP-ERROR]  Failure:` .red, err.message);
+        }
+      } else {
+        console.log(`[CLEANUP] No pages in progress.`.green);
+      }
+
+      console.log(`[SHUTDOWN] Instance terminated.`.green);
+      
+
+      process.exit(0); 
+    });
+  })
+}
+  public getCurrentProcessingIds(): number[] {
+    return this.currentProcessingIds;
+
   }
   //FIXME confirmar se as paginas têm sempre avaliação
-  async getLastEvaluationByPage(pageId: number): Promise<Evaluation> {
+  async getLastEvaluationByPage(pageId: number): Promise<Evaluation>  {
     const evaluationList = await this.evaluationRepository.find({
       where: { PageId: pageId },
       take: 1,
@@ -36,6 +100,45 @@ export class EvaluationService {
     return evaluationList[0];
   }
 
+private async findUrlError(url: string): Promise<string> {
+  const now = Date.now();
+  const TWENTY_MINUTES_MS = 20 * 60 * 1000;
+
+  try {
+    const files = await readdir("./");
+    
+    const filesWithStats = await Promise.all(
+      files
+        .filter(f => f.startsWith("qualweb-errors"))
+        .map(async f => ({ name: f, stats: await stat(f) }))
+    );
+
+    const recentFiles = filesWithStats
+      .filter(f => (now - f.stats.mtimeMs) < TWENTY_MINUTES_MS)
+      .sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs);
+
+    for (const file of recentFiles) {
+      const rl = readline.createInterface({
+        input: createReadStream(file.name),
+        crlfDelay: Infinity
+      });
+
+      for await (const line of rl) {
+        if (line.includes(url)) {
+          const split = line.split(url);
+          const error = split[1]?.split("-----------")[0]?.split(":")?.slice(1).join(":").trim();
+          if (error) {
+            rl.close(); 
+            return error;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    return "Error extraction failed.";
+  }
+  return "No error found for URL. Please check server logs for more details.";
+}
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   cleanUpErrorFiles(): void {
     fs.readdir("./", (err, files: string[]) => {
@@ -53,133 +156,170 @@ export class EvaluationService {
     });
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
-  async instanceEvaluateAdminPageList(): Promise<void> {
-    if (
-      (process.env.NAMESPACE === undefined ||
-        process.env.NAMESPACE === "ADMIN") &&
-      !this.isEvaluatingAdminInstance
-    ) {
-      this.isEvaluatingAdminInstance = true;
 
-      let pages = [];
-      if (
-        process.env.NAMESPACE === undefined ||
-        parseInt(process.env.AMSID) === 0
-      ) {
-        pages = await this.connection.query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
-        );
-      } else {
-        const skip = parseInt(process.env.AMSID) * this.SKIP;
-        pages = await this.connection.query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId = -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
-        );
-      }
-      await this.evaluateInBackground(pages);
+@Cron(CronExpression.EVERY_10_SECONDS)
+async instanceEvaluateAdminPageList(): Promise<void> {
+  
+  if (process.env.NAMESPACE !== undefined && process.env.NAMESPACE !== "ADMIN") return;
 
-      this.isEvaluatingAdminInstance = false;
+  const queryRunner = this.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const [status] = await queryRunner.manager.query(
+      `SELECT COUNT(*) as total FROM Evaluation_List WHERE Is_Evaluating = 1 AND UserId = -1 `
+    );
+
+    const totalInQueue = parseInt(status.total);
+    if (totalInQueue >= 30) {
+      console.warn(`[Queue Full] APP_INSTANCE:${this.APP_INSTANCE} - Evaluation Queue cannot hold more active works at this moment- Queue : ${totalInQueue}/30`.yellow);
+      await queryRunner.rollbackTransaction();
+      return;
     }
-  }
+    const instanceId = `LOCK_ADMIN_${this.APP_INSTANCE}`;
+    const batchSize = Math.min(10, 30 - totalInQueue);
 
-  @Cron(CronExpression.EVERY_5_SECONDS) // Called every 5 seconds - ADMIN EVALUATIONS
-  async instanceEvaluateUserPageList(): Promise<void> {
-    if (
-      (process.env.NAMESPACE === undefined ||
-        process.env.NAMESPACE === "USER") &&
-      !this.isEvaluatingUserInstance
-    ) {
-      this.isEvaluatingUserInstance = true;
 
-      let pages = [];
-      if (
-        process.env.NAMESPACE === undefined ||
-        parseInt(process.env.USRID) === 0
-      ) {
-        pages = await this.connection.query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20`
-        );
-      } else {
-        const skip = parseInt(process.env.USRID) * this.SKIP;
-        pages = await this.connection.query(
-          `SELECT * FROM Evaluation_List WHERE Error IS NULL AND UserId <> -1 AND Is_Evaluating = 0 ORDER BY Creation_Date ASC LIMIT 20, ${skip}`
-        );
+    const pagesToLock = await queryRunner.manager.query(`
+      SELECT EvaluationListId 
+      FROM Evaluation_List 
+      WHERE Is_Evaluating = 0 
+        AND Error IS NULL 
+        AND UserId = -1
+      ORDER BY Creation_Date ASC, EvaluationListId ASC
+      LIMIT ?
+      FOR UPDATE SKIP LOCKED
+    `, [batchSize]);
+
+    if (pagesToLock.length > 0) {
+      const ids = pagesToLock.map(p => p.EvaluationListId);
+
+      await queryRunner.manager.query(`
+        UPDATE Evaluation_List 
+        SET Is_Evaluating = 1, Error = ?
+        WHERE EvaluationListId IN (?)
+      `, [instanceId, ids]);
+
+      const pages = await queryRunner.manager.query(
+        `SELECT * FROM Evaluation_List WHERE EvaluationListId IN (?)`,
+        [ids]
+      );
+
+      await queryRunner.commitTransaction();
+
+      this.currentProcessingIds.push(...ids);
+      
+      try {
+        await this.evaluateInBackground(pages);
+      } finally {
+        this.currentProcessingIds = this.currentProcessingIds.filter(id => !ids.includes(id));
       }
-
-      await this.evaluateInBackground(pages);
-
-      this.isEvaluatingUserInstance = false;
+    } else {
+      await queryRunner.rollbackTransaction();
     }
+  } catch (err) {
+    console.error(`[CRITICAL] APP_INSTANCE:${this.APP_INSTANCE} - Failure in orchestration of evaluation: ${err.message}`.red);
+    if (queryRunner.isTransactionActive) {
+      await queryRunner.rollbackTransaction();
+    }
+  } finally {
+    // Libertar o worker para o pool
+    await queryRunner.release();
   }
+}
 
+
+@Cron(CronExpression.EVERY_30_SECONDS)
+async instanceEvaluateUserPageList(): Promise<void> {
+
+  if (process.env.NAMESPACE !== undefined && process.env.NAMESPACE !== "USER") return;
+
+  const queryRunner = this.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const [status] = await queryRunner.manager.query(
+      `SELECT COUNT(*) as total FROM Evaluation_List WHERE Is_Evaluating = 1 AND UserId <> -1 `
+    );
+
+    const totalInQueue = parseInt(status.total);
+    if (totalInQueue >= 20) {
+      console.warn(`[Queue Full] APP_INSTANCE:${this.APP_INSTANCE} - Evaluation Queue cannot hold more active works at this moment- Queue : ${totalInQueue}/20`.yellow);
+      await queryRunner.rollbackTransaction();
+      return;
+    }
+    const instanceId = `LOCK_USER_${this.APP_INSTANCE}`;
+    const batchSize = Math.min(10, 20 - totalInQueue);
+
+
+    const pagesToLock = await queryRunner.manager.query(`
+      SELECT EvaluationListId 
+      FROM Evaluation_List 
+      WHERE Is_Evaluating = 0 
+        AND Error IS NULL 
+        AND UserId <> -1
+      ORDER BY Creation_Date ASC, EvaluationListId ASC
+      LIMIT ?
+      FOR UPDATE SKIP LOCKED
+    `, [batchSize]);
+
+    if (pagesToLock.length > 0) {
+      const ids = pagesToLock.map(p => p.EvaluationListId);
+
+      await queryRunner.manager.query(`
+        UPDATE Evaluation_List 
+        SET Is_Evaluating = 1, Error = ?
+        WHERE EvaluationListId IN (?)
+      `, [instanceId, ids]);
+
+      const pages = await queryRunner.manager.query(
+        `SELECT * FROM Evaluation_List WHERE EvaluationListId IN (?)`,
+        [ids]
+      );
+
+      await queryRunner.commitTransaction();
+
+      this.currentProcessingIds.push(...ids);
+      
+      try {
+        await this.evaluateInBackground(pages);
+      } finally {
+        this.currentProcessingIds = this.currentProcessingIds.filter(id => !ids.includes(id));
+      }
+    } else {
+      await queryRunner.rollbackTransaction();
+    }
+  } catch (err) {
+    console.error(`[CRITICAL] APP_INSTANCE:${this.APP_INSTANCE} - Failure in orchestration of evaluation: ${err.message}`.red);
+    if (queryRunner.isTransactionActive) {
+      await queryRunner.rollbackTransaction();
+    }
+  } finally {
+    await queryRunner.release();
+  }
+}
+ 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async evaluateStuckPages(): Promise<void> {
     const pages = await this.connection.query(
-      `SELECT * FROM Evaluation_List WHERE Error IS NULL AND Is_Evaluating = 1 AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`
+      `SELECT * FROM Evaluation_List WHERE Is_Evaluating = 1 AND (Error IS NULL OR Error LIKE 'LOCK_%') AND Creation_Date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`
     );
 
     if (pages.length > 0) {
       try {
         await this.connection.query(
-          `UPDATE Evaluation_List SET Is_Evaluating = 0 WHERE EvaluationListId IN (?)`,
+          `UPDATE Evaluation_List SET Is_Evaluating = 0, Error = NULL WHERE EvaluationListId IN (?)`,
           [pages.map((p) => p.EvaluationListId)]
         );
       } catch (err) {
-        console.error(err);
+        console.error(`[CRITICAL] APP_INSTANCE:${this.APP_INSTANCE} - Failure in evaluating stuck pages: ${err.message}`.red);
         throw err;
       }
     }
   }
 
-  /*@Cron('0 0 * * 0')
-  async evaluateOldPages(): Promise<void> {
-    if (process.env.NAMESPACE !== 'AMP' && process.env.NODE_APP_INSTANCE === '1') {
-
-      const pagesToEvaluate = await getManager().query(`
-        SELECT DISTINCT p.PageId, p.Uri, e.Evaluation_Date
-        FROM 
-          Page as p, 
-          Evaluation as e 
-        WHERE
-          e.PageId = p.PageId AND e.Evaluation_Date = (
-            SELECT Evaluation_Date FROM Evaluation 
-            WHERE PageId = p.PageId 
-            ORDER BY Evaluation_Date DESC LIMIT 1
-          )  
-        ORDER BY e.Evaluation_Date ASC LIMIT 100
-      `);
-      
-      for (const pte of pagesToEvaluate || []) {
-        let error = null;
-        let evaluation: any;
-        try {
-          evaluation = clone(await this.evaluateUrl(pte.Url));
-        } catch (e) {
-          error = e.stack;
-        }
-
-        const queryRunner = this.connection.createQueryRunner();
-
-        await queryRunner.connect();
-        
-        await queryRunner.startTransaction();
-
-        try {
-          if (!error && evaluation) {
-            this.savePageEvaluation(queryRunner, pte.PageId, evaluation, '10');
-          }
-
-          await queryRunner.commitTransaction();
-        } catch (err) {
-          // since we have errors lets rollback the changes we made
-          await queryRunner.rollbackTransaction();
-          console.log(err);
-        } finally {
-          await queryRunner.release();
-        }
-      }
-    }
-  }*/
 
   private async evaluateInBackground(pages: any[]): Promise<void> {
     if (pages.length > 0) {
@@ -189,16 +329,16 @@ export class EvaluationService {
           [pages.map((p) => p.EvaluationListId)]
         );
       } catch (err) {
-        console.error(err);
+        console.error(`[CRITICAL] APP_INSTANCE:${this.APP_INSTANCE} - Failure in updating evaluation list: ${err.message}`.red);
         throw err;
       }
 
       let reports = {};
 
       try {
-        reports = clone(await this.evaluateUrls(pages.map((p) => p.Url)));
+        reports = await this.evaluateUrls(pages.map((p) => p.Url));
       } catch (err) {
-        console.error(err);
+        console.error(`[CRITICAL] APP_INSTANCE:${this.APP_INSTANCE} - Failure in evaluating URLs: ${err.message}`.red);
       }
 
       const queryRunner = this.connection.createQueryRunner();
@@ -222,9 +362,9 @@ export class EvaluationService {
             [pte.EvaluationListId]
           );
         } else {
-          const error = this.findUrlError(pte.Url);
+          const error = await this.findUrlError(pte.Url);
           await queryRunner.manager.query(
-            `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
+            `UPDATE Evaluation_List SET Error = ? , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
             [error, pte.EvaluationListId]
           );
         }
@@ -233,78 +373,14 @@ export class EvaluationService {
       try {
         await queryRunner.commitTransaction();
       } catch (err) {
-        // since we have errors lets rollback the changes we made
         await queryRunner.rollbackTransaction();
         console.error(err);
       } finally {
         await queryRunner.release();
       }
 
-      /*for (const pte of pages || []) {
-        let error = null;
-        let evaluation: any;
-        try {
-          evaluation = clone(await this.evaluateUrl(pte.Url));
-        } catch (e) {
-          error = e.stack;
-        }
-
-        const queryRunner = this.connection.createQueryRunner();
-
-        await queryRunner.connect();
-
-        await queryRunner.startTransaction();
-
-        try {
-          if (!error && evaluation) {
-            this.savePageEvaluation(
-              queryRunner,
-              pte.PageId,
-              evaluation,
-              pte.Show_To,
-              pte.StudyUserId
-            );
-
-            await queryRunner.manager.query(
-              `DELETE FROM Evaluation_List WHERE EvaluationListId = ?`,
-              [pte.EvaluationListId]
-            );
-          } else {
-            console.log(error);
-            await queryRunner.manager.query(
-              `UPDATE Evaluation_List SET Error = "?" , Is_Evaluating = 0 WHERE EvaluationListId = ?`,
-              [error?.toString() || error, pte.EvaluationListId]
-            );
-          }
-
-          await queryRunner.commitTransaction();
-        } catch (err) {
-          // since we have errors lets rollback the changes we made
-          await queryRunner.rollbackTransaction();
-          console.error(err);
-        } finally {
-          await queryRunner.release();
-        }
-      }*/
+  
     }
-  }
-
-  private findUrlError(url: string): string {
-    let error = "";
-    const files = fs.readdirSync("./", { encoding: "utf-8" });
-    for (const file of files ?? []) {
-      if (file.startsWith("qualweb-errors") && !error) {
-        const content = fs.readFileSync(file, { encoding: "utf-8" });
-        if (content.includes(url)) {
-          let split = content.split(url);
-          split = split[1].split("-----------");
-          split = split[0].split(":");
-          error = split.splice(1).join(":").trim();
-        }
-      }
-    }
-
-    return error;
   }
 
   evaluateUrl(url: string): Promise<any> {
@@ -331,11 +407,10 @@ export class EvaluationService {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      // since we have errors lets rollback the changes we made
       await queryRunner.rollbackTransaction();
       hasError = true;
     } finally {
-      // you need to release a queryRunner which was manually instantiated
+
       await queryRunner.release();
     }
 
