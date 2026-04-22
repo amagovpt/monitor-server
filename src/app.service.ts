@@ -28,6 +28,7 @@ export class AppService implements OnModuleInit {
     const nodeEnv = this.configService.get('NODE_ENV'); 
     const authMethod = this.configService.get('APP_AUTH_METHOD');
     const secretKey = this.configService.get('SECRET_KEY');
+    const AuthServer = this.configService.get('AUTH_SERVER');
     const secretStatus = secretKey ? '✅ PRESENT' : '❌ MISSING';
     this.logger.log('┌──────────────────────────────────────────┐');
     this.logger.log('│          CONFIGURATION AUDIT             │');
@@ -35,6 +36,7 @@ export class AppService implements OnModuleInit {
     this.logger.log(`│ NODE_ENV    : ${nodeEnv.padEnd(26)} │`);
     this.logger.log(`│ AUTH_METHOD : ${authMethod.padEnd(26)} │`);
     this.logger.log(`│ SECRET_KEY  : ${secretStatus.padEnd(26)}│`);
+    this.logger.log(`│ AUTH_SERVER : ${AuthServer.padEnd(26)} │`);
     this.logger.log('└──────────────────────────────────────────┘');
   }
   getHello(): string {
