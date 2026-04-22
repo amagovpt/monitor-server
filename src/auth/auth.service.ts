@@ -9,6 +9,7 @@ import { comparePasswordHash } from "../lib/security";
 import axios from "axios";
 import { NAME_CONVERTER, NIC } from "./constants";
 import { GovUserService } from "src/gov-user/gov-user.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,8 @@ export class AuthService {
     private readonly invalidTokenRepository: Repository<InvalidToken>,
     @InjectDataSource()
     private readonly connection: DataSource,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService  
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -153,17 +155,18 @@ export class AuthService {
   }
 
   async getAtributes(token: string) {
+    const AUTH_SERVER = this.configService.get('AUTH_SERVER');
     const atributesName = [
       "http://interop.gov.pt/MDC/Cidadao/NIC",
       "http://interop.gov.pt/MDC/Cidadao/NomeCompleto",
     ];
     const responseStart = await axios.post(
-      "https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
+      `${AUTH_SERVER}/oauthresourceserver/api/AttributeManager`,
       { token, atributesName }
     );
     const authenticationContextId = responseStart.data.authenticationContextId;
     const responseAtributes = await axios.get(
-      `https://autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`
+      `${AUTH_SERVER}/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`
     );
     return this.parseAtributes(responseAtributes.data);
   }
