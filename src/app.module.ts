@@ -61,7 +61,8 @@ const databaseConfig = JSON.parse(
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'staging', 'test').required(),
         APP_AUTH_METHOD: Joi.string().valid('local', 'gov').required(),
-        SECRET_KEY: Joi.string().required()
+        SECRET_KEY: Joi.string().required(),
+        AUTH_SERVER: Joi.string().uri().required(),
       }),
     }),
     WinstonModule.forRoot({

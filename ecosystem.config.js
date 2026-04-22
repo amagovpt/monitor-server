@@ -1,4 +1,3 @@
-
 module.exports = {
   apps: [
     {
@@ -9,8 +8,12 @@ module.exports = {
       exec_mode: "cluster",
       increment_var: "AMPID",
       cron_restart: "45 */2 * * *",
+      kill_timeout: 60000,
+      wait_ready: true,
+      listen_timeout: 30000,
       env: {
         APP_AUTH_METHOD: "local",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         NAMESPACE: "AMP",
         AMPID: 0,
         PORT: 3000,
@@ -30,6 +33,7 @@ module.exports = {
         AMPID: 0,
         PORT: 3000,
         NODE_ENV: "production",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         VALIDATOR: "http://10.100.45.7/validate/",
         REFERER: "https://accessmonitor.acessibilidade.gov.pt/",
         CLIENT_ID: "8034387266539447728",
@@ -48,12 +52,16 @@ module.exports = {
       exec_mode: "cluster",
       increment_var: "AMSID",
       cron_restart: "45 */2 * * *",
+      kill_timeout: 60000,
+      wait_ready: true,
+      listen_timeout: 30000,
       env: {
         APP_AUTH_METHOD: "local",
         NAMESPACE: "ADMIN",
         AMSID: 0,
         PORT: 3000,
         NODE_ENV: "development",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         VALIDATOR: "http://10.100.45.7/validate/",
         REFERER: "https://accessmonitor.acessibilidade.gov.pt/",
         CLIENT_ID: "8034387266539447728",
@@ -69,6 +77,7 @@ module.exports = {
         PORT: 3000,
         NODE_ENV: "production",
         APP_AUTH_METHOD: "gov",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         REFERER: "https://accessmonitor.acessibilidade.gov.pt/",
         CLIENT_ID: "8034387266539447728",
         REDIRECT_URI: "https://mymonitor.acessibilidade.gov.pt/loginRedirect",
@@ -86,8 +95,12 @@ module.exports = {
       exec_mode: "cluster",
       increment_var: "USRID",
       cron_restart: "45 */2 * * *",
+      kill_timeout: 60000,
+      wait_ready: true,
+      listen_timeout: 30000,
       env: {
         NAMESPACE: "USER",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         USRID: 0,
         PORT: 3000,
         NODE_ENV: "development",
@@ -106,6 +119,7 @@ module.exports = {
         PORT: 3000,
         NODE_ENV: "production",
         APP_AUTH_METHOD: "gov",
+        AUTH_SERVER: "https://autenticacao.gov.pt",
         REFERER: "https://accessmonitor.acessibilidade.gov.pt/",
         CLIENT_ID: "8034387266539447728",
         REDIRECT_URI: "https://mymonitor.acessibilidade.gov.pt/loginRedirect",
@@ -117,4 +131,3 @@ module.exports = {
     },
   ],
 };
-
