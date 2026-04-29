@@ -640,10 +640,11 @@ export class PageService {
     try {
       for (let uri of uris || []) {
         uri = uri;
-        const page = await this.pageRepository.findOne({
-          select: ["PageId", "Show_In"],
-          where: { Uri: uri },
-        });
+
+        const page = await queryRunner.manager.createQueryBuilder(Page, "page")
+          .where("LOWER(page.Uri) = LOWER(:uri)", { uri }) 
+          .select(["page.PageId", "page.Show_In"])
+          .getOne();
 
         if (page) {
           let newShowIn = "100";
