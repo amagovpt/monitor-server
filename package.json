@@ -50,7 +50,7 @@
     "helmet": "^6.0.1",
     "htmlparser2": "^8.0.1",
     "ip-range-check": "^0.2.0",
-    "joi": "^18.0.2",
+    "joi": "^18.2.1",
     "lodash.clone": "^4.5.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.orderby": "^4.6.0",
