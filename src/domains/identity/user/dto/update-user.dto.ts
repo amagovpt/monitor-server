@@ -9,7 +9,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { RoleSlug, UserPermission } from 'src/core/authentication/interfaces/types';
+import { RoleSlug } from 'src/core/authentication/interfaces/types';
+import { PermissionLevel } from '../user.entity';
 
 export class UpdateUserDto {
   @IsNumber({}, { message: 'ID must be a number.' })
@@ -37,8 +38,8 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString({ message: 'Permissions must be a string.' })
-  @IsEnum(UserPermission, {
-    message: `Permissions must be a valid permission. Valid permissions are: ${Object.values(UserPermission).join(', ')}`,
+  @IsEnum(PermissionLevel, {
+    message: `Permissions must be a valid permission. Valid permissions are: ${Object.values(PermissionLevel).join(', ')}`,
   })
-  permissions: UserPermission;
+  permission: PermissionLevel;
 }

@@ -16,6 +16,9 @@ export class UserDTO {
   role: RoleDTO;
 
   @Expose()
+  permission: string;
+
+  @Expose()
   teamCount: number;
 
   @Expose()

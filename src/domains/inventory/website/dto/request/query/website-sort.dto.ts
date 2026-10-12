@@ -1,31 +1,39 @@
-import { IsIn, IsOptional, ValidateNested } from "class-validator";
-import { BaseSortDto, SortItem } from "src/common/dto/request/base-sort.dto";
-import { Type, Transform } from "class-transformer";
-import { Website } from "../../../website.entity";
-export class WebsiteSortItem extends SortItem {
-  @IsIn(["id","title", "tagId", "tagName", "websiteId", "createdAt"])
-  declare field: string;
+import { IsOptional } from 'class-validator';
+import { IsSortOrder } from 'src/common/decorators/is-sort-order.decorator';
+import { SortCriteria } from 'src/common/interfaces/types';
+import { BaseSortDto } from 'src/common/dto/request/base-sort.dto';
+import { Website } from '../../../website.entity';
 
-  @IsIn(["ASC", "DESC", "asc", "desc"])
-  declare order: "ASC" | "DESC" | "asc" | "desc";
-}
+type TargetKeys = keyof Pick<
+  Website,
+  'id' | 'title' | 'baseUrl' | 'createdAt' | 'institutionId' | 'createdAt'
+>;
 
-export class WebsiteSortDTO extends BaseSortDto<Website> {
+type WebsiteSortContract = {
+  [K in TargetKeys]: SortCriteria;
+};
+
+export class WebsiteSortDTO extends BaseSortDto<Website> implements WebsiteSortContract {
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => WebsiteSortItem)
-  @Transform(({ value }) => {
-    if (!Array.isArray(value)) return value;
-    return value.reduce((acc, item) => {
-      if (item.field && item.order) {
-        acc[item.field] = item.order.toUpperCase();
-      }
-      return acc;
-    }, {});
-  })
-  declare readonly sort?: Record<string, "ASC" | "DESC">;
+  @IsSortOrder()
+  id: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  title: SortCriteria;
+  @IsOptional()
+  @IsSortOrder()
+  baseUrl: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  institutionId: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  createdAt: SortCriteria;
 
   getAllowedFields(): string[] {
-    return ["id", "title", "tagId", "tagName", "websiteId", "createdAt"];
+    return ['id', 'title', 'baseUrl', 'createdAt', 'institutionId'];
   }
 }
