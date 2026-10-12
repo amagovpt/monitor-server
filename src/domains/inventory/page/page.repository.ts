@@ -66,8 +66,9 @@ export class PageRepository extends ContextAwareRepository<
   protected readonly sortMap: SortingMap<PageSort, Page> = {
     id: (query, order) => this.addSort(query, 'id', order),
     url: (query, order) => this.addSort(query, 'url', order),
-    score: (query, order) => query.addOrderBy('evaluation.score', order),
-    createdAt: (query, order) => query.addOrderBy('evaluation.createdAt', order),
+    isInObservatory: (query, order) => query.addOrderBy(`${this.alias}.is_in_observatory`, order),
+    websiteId: (query, order) => this.addSort(query, 'websiteId', order),
+    createdAt: (query, order) => query.addOrderBy(`${this.alias}.created_at`, order),
   };
 
   async findManyWithLastEvalScore(

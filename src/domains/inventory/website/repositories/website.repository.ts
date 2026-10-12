@@ -76,10 +76,9 @@ export class WebsiteRepository extends ContextAwareRepository<
   protected readonly sortMap: SortingMap<WebsiteSort, Website> = {
     id: (query, order) => this.addSort(query, 'id', order),
     title: (query, order) => this.addSort(query, 'title', order),
-    score: (query, order) => query.addOrderBy(`${this.alias}.averageScore`, order),
     createdAt: (query, order) => this.addSort(query, 'createdAt', order),
-    updatedAt: (query, order) => this.addSort(query, 'updatedAt', order),
-    createdBy: (query, order) => query.addOrderBy(`${this.alias}.createdById`, order),
+    baseUrl: (query, order) => this.addSort(query, 'baseUrl', order),
+    institutionId: (query, order) => this.addSort(query, 'institutionId', order),
   };
 
   public async findMany(

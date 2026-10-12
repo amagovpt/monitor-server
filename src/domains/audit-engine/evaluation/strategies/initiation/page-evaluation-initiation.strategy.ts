@@ -72,7 +72,6 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
       throw new BadRequestException('No matching pages found for provided target IDs.');
     }
 
-    // 2. Extrair websites únicos e filtrar via OpenFGA
     const uniqueWebsiteIds = Array.from(new Set(pageWebsiteMappings.map((p) => p.website_id)));
 
     const authorizedWebsiteIds: (string | number)[] = [];

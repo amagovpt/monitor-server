@@ -16,6 +16,7 @@ import { WebsiteCrawlerAdapter } from './strategies/puppeteer-website-crawler.ad
 import { CrawlPublicWorker } from './processors/crawler-public.processor';
 import { CrawlWebsiteHandler } from './handlers/crawl-websites.handler';
 import { CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG } from './crawler-website.constants';
+import { QueuesModule } from 'src/core/queues/queues.module';
 
 export const CrawlerWebsiteTableConfigProvider: Provider = {
   provide: CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG,
@@ -39,10 +40,7 @@ export const CrawlerWebsiteTableConfigProvider: Provider = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([CrawlerWebsite]),
-    BullModule.registerQueue({ name: QUEUE_NAMES.CRAWL_PRIVATE }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.CRAWL_PRIVATE_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.CRAWL_PUBLIC }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.CRAWL_PUBLIC_DLQ }),
+    QueuesModule,
     WebsiteModule,
     CrawlerPageModule,
   ],

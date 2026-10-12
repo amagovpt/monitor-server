@@ -24,12 +24,14 @@ export class WebsiteService extends BaseService {
     contexts: ContextEnum[],
     securityContext: SecurityContext,
   ): Promise<PaginationResponse<Website>> {
-    const findArgs = {
-      ...queryArgs,
+    const query = {
+      filters: queryArgs.filters || {},
+      sortings: queryArgs.sorts || {},
+      pagination: queryArgs.pagination || {},
       contexts,
       securityContext,
     };
-    return this.repository.findManySecure(findArgs);
+    return this.repository.findManySecure(query);
   }
 
   async createWebsite(

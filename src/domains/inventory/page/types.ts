@@ -13,7 +13,9 @@ export interface PageFilter extends BaseFilter {
 export interface PageSort extends BaseSort {
   url?: SortCriteria;
   createdAt?: SortCriteria;
-  score?: SortCriteria;
+  id?: SortCriteria;
+  websiteId?: SortCriteria;
+  isInObservatory?: SortCriteria;
 }
 
 export type PageQueryRequest = {

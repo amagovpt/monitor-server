@@ -40,7 +40,7 @@ export class PageController implements LoggableController {
     return this.pageService.findAll(
       {
         pagination: { limit: query.pagination?.limit, page: query.pagination?.page },
-        sortings: query.sorts?.sort,
+        sortings: query.sorts,
         filters: query.filters,
       },
       query.contexts,
