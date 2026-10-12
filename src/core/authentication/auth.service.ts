@@ -4,12 +4,10 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../domains/identity/user/user.entity';
-import { InvalidToken } from './entitities/invalid-token.entity';
 import { comparePasswordHash } from '../../common/security';
 import axios from 'axios';
 import { NAME_CONVERTER, NIC } from './constants/constants';
@@ -183,12 +181,4 @@ export class AuthService {
     });
     return result;
   }
-
-  /*
-  public async findUserByGovId(govUserId: number): Promise<User> {
-
-    return await this.userRepository.findOneOrFail({
-      where: { govUser: { id: govUserId } },
-    });
-  }*/
 }
