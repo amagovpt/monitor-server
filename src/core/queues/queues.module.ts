@@ -5,18 +5,30 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { QUEUE_NAMES, DEFAULT_JOB_OPTIONS } from './queues.config';
 import { ExpressAdapter } from '@bull-board/express';
 import { ConfigService } from '@nestjs/config';
+import { QueueMetricsService } from './queue-metrics.service';
+import { QueuesController } from './queue.controller';
+import { QueueManagementService } from './queue-management.service';
+import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
 
 @Module({
   imports: [
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
-          db: configService.get<number>('REDIS_DB_BULL') || 0,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const telemetry = new BullMQOtel({
+          tracerName: process.env.OTEL_SERVICE_NAME || 'monitor-server',
+          meterName: process.env.OTEL_SERVICE_NAME || 'monitor-server',
+          enableMetrics: true,
+        });
+        return {
+          connection: {
+            host: configService.get<string>('REDIS_HOST'),
+            port: configService.get<number>('REDIS_PORT'),
+            db: configService.get<number>('REDIS_DB_BULL') || 0,
+          },
+          telemetry,
+        };
+      },
     }),
     BullModule.registerQueue(
       {
@@ -68,6 +80,8 @@ import { ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  exports: [BullModule],
+  controllers: [QueuesController],
+  providers: [QueueMetricsService, QueueManagementService],
+  exports: [BullModule, QueueMetricsService, QueueManagementService],
 })
 export class QueuesModule {}
