@@ -64,6 +64,7 @@ GROUP BY dm.id, dm.name, dm.tag_matching_strategy, dm.is_in_observatory;
 
 
 CREATE OR REPLACE VIEW v_institution_websites AS
+
 SELECT 
     i.id AS institution_id,
     i.long_name AS institution_name,
