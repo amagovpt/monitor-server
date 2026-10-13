@@ -12,12 +12,11 @@ import { CrawlPrivateWorker } from './processors/crawler-private.processor';
 import { WebsitesGateway } from './gateways/crawler.gateway';
 import { WebsiteModule } from 'src/domains/inventory/website/website.module';
 import { IWebsiteScraper } from './types/scraper.interface';
-import { WebsiteCrawlerAdapter } from './strategies/puppeteer-website-crawler.adapter';
 import { CrawlPublicWorker } from './processors/crawler-public.processor';
 import { CrawlWebsiteHandler } from './handlers/crawl-websites.handler';
 import { CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG } from './crawler-website.constants';
 import { QueuesModule } from 'src/core/queues/queues.module';
-
+import { PlaywrightWebsiteScraperAdapter } from './strategies/playwright-website-scraper.adapter';
 export const CrawlerWebsiteTableConfigProvider: Provider = {
   provide: CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG,
   useFactory: (): RepositoryTableConfig => ({
@@ -51,9 +50,10 @@ export const CrawlerWebsiteTableConfigProvider: Provider = {
     CrawlPublicWorker,
     CrawlPrivateWorker,
     WebsitesGateway,
+
     {
       provide: IWebsiteScraper,
-      useClass: WebsiteCrawlerAdapter,
+      useClass: PlaywrightWebsiteScraperAdapter,
     },
     CrawlWebsiteHandler,
     CrawlerWebsiteTableConfigProvider,
