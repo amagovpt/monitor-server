@@ -88,14 +88,6 @@ export class CrawlPrivateWorker extends WorkerHost {
     }
 
     try {
-      const currentState = await job.getState();
-      if (currentState !== 'failed') {
-        this.logger.warn(
-          `Ignorando o tratamento de falha definitiva para o job ${job.id} pois o estado atual é '${currentState}'.`,
-        );
-        return;
-      }
-
       await this.dlqQueue.add('failed-job', {
         ...job.data,
         lastError: error.message,
