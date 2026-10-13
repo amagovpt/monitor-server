@@ -3,6 +3,7 @@ import { PlaywrightCrawler } from 'crawlee';
 import { IWebsiteScraper } from '../types/scraper.interface';
 import * as path from 'path';
 import * as fs from 'fs';
+import { UrlNormalizer } from '../url-normalizer';
 
 @Injectable()
 export class CrawleeStealthScraperAdapter implements IWebsiteScraper {
@@ -84,7 +85,7 @@ export class CrawleeStealthScraperAdapter implements IWebsiteScraper {
 
       delete process.env.CRAWLEE_STORAGE_DIR;
     }
-
-    return Array.from(discoveredLinks);
+    const normalizedHrefs = UrlNormalizer.filterAndNormalize(Array.from(discoveredLinks), baseUrl);
+    return normalizedHrefs;
   }
 }
