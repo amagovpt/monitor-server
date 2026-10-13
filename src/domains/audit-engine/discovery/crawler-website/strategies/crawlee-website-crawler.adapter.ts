@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PlaywrightCrawler } from 'crawlee';
+import { Configuration, PlaywrightCrawler, MemoryStorage } from 'crawlee';
 import { IWebsiteScraper } from '../types/scraper.interface';
-import * as path from 'path';
-import * as fs from 'fs';
 import { UrlNormalizer } from '../url-normalizer';
 
 @Injectable()
@@ -13,60 +11,69 @@ export class CrawleeStealthScraperAdapter implements IWebsiteScraper {
     const discoveredLinks = new Set<string>();
     discoveredLinks.add(baseUrl);
 
-    const ephemeralDir = path.join(
-      process.cwd(),
-      `crawlee-stealth-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    );
-
-    process.env.CRAWLEE_STORAGE_DIR = ephemeralDir;
-
-    const crawler = new PlaywrightCrawler({
-      maxCrawlDepth: 1,
-      maxRequestsPerCrawl: 100,
-      maxConcurrency: 1,
-      headless: true,
-
-      browserPoolOptions: {
-        useFingerprints: true,
-      },
-
-      launchContext: {
-        launchOptions: {
-          executablePath:
-            process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-          ],
-        },
-      },
-
-      maxRequestRetries: 0,
-
-      async requestHandler({ request, enqueueLinks, log }) {
-        log.info(`A extrair com Stealth (Crawlee): ${request.url}`);
-
-        await enqueueLinks({
-          strategy: 'same-domain',
-          transformRequestFunction: (req) => {
-            if (req.url) {
-              discoveredLinks.add(req.url);
-            }
-            return req;
-          },
-        });
-      },
-
-      failedRequestHandler({ request, error }) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Falha no Stealth Crawler para ${request.url}: ${errorMessage}`);
-      },
+    const storageClient = new MemoryStorage({ persistStorage: false });
+    const customConfig = new Configuration({
+      storageClient,
+      persistStorage: false,
+      purgeOnStart: true,
     });
 
+    const crawler = new PlaywrightCrawler(
+      {
+        maxCrawlDepth: 1,
+        maxRequestsPerCrawl: 100,
+        maxConcurrency: 1,
+        headless: true,
+        maxRequestRetries: 0,
+
+        useSessionPool: false,
+        persistCookiesPerSession: false,
+
+        browserPoolOptions: {
+          useFingerprints: true,
+        },
+
+        launchContext: {
+          useIncognitoPages: true,
+          launchOptions: {
+            executablePath:
+              process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+              '--disk-cache-size=0',
+              '--media-cache-size=0',
+            ],
+          },
+        },
+
+        async requestHandler({ request, enqueueLinks, log }) {
+          log.info(`A extrair com Stealth (Crawlee Memory): ${request.url}`);
+
+          await enqueueLinks({
+            strategy: 'same-domain',
+            transformRequestFunction: (req) => {
+              if (req.url) {
+                discoveredLinks.add(req.url);
+              }
+              return req;
+            },
+          });
+        },
+
+        failedRequestHandler({ request, error }) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          throw new Error(`Falha no Stealth Crawler para ${request.url}: ${errorMessage}`);
+        },
+      },
+      customConfig,
+    );
+
     try {
-      this.logger.log(`A iniciar stealth crawl para: ${baseUrl}`);
+      this.logger.log(`A iniciar stealth crawl (in-memory) para: ${baseUrl}`);
       await crawler.run([baseUrl]);
       this.logger.log(`Crawl concluído. Links descobertos: ${discoveredLinks.size}`);
     } catch (error) {
@@ -75,17 +82,13 @@ export class CrawleeStealthScraperAdapter implements IWebsiteScraper {
       throw error;
     } finally {
       try {
-        if (fs.existsSync(ephemeralDir)) {
-          fs.rmSync(ephemeralDir, { recursive: true, force: true });
-          this.logger.log(`Storage temporário stealth limpo: ${ephemeralDir}`);
-        }
-      } catch (cleanError) {
-        this.logger.warn(`Falha ao limpar diretoria temporária: ${cleanError}`);
+        await crawler.teardown();
+        await storageClient.teardown?.();
+      } catch (e) {
+        this.logger.warn(`Falha ao limpar storage em memória: ${String(e)}`);
       }
-
-      delete process.env.CRAWLEE_STORAGE_DIR;
     }
-    const normalizedHrefs = UrlNormalizer.filterAndNormalize(Array.from(discoveredLinks), baseUrl);
-    return normalizedHrefs;
+
+    return UrlNormalizer.filterAndNormalize(Array.from(discoveredLinks), baseUrl);
   }
 }
