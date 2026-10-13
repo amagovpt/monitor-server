@@ -16,7 +16,7 @@ import { CrawlPublicWorker } from './processors/crawler-public.processor';
 import { CrawlWebsiteHandler } from './handlers/crawl-websites.handler';
 import { CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG } from './crawler-website.constants';
 import { QueuesModule } from 'src/core/queues/queues.module';
-import { PlaywrightWebsiteScraperAdapter } from './strategies/playwright-website-scraper.adapter';
+import { CrawleeStealthScraperAdapter } from './strategies/crawlee-website-crawler.adapter';
 export const CrawlerWebsiteTableConfigProvider: Provider = {
   provide: CRAWLER_WEBSITE_CONTEXT_METADATA_CONFIG,
   useFactory: (): RepositoryTableConfig => ({
@@ -53,7 +53,7 @@ export const CrawlerWebsiteTableConfigProvider: Provider = {
 
     {
       provide: IWebsiteScraper,
-      useClass: PlaywrightWebsiteScraperAdapter,
+      useClass: CrawleeStealthScraperAdapter,
     },
     CrawlWebsiteHandler,
     CrawlerWebsiteTableConfigProvider,

@@ -9,7 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { Logger } from '@nestjs/common';
 
-@Processor('crawl-queue-private')
+@Processor('crawl-queue-private', {
+  concurrency: 1,
+})
 export class CrawlPrivateWorker extends WorkerHost {
   private readonly logger = new Logger(CrawlPrivateWorker.name);
 

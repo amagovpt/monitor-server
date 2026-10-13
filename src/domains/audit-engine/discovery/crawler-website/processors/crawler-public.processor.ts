@@ -4,7 +4,9 @@ import { IWebsiteScraper } from '../types/scraper.interface';
 import { Inject } from '@nestjs/common';
 import { SsePublisherService } from '../../../../../core/sse/sse-publisher.service';
 
-@Processor('crawl-queue-public')
+@Processor('crawl-queue-public', {
+  concurrency: 1,
+})
 export class CrawlPublicWorker extends WorkerHost {
   constructor(
     @Inject(IWebsiteScraper)
