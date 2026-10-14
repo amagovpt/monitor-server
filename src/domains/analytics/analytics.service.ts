@@ -104,14 +104,22 @@ export class AnalyticsService {
   }
 
   async getWebsiteDetails(websiteId: number): Promise<WebsiteAuditReport> {
-    const [summary, scoreDistribution, rulesMetrics, latestQuartiles] = await Promise.all([
-      this.analyticRepository.getResourceSummary(websiteId, 'website', 'observatory'),
-      this.analyticRepository.getResourceScoreDistribution(websiteId, 'website', 'observatory'),
-      this.analyticRepository.getResourceRuleMetrics(websiteId, 'website', 'observatory'),
-      this.analyticRepository.getResourceRulesLatestQuartiles(websiteId, 'website', 'observatory'),
-    ]);
+    const [summary, accessibilityPlotData, scoreDistribution, rulesMetrics, latestQuartiles] =
+      await Promise.all([
+        this.analyticRepository.getResourceSummary(websiteId, 'website', 'observatory'),
+        this.analyticRepository.getResourcePlotData(websiteId, 'website', 'observatory'),
+
+        this.analyticRepository.getResourceScoreDistribution(websiteId, 'website', 'observatory'),
+        this.analyticRepository.getResourceRuleMetrics(websiteId, 'website', 'observatory'),
+        this.analyticRepository.getResourceRulesLatestQuartiles(
+          websiteId,
+          'website',
+          'observatory',
+        ),
+      ]);
     return {
       ...summary,
+      ...accessibilityPlotData,
       ...scoreDistribution,
       ...rulesMetrics,
       ...latestQuartiles,
