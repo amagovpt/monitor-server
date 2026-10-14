@@ -64,9 +64,12 @@ export class CrawleeStealthScraperAdapter implements IWebsiteScraper {
           });
         },
 
-        failedRequestHandler({ request, error }) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Falha no Stealth Crawler para ${request.url}: ${errorMessage}`);
+        failedRequestHandler: async ({ request }, error) => {
+          if (request.url !== baseUrl) {
+            discoveredLinks.delete(request.url);
+          }
+
+          this.logger.warn(`Falha ao crawlar ${request.url}`);
         },
       },
       customConfig,
