@@ -62,7 +62,7 @@ GROUP BY dm.id, dm.name, dm.tag_matching_strategy, dm.is_in_observatory;
 
 
 
-
+DROP VIEW IF EXISTS v_institution_websites;
 CREATE OR REPLACE VIEW v_institution_websites AS
 
 SELECT 
@@ -73,8 +73,6 @@ SELECT
     w.base_url,
     ws.stamp,                 
     wd.status AS declaration_status,
-    w.status as website_status,
-    w.migrated_website_id AS migrated_website_id,
     w.is_in_observatory AS is_in_observatory
 FROM websites w
 LEFT JOIN institutions i ON i.id = w.institution_id
@@ -84,6 +82,7 @@ LEFT JOIN website_declarations wd ON wd.website_id = w.id;
 
 
 
+DROP VIEW IF EXISTS v_websites_metadata;
 CREATE OR REPLACE VIEW v_websites_metadata AS
 SELECT 
     w.id AS website_id,
@@ -96,8 +95,6 @@ SELECT
     ws.stamp,                 
     wd.status AS declaration_status,
     w.is_in_observatory AS is_in_observatory,
-    w.status as website_status,
-    w.migrated_website_id AS migrated_website_id,
     COALESCE(pg.page_count, 0) AS page_count
 FROM websites w
 LEFT JOIN institutions i 
