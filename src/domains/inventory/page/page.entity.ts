@@ -17,6 +17,8 @@ import { SoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
 @Entity('pages')
 @Index('idx_pages_url_trgm', { synchronize: false })
 @Index('uq_pages_site_url_hash', ['websiteId', 'urlHash'], { unique: true })
+@Index('idx_pages_archived_at', ['id', 'archivedAt'])
+@Index('idx_pages_soft_deleted_at', ['id', 'deletedAt'])
 export class Page implements IdentifiableModel, Auditable, SoftDeletable {
   @PrimaryGeneratedColumn('identity', { generatedIdentity: 'BY DEFAULT' })
   id: number;
@@ -80,4 +82,11 @@ export class Page implements IdentifiableModel, Auditable, SoftDeletable {
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'deleted_by_id' })
   deletedBy: User | null;
+
+  @Column({ name: 'archived_at', type: 'timestamptz', nullable: true })
+  archivedAt: Date | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'archived_by_id' })
+  archivedBy: User | null;
 }

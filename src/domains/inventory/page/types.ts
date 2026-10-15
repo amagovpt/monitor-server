@@ -8,6 +8,7 @@ export interface PageFilter extends BaseFilter {
   websiteId?: number;
   searchTerm?: string;
   contexts?: Context[];
+  archived?: boolean;
 }
 
 export interface PageSort extends BaseSort {

@@ -37,6 +37,8 @@ export class PageRepository extends ContextAwareRepository<
   protected readonly filterMap: FilterMap<PageFilter, Page> = {
     id: (query, value) => this.addFilter(query, 'id', value, 'eq'),
     ids: (query, value) => this.addFilter(query, 'id', value, 'in'),
+    archived: (query, value) =>
+      query.andWhere(`${this.alias}.archived_at IS ${value ? 'NOT NULL' : 'NULL'}`),
     searchTerm: (query, val) => {
       if (val && val.trim().length >= 3) {
         const term = `%${val.trim()}%`;
