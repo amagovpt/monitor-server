@@ -26,6 +26,7 @@ import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorizati
 import { UpdatePageContextDto } from './dto/update.page-context.dto';
 import { ContextMapByRole } from '../context/context.enum';
 import { PageDocs } from './page.swagger';
+import { DeletePagesDto } from './dto/delete-page.dto';
 @UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
 @Controller('pages')
 export class PageController implements LoggableController {
@@ -84,14 +85,17 @@ export class PageController implements LoggableController {
   })
   @PageDocs.bulkDelete()
   @Delete('')
-  async bulkDelete(@Body('ids') ids: number[], @CurrentUser() user: AuthenticatedUser) {
+  async bulkDelete(
+    @Body() deletePagesDtos: DeletePagesDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     // strategy depends if is allocated to more than one context, if so, remove only the context, if not, delete the page
     const contextUser = ContextMapByRole[user.role_slug];
     if (!contextUser) {
       throw new BadRequestException('User role does not have an associated context');
     }
 
-    return this.pageService.handlePageRemoval(ids, { user });
+    return this.pageService.handlePageRemoval(deletePagesDtos.pageIds, { user });
   }
 
   @Roles(RoleSlug.ADMIN)

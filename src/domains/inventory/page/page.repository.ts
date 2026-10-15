@@ -146,29 +146,40 @@ export class PageRepository extends ContextAwareRepository<
     websiteId: number,
     records: PageRecord[],
     securityContext: SecurityContext,
-  ): Promise<void> {
-    if (!records.length) return;
+  ): Promise<number[]> {
+    if (!records.length) return [];
 
     const urls = records.map((r) => r.url);
     const hashes = records.map((r) => r.urlHash);
-
-    const query = `
+    return await this.runInTransaction(async (queryRunner) => {
+      const query = `
       WITH incoming_data AS (
         SELECT 
           $1::int AS website_id,
           u.url,
           u.url_hash::bigint AS url_hash
         FROM unnest($2::text[], $3::text[]) AS u(url, url_hash)
+      ),
+      upserted_pages AS (
+        INSERT INTO pages (website_id, url, url_hash, created_by_id, updated_by_id, deleted_at)
+        SELECT 
+          website_id, 
+          url, 
+          url_hash, 
+          $4::int, 
+          $4::int, 
+          NULL
+        FROM incoming_data
+        ON CONFLICT (website_id, url_hash) DO UPDATE
+        SET 
+          deleted_at = NULL,
+          updated_by_id = EXCLUDED.updated_by_id,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING id
       )
-      INSERT INTO pages (website_id, url, url_hash, created_by_id, updated_by_id)
-      SELECT website_id, url, url_hash, $4::int, $4::int
-      FROM incoming_data
-      ON CONFLICT (website_id, url_hash) DO UPDATE
-      SET updated_at = CURRENT_TIMESTAMP
-      RETURNING id;
+      SELECT id FROM upserted_pages;
     `;
 
-    this.runInTransaction(async (queryRunner) => {
       const rows: { id: number }[] = await queryRunner.query(query, [
         websiteId,
         urls,
@@ -176,16 +187,15 @@ export class PageRepository extends ContextAwareRepository<
         securityContext.user.id ?? null,
       ]);
 
-      this.addContextRules(
-        queryRunner,
-        rows.map((r) => r.id),
-        undefined,
-        securityContext,
-      );
-      return rows.map((r) => r.id);
+      const pageIds = rows.map((r) => r.id);
+
+      if (pageIds.length > 0) {
+        await this.addContextRules(queryRunner, pageIds, undefined, securityContext);
+      }
+
+      return pageIds;
     });
   }
-
   async deletePagesWithContextCheck(
     pageIds: number[],
     securityContext: SecurityContext,
@@ -193,6 +203,7 @@ export class PageRepository extends ContextAwareRepository<
     if (!pageIds.length) {
       return;
     }
+
     await this.runInTransaction(async (queryRunner) => {
       const query = `
       WITH target_pages AS (
@@ -211,27 +222,50 @@ export class PageRepository extends ContextAwareRepository<
         RETURNING pc.page_id
       ),
       orphaned_pages AS (
-        SELECT rc.page_id AS id
+        -- Verifica se restou QUALQUER outro contexto associado à página
+        SELECT DISTINCT rc.page_id AS id
         FROM removed_contexts rc
         WHERE NOT EXISTS (
           SELECT 1
           FROM page_contexts pc
           WHERE pc.page_id = rc.page_id
+            AND pc.context_id <> $2::int
         )
       ),
+      classified_orphans AS (
+        -- Separa quem tem histórico de evaluations de quem pode ser purgado
+        SELECT 
+          op.id,
+          EXISTS (
+            SELECT 1 
+            FROM evaluations e 
+            WHERE e.page_id = op.id
+          ) AS has_evaluations
+        FROM orphaned_pages op
+      ),
+      hard_deleted_pages AS (
+        -- Purga páginas sem histórico de auditoria
+        DELETE FROM pages p
+        USING classified_orphans co
+        WHERE p.id = co.id 
+          AND co.has_evaluations = FALSE
+        RETURNING p.id
+      ),
       soft_deleted_pages AS (
-        -- 4. Aplica soft delete apenas às que ficaram órfãs de contexto
+        -- Aplica soft delete apenas às que possuem evaluations associadas
         UPDATE pages p
         SET 
           deleted_at = CURRENT_TIMESTAMP,
           updated_by_id = $3::int
-        FROM orphaned_pages op
-        WHERE p.id = op.id
+        FROM classified_orphans co
+        WHERE p.id = co.id 
+          AND co.has_evaluations = TRUE
         RETURNING p.id
       )
       SELECT 
         (SELECT COUNT(*)::int FROM removed_contexts) AS unlinked_count,
-        (SELECT COUNT(*)::int FROM soft_deleted_pages) AS soft_deleted_count;
+        (SELECT COUNT(*)::int FROM soft_deleted_pages) AS soft_deleted_count,
+        (SELECT COUNT(*)::int FROM hard_deleted_pages) AS hard_deleted_count;
     `;
 
       await queryRunner.query(query, [
