@@ -19,18 +19,9 @@ import { Context } from '../context/context.identity';
 import { User } from 'src/domains/identity/user/user.entity';
 import { Institution } from '../institution/institution.entity';
 
-export enum WebsiteStatus {
-  ACTIVE = 'ACTIVE',
-  MIGRATED = 'MIGRATED',
-}
-
 @Entity('websites')
 @Index('idx_websites_title_trgm', { synchronize: false })
 @Index('idx_websites_base_url', ['baseUrl'], { unique: true })
-@Index('idx_websites_migrated_website_id_not_null', ['migratedWebsiteId'], {
-  unique: true,
-  where: 'migrated_website_id IS NOT NULL',
-})
 export class Website implements IdentifiableModel, Auditable {
   @PrimaryGeneratedColumn('identity', { generatedIdentity: 'BY DEFAULT' })
   id: number;
@@ -65,21 +56,6 @@ export class Website implements IdentifiableModel, Auditable {
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
-
-  @Column({ name: 'status', type: 'enum', enum: WebsiteStatus, default: WebsiteStatus.ACTIVE })
-  status: WebsiteStatus;
-
-  @Column({ name: 'migrated_at', type: 'timestamptz', nullable: true })
-  migratedAt: Date | null;
-
-  @Column({
-    name: 'migrated_website_id',
-    type: 'int',
-    unsigned: true,
-    nullable: true,
-    unique: true,
-  })
-  migratedWebsiteId: number | null;
 
   @UpdateDateColumn({
     name: 'updated_at',

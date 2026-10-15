@@ -82,7 +82,19 @@ export class WebsiteService extends BaseService {
   }
 
   async delete(ids: number[], securityContext: SecurityContext): Promise<void> {
-    await this.repository.deleteWebsites(ids);
+    await this.repository.deleteWebsites(ids, securityContext);
+  }
+
+  async changeWebsiteUrl(
+    websiteId: number,
+    baseUrl: string,
+    securityContext: SecurityContext,
+  ): Promise<Website> {
+    const website = await this.repository.findById(websiteId);
+    if (!website) {
+      throw new NotFoundException(`Website with ID ${websiteId} not found`);
+    }
+    return await this.repository.changeWebsiteUrl(website, baseUrl, securityContext);
   }
 
   async changeWebsiteContexts(
