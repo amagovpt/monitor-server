@@ -61,8 +61,14 @@ export class WebsiteRepository extends ContextAwareRepository<
       query.andWhere(`${this.alias}.base_url = :baseUrl`, { baseUrl: value });
     },
     directoryId: (query, value) => {
-      query.innerJoin('v_websites_metadata', 'v', `v.website_id = ${this.alias}.id`);
-      query.andWhere(`v.directories_ids @> ARRAY[:directoryId]::int[]`, { directoryId: value });
+      query.andWhere(
+        `${this.alias}.id IN (
+        SELECT UNNEST(v.website_ids)
+        FROM v_directory_websites v
+        WHERE v.id = :directoryId
+      )`,
+        { directoryId: value },
+      );
     },
     institutionId: (query, value) => {
       query.andWhere(`${this.alias}.institution_id = :institutionId`, {
