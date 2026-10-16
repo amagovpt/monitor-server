@@ -17,7 +17,6 @@ import { EvaluationParserService } from './evaluation-parser.service';
 import { RepositoryTableConfig } from 'src/common/repositories/base-context';
 import { EVALUATION_CONTEXT_METADATA_CONFIG } from './evaluation.constants';
 import { EvaluationStorage } from './contracts/evaluation-storage.contract';
-import { EvaluationLocalStorageStrategy } from './strategies/storage/evaluation-local-storage.strategy';
 import { EvaluationInitiatorRegistry } from './registries/evaluation-initiator.registry';
 import {
   GlobalEvaluationInitiationStrategy,
@@ -31,6 +30,9 @@ import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { PublicPageExtractorProcessor } from './queue/processors/page-public.processor';
 import { PrivatePageExtractorProcessor } from './queue/processors/page-private.processor';
 import { EvaluationS3StorageStrategy } from './strategies/storage/evaluation-s3-aws-storage.strategy';
+import { EvaluationPrivateEventsListener } from './queue/events/evaluation-private.event';
+import { EvaluationPublicEventsListener } from './queue/events/evaluation-public.event';
+import { QueuesModule } from 'src/core/queues/queues.module';
 
 export const EvaluationTableConfigProvider: Provider = {
   provide: EVALUATION_CONTEXT_METADATA_CONFIG,
@@ -53,13 +55,7 @@ export const EvaluationTableConfigProvider: Provider = {
 
 @Module({
   imports: [
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PUBLIC }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PUBLIC_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.PUBLIC_PAGE_DISPATCH }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.PRIVATE_PAGE_DISPATCH }),
+    QueuesModule,
     TypeOrmModule.forFeature([Website, Page, Evaluation, EvaluationContext]),
     RedisModule,
     AccessibilityStatementModule,
@@ -86,6 +82,8 @@ export const EvaluationTableConfigProvider: Provider = {
     WebsiteEvaluationInitiationStrategy,
     InstitutionEvaluationInitiationStrategy,
     GlobalEvaluationInitiationStrategy,
+    EvaluationPrivateEventsListener,
+    EvaluationPublicEventsListener,
   ],
   controllers: [EvaluationController],
 })

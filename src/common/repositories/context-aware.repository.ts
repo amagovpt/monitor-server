@@ -156,7 +156,6 @@ export abstract class ContextAwareRepository<
 
     await queryRunner.query(query, [relationIds, uniqueContextIds]);
   }
-
   protected customContextRuleQuery(
     query: WhereExpressionBuilder,
     securityContext: SecurityContext,
@@ -184,7 +183,6 @@ export abstract class ContextAwareRepository<
     );
 
     if (contextId !== ADMIN_CONTEXT_ID) {
-      // Se não há helperTable nem relação direta, fallback seguro para verificação via team_websites
       const joinHelper = helperTable
         ? `EXISTS (
             SELECT 1 FROM users_websites uw
@@ -197,12 +195,11 @@ export abstract class ContextAwareRepository<
         new Brackets((qb) => {
           qb.where(joinHelper).orWhere(
             `EXISTS (
-              SELECT 1 FROM "${relatedTable.table}" "${relatedTable.alias}"
-              INNER JOIN "${teamWebsiteTable.table}" "${teamWebsiteTable.alias}" 
-                ON "${teamWebsiteTable.alias}".website_id = "${relatedTable.alias}".website_id
+              SELECT 1 FROM "${teamWebsiteTable.table}" "${teamWebsiteTable.alias}" 
               INNER JOIN "${teamUserTable.table}" "${teamUserTable.alias}"
                 ON "${teamUserTable.alias}".team_id = "${teamWebsiteTable.alias}".team_id
-              WHERE "${teamUserTable.alias}".user_id = :userId
+              WHERE "${teamWebsiteTable.alias}".website_id = "${relatedTable.alias}".website_id
+                AND "${teamUserTable.alias}".user_id = :userId
             )`,
           );
         }),
@@ -287,7 +284,6 @@ export abstract class ContextAwareRepository<
     const BATCH_SIZE = 1000;
     const idBatches = chunkArray(cleanRelationIds, BATCH_SIZE);
 
-    // Caso 1: Desassociação total em lotes
     if (uniqueContextIds.length === 0) {
       const clearQuery = `
       DELETE FROM "${contextTable.table}"

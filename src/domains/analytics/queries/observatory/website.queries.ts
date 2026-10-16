@@ -2,14 +2,14 @@ export const EVALUATIONS_COMBINED_LATEST_CTE = `
     temp_pages AS (
         SELECT * 
         FROM latest_page_evaluations_temp 
-        WHERE website_id = {websiteId: UInt32} 
+        WHERE website_id = {resourceId: UInt32} 
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
           AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
     ),
     main_pages AS (
         SELECT * 
         FROM latest_page_evaluations FINAL
-        WHERE website_id = {websiteId: UInt32} 
+        WHERE website_id = {resourceId: UInt32} 
           AND page_id NOT IN (SELECT page_id FROM temp_pages) 
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
           AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
@@ -27,11 +27,11 @@ WITH
    ${EVALUATIONS_COMBINED_LATEST_CTE},
     website_meta AS (
         SELECT
-            {websiteId: UInt32} AS id,
+            {resourceId: UInt32} AS id,
             dictGet(
                 'institution_websites_dict', 
                 ('website_title', 'base_url', 'institution_name'), 
-                {websiteId: UInt32}
+                {resourceId: UInt32}
             ) AS meta
     )
 SELECT
@@ -84,7 +84,7 @@ ${EVALUATIONS_COMBINED_LATEST_CTE},
         ORDER BY b.bucket ASC
 );
 `,
-scoreMetrics: `
+  scoreMetrics: `
     WITH 
     ${EVALUATIONS_COMBINED_LATEST_CTE},
     plot_data AS (
@@ -143,9 +143,9 @@ WITH
             evaluation_date,
             1 AS is_temp
         FROM evaluations_temp
-        WHERE website_id = {websiteId: UInt32}
+        WHERE website_id = {resourceId: UInt32}
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
+          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
 
         UNION ALL
 
@@ -156,9 +156,9 @@ WITH
             evaluation_date,
             0 AS is_temp
         FROM evaluations
-        PREWHERE website_id = {websiteId: UInt32}
+        PREWHERE website_id = {resourceId: UInt32}
         WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
+          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
     ),
 
     -- 2. Último snapshot de cada regra por página
@@ -169,7 +169,7 @@ WITH
             argMax(count, (is_temp, evaluation_date)) AS latest_count
         FROM raw_evaluations
         WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
+          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
         GROUP BY page_id, rule_id
     ),
 
@@ -252,7 +252,7 @@ FROM rules_match;
             evaluation_date,
             1 AS is_temp
         FROM evaluations_temp
-        WHERE (website_id = {websiteId: UInt32}) AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
+        WHERE (website_id = {resourceId: UInt32}) AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
           AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
 
         UNION ALL
@@ -264,9 +264,9 @@ FROM rules_match;
             evaluation_date,
             0 AS is_temp
         FROM evaluations
-        PREWHERE website_id = {websiteId: UInt32}
+        PREWHERE website_id = {resourceId: UInt32}
         WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
+          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
     ),
 
     -- 2. Snapshot mais recente por (page_id, rule_id)

@@ -1,0 +1,56 @@
+sequenceDiagram
+    autonumber
+    actor C1 as Client 1 (Leader)
+    actor C2 as Client 2 (Follower)
+    actor C50 as Clients 3..50 (Followers)
+    participant I as EntityCacheInterceptor / AppCacheService
+    participant Map as inFlightRequests (In-Memory Map)
+    participant R as Redis (Testcontainers)
+    participant DB as Database (PostgreSQL / ClickHouse)
+
+    Note over C1,C50: 50 requests arrive within the same millisecond (Traffic Spike)
+
+    par Parallel HTTP Requests
+        C1->>I: GET /resource/123
+        C2->>I: GET /resource/123
+        C50->>I: GET /resource/123
+    end
+
+    Note over I,R: 1. Redis Lookup (Simultaneous Cache Miss)
+    I->>R: GET cache:resource:123
+    R-->>I: (null / undefined)
+
+    Note over I,Map: 2. Concurrency Barrier (Request Coalescing)
+    I->>Map: has("cache:resource:123")?
+    Map-->>I: false (Client 1 wins race condition)
+    
+    I->>Map: set("cache:resource:123", leaderPromise)
+    
+    par Immediate Concurrency (Clients 2 to 50)
+        C2->>I: has("cache:resource:123")? -> true
+        I->>Map: get("cache:resource:123")
+        Map-->>I: [In-Flight Promise]
+        Note over C2,I: Client 2 awaits leader resolution
+        C50->>I: has("cache:resource:123")? -> true
+        I->>Map: get("cache:resource:123")
+        Map-->>I: [In-Flight Promise]
+        Note over C50,I: Clients 3..50 await leader resolution
+    end
+
+    Note over I,DB: 3. Single-Flight Execution: Only the Leader Hits the DB
+    I->>DB: Execute expensive query (e.g., 150ms I/O latency)
+    Note over DB: dbCallCount increments EXACTLY 1 time
+    DB-->>I: Fresh payload computed
+
+    Note over I,R: 4. Atomic Persistence with TTL
+    I->>R: SET cache:resource:123, payload, PX: 10000
+    R-->>I: OK
+
+    Note over I,Map: 5. Cleanup In-Flight Map (finally block)
+    I->>Map: delete("cache:resource:123")
+
+    par Coalesced Broadcast to All Clients
+        I-->>C1: 200 OK (Fresh Data)
+        I-->>C2: 200 OK (Shared Data)
+        I-->>C50: 200 OK (Shared Data)
+    end

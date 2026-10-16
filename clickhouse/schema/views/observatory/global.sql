@@ -9,7 +9,8 @@ WITH temp_pages AS (
 main_pages AS (
     SELECT *
     FROM latest_page_evaluations FINAL
-    WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true AND page_id NOT IN (SELECT page_id FROM temp_pages)
+    WHERE 
+    dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true AND page_id NOT IN (SELECT page_id FROM temp_pages)
     AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
 ),
 combined_latest AS (

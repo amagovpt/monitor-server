@@ -1,33 +1,31 @@
-import { IsIn, IsOptional, ValidateNested } from "class-validator";
-import { BaseSortDto, SortItem } from "src/common/dto/request/base-sort.dto";
-import { Type, Transform } from "class-transformer";
-import { Page } from "../../../page.entity";
-
-
-export class PageSortItem extends SortItem {
-  @IsIn(["id", "tagId", "tagName", "websiteId", "isDone", "createdAt"])
-  declare field: string;
-
-  @IsIn(["ASC", "DESC", "asc", "desc"])
-  declare order: "ASC" | "DESC" | "asc" | "desc";
-}
+import { IsOptional } from 'class-validator';
+import { IsSortOrder } from 'src/common/decorators/is-sort-order.decorator';
+import { SortCriteria } from 'src/common/interfaces/types';
+import { BaseSortDto } from 'src/common/dto/request/base-sort.dto';
+import { Page } from '../../../page.entity';
 
 export class PageSortDTO extends BaseSortDto<Page> {
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PageSortItem)
-  @Transform(({ value }) => {
-    if (!Array.isArray(value)) return value;
-    return value.reduce((acc, item) => {
-      if (item.field && item.order) {
-        acc[item.field] = item.order.toUpperCase();
-      }
-      return acc;
-    }, {});
-  })
-  declare readonly sort?: Record<string, "ASC" | "DESC">;
+  @IsSortOrder()
+  id?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  websiteId?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  isInObservatory?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  createdAt?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  url?: SortCriteria;
 
   getAllowedFields(): string[] {
-    return ["id", "tagId", "tagName", "websiteId", "isDone", "createdAt"];
+    return ['id', 'websiteId', 'isInObservatory', 'createdAt', 'url'];
   }
 }

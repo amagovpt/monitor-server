@@ -2,19 +2,19 @@ export const EVALUATIONS_COMBINED_LATEST_CTE = `
     temp_pages AS (
         SELECT * 
         FROM latest_page_evaluations_temp 
-        WHERE has(directories_ids, {directory_id: UInt32})
+        WHERE has(directories_ids, {resourceId: UInt32})
         AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
         AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
-        AND dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {directory_id: UInt32}, false) = true
+        AND dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
     ),
     main_pages AS (
         SELECT * 
         FROM latest_page_evaluations FINAL
-        WHERE has(directories_ids, {directory_id: UInt32})
+        WHERE has(directories_ids, {resourceId: UInt32})
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
           AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
           AND page_id NOT IN (SELECT page_id FROM temp_pages)
-          AND dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {directory_id: UInt32}, false) = true
+          AND dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
 
     ),
     combined_latest AS (
@@ -29,7 +29,7 @@ WITH
     ${EVALUATIONS_COMBINED_LATEST_CTE}
 
 SELECT 
-    dictGet('directories_metadata_dict', 'name', {directory_id: UInt32}) AS name,
+    dictGet('directories_metadata_dict', 'name', {resourceId: UInt32}) AS name,
     uniqExact(website_id) AS websitesCount,
     uniqExact(page_id) AS pagesCount,
     uniqExact(institution_id) AS entitiesCount,
@@ -37,7 +37,7 @@ SELECT
     max(evaluation_date) AS recentPageDate,
     min(evaluation_date) AS oldestPageDate
 FROM combined_latest
-WHERE dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {directory_id: UInt32}, false) = true
+WHERE dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
 
 ;
 `;
@@ -58,7 +58,7 @@ website_metrics AS (
         countIf(a_error_count = 0 AND aa_error_count = 0 AND aaa_error_count = 0) AS aaa_conform_count
     FROM combined_latest
     WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-      AND has(directories_ids, {directory_id: UInt32})
+      AND has(directories_ids, {resourceId: UInt32})
     GROUP BY website_id
     )
 SELECT
@@ -92,6 +92,6 @@ SELECT
     aaa_conform_count AS AAA
 
 FROM website_metrics
-WHERE dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {directory_id: UInt32}, false) = true
+WHERE dictGetOrDefault('directories_metadata_dict', 'is_in_observatory', {resourceId: UInt32}, false) = true
 
 ORDER BY rank ASC`;

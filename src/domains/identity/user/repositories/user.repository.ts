@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository, SelectQueryBuilder } from 'typeorm';
-import { User } from '../user.entity';
+import { PermissionLevel, User } from '../user.entity';
 import { BaseTransactionalRepository } from '@common/repositories/base-transactional.repository';
 import { FilterMap, PaginationResponse, SortingMap } from '@common/repositories/base.repository';
 import { BaseFilter, BasePagination, BaseSort, SortCriteria } from 'src/common/interfaces/types';
@@ -19,6 +19,7 @@ export interface UserFilter extends BaseFilter, Pick<User, 'id' | 'username'> {
   username: string;
   searchTerm: string;
   role: string;
+  permissionLevel: UserPermission;
 }
 
 export interface UserSorting extends BaseSort {
@@ -28,6 +29,7 @@ export interface UserSorting extends BaseSort {
   updatedAt: SortCriteria;
   lastLogin: SortCriteria;
   role: SortCriteria;
+  permissionLevel: SortCriteria;
 }
 
 type UserQueryRequest = {
@@ -58,6 +60,8 @@ export class UserRepository extends BaseTransactionalRepository<User, UserFilter
     searchTerm: (query, term) =>
       query.andWhere(`(${this.alias}.username ILIKE :term)`, { term: `%${term}%` }),
     role: (query, role) => query.andWhere(`role.slug = :role`, { role }),
+    permissionLevel: (query, permissionLevel) =>
+      query.andWhere(`${this.alias}.permission_level = :permissionLevel`, { permissionLevel }),
   };
 
   protected readonly sortMap: SortingMap<UserSorting, User> = {
@@ -67,28 +71,34 @@ export class UserRepository extends BaseTransactionalRepository<User, UserFilter
     updatedAt: (query, order) => query.addOrderBy(`${this.alias}.updatedAt`, order),
     lastLogin: (query, order) => query.addOrderBy(`${this.alias}.lastLogin`, order),
     role: (query, order) => query.addOrderBy(`role.displayName`, order),
+    permissionLevel: (query, order) => query.addOrderBy(`${this.alias}.permission_level`, order),
   };
-
   async findManyWithMetadata(queryArgs: UserQueryRequest): Promise<PaginationResponse<User>> {
     const { filters, sortings, pagination } = queryArgs;
     const connection = this.getOrmRepository().manager.connection;
 
     const query = connection.createQueryBuilder().from(User, this.alias);
+    const countQuery = connection.createQueryBuilder().from(User, this.alias);
 
+    // 1. PRIMEIRO: Aplicar os Joins necessários em ambas as queries (essencial para que filtros e ordenações por 'role' funcionem)
+    this.joinUserRole(query);
+    this.joinUserRole(countQuery);
+
+    // 2. SEGUNDO: Aplicar filtros e ordenação dinâmica com as tabelas já ligadas no contexto
     this.applyDynamicFilters(query, filters);
     this.applyDynamicSorting(query, sortings);
 
-    const countQuery = connection.createQueryBuilder().from(User, this.alias);
     this.applyDynamicFilters(countQuery, filters);
     countQuery.select(`COUNT(${this.alias}.id)`, 'total');
-    this.joinUserRole(query);
-    this.joinUserRole(countQuery);
+
+    // 3. TERCEIRO: Definir a projeção dos campos (SELECT) e colunas computadas
     query.select([
       `${this.alias}.id AS id`,
       `${this.alias}.username AS username`,
       `${this.alias}.created_at AS "createdAt"`,
       `${this.alias}.updated_at AS "updatedAt"`,
       `${this.alias}.last_login AS "lastLogin"`,
+      `${this.alias}.permission AS "permission"`,
       `json_build_object(
         'id', role.id,
         'displayName', role.display_name,
@@ -98,6 +108,7 @@ export class UserRepository extends BaseTransactionalRepository<User, UserFilter
       `( SELECT COUNT(1) FROM users_websites UW WHERE UW.user_id = ${this.alias}.id) AS "websiteCount"`,
     ]);
 
+    // 4. QUARTO: Paginação e execução paralela
     this.applyPagination(query, pagination);
 
     const [rawData, countResult] = await Promise.all([
@@ -140,7 +151,7 @@ export class UserRepository extends BaseTransactionalRepository<User, UserFilter
     });
   }
 
-  async createUser(user: User, role: RoleSlug, permission: UserPermission): Promise<User> {
+  async createUser(user: User, role: RoleSlug, permission: PermissionLevel): Promise<User> {
     return this.runInTransaction(async (queryRunner) => {
       const savedUser = await queryRunner.manager.save(User, user);
       const manager = queryRunner.manager;
@@ -162,23 +173,41 @@ export class UserRepository extends BaseTransactionalRepository<User, UserFilter
     });
   }
 
-  async updateUser(user: User, role: RoleSlug, permission: UserPermission): Promise<User> {
+  async updateUser(
+    user: User,
+    options: {
+      role: RoleSlug;
+      newRoleSlug?: RoleSlug;
+      permission: PermissionLevel;
+      newPermission?: PermissionLevel;
+    },
+  ): Promise<User> {
+    const hasAuthorizationChanges = Boolean(options.newRoleSlug || options.newPermission);
+
+    if (!hasAuthorizationChanges) {
+      return this.getOrmRepository().save(user);
+    }
+
     return this.runInTransaction(async (queryRunner) => {
       const updatedUser = await queryRunner.manager.save(User, user);
       const manager = queryRunner.manager;
+
+      const payload: Record<string, unknown> = {
+        resourceType: FGA_RESOURCE.USER,
+        resourceId: updatedUser.id.toString(),
+        userId: updatedUser.id,
+        role: options.role,
+        permission: options.permission,
+        action: AUTHORIZATION_ACTION.USER_UPDATE,
+        newRoleSlug: options.newRoleSlug,
+        newPermission: options.newPermission,
+      };
 
       await this.outboxService.putInOutbox(manager, {
         aggregateType: FGA_RESOURCE.USER,
         aggregateId: updatedUser.id,
         eventType: AuthorizationEvent.AUTHORIZATION,
-        payload: {
-          resourceType: FGA_RESOURCE.USER,
-          resourceId: updatedUser.id.toString(),
-          action: AUTHORIZATION_ACTION.USER_UPDATE,
-          userId: updatedUser.id,
-          role: role,
-          permission: permission,
-        },
+        payload,
       });
 
       return updatedUser;

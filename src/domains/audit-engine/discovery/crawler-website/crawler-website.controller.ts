@@ -57,21 +57,7 @@ export class CrawlerWebsiteController {
     const securityContext: SecurityContext = { user };
     await this.crawlerWebsiteService.importCrawlers(securityContext, crawlerImport.crawlerIds);
   }
-  @Roles(RoleSlug.ADMIN)
-  @Post('tags')
-  async crawlWebsiteTags(
-    @Body() crawlerCreate: CrawlerTagsCreateDTO,
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<void> {
-    const securityContext: SecurityContext = { user };
-
-    await this.crawlerWebsiteService.crawlWebsitesTags(securityContext, crawlerCreate.tagsId, {
-      maxDepth: crawlerCreate.maxDepth,
-      maxPages: crawlerCreate.maxPages,
-      waitJS: crawlerCreate.waitJS,
-    });
-  }
-
+  
   @DiscoveryDocs.crawlWebsite()
   @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @Post('')
@@ -91,6 +77,21 @@ export class CrawlerWebsiteController {
       },
     );
   }
+  @Roles(RoleSlug.ADMIN)
+  @Post('tags')
+  async crawlWebsiteTags(
+    @Body() crawlerCreate: CrawlerTagsCreateDTO,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    const securityContext: SecurityContext = { user };
+
+    await this.crawlerWebsiteService.crawlWebsitesTags(securityContext, crawlerCreate.tagsId, {
+      maxDepth: crawlerCreate.maxDepth,
+      maxPages: crawlerCreate.maxPages,
+      waitJS: crawlerCreate.waitJS,
+    });
+  }
+
 
   @DiscoveryDocs.deleteCrawler()
   @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)

@@ -16,7 +16,7 @@ export class PageQueryRequestDTO extends ResourceQueryDto<
   @IsOptional()
   @ValidateNested()
   @Type(() => PageFilterDTO)
-  filters: PageFilterDTO = {};
+  filters: PageFilterDTO;
 
   @IsOptional()
   @ValidateNested()

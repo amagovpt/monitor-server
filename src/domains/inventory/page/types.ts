@@ -8,12 +8,15 @@ export interface PageFilter extends BaseFilter {
   websiteId?: number;
   searchTerm?: string;
   contexts?: Context[];
+  archived?: boolean;
 }
 
 export interface PageSort extends BaseSort {
   url?: SortCriteria;
   createdAt?: SortCriteria;
-  score?: SortCriteria;
+  id?: SortCriteria;
+  websiteId?: SortCriteria;
+  isInObservatory?: SortCriteria;
 }
 
 export type PageQueryRequest = {

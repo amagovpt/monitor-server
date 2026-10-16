@@ -1,4 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { context, trace, propagation } from '@opentelemetry/api';
 import { Job, Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
@@ -35,7 +36,8 @@ export class PublicPageExtractorProcessor extends WorkerHost {
   async process(job: Job<WebsiteExtractorJobData>): Promise<void> {
     const { contextId, websiteId } = job.data;
     this.logger.log(`A extrair páginas para Website ID: ${websiteId} (Context ID: ${contextId})`);
-
+    const carrier: Record<string, string> = {};
+    propagation.inject(context.active(), carrier);
     let lastPageId = job.data.lastPageId ?? 0;
     let totalDispatched = 0;
 
@@ -95,6 +97,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
             type: 'exponential',
             delay: 2000,
           },
+          __otelContext: carrier,
         },
       }));
 

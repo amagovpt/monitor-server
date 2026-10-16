@@ -219,6 +219,8 @@ DROP DICTIONARY IF EXISTS institution_websites_dict;
 
 CREATE DICTIONARY IF NOT EXISTS institution_websites_dict (
     directories_ids Array(Int32),
+    tags_ids Array(Int32),
+
     website_id UInt64,
     page_count UInt64,
     institution_id Nullable(UInt64),
@@ -236,18 +238,6 @@ SOURCE(POSTGRESQL(HOST '172.17.0.1' PORT 5432 USER 'accessmonitor' PASSWORD 'v2p
 LIFETIME(MIN 5 MAX 20)
 LAYOUT(HASHED());
 
-/*
-DROP DICTIONARY IF EXISTS websites_context_dict;
-
-CREATE DICTIONARY IF NOT EXISTS websites_context_dict (
-    context_id UInt8,
-    website_id UInt32
-)
-PRIMARY KEY website_id
-SOURCE(POSTGRESQL(HOST '172.17.0.1' PORT 5432 USER 'accessmonitor' PASSWORD 'v2password' DB 'Accessibility' TABLE 'context_websites_observatory'))
-LIFETIME(MIN 20 MAX 60)
-LAYOUT(HASHED());
-*/
 
 
 DROP DICTIONARY IF EXISTS pages_context_dict;
@@ -312,4 +302,21 @@ LIFETIME(MIN 0 MAX 60)
 LAYOUT(HASHED());
 
 
-
+DROP DICTIONARY IF EXISTS dict_app_counters;
+CREATE DICTIONARY IF NOT EXISTS dict_app_counters
+(
+    entity_type String,
+    total_count UInt64
+)
+PRIMARY KEY entity_type
+SOURCE(POSTGRESQL(
+    host '172.17.0.1'
+    port 5432
+    user 'accessmonitor'
+    password 'v2password'
+    db 'Accessibility'
+    table 'v_app_counters'
+    invalidate_query 'SELECT MAX(last_updated_at) FROM entity_counters'
+))
+LAYOUT(COMPLEX_KEY_HASHED())
+LIFETIME(MIN 30 MAX 60);

@@ -6,14 +6,54 @@ import {
   DIRECTORY_WEBSITE_STATISTICS_QUERY,
 } from './queries/observatory/directory.queries';
 import { SEARCH_WEBSITES_QUERY } from './queries/observatory/search.queries';
-import { Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import { ExportFormat } from './dto/export-analytics.dto';
-import { getGenericQuery } from './queries/query.registry';
 import { ContextTarget, FileStreamResult, ResourceTarget } from './queries/type';
-
+import { buildGlobalAnalyticsQuery, EvaluationFilterOptions } from './queries/global.query';
+import { getGenericQuery } from './queries/query.registry';
+import type { Row } from '@clickhouse/client';
 @Injectable()
 export class AnalyticRepository {
   constructor(@Inject(CLICKHOUSE_CLIENT) private readonly clickHouseClient: ClickHouseClient) {}
+
+  async getGlobalAnalytics(options: EvaluationFilterOptions = {}): Promise<any> {
+    const { query, queryParams } = buildGlobalAnalyticsQuery(options);
+
+    const result = await this.clickHouseClient.query({
+      query,
+      format: 'JSONEachRow',
+      query_params: queryParams,
+    });
+
+    const rows = await result.json<any>();
+    return rows[0];
+  }
+
+  async getAppCounters(): Promise<any> {
+    const query = `
+      SELECT * FROM accessibility.v_app_counters
+    `;
+
+    const result = await this.clickHouseClient.query({
+      query,
+      format: 'JSONEachRow',
+    });
+    const rows = await result.json<any>();
+    return rows[0];
+  }
+
+  async getGlobalAMS(): Promise<any> {
+    const query = `
+      SELECT * FROM accessibility.v_global_ams
+    `;
+
+    const result = await this.clickHouseClient.query({
+      query,
+      format: 'JSONEachRow',
+    });
+    const rows = await result.json<any>();
+    return rows[0];
+  }
 
   async getGlobalSummary(): Promise<any> {
     const query = `
@@ -47,7 +87,7 @@ export class AnalyticRepository {
     const result = await this.clickHouseClient.query({
       query,
       query_params: {
-        directory_id: directoryId,
+        resourceId: directoryId,
       },
       format: 'JSONEachRow',
     });
@@ -61,7 +101,7 @@ export class AnalyticRepository {
     const result = await this.clickHouseClient.query({
       query,
       query_params: {
-        directory_id: directoryId,
+        resourceId: directoryId,
       },
       format: 'JSONEachRow',
     });
@@ -69,7 +109,11 @@ export class AnalyticRepository {
     return rows;
   }
 
-  async getResourceSummary(resourceId: number, resourceType: ResourceTarget, context: ContextTarget): Promise<any> {
+  async getResourceSummary(
+    resourceId: number,
+    resourceType: ResourceTarget,
+    context: ContextTarget,
+  ): Promise<any> {
     const query = getGenericQuery(context, resourceType, 'summary');
 
     const result = await this.clickHouseClient.query({
@@ -83,7 +127,11 @@ export class AnalyticRepository {
     return rows[0];
   }
 
-  async getResourcePlotData(resourceId: number, resourceType: ResourceTarget, context: ContextTarget): Promise<any> {
+  async getResourcePlotData(
+    resourceId: number,
+    resourceType: ResourceTarget,
+    context: ContextTarget,
+  ): Promise<any> {
     const query = getGenericQuery(context, resourceType, 'plotScore');
     const result = await this.clickHouseClient.query({
       query,
@@ -96,7 +144,11 @@ export class AnalyticRepository {
     return rows[0];
   }
 
-  async getResourceScoreDistribution(resourceId: number, resourceType:ResourceTarget,context: ContextTarget): Promise<any> {
+  async getResourceScoreDistribution(
+    resourceId: number,
+    resourceType: ResourceTarget,
+    context: ContextTarget,
+  ): Promise<any> {
     const query = getGenericQuery(context, resourceType, 'scoreDistribution');
     const result = await this.clickHouseClient.query({
       query,
@@ -109,7 +161,11 @@ export class AnalyticRepository {
     return rows[0];
   }
 
-  async getResourceRuleMetrics(resourceId: number,resourceType:ResourceTarget, context: ContextTarget): Promise<any> {
+  async getResourceRuleMetrics(
+    resourceId: number,
+    resourceType: ResourceTarget,
+    context: ContextTarget,
+  ): Promise<any> {
     const query = getGenericQuery(context, resourceType, 'metrics');
 
     const result = await this.clickHouseClient.query({
@@ -122,9 +178,12 @@ export class AnalyticRepository {
     const rows = await result.json<any>();
     return rows[0];
   }
-  async getResourceRulesLatestQuartiles(resourceId: number,resourceType:ResourceTarget, context: ContextTarget): Promise<any> {
+  async getResourceRulesLatestQuartiles(
+    resourceId: number,
+    resourceType: ResourceTarget,
+    context: ContextTarget,
+  ): Promise<any> {
     const query = getGenericQuery(context, resourceType, 'rulesLatestQuartiles');
-    
 
     const result = await this.clickHouseClient.query({
       query,
@@ -169,11 +228,31 @@ export class AnalyticRepository {
         max_execution_time: 60,
       },
     });
+    const chStream = resultSet.stream();
 
-    const nodeStream = resultSet.stream();
+    const byteTransformer = new Transform({
+      objectMode: true,
+      transform(chunk: Row[] | Row, _encoding, callback) {
+        try {
+          if (Array.isArray(chunk)) {
+            let buffer = '';
+            for (let i = 0; i < chunk.length; i++) {
+              buffer += chunk[i].text + '\n';
+            }
+            callback(null, buffer);
+          } else {
+            callback(null, chunk.text + '\n');
+          }
+        } catch (err) {
+          callback(err as Error);
+        }
+      },
+    });
+
+    const outStream = chStream.pipe(byteTransformer);
 
     return {
-      stream: nodeStream as unknown as Readable,
+      stream: outStream,
       contentType,
       filename: `analytics-export-${timestamp}.${extension}`,
     };

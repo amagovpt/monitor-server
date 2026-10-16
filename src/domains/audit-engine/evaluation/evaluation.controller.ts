@@ -10,6 +10,7 @@ import {
   Query,
   StreamableFile,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import { LoggingInterceptor } from 'src/core/log/log.interceptor';
@@ -171,5 +172,29 @@ export class EvaluationController {
       evaluationTriggerDTO.targetIds ?? [],
       securityContext,
     );
+  }
+
+  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
+  @FgaAuthorized({
+    objectType: 'website',
+    action: 'can_manage',
+    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+  })
+  @Delete('website/:websiteId/page/:pageId/evaluation/:evaluationId')
+  async deleteEvaluation(
+    @Param('websiteId', ParseIntPipe) websiteId: number,
+    @Param('pageId', ParseIntPipe) pageId: number,
+    @Param('evaluationId', ParseIntPipe) evaluationId: number,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    const securityContext = { user: user };
+    /*   //TODO: Implement the delete evaluation functionality
+    await this.evaluationService.deleteEvaluation(
+      websiteId,
+      pageId,
+      evaluationId,
+      securityContext,
+    );
+    */
   }
 }

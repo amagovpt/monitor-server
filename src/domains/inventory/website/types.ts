@@ -1,4 +1,4 @@
-import { BaseFilter, BaseSort, BasePagination } from 'src/common/interfaces/types';
+import { BaseFilter, BaseSort, BasePagination, SortCriteria } from 'src/common/interfaces/types';
 import { ContextEnum } from '../context/context.enum';
 import { SecurityContext } from 'src/core/authentication/interfaces/types';
 
@@ -11,11 +11,11 @@ export interface WebsiteFilter extends BaseFilter {
 }
 
 export interface WebsiteSort extends BaseSort {
-  title?: 'ASC' | 'DESC';
-  score?: 'ASC' | 'DESC';
-  createdAt?: 'ASC' | 'DESC';
-  updatedAt?: 'ASC' | 'DESC';
-  createdBy?: 'ASC' | 'DESC';
+  title?: SortCriteria;
+  createdAt?: SortCriteria;
+  id?: SortCriteria;
+  baseUrl?: SortCriteria;
+  institutionId?: SortCriteria;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface WebsitePagination extends BasePagination {}

@@ -1,20 +1,9 @@
 import { ResourceQuerySet } from './type';
 
-import { directoryQueries as amsDirectory } from './ams/directory.queries';
-import { tagQueries as amsTag } from './ams/tag.queries';
-import { websiteQueries as amsWebsite } from './ams/website.queries';
-import { globalQueries as amsGlobal } from './ams/global.queries';
-
 import { websiteQueries as obsWebsite } from './observatory/website.queries';
 import { globalQueries as obsGlobal } from './observatory/global.queries';
 
 const MASTER_QUERY_REGISTRY = {
-  ams: {
-    directory: amsDirectory,
-    tag: amsTag,
-    website: amsWebsite,
-    global: amsGlobal,
-  },
   observatory: {
     website: obsWebsite,
     global: obsGlobal,

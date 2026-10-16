@@ -8,6 +8,7 @@ import {
   HttpStatus,
   ParseIntPipe,
   Param,
+  Query,
   Post,
 } from '@nestjs/common';
 import { CrawlerPageService } from './crawler-page.service';
@@ -26,6 +27,7 @@ import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
 import { CrawlPagesResponseDTO } from './dto/crawler-page-response.dto';
 import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
 import { CrawlerPageImportDTO } from './dto/crawler-page-import.dto';
+import { CrawlerRequestDTO } from './dto/request/cralwer-request.dto';
 
 @DiscoveryDocs.controller()
 @Controller('discovery/websites/:websiteId/crawler/:crawlerId')
@@ -44,11 +46,17 @@ export class CrawlerPageController {
   async getCrawlPages(
     @Param('websiteId', ParseIntPipe) websiteId: number,
     @Param('crawlerId', ParseIntPipe) crawlerId: number,
+    @Query() query: CrawlerRequestDTO,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<CrawlPagesResponseDTO> {
     const securityContext: SecurityContext = { user };
 
-    return await this.crawlerPageService.getCrawlPages(securityContext, websiteId, crawlerId);
+    return await this.crawlerPageService.getCrawlPages(
+      query,
+      securityContext,
+      websiteId,
+      crawlerId,
+    );
   }
 
   @DiscoveryDocs.deleteCrawlPages()
