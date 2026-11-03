@@ -21,7 +21,6 @@ import { Roles } from 'src/core/authorization/decorators/roles.decorator';
 import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
 import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
 import { AMS_ROLE_VIEWER } from 'src/core/authorization/policies/role.policies';
-import { CacheableBy } from 'src/core/cache/decorator/cache-resource.decorator';
 import { ExportAnalyticsDto } from './dto/export-analytics.dto';
 import { Readable } from 'stream';
 
@@ -33,10 +32,6 @@ import { Readable } from 'stream';
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @CacheableBy({
-    key: 'analytics_overview',
-    ttl: 60,
-  })
   @AnalyticsDocs.getOverview()
   @Get('overview')
   async getOverview() {
@@ -44,12 +39,6 @@ export class AnalyticsController {
   }
 
   @Get('tag/:tagId')
-  @CacheableBy({
-    key: 'analytics_tag',
-    source: 'path',
-    param: 'tagId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getTagMetrics()
   @HttpCode(HttpStatus.OK)
   async getTagMetrics(@Param('tagId', ParseIntPipe) tagId: number) {
@@ -57,12 +46,6 @@ export class AnalyticsController {
   }
 
   @Get('website/:websiteId')
-  @CacheableBy({
-    key: 'analytics_website',
-    source: 'path',
-    param: 'websiteId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getWebsiteMetrics()
   @HttpCode(HttpStatus.OK)
   async getWebsiteMetrics(@Param('websiteId', ParseIntPipe) websiteId: number) {
@@ -70,12 +53,6 @@ export class AnalyticsController {
   }
 
   @Get('institution/:institutionId')
-  @CacheableBy({
-    key: 'analytics_institution',
-    source: 'path',
-    param: 'institutionId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getInstitutionMetrics()
   @HttpCode(HttpStatus.OK)
   async getInstitutionMetrics(@Param('institutionId', ParseIntPipe) institutionId: number) {
@@ -83,12 +60,6 @@ export class AnalyticsController {
   }
 
   @Get('directory/:directoryId')
-  @CacheableBy({
-    key: 'analytics_directory',
-    source: 'path',
-    param: 'directoryId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getDirectoryMetrics()
   @HttpCode(HttpStatus.OK)
   async getDirectoryMetrics(@Param('directoryId', ParseIntPipe) directoryId: number) {
@@ -97,22 +68,12 @@ export class AnalyticsController {
 
   @AnalyticsDocs.getGlobalMetrics()
   @Get('global')
-  @CacheableBy({
-    key: 'analytics_global',
-    ttl: 600,
-  })
   @HttpCode(HttpStatus.OK)
   async getGlobalMetrics() {
     return this.analyticsService.getGlobalMetrics();
   }
 
   @Get('global/website/:websiteId')
-  @CacheableBy({
-    key: 'analytics_global_website',
-    source: 'path',
-    param: 'websiteId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getGlobalWebsiteMetrics()
   @HttpCode(HttpStatus.OK)
   async getGlobalWebsiteMetrics(@Param('websiteId', ParseIntPipe) websiteId: number) {
@@ -120,12 +81,6 @@ export class AnalyticsController {
   }
 
   @Get('global/directory/:directoryId')
-  @CacheableBy({
-    key: 'analytics_global_directory',
-    source: 'path',
-    param: 'directoryId',
-    ttl: 60,
-  })
   @AnalyticsDocs.getGlobalDirectoryMetrics()
   @HttpCode(HttpStatus.OK)
   async getGlobalDirectoryMetrics(@Param('directoryId', ParseIntPipe) directoryId: number) {
