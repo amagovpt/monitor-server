@@ -5,7 +5,7 @@ import { UserWebsite } from './user-websites.entity';
 import { User } from 'src/domains/identity/user/user.entity';
 import { Website } from 'src/domains/inventory/website/website.entity';
 import { FGA_RESOURCE } from 'src/core/authorization/types/fga.types';
-import { AuthorizationEvent } from 'src/core/authorization/queue/payload.types';
+import { AuthorizationEvent, PermissionKey } from 'src/core/authorization/queue/payload.types';
 import { OutboxService } from 'src/core/outbox/outbox.service';
 import { sanitizeDelta } from '../util';
 import { AUTHORIZATION_ACTION } from 'src/core/authorization/registry/registry.keys';
@@ -34,20 +34,28 @@ export class UserWebsitesService {
     const uniqueAdd = Array.from(new Set(toAdd));
     const uniqueRemove = Array.from(new Set(toRemove));
     const { add: sanitizedAdd, remove: sanitizedRemove } = sanitizeDelta(uniqueAdd, uniqueRemove);
-
     await this.assignmentRepo.manager.transaction(async (manager) => {
       const userRepo = manager.getRepository(User);
       const userExists = await userRepo.findOne({ where: { id: userId } });
       if (!userExists) {
         throw new NotFoundException(`User with ID ${userId} does not exist`);
       }
+      const permission: PermissionKey = userExists.permission;
+      if (!permission) {
+        throw new NotFoundException(`Permission for user with ID ${userId} not found`);
+      }
 
       await this.handleRemoveWebsites(sanitizedRemove, manager, userId);
-      await this.handleAddWebsites(sanitizedAdd, manager, userId);
+      await this.handleAddWebsites(sanitizedAdd, manager, userId, permission);
     });
   }
 
-  private async handleAddWebsites(sanitizedAdd: number[], manager: EntityManager, userId: number) {
+  private async handleAddWebsites(
+    sanitizedAdd: number[],
+    manager: EntityManager,
+    userId: number,
+    permission: PermissionKey,
+  ) {
     if (sanitizedAdd.length === 0) return;
 
     const websiteRepo = manager.getRepository(Website);
@@ -80,6 +88,7 @@ export class UserWebsitesService {
         payload: {
           action: AUTHORIZATION_ACTION.USER_ADD_WEBSITE,
           resourceType: FGA_RESOURCE.USER,
+          permission: permission,
           resourceId: userId,
           websiteIds: toInsert,
         },
