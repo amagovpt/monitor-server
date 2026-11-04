@@ -164,7 +164,7 @@ export class AuthorizationRegistry {
         payload.websiteIds.map((websiteId) =>
           this.fgaService.removeUserRelations(
             'website',
-            payload.userId.toString(),
+            payload.resourceId.toString(),
             websiteId.toString(),
             ['viewer', 'editor', 'manager'],
           ),
@@ -176,7 +176,7 @@ export class AuthorizationRegistry {
           'website',
           websiteId.toString(),
           payload.permission,
-          `user:${payload.userId}`,
+          `user:${payload.resourceId}`,
         ),
       );
       await this.fgaService.createBatchesRelationships(tuples);
@@ -187,7 +187,7 @@ export class AuthorizationRegistry {
         payload.websiteIds.map((websiteId) =>
           this.fgaService.removeUserRelations(
             'website',
-            payload.userId.toString(),
+            payload.resourceId.toString(),
             websiteId.toString(),
             ['viewer', 'editor', 'manager'],
           ),

@@ -143,7 +143,7 @@ export class WebsiteRepository extends ContextAwareRepository<
           ).orWhere(
             `EXISTS (
               SELECT 1 FROM team_websites tw 
-              JOIN user_teams ut ON ut.team_id = tw.team_id 
+              JOIN team_member ut ON ut.team_id = tw.team_id 
               WHERE tw.website_id = ${this.alias}.id AND ut.user_id = :userId
             )`,
           );

@@ -90,7 +90,6 @@ export interface WebsiteCreatePayload extends BaseAuthPayload<typeof FGA_RESOURC
 
 export interface WebsiteUserPayload extends BaseAuthPayload<typeof FGA_RESOURCE.WEBSITE> {
   resourceType: typeof FGA_RESOURCE.WEBSITE;
-  userId: number;
   websiteIds: number[];
   permission: PermissionKey;
 }
