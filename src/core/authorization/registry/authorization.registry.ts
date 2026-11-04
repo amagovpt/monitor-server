@@ -90,18 +90,40 @@ export class AuthorizationRegistry {
           `role:ams`,
         ),
       );
+       
     },
     [AUTHORIZATION_ACTION.TEAM_DELETE]: async (payload: TeamsPayload) => {
-      const tuples: FgaTupleEnquire<any>[] = [
+      const tuples: FgaTupleEnquire<any>[] = [];
+
+      payload.userIds?.forEach((userId) => {
+        tuples.push(
+          this.fgaService.makeFgaTuple(
+            'team',
+            payload.resourceId.toString(),
+            'member',
+            `user:${userId}`,
+          ),
+        );
+      });
+
+      payload.websiteIds?.forEach((websiteId) => {
+        tuples.push(
+          this.fgaService.makeFgaTuple(
+            'website',
+            websiteId.toString(),
+            'parent',
+            `team:${payload.resourceId}`,
+          ),
+        );
+      });
+
+      tuples.push(
         this.fgaService.makeFgaTuple(
           'team',
           payload.resourceId.toString(),
           'team_role',
           `role:monitor`,
         ),
-      ];
-      await this.fgaService.deleteBatchesRelationships(tuples);
-      await this.fgaService.createRelationship(
         this.fgaService.makeFgaTuple(
           'team',
           payload.resourceId.toString(),
@@ -109,6 +131,12 @@ export class AuthorizationRegistry {
           `role:ams`,
         ),
       );
+
+      if (tuples.length > 0) {
+        await this.fgaService.deleteBatchesRelationships(tuples);
+      }
+
+     
     },
     [AUTHORIZATION_ACTION.TEAM_ADD_MEMBER]: async (payload: TeamsPayload) => {
       const tuples: FgaTupleEnquire<any>[] =

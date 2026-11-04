@@ -117,15 +117,13 @@ export class TeamRepository extends BaseTransactionalRepository<
       await this.outboxService.putInOutbox(queryRunner.manager, {
         aggregateType: FGA_RESOURCE.TEAM,
         aggregateId: savedTeam.id,
-        action: AUTHORIZATION_ACTION.TEAM_ADD_MEMBER,
+        action: AUTHORIZATION_ACTION.TEAM_CREATE,
         eventType: AuthorizationEvent.AUTHORIZATION,
         payload: {
           resourceType: FGA_RESOURCE.TEAM,
           resourceId: savedTeam.id,
-          action: AUTHORIZATION_ACTION.TEAM_ADD_MEMBER,
+          action: AUTHORIZATION_ACTION.TEAM_CREATE,
           teamId: savedTeam.id,
-          websiteIds,
-          userIds,
         },
       });
       return savedTeam;
