@@ -137,7 +137,7 @@ export class WebsiteRepository extends ContextAwareRepository<
         new Brackets((qb) => {
           qb.where(
             `EXISTS (
-              SELECT 1 FROM user_websites uw 
+              SELECT 1 FROM users_websites uw 
               WHERE uw.website_id = ${this.alias}.id AND uw.user_id = :userId
             )`,
           ).orWhere(
