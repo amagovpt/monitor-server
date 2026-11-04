@@ -13,10 +13,7 @@ import { AuthorizationEvent } from 'src/core/authorization/queue/payload.types';
 import { User } from '../../user/user.entity';
 import { Website } from 'src/domains/inventory/website/website.entity';
 import { AUTHORIZATION_ACTION } from 'src/core/authorization/registry/registry.keys';
-import { TeamMembers } from 'src/domains/allocations/relations/team-members/team-members.entity';
-import { TeamWebsites } from 'src/domains/allocations/relations/team-websites/team-websites.entity';
 import { SecurityContext } from 'src/core/authentication/interfaces/types';
-import { SelectQuery } from 'typeorm/query-builder/SelectQuery.js';
 
 export interface TeamFilter extends BaseFilter, Pick<Team, 'id' | 'teamName'> {
   id: number;
@@ -140,7 +137,7 @@ export class TeamRepository extends BaseTransactionalRepository<
       const manager = queryRunner.manager;
       const team = await manager.findOne(Team, { where: { id } });
       const usersTeamRaw: Array<{ user_id: number }> = await manager.query(
-        `SELECT user_id FROM team_members WHERE team_id = $1`,
+        `SELECT user_id FROM team_member WHERE team_id = $1`,
         [id],
       );
       const websitesTeamRaw: Array<{ website_id: number }> = await manager.query(
