@@ -1,58 +1,97 @@
-import { QueueEventsListener, QueueEventsHost, OnQueueEvent } from '@nestjs/bullmq';
+import { QueueEventsListener, QueueEventsHost, OnQueueEvent, InjectQueue } from '@nestjs/bullmq';
 import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { SsePublisherService } from '@core/sse/sse-publisher.service';
+import { Queue } from 'bullmq';
+import {
+  EvaluationJobData,
+  EvaluationStarted,
+  EvaluationProgress,
+  EvaluationFailed,
+  EvaluationCompleted,
+} from './types';
 
 @QueueEventsListener(QUEUE_NAMES.EVAL_PUBLIC)
 export class EvaluationPublicEventsListener extends QueueEventsHost {
-  public constructor(private readonly SsePublisherService: SsePublisherService) {
+  public constructor(
+    private readonly SsePublisherService: SsePublisherService,
+    @InjectQueue(QUEUE_NAMES.EVAL_PUBLIC)
+    private readonly evaluationQueue: Queue<EvaluationJobData>,
+  ) {
     super();
   }
   @OnQueueEvent('active')
-  onActive(job: { jobId: string; prev?: string }) {
-    // Job começou a ser processado no worker
-    this.SsePublisherService.notifyUser(0, 'job-active', { jobId: job.jobId });
-    this.SsePublisherService.notifyUser(0, 'job-active', { jobId: job.jobId }, 'MONITOR');
+  async onActive(job: { jobId: string; prev?: string }) {
+    const jobData = await this.evaluationQueue.getJob(job.jobId);
+    if (!jobData?.data) return;
+
+    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+
+    const event: EvaluationStarted = {
+      event: 'evaluation:started',
+      websiteId,
+      pageId,
+      institutionId,
+      directoryIds,
+      previousState: job.prev,
+    };
+
+    this.SsePublisherService.notifyUser(0, 'evaluation:started', event);
+    this.SsePublisherService.notifyUser(0, 'evaluation:started', event, 'MONITOR');
   }
 
   @OnQueueEvent('progress')
-  onProgress(job: { jobId: string; data: number | object }) {
-    // Notificar frontend/gateway via SSE ou WebSocket
-    this.SsePublisherService.notifyUser(0, 'job-progress', { jobId: job.jobId, data: job.data });
-    this.SsePublisherService.notifyUser(
-      0,
-      'job-progress',
-      { jobId: job.jobId, data: job.data },
-      'MONITOR',
-    );
+  async onProgress(job: { jobId: string; data: number | object }) {
+    const jobData = await this.evaluationQueue.getJob(job.jobId);
+    if (!jobData?.data) return;
+
+    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+
+    const event: EvaluationProgress = {
+      event: 'evaluation:progress',
+      websiteId,
+      pageId,
+      institutionId,
+      directoryIds,
+      progress: job.data,
+    };
+
+    this.SsePublisherService.notifyUser(0, 'evaluation:progress', event);
+    this.SsePublisherService.notifyUser(0, 'evaluation:progress', event, 'MONITOR');
   }
 
   @OnQueueEvent('completed')
-  onCompleted(job: { jobId: string; returnvalue: string }) {
-    // Persistir estado final ou disparar próximo passo no pipeline
-    this.SsePublisherService.notifyUser(0, 'job-completed', {
-      jobId: job.jobId,
-      returnvalue: job.returnvalue,
-    });
-    this.SsePublisherService.notifyUser(
-      0,
-      'job-completed',
-      { jobId: job.jobId, returnvalue: job.returnvalue },
-      'MONITOR',
-    );
+  async onCompleted(job: { jobId: string; returnvalue: string }) {
+    const jobData = await this.evaluationQueue.getJob(job.jobId);
+    if (!jobData?.data) return;
+
+    const evaluation = JSON.parse(job.returnvalue);
+
+    const event: EvaluationCompleted = {
+      event: 'evaluation:completed',
+      evaluation,
+    };
+
+    this.SsePublisherService.notifyUser(0, 'evaluation:completed', event);
+    this.SsePublisherService.notifyUser(0, 'evaluation:completed', event, 'MONITOR');
   }
 
   @OnQueueEvent('failed')
-  onFailed(job: { jobId: string; failedReason: string }) {
-    // Tratar alertas, Dead Letter Queue ou retries
-    this.SsePublisherService.notifyUser(0, 'job-failed', {
-      jobId: job.jobId,
+  async onFailed(job: { jobId: string; failedReason: string }) {
+    const jobData = await this.evaluationQueue.getJob(job.jobId);
+    if (!jobData?.data) return;
+
+    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+
+    const event: EvaluationFailed = {
+      event: 'evaluation:failed',
+      websiteId,
+      pageId,
+      institutionId,
+      directoryIds,
       failedReason: job.failedReason,
-    });
-    this.SsePublisherService.notifyUser(
-      0,
-      'job-failed',
-      { jobId: job.jobId, failedReason: job.failedReason },
-      'MONITOR',
-    );
+    };
+
+    this.SsePublisherService.notifyUser(0, 'evaluation:failed', event);
+    this.SsePublisherService.notifyUser(0, 'evaluation:failed', event, 'MONITOR');
   }
 }
