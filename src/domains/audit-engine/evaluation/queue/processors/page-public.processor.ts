@@ -14,6 +14,7 @@ export interface WebsiteExtractorJobData {
   websiteId: number;
   institutionId: number;
   directoryIds: number[];
+  userId: number;
   lastPageId?: number;
 }
 
@@ -85,6 +86,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
           contextId,
           websiteId,
           pageId: pages.page_id,
+          userId: job.data.userId,
           url: pages.url,
           institutionId: pages.institution_id,
           directoryIds: pages.directories_ids,

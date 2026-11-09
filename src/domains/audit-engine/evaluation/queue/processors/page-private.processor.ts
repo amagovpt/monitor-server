@@ -13,6 +13,7 @@ import { EvaluationJobData } from '../../types';
 export interface WebsiteExtractorJobData {
   contextId: number;
   websiteId: number;
+  userId: number;
   lastPageId?: number;
 }
 
@@ -86,6 +87,7 @@ export class PrivatePageExtractorProcessor extends WorkerHost {
           contextId,
           websiteId,
           pageId: pages.page_id,
+          userId: job.data.userId,
           url: pages.url,
           institutionId: pages.institution_id,
           directoryIds: pages.directories_ids,
