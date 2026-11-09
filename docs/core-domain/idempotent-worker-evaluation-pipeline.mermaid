@@ -1,0 +1,52 @@
+graph TD
+    Start(["Job Start / BullMQ Retry"]) --> Step1
+
+    subgraph "Phase 1: Volatile Execution"
+        Step1["1. Evaluation (or throw) <br/>Evaluation Engine - Progress: 30%"]
+        Step2["2. Parsing of evaluation Data<br/>Extracts Report and Data in Memory"]
+        Step1 --> Step2
+    end
+
+    Step2 --> CheckID{"job.data.evaluationId<br/>already exists?"}
+
+    subgraph "Phase 2: Identity Reservation"
+        CheckID -->|"No: 1st Attempt"| CreateEval["3a. Create Evaluation<br/>Allocates Integer ID in PostgreSQL"]
+        CreateEval --> RecordJournal1["Record Journal<br/>Persists evaluationId in job.data"]
+        
+        CheckID -->|"Yes: It's a Retry"| ReuseEval["3b. Reuse Evaluation ID<br/>Performs Upsert/Update in PostgreSQL"]
+        
+        RecordJournal1 --> Step4
+        ReuseEval --> Step4
+         Step4["4. Calculate Ingestion Metrics<br/>Calculates metrics - Progress: 60%"]
+    end
+
+    subgraph "Phase 3: Object Storage"
+        Step4 --> RecordJournal2["Updates Journal before writing to S3"]
+        RecordJournal2 --> Step5["5. steps.saveToStorage<br/>Saves HTML + Evidence in S3 - Progress: 80%"]
+    end
+
+    subgraph "Phase 4: Publishing OLAP Metrics"
+        Step5 --> RecordJournal3["Updates Journal before writing to redis Stream "] 
+        RecordJournal3 --> Step6a["6. Publish Metrics<br/>Sends to Redis Stream with IDMP"]
+        
+    end
+    subgraph "Phase 5: OLTP Persistence"
+        Step6a --> Step6b["7. completeEvaluation <br/>Closes Evaluation & PageStatus - Progress: 100%"]
+    end
+
+
+    subgraph "Phase 6: Finalization & Events"
+        Step6b --> EmitEvent["Emmit event 'Complete'"]
+        EmitEvent --> ReturnDTO(["Return EvaluationDTO"])
+    end
+
+    Step1 -.->|"Failure: Crash/Timeout"| SafeRetry(["Clean Retry: Zero Side Effects"])
+    Step2 -.->|"Failure: Parse Error"| SafeRetry
+
+    CreateEval -.->|"Network/DB Failure"| DirtyRetry{"Attempts < Max?"}
+    Step5 -.->|"S3 Write Failure"| DirtyRetry
+    Step6a -.->|"Redis Failure"| DirtyRetry
+    Step6b -.->|"On 7. failure Evaluation entity  </br> Rollback info is already present in journal from phase 2"| DirtyRetry
+
+    DirtyRetry -->|"Yes: BullMQ Backoff"| Start
+    DirtyRetry -->|"No: Exhausted 3x"| Compensate["Terminal Compensation Routine<br/>Reads Journal & clears S3 + PG + Stream"]
