@@ -13,6 +13,9 @@ export const QUEUE_NAMES = {
   EVAL_PUBLIC_DLQ: 'evaluation-queue-public-dlq',
   EVAL_PRIVATE: 'evaluation-queue-private',
   EVAL_PRIVATE_DLQ: 'evaluation-queue-private-dlq',
+  EVAL_PRIVATE_ROLLBACK: 'evaluation-queue-private-rollback',
+  EVAL_PRIVATE_ROLLBACK_DLQ: 'evaluation-queue-private-rollback-dlq',
+  //Evaluation Storage Queues
   //Authorization Queue
   AUTHORIZATION: 'authorization-queue',
   //General Resource Decoupled Actions Queues

@@ -60,6 +60,16 @@ import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
       { name: QUEUE_NAMES.AUTHORIZATION, defaultJobOptions: DEFAULT_JOB_OPTIONS },
       { name: QUEUE_NAMES.EVALUATION_RESOURCE, defaultJobOptions: DEFAULT_JOB_OPTIONS },
       { name: QUEUE_NAMES.EVALUATION_RESOURCE_DLQ },
+      {
+        name: QUEUE_NAMES.EVAL_PRIVATE_ROLLBACK,
+        defaultJobOptions: {
+          attempts: 3,
+          delay: 1 * 60 * 1000,
+        },
+      },
+      {
+        name: QUEUE_NAMES.EVAL_PRIVATE_ROLLBACK_DLQ,
+      },
     ),
     BullBoardModule.forFeature(
       { name: QUEUE_NAMES.CRAWL_PRIVATE, adapter: BullMQAdapter },
