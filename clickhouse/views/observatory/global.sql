@@ -2,81 +2,60 @@
 -- 1. VIEW TOP 3 WEBSITES 
 -- ============================================================================
 CREATE OR REPLACE VIEW v_top_3_global_websites AS
+WITH top_3_data AS (
+    SELECT
+        toUInt64(website_id) AS website_id,
+        toFloat64(avg(score)) AS avg_score,
+        countIf(a_error_count = 0) AS pagesWithoutErrorsA,
+        countIf(a_error_count = 0 AND aa_error_count = 0) AS pagesWithoutErrorsAA,
+        countIf(a_error_count = 0 AND aa_error_count = 0 AND aaa_error_count = 0) AS pagesWithoutErrorsAAA,
+        sum(toUInt64(total_error_count)) AS total_errors,
+        dictGetOrDefault(
+            'institution_websites_dict',
+            ('institution_name', 'website_title', 'directories_ids'),
+            toUInt64(website_id),
+            (CAST('' AS String), CAST('' AS String), CAST([] AS Array(UInt64)))
+        ) AS meta
+    FROM accessibility.v_latest_pages_evaluations
+    GROUP BY website_id
+    ORDER BY
+        avg_score DESC,
+        dictGetUInt64OrDefault('institution_websites_dict', 'page_count', toUInt64(website_id), toUInt64(0)) DESC,
+        pagesWithoutErrorsAAA DESC,
+        pagesWithoutErrorsAA DESC,
+        pagesWithoutErrorsA DESC
+    LIMIT 3
+)
 SELECT
-    groupArray(
-        CAST(
+    arrayMap(
+        (row, idx) -> tuple(
+            toUInt64(idx) AS index,
+            toUInt64(row.1) AS id,
+            toUInt64(row.2) AS directoryId,
+            toString(row.3) AS entity,
+            toString(row.4) AS name,
+            toFloat64(row.5) AS score,
+            toUInt64(row.6) AS pagesWithoutErrorsA,
+            toUInt64(row.7) AS pagesWithoutErrorsAA,
+            toUInt64(row.8) AS pagesWithoutErrorsAAA,
+            toUInt64(row.9) AS totalErrors
+        ),
+        groupArray(
             tuple(
-                rank,
                 website_id,
                 toUInt64(if(empty(meta.3), 0, meta.3[1])),
-                meta.1,
-                meta.2,
+                toString(assumeNotNull(ifNull(meta.1, ''))),
+                toString(assumeNotNull(ifNull(meta.2, ''))),
                 avg_score,
                 pagesWithoutErrorsA,
                 pagesWithoutErrorsAA,
                 pagesWithoutErrorsAAA,
                 total_errors
-            ),
-            'Tuple(
-                index UInt64,
-                id UInt64,
-                directoryId UInt64,
-                entity String,
-                name String,
-                score Float64,
-                pagesWithoutErrorsA UInt64,
-                pagesWithoutErrorsAA UInt64,
-                pagesWithoutErrorsAAA UInt64,
-                totalErrors UInt64
-            )'
-        )
+            )
+        ),
+        arrayEnumerate(groupArray(website_id))
     ) AS topWebsites
-FROM
-(
-    SELECT
-        rowNumberInAllBlocks() + 1 AS rank,
-        toUInt64(website_id) AS website_id,
-        avg_score,
-        pagesWithoutErrorsA,
-        pagesWithoutErrorsAA,
-        pagesWithoutErrorsAAA,
-        total_errors,
-        dictGetOrDefault(
-            'institution_websites_dict',
-            ('institution_name', 'website_title', 'directories_ids'),
-            website_id,
-            ('', '', [])
-        ) AS meta
-    FROM
-    (
-        SELECT
-            website_id,
-            toFloat64(avg(score)) AS avg_score,
-            countIf(a_error_count = 0 AND aa_error_count > 0) AS pagesWithoutErrorsA,
-            countIf(aa_error_count = 0 AND a_error_count = 0 AND aaa_error_count > 0) AS pagesWithoutErrorsAA,
-            countIf(aaa_error_count = 0 AND aa_error_count = 0 AND a_error_count = 0) AS pagesWithoutErrorsAAA,
-            sum(toUInt64(total_error_count)) AS total_errors
-        FROM
-        (
-            SELECT
-                website_id,
-                score,
-                a_error_count,
-                aa_error_count,
-                aaa_error_count,
-                total_error_count
-            FROM accessibility.v_latest_pages_evaluations
-        )
-        GROUP BY website_id
-        ORDER BY
-            avg_score DESC,
-            dictGetUInt64OrDefault('institution_websites_dict', 'page_count', website_id, toUInt64(0)) DESC,
-            pagesWithoutErrorsAAA DESC,
-            pagesWithoutErrorsAA DESC,
-            pagesWithoutErrorsA DESC
-        LIMIT 3
-    )
-);
+FROM top_3_data;
 
 -- ============================================================================
 -- 2. VIEW GLOBAL STATS
