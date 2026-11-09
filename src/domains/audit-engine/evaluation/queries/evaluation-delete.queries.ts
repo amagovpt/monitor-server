@@ -25,3 +25,7 @@ SELECT
 FROM accessibility.evaluations_temp FINAL
 PREWHERE is_deleted = 0 AND is_migrated = 0
 WHERE evaluation_id = {evaluationId:UInt32}; `;
+
+export const EVALUATION_DELETE_ROLLBACK_QUERY = `
+DELETE FROM accessibility.evaluations_temp
+WHERE evaluation_id = {evaluationId:UInt32}; `;
