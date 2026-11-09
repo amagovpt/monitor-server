@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { Client, ClientConfig } from 'pg';
 import { ConfigService } from '@nestjs/config';
 import { SsePublisherService } from '../sse/sse-publisher.service';
-type Visibility = 'AMS' | 'MONITOR' | 'GLOBAL';
+
 @Injectable()
 export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseCounterListenerService.name);
@@ -22,6 +22,7 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
   async onModuleInit(): Promise<void> {
     await this.initListener();
   }
+
   private buildClientConfig(): ClientConfig {
     const host = this.configService.get<string>('DB_HOST');
     const port = this.configService.get<number>('DB_PORT', 5432);
@@ -30,7 +31,7 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
     const database = this.configService.get<string>('DB_DATABASE');
 
     if (!password) {
-      throw new Error('A variável DB_PASSWORD não está definida no ambiente.');
+      throw new Error('The DB_PASSWORD variable is not defined in the environment.');
     }
 
     return {
@@ -41,58 +42,69 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
       database,
       keepAlive: true,
       keepAliveInitialDelayMillis: 10000,
+      connectionTimeoutMillis: 5000,
     };
   }
 
   private async initListener(): Promise<void> {
     if (this.isShuttingDown) return;
 
-    this.cleanupClient();
+    await this.cleanupClient();
 
     try {
-      this.client = new Client(this.buildClientConfig());
+      const client = new Client(this.buildClientConfig());
+      this.client = client;
 
-      this.client.on('notification', (msg) => this.handleNotification(msg.payload));
+      client.on('notification', (msg) => this.handleNotification(msg.payload));
 
-      this.client.on('error', (err) => {
-        this.logger.error(`Erro no socket do LISTEN: ${err.message}`, err.stack);
+      client.on('error', (err) => {
+        this.logger.error(`LISTEN socket error: ${err.message}`, err.stack);
         this.scheduleReconnect();
       });
 
-      this.client.on('end', () => {
+      client.on('end', () => {
         if (!this.isShuttingDown) {
-          this.logger.warn('Conexão PostgreSQL LISTEN terminada inesperadamente.');
+          this.logger.warn('PostgreSQL LISTEN connection terminated unexpectedly.');
           this.scheduleReconnect();
         }
       });
 
-      await this.client.connect();
-      await this.client.query(`LISTEN ${DatabaseCounterListenerService.CHANNEL}`);
+      await client.connect();
+
+      // Guard clause in case shutdown occurred during the connect() handshake
+      if (this.isShuttingDown) {
+        await client.end().catch(() => {});
+        return;
+      }
+
+      await client.query(`LISTEN ${DatabaseCounterListenerService.CHANNEL}`);
+
+      if (this.isShuttingDown) {
+        await client.end().catch(() => {});
+        return;
+      }
 
       this.retryCount = 0;
-      this.logger.log(
-        `Escuta ativa no canal PostgreSQL: ${DatabaseCounterListenerService.CHANNEL}`,
-      );
+      this.logger.log(`Listening on PostgreSQL channel: ${DatabaseCounterListenerService.CHANNEL}`);
     } catch (error) {
-      this.logger.error(`Falha ao conectar/escutar no canal: ${(error as Error).message}`);
+      if (this.isShuttingDown) return;
+
+      this.logger.error(`Failed to connect/listen on channel: ${(error as Error).message}`);
       this.scheduleReconnect();
     }
   }
 
   private handleNotification(payload?: string): void {
-    if (!payload) return;
-    console.log(`Notificação recebida: ${JSON.stringify(payload)}`);
+    if (!payload || this.isShuttingDown) return;
+
     const visibilities = this.extractVisibilities(payload);
-    console.log(`Visibilidades extraídas: ${JSON.stringify(visibilities)}`);
     this.logger.debug(
-      `Notificação recebida [${payload}]. A propagar para: ${visibilities.join(', ')}`,
+      `Notification received [${payload}]. Propagating to: ${visibilities.join(', ')}`,
     );
 
-    // Dispara a notificação para cada escopo de visibilidade em paralelo
     Promise.allSettled(
       visibilities.map((visibility) =>
-        this.ssePublisher.notifyUser(
-          0,
+        this.ssePublisher.broadcastToGroups(
           'entity_count_updated',
           { entity: payload, timestamp: new Date() },
           visibility,
@@ -102,7 +114,7 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
       results.forEach((res, index) => {
         if (res.status === 'rejected') {
           this.logger.error(
-            `Falha ao emitir SSE para visibilidade [${visibilities[index]}]: ${res.reason?.message || res.reason}`,
+            `Failed to emit SSE for visibility [${visibilities[index]}]: ${res.reason?.message || res.reason}`,
           );
         }
       });
@@ -111,26 +123,29 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
 
   private extractVisibilities(payload: string): ('AMS' | 'MONITOR')[] {
     const list: ('AMS' | 'MONITOR')[] = ['AMS'];
-
     if (payload.toLowerCase().includes('monitor')) {
       list.push('MONITOR');
     }
-
     return list;
   }
 
   private scheduleReconnect(): void {
     if (this.isShuttingDown || this.reconnectTimeout) return;
 
-    // Exponential backoff com teto de 30s
     const delay = Math.min(
       1000 * Math.pow(2, this.retryCount),
       DatabaseCounterListenerService.MAX_RETRY_DELAY_MS,
     );
+    this.logger.log(`Reconnection attempt in ${delay}ms...`);
+    this.reconnectTimeout = setTimeout(() => {
+      this.reconnectTimeout = null;
+      this.retryCount++;
+      this.initListener();
+    }, delay);
     this.retryCount++;
 
     this.logger.warn(
-      `Agendando reconexão do canal LISTEN em ${delay}ms (tentativa ${this.retryCount})...`,
+      `Scheduling LISTEN channel reconnection in ${delay}ms (attempt ${this.retryCount})...`,
     );
 
     this.reconnectTimeout = setTimeout(async () => {
@@ -139,11 +154,16 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
     }, delay);
   }
 
-  private cleanupClient(): void {
+  private async cleanupClient(): Promise<void> {
     if (this.client) {
-      this.client.removeAllListeners();
-      this.client.end().catch(() => {});
+      const client = this.client;
       this.client = null;
+      client.removeAllListeners();
+      try {
+        await client.end();
+      } catch (err) {
+        this.logger.warn(`Error closing PostgreSQL client: ${(err as Error).message}`);
+      }
     }
   }
 
@@ -155,7 +175,7 @@ export class DatabaseCounterListenerService implements OnModuleInit, OnModuleDes
       this.reconnectTimeout = null;
     }
 
-    this.cleanupClient();
-    this.logger.log('Listener PostgreSQL destruído com sucesso.');
+    await this.cleanupClient();
+    this.logger.log('PostgreSQL listener destroyed successfully.');
   }
 }
