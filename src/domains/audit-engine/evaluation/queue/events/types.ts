@@ -3,6 +3,7 @@ import { EvaluationDTO } from '../../dto/evaluation.dto';
 
 export interface EvaluationMeta {
   evaluationId?: number;
+  userId?: number;
 }
 
 export interface PageMetadata {
