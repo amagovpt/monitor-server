@@ -33,13 +33,16 @@ export const otelSDK = new NodeSDK({
     exporter: new OTLPMetricExporter({
       url: `${collectorBaseUrl}/v1/metrics`,
     }),
-    exportIntervalMillis: 15000, // Alinhado com o scrape_interval de 15s do Prometheus
+    exportIntervalMillis: 15000,
   }),
 
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-fs': { enabled: false },
       '@opentelemetry/instrumentation-dns': { enabled: false },
+      '@opentelemetry/instrumentation-runtime-node': {
+        enabled: false,
+      },
       '@opentelemetry/instrumentation-http': {
         ignoreIncomingRequestHook: (req: IncomingMessage) => {
           const url = req.url || '';
@@ -51,3 +54,25 @@ export const otelSDK = new NodeSDK({
 });
 
 otelSDK.start();
+
+process.on('SIGTERM', async () => {
+  try {
+    await otelSDK.shutdown();
+    console.log('OpenTelemetry SDK successfully shut down.');
+  } catch (error) {
+    console.error('Error shutting down OpenTelemetry SDK:', error);
+  } finally {
+    process.exit(0);
+  }
+});
+
+process.on('SIGINT', async () => {
+  try {
+    await otelSDK.shutdown();
+    console.log('OpenTelemetry SDK successfully shut down.');
+  } catch (error) {
+    console.error('Error shutting down OpenTelemetry SDK:', error);
+  } finally {
+    process.exit(0);
+  }
+});
