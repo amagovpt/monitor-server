@@ -212,6 +212,9 @@ WITH
         FROM accessibility.latest_page_evaluations_temp
         WHERE website_id IN eligible_websites
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
     ),
 
     main_pages AS (
@@ -230,6 +233,9 @@ WITH
         FROM accessibility.latest_page_evaluations
         WHERE website_id IN eligible_websites
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
           AND page_id NOT IN (SELECT page_id FROM temp_pages)
         GROUP BY website_id, page_id
         HAVING argMax(is_deleted, version) = 0
@@ -241,7 +247,7 @@ SELECT * FROM main_pages;
 
 
 ---- LATEST PAGES EVALUATIONS VIEW ALL
-CREATE OR REPLACE VIEW v_latest_pages_evaluations_all AS
+CREATE OR REPLACE VIEW accessibility.v_latest_pages_evaluations_all AS
 WITH
     temp_pages AS (
         SELECT
@@ -249,6 +255,10 @@ WITH
             aaa_error_count, aa_error_count, a_error_count, total_error_count,
             failed_rules, warning_rules, passed_rules
         FROM accessibility.latest_page_evaluations_temp
+        WHERE  dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
+
     ),
     main_pages AS (
         SELECT
@@ -265,6 +275,9 @@ WITH
             argMax(passed_rules,      version) AS passed_rules
         FROM accessibility.latest_page_evaluations
         WHERE (website_id, page_id) NOT IN (SELECT website_id, page_id FROM temp_pages)
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
         GROUP BY website_id, page_id
         HAVING argMax(is_deleted, version) = 0
     )
@@ -587,6 +600,9 @@ WITH per_evaluation AS (
         ) AS passed_rules
     FROM accessibility.evaluations_temp
     WHERE is_deleted = 0 AND is_migrated = 0
+    AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+    AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+    AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
     GROUP BY
         website_id,
         page_id,
@@ -608,6 +624,10 @@ SELECT
     argMax(pe.warning_rules,     (pe.evaluation_date, pe.evaluation_id)) AS warning_rules,
     argMax(pe.passed_rules,      (pe.evaluation_date, pe.evaluation_id)) AS passed_rules
 FROM per_evaluation AS pe
+WHERE 
+     dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+    AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+    AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
 GROUP BY pe.website_id, pe.page_id;
 
 
@@ -644,6 +664,9 @@ WITH
         FROM accessibility.mv_latest_page_evaluations_temp_real_time
         WHERE website_id IN eligible_websites
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
     ),
     main_pages AS (
         SELECT
@@ -663,6 +686,9 @@ WITH
         WHERE website_id IN eligible_websites
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
           AND (website_id, page_id) NOT IN (SELECT website_id, page_id FROM temp_pages)
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
         GROUP BY website_id, page_id
         HAVING argMax(is_deleted, version) = 0
     )
@@ -675,7 +701,7 @@ SELECT * FROM main_pages;
 
 
 
-CREATE OR REPLACE VIEW v_latest_pages_evaluations_real_time_all AS
+CREATE OR REPLACE VIEW accessibility.v_latest_pages_evaluations_real_time_all AS
 
 WITH
     eligible_websites AS (
@@ -712,6 +738,9 @@ WITH
         FROM accessibility.latest_page_evaluations
         WHERE website_id IN eligible_websites
           AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
+          AND dictGetOrDefault('pages_context_dict', 'is_archived', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_deleted', page_id, false) = false
+          AND dictGetOrDefault('pages_context_dict', 'is_in_ams', page_id, false) = true
           AND page_id NOT IN (SELECT page_id FROM temp_pages)
         GROUP BY website_id, page_id
         HAVING argMax(is_deleted, version) = 0
