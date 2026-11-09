@@ -2,8 +2,8 @@
   "compilerOptions": {
     "noImplicitAny": false,
     "resolveJsonModule": true,
-    "module": "NodeNext",      
-    "moduleResolution": "NodeNext", 
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -17,7 +17,7 @@
     "useDefineForClassFields": false,
     "outDir": "./dist",
     "incremental": true,
-    "types": ["jest", "node"],
+    "types": ["jest", "node", "multer"],
     "baseUrl": ".",
     "paths": {
       "src/*": ["./src/*"],
@@ -27,6 +27,6 @@
       "@core/*": ["./src/core/*"],
       "test/*": ["./test/*"]
     }
-  } ,
+  },
   "exclude": ["node_modules", "dist"]
 }
