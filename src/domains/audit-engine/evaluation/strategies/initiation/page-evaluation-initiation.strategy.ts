@@ -56,6 +56,7 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
 
     const uniquePageIds = Array.from(new Set(targetIds));
     const contextId = context.user.context.id;
+    const userId = context.user.id;
 
     // 1. Obter a relação página -> website_id para checagem de autorização
     const pageWebsiteMappings: Array<{ id: number; website_id: number }> =
@@ -141,6 +142,7 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
           websiteId: page.website_id,
           pageId: page.page_id,
           url: page.url,
+          userId,
           institutionId: page.institution_id,
           directoryIds: page.directories_ids ?? [],
         },

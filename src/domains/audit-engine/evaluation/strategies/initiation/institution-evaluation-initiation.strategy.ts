@@ -31,9 +31,9 @@ export class InstitutionEvaluationInitiationStrategy implements EvaluationInitia
     if (!targetIds?.length) {
       throw new BadRequestException('At least one institution ID must be provided.');
     }
-
+    const userId = securityContext.user.id;
     const isAllowed = await this.openFgaService.check(
-      `user:${securityContext.user.id}`,
+      `user:${userId}`,
       'can_manage_users',
       'role:ams',
     );
@@ -51,6 +51,7 @@ export class InstitutionEvaluationInitiationStrategy implements EvaluationInitia
       data: {
         contextId,
         websiteId: website.id,
+        userId,
       },
       opts: {
         jobId: `ctx-${contextId}-website-${website.id}`,

@@ -32,9 +32,13 @@ export class DirectoryEvaluationInitiationStrategy implements EvaluationInitiato
     if (!targetIds?.length) {
       throw new BadRequestException('At least one directory ID must be provided.');
     }
+    const userId = securityContext.user.id;
+    if (!userId) {
+      throw new ForbiddenException('User ID is required.');
+    }
 
     const isAllowed = await this.openFgaService.check(
-      `user:${securityContext.user.id}`,
+      `user:${userId}`,
       'can_manage_users',
       'role:ams',
     );
@@ -53,6 +57,7 @@ export class DirectoryEvaluationInitiationStrategy implements EvaluationInitiato
         data: {
           contextId,
           websiteId: id,
+          userId,
         },
         opts: {
           jobId: `ctx-${contextId}-website-${id}`,
