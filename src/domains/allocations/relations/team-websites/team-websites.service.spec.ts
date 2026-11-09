@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
@@ -7,20 +8,49 @@ import { OutboxService } from 'src/core/outbox/outbox.service';
 import { FGA_RESOURCE } from 'src/core/authorization/types/fga.types';
 import { AuthorizationEvent } from 'src/core/authorization/queue/payload.types';
 import { AUTHORIZATION_ACTION } from 'src/core/authorization/registry/registry.keys';
+import { Team } from 'src/domains/identity/team/team.entity';
+import { Website } from 'src/domains/inventory/website/website.entity';
 
 describe('TeamWebsitesService', () => {
   let service: TeamWebsitesService;
   let assignmentRepo: Repository<TeamWebsites>;
   let outboxService: OutboxService;
   let mockManager: EntityManager;
+  let mockTeamRepo: { findOne: jest.Mock };
+  let mockWebsiteRepo: { find: jest.Mock };
+  let mockTeamWebsitesRepo: { find: jest.Mock; save: jest.Mock; delete: jest.Mock };
 
   beforeEach(async () => {
+    // Mock the Team repository: by default the team exists
+    mockTeamRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 1 }),
+    };
+
+    // Mock the Website repository: by default every requested id exists
+    mockWebsiteRepo = {
+      find: jest
+        .fn()
+        .mockImplementation(async ({ where }) =>
+          (where.id.value as number[]).map((id: number) => ({ id })),
+        ),
+    };
+
+    // Mock the TeamWebsites repository: by default no website is assigned yet
+    mockTeamWebsitesRepo = {
+      find: jest.fn().mockResolvedValue([]),
+      save: jest.fn().mockResolvedValue([]),
+      delete: jest.fn().mockResolvedValue({}),
+    };
+
     // Mock the EntityManager
     mockManager = {
       transaction: jest.fn((callback) => callback(mockManager)),
-      find: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
+      getRepository: jest.fn((entity: unknown) => {
+        if (entity === Team) return mockTeamRepo;
+        if (entity === Website) return mockWebsiteRepo;
+        if (entity === TeamWebsites) return mockTeamWebsitesRepo;
+        throw new Error(`Unexpected repository requested: ${String(entity)}`);
+      }),
     } as unknown as EntityManager;
 
     // Mock the OutboxService
@@ -48,9 +78,7 @@ describe('TeamWebsitesService', () => {
     }).compile();
 
     service = module.get<TeamWebsitesService>(TeamWebsitesService);
-    assignmentRepo = module.get<Repository<TeamWebsites>>(
-      getRepositoryToken(TeamWebsites),
-    );
+    assignmentRepo = module.get<Repository<TeamWebsites>>(getRepositoryToken(TeamWebsites));
     outboxService = module.get<OutboxService>(OutboxService);
   });
 
@@ -65,31 +93,30 @@ describe('TeamWebsitesService', () => {
         const toAdd = [2, 3, 4];
         const toRemove: number[] = [];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
-
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.find).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { id: In(toAdd) },
+          select: ['id'],
+        });
+        expect(mockTeamWebsitesRepo.find).toHaveBeenCalledWith({
           where: { teamId, websiteId: In(toAdd) },
         });
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TeamWebsites,
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith(
           toAdd.map((id) => ({ websiteId: id, teamId })),
         );
-        expect(outboxService.putInOutbox).toHaveBeenCalledWith(
-          mockManager,
-          {
-            aggregateType: FGA_RESOURCE.TEAM,
-            aggregateId: teamId,
-            eventType: AuthorizationEvent.AUTHORIZATION,
-            payload: {
-              action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
-              teamId,
-              websiteIds: toAdd,
-            },
+        expect(outboxService.putInOutbox).toHaveBeenCalledWith(mockManager, {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: toAdd,
           },
-        );
+        });
       });
 
       it('should successfully remove websites from a team', async () => {
@@ -102,31 +129,29 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.find).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.find).toHaveBeenCalledWith({
           where: { teamId, websiteId: In(toRemove) },
         });
-        expect(mockManager.delete).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.delete).toHaveBeenCalledWith({
           teamId,
           websiteId: In([2, 3]),
         });
-        expect(outboxService.putInOutbox).toHaveBeenCalledWith(
-          mockManager,
-          {
-            aggregateType: FGA_RESOURCE.TEAM,
-            aggregateId: teamId,
-            eventType: AuthorizationEvent.AUTHORIZATION,
-            payload: {
-              action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
-              teamId,
-              websiteIds: [2, 3],
-            },
+        expect(outboxService.putInOutbox).toHaveBeenCalledWith(mockManager, {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: [2, 3],
           },
-        );
+        });
       });
 
       it('should add and remove websites in the same call', async () => {
@@ -134,21 +159,24 @@ describe('TeamWebsitesService', () => {
         const toAdd = [5, 6];
         const toRemove = [2, 3];
 
-        (mockManager.find as jest.Mock)
-        .mockResolvedValueOnce([
+        mockTeamWebsitesRepo.find
+          .mockResolvedValueOnce([
             // for remove check
             { websiteId: 2, teamId },
             { websiteId: 3, teamId },
           ])
           .mockResolvedValueOnce([]); // for add check
-      
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.delete).toHaveBeenCalled();
-        expect(mockManager.save).toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.delete).toHaveBeenCalledWith({
+          teamId,
+          websiteId: In([2, 3]),
+        });
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith([
+          { websiteId: 5, teamId },
+          { websiteId: 6, teamId },
+        ]);
         expect(outboxService.putInOutbox).toHaveBeenCalledTimes(2);
       });
 
@@ -159,29 +187,81 @@ describe('TeamWebsitesService', () => {
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.find).not.toHaveBeenCalled();
-        expect(mockManager.save).not.toHaveBeenCalled();
-        expect(mockManager.delete).not.toHaveBeenCalled();
+        expect(mockWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.find).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.save).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.delete).not.toHaveBeenCalled();
         expect(outboxService.putInOutbox).not.toHaveBeenCalled();
       });
     });
 
+    describe('Team validation', () => {
+      it('should throw BadRequestException when the team does not exist', async () => {
+        const teamId = 999;
+
+        mockTeamRepo.findOne.mockResolvedValueOnce(null);
+
+        await expect(service.updateTeamWebsites(teamId, [2], [3])).rejects.toThrow(
+          BadRequestException,
+        );
+
+        expect(mockTeamRepo.findOne).toHaveBeenCalledWith({ where: { id: teamId } });
+        expect(mockWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.find).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.save).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.delete).not.toHaveBeenCalled();
+        expect(outboxService.putInOutbox).not.toHaveBeenCalled();
+      });
+
+      it('should use the team id in the error message', async () => {
+        mockTeamRepo.findOne.mockResolvedValueOnce(null);
+
+        await expect(service.updateTeamWebsites(999, [], [])).rejects.toThrow(
+          'Team with ID 999 does not exist',
+        );
+      });
+    });
+
     describe('Edge Cases', () => {
+      it('should only add websites that exist', async () => {
+        const teamId = 1;
+
+        mockWebsiteRepo.find.mockResolvedValueOnce([{ id: 2 }, { id: 4 }]);
+
+        await service.updateTeamWebsites(teamId, [2, 3, 4], []);
+
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith([
+          { websiteId: 2, teamId },
+          { websiteId: 4, teamId },
+        ]);
+      });
+
+      it('should not add anything when none of the websites exist', async () => {
+        const teamId = 1;
+
+        mockWebsiteRepo.find.mockResolvedValueOnce([]);
+
+        await service.updateTeamWebsites(teamId, [2, 3], []);
+
+        expect(mockTeamWebsitesRepo.find).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.save).not.toHaveBeenCalled();
+        expect(outboxService.putInOutbox).not.toHaveBeenCalled();
+      });
       it('should deduplicate websites in toAdd list', async () => {
         const teamId = 1;
         const toAdd = [2, 3, 2, 3, 4]; // duplicates
         const toRemove: number[] = [];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
-
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.find).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { id: In([2, 3, 4]) },
+          select: ['id'],
+        });
+        expect(mockTeamWebsitesRepo.find).toHaveBeenCalledWith({
           where: { teamId, websiteId: In([2, 3, 4]) },
         });
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TeamWebsites,
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith(
           expect.arrayContaining([
             { websiteId: 2, teamId },
             { websiteId: 3, teamId },
@@ -201,12 +281,11 @@ describe('TeamWebsitesService', () => {
           { websiteId: 4, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.find).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.find).toHaveBeenCalledWith({
           where: { teamId, websiteId: In([2, 3, 4]) },
         });
       });
@@ -222,29 +301,24 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should only try to add website 4
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TeamWebsites,
-          [{ websiteId: 4, teamId }],
-        );
-        expect(outboxService.putInOutbox).toHaveBeenCalledWith(
-          mockManager,
-          {
-            aggregateType: FGA_RESOURCE.TEAM,
-            aggregateId: teamId,
-            eventType: AuthorizationEvent.AUTHORIZATION,
-            payload: {
-              action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
-              teamId,
-              websiteIds: [4],
-            },
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith([{ websiteId: 4, teamId }]);
+        expect(outboxService.putInOutbox).toHaveBeenCalledWith(mockManager, {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: [4],
           },
-        );
+        });
       });
 
       it('should not attempt to remove websites that do not exist in the team', async () => {
@@ -258,29 +332,27 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should only try to remove websites 2 and 3, not 4
-        expect(mockManager.delete).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.delete).toHaveBeenCalledWith({
           teamId,
           websiteId: In([2, 3]),
         });
-        expect(outboxService.putInOutbox).toHaveBeenCalledWith(
-          mockManager,
-          {
-            aggregateType: FGA_RESOURCE.TEAM,
-            aggregateId: teamId,
-            eventType: AuthorizationEvent.AUTHORIZATION,
-            payload: {
-              action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
-              teamId,
-              websiteIds: [2, 3],
-            },
+        expect(outboxService.putInOutbox).toHaveBeenCalledWith(mockManager, {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: [2, 3],
           },
-        );
+        });
       });
 
       it('should sanitize delta when same website appears in both add and remove lists', async () => {
@@ -288,16 +360,17 @@ describe('TeamWebsitesService', () => {
         const toAdd = [2, 3, 4];
         const toRemove = [3, 5]; // 3 is in both lists
 
-        (mockManager.find as jest.Mock)
-          .mockResolvedValueOnce([]) // for add check
-          .mockResolvedValueOnce([]); // for remove check - 3 should be removed from toRemove
-
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
-
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        // Save should be called with websites to add (after sanitization)
-        expect(mockManager.save).toHaveBeenCalled();
+        // 3 is in both lists, so it is dropped from both: only 2 and 4 are added
+        expect(mockWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { id: In([2, 4]) },
+          select: ['id'],
+        });
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith([
+          { websiteId: 2, teamId },
+          { websiteId: 4, teamId },
+        ]);
       });
 
       it('should not create outbox event if no websites are added after deduplication and existence check', async () => {
@@ -311,12 +384,12 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should not call save if all websites already exist
-        expect(mockManager.save).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.save).not.toHaveBeenCalled();
         // Should not create outbox event
         expect(outboxService.putInOutbox).not.toHaveBeenCalled();
       });
@@ -326,12 +399,12 @@ describe('TeamWebsitesService', () => {
         const toAdd: number[] = [];
         const toRemove = [2, 3, 4];
 
-        // No websites exist
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
+        // No websites are assigned to the team
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce([]);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.delete).not.toHaveBeenCalled();
+        expect(mockTeamWebsitesRepo.delete).not.toHaveBeenCalled();
         expect(outboxService.putInOutbox).not.toHaveBeenCalled();
       });
 
@@ -341,15 +414,10 @@ describe('TeamWebsitesService', () => {
         const toRemove: number[] = [];
 
         const transactionCallback = jest.fn();
-        (mockManager.transaction as jest.Mock).mockImplementation(
-          (callback) => {
-            transactionCallback(callback);
-            return callback(mockManager);
-          },
-        );
-
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
+        (mockManager.transaction as jest.Mock).mockImplementation((callback) => {
+          transactionCallback(callback);
+          return callback(mockManager);
+        });
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
@@ -363,16 +431,10 @@ describe('TeamWebsitesService', () => {
         const toAdd = largeWebsiteList;
         const toRemove: number[] = [];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
-
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TeamWebsites,
-          expect.arrayContaining(
-            largeWebsiteList.map((id) => ({ websiteId: id, teamId })),
-          ),
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith(
+          expect.arrayContaining(largeWebsiteList.map((id) => ({ websiteId: id, teamId }))),
         );
       });
 
@@ -380,9 +442,6 @@ describe('TeamWebsitesService', () => {
         const teamId = 5;
         const toAdd = [10, 11];
         const toRemove: number[] = [];
-
-        (mockManager.find as jest.Mock).mockResolvedValueOnce([]);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
@@ -411,8 +470,7 @@ describe('TeamWebsitesService', () => {
           { websiteId: 11, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
@@ -442,14 +500,12 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.save as jest.Mock).mockResolvedValueOnce([]);
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should only save websites 4 and 5
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TeamWebsites,
+        expect(mockTeamWebsitesRepo.save).toHaveBeenCalledWith(
           expect.arrayContaining([
             { websiteId: 4, teamId },
             { websiteId: 5, teamId },
@@ -468,13 +524,12 @@ describe('TeamWebsitesService', () => {
           { websiteId: 3, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should only delete websites 2 and 3
-        expect(mockManager.delete).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.delete).toHaveBeenCalledWith({
           teamId,
           websiteId: In([2, 3]),
         });
@@ -492,29 +547,27 @@ describe('TeamWebsitesService', () => {
           { websiteId: 50, teamId },
         ];
 
-        (mockManager.find as jest.Mock).mockResolvedValueOnce(existingWebsites);
-        (mockManager.delete as jest.Mock).mockResolvedValueOnce({});
+        mockTeamWebsitesRepo.find.mockResolvedValueOnce(existingWebsites);
 
         await service.updateTeamWebsites(teamId, toAdd, toRemove);
 
         // Should only attempt to remove websites that exist
-        expect(mockManager.delete).toHaveBeenCalledWith(TeamWebsites, {
+        expect(mockTeamWebsitesRepo.delete).toHaveBeenCalledWith({
           teamId,
           websiteId: In([10, 30, 50]),
         });
-        expect(outboxService.putInOutbox).toHaveBeenCalledWith(
-          mockManager,
-          {
-            aggregateType: FGA_RESOURCE.TEAM,
-            aggregateId: teamId,
-            eventType: AuthorizationEvent.AUTHORIZATION,
-            payload: {
-              action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
-              teamId,
-              websiteIds: [10, 30, 50],
-            },
+        expect(outboxService.putInOutbox).toHaveBeenCalledWith(mockManager, {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_REMOVE_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: [10, 30, 50],
           },
-        );
+        });
       });
     });
   });

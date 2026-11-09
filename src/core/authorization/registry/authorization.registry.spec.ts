@@ -251,7 +251,7 @@ describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
     it('should assign and clear direct user website permissions', async () => {
       await registry.execute(AUTHORIZATION_ACTION.USER_ADD_WEBSITE, {
         resourceType: FGA_RESOURCE.WEBSITE,
-        resourceId: 500,
+        resourceId: 42,
         action: AUTHORIZATION_ACTION.USER_ADD_WEBSITE,
         websiteIds: [500],
         permission: 'viewer',
@@ -263,7 +263,7 @@ describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
       // Remover permissões do website
       await registry.execute(AUTHORIZATION_ACTION.USER_REMOVE_WEBSITE, {
         resourceType: FGA_RESOURCE.WEBSITE,
-        resourceId: 500,
+        resourceId: 42,
         action: AUTHORIZATION_ACTION.USER_REMOVE_WEBSITE,
         websiteIds: [500],
         permission: 'viewer',

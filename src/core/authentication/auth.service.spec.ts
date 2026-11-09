@@ -379,12 +379,9 @@ describe('AuthService (unit, mocked collaborators)', () => {
     it('then fetches the attributes using the returned authenticationContextId', async () => {
       await service.getAtributes('tok');
 
-      const url = new URL(mockedAxios.get.mock.calls[0][0] as string);
-      expect(url.origin + url.pathname).toBe(
-        'https://auth.example/oauthresourceserver/api/AttributeManager',
-      );
-      expect(url.searchParams.get('token')).toBe('tok');
-      expect(url.searchParams.get('authenticationContextId')).toBe('ctx-1');
+      const [url, options] = mockedAxios.get.mock.calls[0] as any;
+      expect(url).toBe('https://auth.example/oauthresourceserver/api/AttributeManager');
+      expect(options.params).toEqual({ token: 'tok', authenticationContextId: 'ctx-1' });
     });
 
     it('maps known attributes to { cc, name } and ignores unknown ones', async () => {
@@ -410,13 +407,15 @@ describe('AuthService (unit, mocked collaborators)', () => {
       expect(mockedAxios.get).not.toHaveBeenCalled();
     });
 
-    it('URL-encodes the token so reserved characters survive', async () => {
+    it('passes the token as a request param (axios URL-encodes it) instead of concatenating it into the URL', async () => {
       const token = 'a+b/c=d&e=f#g';
 
       await service.getAtributes(token);
 
-      const url = new URL(mockedAxios.get.mock.calls[0][0] as string);
-      expect(url.searchParams.get('token')).toBe(token);
+      const [url, options] = mockedAxios.get.mock.calls[0] as any;
+      expect(url).not.toContain(token);
+      expect(url).not.toContain('?');
+      expect(options.params.token).toBe(token);
     });
   });
 
