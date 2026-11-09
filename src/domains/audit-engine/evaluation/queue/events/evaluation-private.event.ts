@@ -67,8 +67,9 @@ export class EvaluationPrivateEventsListener extends QueueEventsHost {
   }
 
   @OnQueueEvent('completed')
-  async onCompleted(job: { jobId: string; returnvalue: EvaluationDTO }) {
-    // UserId of completed needs to be retrieved from returnValue since job data may not be available at this point
+  async onCompleted(job: { jobId: string; returnvalue: EvaluationDTO | null }) {
+    if (!job.returnvalue) return;
+
     const userId = job.returnvalue.createdById ?? undefined;
 
     const event: EvaluationCompleted = {

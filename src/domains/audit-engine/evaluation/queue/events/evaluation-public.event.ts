@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { QueueEventsListener, QueueEventsHost, OnQueueEvent, InjectQueue } from '@nestjs/bullmq';
 import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { SsePublisherService } from '@core/sse/sse-publisher.service';
@@ -13,6 +14,8 @@ import { EvaluationDTO } from '../../dto/evaluation.dto';
 
 @QueueEventsListener(QUEUE_NAMES.EVAL_PUBLIC)
 export class EvaluationPublicEventsListener extends QueueEventsHost {
+  private readonly logger = new Logger(EvaluationPublicEventsListener.name);
+
   public constructor(
     private readonly SsePublisherService: SsePublisherService,
     @InjectQueue(QUEUE_NAMES.EVAL_PUBLIC)
@@ -36,7 +39,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       previousState: job.prev,
     };
 
-    Promise.all([
+    await Promise.all([
       userId
         ? this.SsePublisherService.notifyUser(userId, 'evaluation:started', event)
         : Promise.resolve(),
@@ -60,7 +63,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       progress: job.data,
     };
 
-    Promise.all([
+    await Promise.all([
       userId
         ? this.SsePublisherService.notifyUser(userId, 'evaluation:progress', event)
         : Promise.resolve(),
@@ -69,7 +72,9 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
   }
 
   @OnQueueEvent('completed')
-  async onCompleted(job: { jobId: string; returnvalue: EvaluationDTO }) {
+  async onCompleted(job: { jobId: string; returnvalue: EvaluationDTO | null }) {
+    if (!job.returnvalue) return;
+
     // UserId of completed needs to be retrieved from returnValue since job data may not be available at this point
     const userId = job.returnvalue.createdById ?? undefined;
 
@@ -77,7 +82,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       event: 'evaluation:completed',
       evaluation: job.returnvalue,
     };
-    Promise.all([
+    await Promise.all([
       userId
         ? this.SsePublisherService.notifyUser(userId, 'evaluation:completed', event)
         : Promise.resolve(),
@@ -101,7 +106,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       failedReason: job.failedReason,
     };
 
-    Promise.all([
+    await Promise.all([
       userId
         ? this.SsePublisherService.notifyUser(userId, 'evaluation:failed', event)
         : Promise.resolve(),
