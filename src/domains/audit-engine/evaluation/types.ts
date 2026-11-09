@@ -35,6 +35,7 @@ export interface EvaluationMeta {
 export interface AdditionalMetadata {
   institutionId: number;
   directoryIds: number[];
+  userId?: number;
 }
 
 export interface EvaluationJobData extends EvaluationMeta, PageMetadata, AdditionalMetadata {}
