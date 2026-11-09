@@ -1,4 +1,11 @@
-import { Controller, Sse, UseGuards, Header, Res } from '@nestjs/common';
+import {
+  Controller,
+  Sse,
+  UseGuards,
+  Header,
+  MessageEvent,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { SseVisibility } from './sse-publisher.service';
 import { SSEService } from './sse.service';
@@ -19,11 +26,11 @@ export class SSEController {
   streamEvents(@CurrentUser() currentUser: AuthenticatedUser): Observable<MessageEvent> {
     const userId = currentUser?.id;
     if (!userId) {
-      throw new Error('UserId is required to establish SSE connection');
+      throw new UnauthorizedException('UserId is required to establish SSE connection');
     }
     const roleName = RoleSlugMap[currentUser?.role_slug];
     if (!roleName) {
-      throw new Error('Role is required to establish SSE connection');
+      throw new UnauthorizedException('Role is required to establish SSE connection');
     }
     const visibilities = this.sseService.getVisibilitiesForRole(roleName);
 

@@ -1,23 +1,34 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+  Logger,
+  MessageEvent,
+  BadRequestException,
+} from '@nestjs/common';
 import { Observable, Subject } from 'rxjs';
 import { filter, finalize, map } from 'rxjs/operators';
 import Redis from 'ioredis';
 import { SSE_REDIS_SUBSCRIBER } from '../../redis/sse-redis.tokens';
-import { CHANNELS, SseVisibility } from './sse-publisher.service';
+import {
+  CHANNELS,
+  INVALID_CHANNEL,
+  SseEventEnvelope,
+  SseVisibility,
+} from './sse-publisher.service';
 
-interface BroadcastEvent {
+interface InternalBroadcastEvent {
   channel: string;
-  type?: string;
-  data: any;
+  envelope: SseEventEnvelope;
 }
 
 @Injectable()
 export class SSEService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SSEService.name);
-  private readonly eventBus$ = new Subject<BroadcastEvent>();
+  private readonly eventBus$ = new Subject<InternalBroadcastEvent>();
   private readonly privateChannelRefCount = new Map<string, number>();
 
-  // Canais permanentes do sistema
   private static readonly STATIC_CHANNELS = [CHANNELS.AMS(), CHANNELS.MONITOR(), CHANNELS.GLOBAL()];
 
   constructor(
@@ -28,23 +39,30 @@ export class SSEService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     this.redisSubscriber.on('message', (incomingChannel: string, rawMessage: string) => {
       try {
-        const parsed = JSON.parse(rawMessage);
+        const parsed = JSON.parse(rawMessage) as SseEventEnvelope;
 
         this.eventBus$.next({
           channel: incomingChannel,
-          type: parsed.event,
-          data: parsed.data ?? parsed,
+          envelope: {
+            event: parsed.event ?? 'message',
+            visibility: parsed.visibility ?? this.inferVisibilityFromChannel(incomingChannel),
+            timestamp: parsed.timestamp ?? new Date().toISOString(),
+            payload: parsed.payload ?? parsed,
+          },
         });
       } catch (e) {
         this.eventBus$.next({
           channel: incomingChannel,
-          type: 'message',
-          data: rawMessage,
+          envelope: {
+            event: 'message',
+            visibility: this.inferVisibilityFromChannel(incomingChannel),
+            timestamp: new Date().toISOString(),
+            payload: rawMessage,
+          },
         });
       }
     });
 
-    // Subscreve canais partilhados permanentemente
     try {
       await this.redisSubscriber.subscribe(...SSEService.STATIC_CHANNELS);
       this.logger.log(
@@ -57,37 +75,48 @@ export class SSEService implements OnModuleInit, OnModuleDestroy {
 
   getUserStream(userId: number, visibilities: SseVisibility[]): Observable<MessageEvent> {
     const activeChannels = new Set<string>();
+    let privateChannel: string | null = null;
 
     visibilities.forEach((vis) => {
       if (vis === 'PRIVATE') {
-        activeChannels.add(CHANNELS.PRIVATE(userId));
+        const channel = CHANNELS.PRIVATE(userId);
+        if (channel === INVALID_CHANNEL) {
+          throw new BadRequestException(
+            `Cannot open private SSE stream for invalid userId: ${userId}`,
+          );
+        }
+        privateChannel = channel;
+        activeChannels.add(channel);
       } else {
         activeChannels.add(CHANNELS[vis]());
       }
     });
 
-    const privateChannel = CHANNELS.PRIVATE(userId);
-    const listensToPrivate = activeChannels.has(privateChannel);
+    const listensToPrivate = privateChannel !== null && activeChannels.has(privateChannel);
 
-    if (listensToPrivate) {
+    if (listensToPrivate && privateChannel) {
       this.retainPrivateChannel(privateChannel);
     }
 
     return this.eventBus$.asObservable().pipe(
-      filter((event) => activeChannels.has(event.channel)),
-      map(
-        (event) =>
-          ({
-            type: event.type,
-            data: event.data,
-          }) as MessageEvent,
-      ),
+      filter((item) => activeChannels.has(item.channel)),
+      map((item): MessageEvent => ({
+        type: item.envelope.event,
+        data: item.envelope,
+      })),
       finalize(() => {
-        if (listensToPrivate) {
+        if (listensToPrivate && privateChannel) {
           this.releasePrivateChannel(privateChannel);
         }
       }),
     );
+  }
+
+  private inferVisibilityFromChannel(channel: string): SseVisibility {
+    if (channel === CHANNELS.GLOBAL()) return 'GLOBAL';
+    if (channel === CHANNELS.AMS()) return 'AMS';
+    if (channel === CHANNELS.MONITOR()) return 'MONITOR';
+    return 'PRIVATE';
   }
 
   private retainPrivateChannel(channel: string): void {
@@ -117,10 +146,8 @@ export class SSEService implements OnModuleInit, OnModuleDestroy {
     switch (role.toUpperCase()) {
       case 'NIMDA':
         return ['GLOBAL', 'PRIVATE', 'AMS'];
-
       case 'MONITOR':
         return ['GLOBAL', 'PRIVATE', 'MONITOR'];
-
       case 'USER':
       default:
         return ['GLOBAL', 'PRIVATE'];
