@@ -5,7 +5,7 @@ import {
   GetObjectCommand,
   DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   ArtifactType,
   EvaluationArtifact,
@@ -25,6 +25,7 @@ const asyncGzip = promisify(gzip);
 interface EvaluationFileKeys {
   htmlKey: string;
   nodesKey: string;
+  conformanceKey: string;
 }
 
 export class EvaluationFileNotFoundError extends Error {
@@ -42,6 +43,8 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
 
   private readonly HTML_FILE_COMPRESSED_SUFFIX = '.html.gz';
   private readonly NODES_FILE_COMPRESSED_SUFFIX = '_nodes.json.gz';
+  private readonly CONFORMANCE_FILE_COMPRESSED_SUFFIX = '_conformance.json.gz';
+
   constructor(
     private readonly logger: Logger,
     @InjectRepository(EvaluationArtifact)
@@ -57,6 +60,13 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
     });
   }
 
+  /**
+   * No S3 não é necessário criar diretórios fisicamente. Mantido para cumprir o contrato.
+   */
+  async init(): Promise<void> {
+    this.logger.log('EvaluationS3StorageStrategy initialized.');
+  }
+
   private buildSafePaths(evalIdentifier: EvaluationIdentifier): SafePaths {
     const safeDate = new Date(evalIdentifier.evaluationDate).toISOString().slice(0, 10);
     const targetDir = `${this.s3Prefix}${safeDate}/${evalIdentifier.websiteId}`;
@@ -69,6 +79,7 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
     return {
       htmlKey: `${targetDir}/${baseFileName}${this.HTML_FILE_COMPRESSED_SUFFIX}`,
       nodesKey: `${targetDir}/${baseFileName}${this.NODES_FILE_COMPRESSED_SUFFIX}`,
+      conformanceKey: `${targetDir}/${baseFileName}${this.CONFORMANCE_FILE_COMPRESSED_SUFFIX}`,
     };
   }
 
@@ -91,9 +102,11 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
       );
     }
   }
+
   private mapToArtifactType(fileType: EvaluationFileType): ArtifactType {
     return fileType === 'html' ? 'html' : 'assertions';
   }
+
   /**
    * Remove uma chave do S3 de forma idempotente, ignorando se não existir.
    */
@@ -110,88 +123,6 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
       this.logger.warn(`Failed to safely delete S3 key: ${key}. Reason: ${errorMessage}`);
     }
   }
-  async save(payload: EvaluationStoragePayload): Promise<void> {
-    const { targetDir, baseFileName } = this.buildSafePaths(payload.evalIdentifier);
-    const { htmlKey, nodesKey } = this.buildFileKeys(targetDir, baseFileName);
-    this.logger.log(
-      `[S3Storage] Attempting to save evaluation ID: ${payload.evalIdentifier.evaluationId} to S3 bucket: ${this.bucketName}`,
-    );
-
-    try {
-      const htmlString =
-        typeof payload.htmlContent === 'string'
-          ? payload.htmlContent
-          : JSON.stringify(payload.htmlContent);
-
-      const nodesString =
-        typeof payload.nodes === 'string' ? payload.nodes : JSON.stringify(payload.nodes);
-
-      if (!htmlString || !nodesString) {
-        throw new Error(`Payload inválido para S3: htmlContent ou nodes estão vazios.`);
-      }
-
-      const [htmlGzipped, nodesGzipped] = await Promise.all([
-        asyncGzip(Buffer.from(htmlString, 'utf8')),
-        asyncGzip(Buffer.from(nodesString, 'utf8')),
-      ]);
-      // 1. Upload paralelo para o S3 (guardamos a resposta para obter o ETag)
-      const [htmlRes, nodesRes] = await Promise.all([
-        this.s3Client.send(
-          new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: htmlKey,
-            Body: htmlGzipped,
-            ContentType: 'text/html',
-            ContentEncoding: 'gzip',
-          }),
-        ),
-        this.s3Client.send(
-          new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: nodesKey,
-            Body: nodesGzipped,
-            ContentType: 'application/json',
-            ContentEncoding: 'gzip',
-          }),
-        ),
-      ]);
-
-      // 2. Upsert atómico no PostgreSQL incluindo storageKey e ETag
-      await this.evaluationArtifactRepository.upsert(
-        [
-          {
-            evaluationId: payload.evalIdentifier.evaluationId,
-            artifactType: 'html',
-            storageKey: htmlKey,
-            fileSize: htmlGzipped.byteLength,
-            mimeType: 'text/html',
-            ETag: htmlRes.ETag?.replace(/"/g, ''),
-          },
-          {
-            evaluationId: payload.evalIdentifier.evaluationId,
-            artifactType: 'assertions',
-            storageKey: nodesKey,
-            fileSize: nodesGzipped.byteLength,
-            mimeType: 'application/json',
-            ETag: nodesRes.ETag?.replace(/"/g, ''),
-          },
-        ],
-        {
-          conflictPaths: ['evaluationId', 'artifactType'],
-          skipUpdateIfNoValuesChanged: true,
-        },
-      );
-    } catch (error) {
-      await Promise.all([this.safeDeleteKey(htmlKey), this.safeDeleteKey(nodesKey)]);
-
-      this.logger.error(
-        `Failed to save evaluation files to S3 for ID: ${payload.evalIdentifier.evaluationId}`,
-        error,
-      );
-      throw error;
-    }
-  }
-
   public async getStream(
     evaluationIdentifier: EvaluationIdentifier,
     fileType: EvaluationFileType,
@@ -199,7 +130,6 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
     const evaluationId = Number(evaluationIdentifier.evaluationId);
     const artifactType = this.mapToArtifactType(fileType);
 
-    // Evita chamadas HTTP desnecessárias à AWS para artefactos que não existem.
     const hasArtifact = await this.evaluationArtifactRepository.existsBy({
       evaluationId,
       artifactType,
@@ -266,15 +196,20 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
   }
 
   async delete(evaluationIdentifier: EvaluationIdentifier): Promise<void> {
-    const { targetDir, baseFileName } = this.buildSafePaths(evaluationIdentifier);
-    const { htmlKey, nodesKey } = this.buildFileKeys(targetDir, baseFileName);
+    // Usa as storageKeys registadas na BD, cobrindo todos os artefactos (html, assertions, conformance, ...)
+    const artifacts = await this.evaluationArtifactRepository.find({
+      where: { evaluationId: evaluationIdentifier.evaluationId },
+    });
+    if (artifacts.length === 0) {
+      return;
+    }
 
     try {
       const s3Response = await this.s3Client.send(
         new DeleteObjectsCommand({
           Bucket: this.bucketName,
           Delete: {
-            Objects: [{ Key: htmlKey }, { Key: nodesKey }],
+            Objects: artifacts.map((artifact) => ({ Key: artifact.storageKey })),
             Quiet: true,
           },
         }),
@@ -284,7 +219,6 @@ export class EvaluationS3StorageStrategy implements EvaluationStorage {
       }
       await this.evaluationArtifactRepository.delete({
         evaluationId: evaluationIdentifier.evaluationId,
-        artifactType: In(['html', 'assertions']),
       });
       this.logger.log(
         `Evaluation files successfully deleted from S3 for ID: ${evaluationIdentifier.evaluationId}`,
