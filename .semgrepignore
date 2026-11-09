@@ -1,7 +1,0 @@
-# .semgrepignore
-node_modules/
-dist/
-coverage/
-test/
-**/*.spec.ts
-**/*.test.ts
