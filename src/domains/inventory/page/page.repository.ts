@@ -136,11 +136,28 @@ export class PageRepository extends ContextAwareRepository<
       meta: metadataPagination,
     };
   }
-  async findByPageByWebsiteId(websiteId: number, pageId: number): Promise<Page | null> {
+  async findByPageByWebsiteId(
+    websiteId: number,
+    pageId: number,
+    securityContext: SecurityContext,
+  ): Promise<Page | null> {
+    const contextId = securityContext.user.context.id ?? null;
+    if (contextId === null) return null;
+
     const query = this.getOrmRepository().createQueryBuilder(this.alias);
     query
       .where(`${this.alias}.id = :pageId`, { pageId })
-      .andWhere(`${this.alias}.website_id = :websiteId`, { websiteId });
+      .andWhere(`${this.alias}.website_id = :websiteId`, { websiteId })
+      .andWhere(`${this.alias}.deleted_at IS NULL`)
+      .andWhere(
+        `${this.alias}.id IN (
+        SELECT page_id
+        FROM page_contexts
+        WHERE context_id = :contextId
+        )
+      )`,
+        { contextId },
+      );
     return await query.getOne();
   }
 

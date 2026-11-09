@@ -6,6 +6,7 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Page } from './page.entity';
 import { UpdatePageContextDto } from './dto/update.page-context.dto';
@@ -87,6 +88,47 @@ export const PageDocs = {
         type: Page,
       }),
       ApiResponse({ status: 400, description: 'Invalid data or duplicate URL' }),
+    ),
+
+  createFromSitemap: () =>
+    applyDecorators(
+      ApiOperation({
+        summary: 'Create pages on a website from a sitemap file',
+        description:
+          'Receives a sitemap (xml) or txt file (one URL per line) and creates the pages on the website. Requires edit permission on the website in OpenFGA (`website:can_edit`).',
+      }),
+      ApiConsumes('multipart/form-data'),
+      ApiParam({
+        name: 'websiteId',
+        type: Number,
+        required: true,
+        description: 'ID of the website where the pages will be created',
+        example: 10,
+      }),
+      ApiBody({
+        required: true,
+        description: 'Sitemap (xml) or txt file sent in the multipart field `file` (max 5MB)',
+        schema: {
+          type: 'object',
+          required: ['file'],
+          properties: {
+            file: {
+              type: 'string',
+              format: 'binary',
+              description: 'Sitemap (.xml) or text (.txt) file',
+            },
+          },
+        },
+      }),
+      ApiResponse({
+        status: 201,
+        description: 'Pages created successfully from the sitemap',
+      }),
+      ApiResponse({
+        status: 400,
+        description: 'File missing, invalid file type, file too large or invalid sitemap content',
+      }),
+      ApiResponse({ status: 404, description: 'Website not found' }),
     ),
 
   bulkDelete: () =>
