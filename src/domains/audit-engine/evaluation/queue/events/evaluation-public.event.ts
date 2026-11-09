@@ -9,6 +9,7 @@ import {
   EvaluationFailed,
   EvaluationCompleted,
 } from './types';
+import { EvaluationDTO } from '../../dto/evaluation.dto';
 
 @QueueEventsListener(QUEUE_NAMES.EVAL_PUBLIC)
 export class EvaluationPublicEventsListener extends QueueEventsHost {
@@ -24,7 +25,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
     const jobData = await this.evaluationQueue.getJob(job.jobId);
     if (!jobData?.data) return;
 
-    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+    const { websiteId, pageId, institutionId, directoryIds, userId } = jobData.data;
 
     const event: EvaluationStarted = {
       event: 'evaluation:started',
@@ -35,8 +36,12 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       previousState: job.prev,
     };
 
-    this.SsePublisherService.notifyUser(0, 'evaluation:started', event);
-    this.SsePublisherService.notifyUser(0, 'evaluation:started', event, 'MONITOR');
+    Promise.all([
+      userId
+        ? this.SsePublisherService.notifyUser(userId, 'evaluation:started', event)
+        : Promise.resolve(),
+      this.SsePublisherService.broadcastToGroups('evaluation:started', event, 'MONITOR'),
+    ]);
   }
 
   @OnQueueEvent('progress')
@@ -44,7 +49,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
     const jobData = await this.evaluationQueue.getJob(job.jobId);
     if (!jobData?.data) return;
 
-    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+    const { websiteId, pageId, institutionId, directoryIds, userId } = jobData.data;
 
     const event: EvaluationProgress = {
       event: 'evaluation:progress',
@@ -55,24 +60,29 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       progress: job.data,
     };
 
-    this.SsePublisherService.notifyUser(0, 'evaluation:progress', event);
-    this.SsePublisherService.notifyUser(0, 'evaluation:progress', event, 'MONITOR');
+    Promise.all([
+      userId
+        ? this.SsePublisherService.notifyUser(userId, 'evaluation:progress', event)
+        : Promise.resolve(),
+      this.SsePublisherService.broadcastToGroups('evaluation:progress', event, 'MONITOR'),
+    ]);
   }
 
   @OnQueueEvent('completed')
-  async onCompleted(job: { jobId: string; returnvalue: string }) {
-    const jobData = await this.evaluationQueue.getJob(job.jobId);
-    if (!jobData?.data) return;
-
-    const evaluation = JSON.parse(job.returnvalue);
+  async onCompleted(job: { jobId: string; returnvalue: EvaluationDTO }) {
+    // UserId of completed needs to be retrieved from returnValue since job data may not be available at this point
+    const userId = job.returnvalue.createdById ?? undefined;
 
     const event: EvaluationCompleted = {
       event: 'evaluation:completed',
-      evaluation,
+      evaluation: job.returnvalue,
     };
-
-    this.SsePublisherService.notifyUser(0, 'evaluation:completed', event);
-    this.SsePublisherService.notifyUser(0, 'evaluation:completed', event, 'MONITOR');
+    Promise.all([
+      userId
+        ? this.SsePublisherService.notifyUser(userId, 'evaluation:completed', event)
+        : Promise.resolve(),
+      this.SsePublisherService.broadcastToGroups('evaluation:completed', event, 'MONITOR'),
+    ]);
   }
 
   @OnQueueEvent('failed')
@@ -80,7 +90,7 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
     const jobData = await this.evaluationQueue.getJob(job.jobId);
     if (!jobData?.data) return;
 
-    const { websiteId, pageId, institutionId, directoryIds } = jobData.data;
+    const { websiteId, pageId, institutionId, directoryIds, userId } = jobData.data;
 
     const event: EvaluationFailed = {
       event: 'evaluation:failed',
@@ -91,7 +101,11 @@ export class EvaluationPublicEventsListener extends QueueEventsHost {
       failedReason: job.failedReason,
     };
 
-    this.SsePublisherService.notifyUser(0, 'evaluation:failed', event);
-    this.SsePublisherService.notifyUser(0, 'evaluation:failed', event, 'MONITOR');
+    Promise.all([
+      userId
+        ? this.SsePublisherService.notifyUser(userId, 'evaluation:failed', event)
+        : Promise.resolve(),
+      this.SsePublisherService.broadcastToGroups('evaluation:failed', event, 'MONITOR'),
+    ]);
   }
 }
