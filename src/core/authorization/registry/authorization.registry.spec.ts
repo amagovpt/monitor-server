@@ -11,6 +11,7 @@ import { AUTHORIZATION_ACTION } from './registry.keys';
 import type { AuthorizationModel } from '@openfga/sdk';
 import { RoleSlug } from '../../authentication/interfaces/types';
 import { FGA_RESOURCE } from '../types/fga.types';
+import { PermissionKey } from '../queue/payload.types';
 
 describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
   let container: StartedTestContainer;
@@ -172,7 +173,7 @@ describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
           resourceType: FGA_RESOURCE.USER,
           resourceId: 102,
           action: AUTHORIZATION_ACTION.USER_CREATE,
-          permission: 'INVALID_PERMISSION' as any,
+          permission: 'INVALID_PERMISSION' as unknown as PermissionKey,
           role: RoleSlug.MONITOR,
         }),
       ).rejects.toThrow('Invalid permission: INVALID_PERMISSION');
@@ -252,7 +253,6 @@ describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
         resourceType: FGA_RESOURCE.WEBSITE,
         resourceId: 500,
         action: AUTHORIZATION_ACTION.USER_ADD_WEBSITE,
-        userId: 42,
         websiteIds: [500],
         permission: 'viewer',
       });
@@ -265,7 +265,6 @@ describe('AuthorizationRegistry (Integration Tests - OpenFga)', () => {
         resourceType: FGA_RESOURCE.WEBSITE,
         resourceId: 500,
         action: AUTHORIZATION_ACTION.USER_REMOVE_WEBSITE,
-        userId: 42,
         websiteIds: [500],
         permission: 'viewer',
       });
