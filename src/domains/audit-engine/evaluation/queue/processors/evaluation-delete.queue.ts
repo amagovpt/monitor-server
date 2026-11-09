@@ -25,12 +25,9 @@ export class EvaluationDeleteWorker extends WorkerHost {
 
   async process(
     job: Job<ResourceJobData<keyof ResourceRegistryHandlers>, any, string>,
-  ): Promise<any> {
-    console.log(`Processing job ${job.id} with data:`, JSON.stringify(job.data, null, 2));
-
+  ): Promise<{ success: true }> {
     const { action, payload } = job.data;
 
-    // Obter o handler correspondente à ação de forma totalmente tipada
     await this.evaluationRegistry.execute(action, payload);
 
     return { success: true };
