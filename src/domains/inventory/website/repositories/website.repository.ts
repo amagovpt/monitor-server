@@ -8,7 +8,13 @@ import {
   SortingMap,
 } from 'src/common/repositories/base.repository';
 import { Website } from '../website.entity';
-import { WebsiteFilter, WebsiteSort, WebsitePagination, WebsiteQueryRequest } from '../types';
+import {
+  WebsiteFilter,
+  WebsiteSort,
+  WebsitePagination,
+  WebsiteQueryRequest,
+  WebsiteWithAvgScore,
+} from '../types';
 import { AppLoggerService } from 'src/core/app-logger/app-logger.service';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,8 +27,6 @@ import { AuthorizationEvent } from 'src/core/authorization/queue/payload.types';
 import { ContextAwareRepository } from 'src/common/repositories/context-aware.repository';
 import { RepositoryTableConfig } from 'src/common/repositories/base-context';
 import { WEBSITE_CONTEXT_METADATA_CONFIG } from '../website.constants';
-import { query } from 'winston';
-import { Exception } from 'bullmq';
 
 @Injectable()
 export class WebsiteRepository extends ContextAwareRepository<
@@ -87,6 +91,8 @@ export class WebsiteRepository extends ContextAwareRepository<
     createdAt: (query, order) => this.addSort(query, 'createdAt', order),
     baseUrl: (query, order) => this.addSort(query, 'baseUrl', order),
     institutionId: (query, order) => this.addSort(query, 'institutionId', order),
+    score: (query, order) =>
+      query.addOrderBy(this.avgLastEvaluationScoreSql(), order, 'NULLS LAST'),
   };
 
   public async findMany(
@@ -111,6 +117,70 @@ export class WebsiteRepository extends ContextAwareRepository<
       queryArgs.pagination?.limit ?? 10,
     );
     return { data, meta: metadataPagination };
+  }
+
+  public async findManyWithAvgScoreSecure(
+    queryArgs: WebsiteQueryRequest,
+  ): Promise<PaginationResponse<WebsiteWithAvgScore>> {
+    const { contexts, securityContext, filters, sortings, pagination } = queryArgs;
+    const connection = this.orm.manager.connection;
+
+    const query = connection.createQueryBuilder().from(Website, this.alias);
+    this.applyPaginationConstraints(query, contexts, securityContext);
+    this.applyDynamicFilters(query, filters);
+    this.applyDynamicSorting(query, sortings);
+
+    // Deterministic tie-breaker so pagination stays stable.
+    if (!(`${this.alias}.id` in query.expressionMap.orderBys)) {
+      query.addOrderBy(`${this.alias}.id`, 'ASC');
+    }
+
+    const countQuery = connection.createQueryBuilder().from(Website, this.alias);
+    this.applyPaginationConstraints(countQuery, contexts, securityContext);
+    this.applyDynamicFilters(countQuery, filters);
+    countQuery.select(`COUNT(DISTINCT ${this.alias}.id)`, 'total');
+
+    query.select([
+      `${this.alias}.id AS id`,
+      `${this.alias}.title AS title`,
+      `${this.alias}.base_url AS "baseUrl"`,
+      `${this.alias}.institution_id AS "institutionId"`,
+      `${this.alias}.created_at AS "createdAt"`,
+      `${this.avgLastEvaluationScoreSql()}::float AS "avgScore"`,
+    ]);
+
+    const { page, limit } = this.applyPagination(query, pagination);
+
+    const [rawData, countResult] = await Promise.all([
+      query.getRawMany<WebsiteWithAvgScore>(),
+      countQuery.getRawOne<{ total: string }>(),
+    ]);
+
+    const totalCount = parseInt(countResult?.total ?? '0', 10);
+
+    return { data: rawData, meta: this.calculatePaginationMeta(totalCount, page, limit) };
+  }
+
+  /**
+   * Scalar subquery returning the average of the latest evaluation score of each
+   * active (not deleted, not archived) page of the website.
+   * Returns NULL when no page of the website has a scored evaluation.
+   */
+  protected avgLastEvaluationScoreSql(): string {
+    return `(
+      SELECT ROUND(AVG(le.score), 1)
+      FROM pages pg
+      INNER JOIN LATERAL (
+        SELECT ev.score
+        FROM evaluations ev
+        WHERE ev.page_id = pg.id
+        ORDER BY ev.created_at DESC
+        LIMIT 1
+      ) le ON TRUE
+      WHERE pg.website_id = ${this.alias}.id
+        AND pg.deleted_at IS NULL
+        AND pg.archived_at IS NULL
+    )`;
   }
 
   private applyPaginationConstraints(

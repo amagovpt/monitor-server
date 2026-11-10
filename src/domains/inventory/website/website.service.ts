@@ -12,6 +12,7 @@ import { ContextEnum, ContextMap } from '../context/context.enum';
 import { WebsiteDTO } from './dto/website.dto';
 import { WebsiteQueryRequestDTO } from './dto/request/query/website-query-request.dto';
 import { plainToInstance } from 'class-transformer';
+import { WebsiteWithAvgScore } from './types';
 
 @Injectable()
 export class WebsiteService extends BaseService {
@@ -23,7 +24,7 @@ export class WebsiteService extends BaseService {
     queryArgs: WebsiteQueryRequestDTO,
     contexts: ContextEnum[],
     securityContext: SecurityContext,
-  ): Promise<PaginationResponse<Website>> {
+  ): Promise<PaginationResponse<WebsiteWithAvgScore>> {
     const query = {
       filters: queryArgs.filters || {},
       sortings: queryArgs.sorts || {},
@@ -31,7 +32,7 @@ export class WebsiteService extends BaseService {
       contexts,
       securityContext,
     };
-    return this.repository.findManySecure(query);
+    return this.repository.findManyWithAvgScoreSecure(query);
   }
 
   async createWebsite(

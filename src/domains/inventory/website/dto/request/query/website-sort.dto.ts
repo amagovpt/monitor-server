@@ -31,9 +31,13 @@ export class WebsiteSortDTO extends BaseSortDto<Website> implements WebsiteSortC
 
   @IsOptional()
   @IsSortOrder()
+  score: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
   createdAt: SortCriteria;
 
   getAllowedFields(): string[] {
-    return ['id', 'title', 'baseUrl', 'createdAt', 'institutionId'];
+    return ['id', 'title', 'baseUrl', 'createdAt', 'institutionId', 'score'];
   }
 }
