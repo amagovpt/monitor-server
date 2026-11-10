@@ -12,6 +12,7 @@ import { ContextEnum, ContextMap } from '../context/context.enum';
 import { WebsiteDTO } from './dto/website.dto';
 import { WebsiteQueryRequestDTO } from './dto/request/query/website-query-request.dto';
 import { plainToInstance } from 'class-transformer';
+import { WebsiteWithAvgScore } from './types';
 
 @Injectable()
 export class WebsiteService extends BaseService {
@@ -23,13 +24,15 @@ export class WebsiteService extends BaseService {
     queryArgs: WebsiteQueryRequestDTO,
     contexts: ContextEnum[],
     securityContext: SecurityContext,
-  ): Promise<PaginationResponse<Website>> {
-    const findArgs = {
-      ...queryArgs,
+  ): Promise<PaginationResponse<WebsiteWithAvgScore>> {
+    const query = {
+      filters: queryArgs.filters || {},
+      sortings: queryArgs.sorts || {},
+      pagination: queryArgs.pagination || {},
       contexts,
       securityContext,
     };
-    return this.repository.findManySecure(findArgs);
+    return this.repository.findManyWithAvgScoreSecure(query);
   }
 
   async createWebsite(
@@ -80,7 +83,19 @@ export class WebsiteService extends BaseService {
   }
 
   async delete(ids: number[], securityContext: SecurityContext): Promise<void> {
-    await this.repository.deleteWebsites(ids);
+    await this.repository.deleteWebsites(ids, securityContext);
+  }
+
+  async changeWebsiteUrl(
+    websiteId: number,
+    baseUrl: string,
+    securityContext: SecurityContext,
+  ): Promise<Website> {
+    const website = await this.repository.findById(websiteId);
+    if (!website) {
+      throw new NotFoundException(`Website with ID ${websiteId} not found`);
+    }
+    return await this.repository.changeWebsiteUrl(website, baseUrl, securityContext);
   }
 
   async changeWebsiteContexts(

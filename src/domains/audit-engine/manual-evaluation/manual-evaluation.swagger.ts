@@ -8,6 +8,7 @@ import {
   ApiBody 
 } from "@nestjs/swagger";
 import { EvaluationAspect } from "./manual-evaluation.entity";
+import { ManualEvaluationResponseDTO } from "./dto/manual-evaluation-response.dto";
 
 export const ManualEvaluationDocs = {
   controller: () =>
@@ -24,7 +25,7 @@ export const ManualEvaluationDocs = {
         summary: "Create a new aspect evaluation",
         description: "Supports content, functional, or transaction aspect types" 
       }),
-      ApiParam({ name: 'type', enum: EvaluationAspect }),
+      ApiParam({ name: 'type', enum: EvaluationAspect, required: true, description: 'Evaluation aspect type' }),
       ApiBody({ 
         schema: { 
           type: 'object', 
@@ -32,23 +33,27 @@ export const ManualEvaluationDocs = {
           required: ['jsonData']
         } 
       }),
-      ApiResponse({ status: 200, description: "Success", type: Boolean }),
-      HttpCode(200)
+      ApiResponse({ status: 201, description: "Evaluation created successfully", type: Boolean }),
+      ApiResponse({ status: 400, description: "Invalid aspect type or payload" }),
+      ApiResponse({ status: 500, description: "Failed to create evaluation" }),
+      HttpCode(201)
     ),
 
   findAllByAspect: () =>
     applyDecorators(
       ApiOperation({ summary: "Find all evaluations for a specific aspect type" }),
-      ApiParam({ name: 'type', enum: EvaluationAspect }),
-      ApiResponse({ status: 200, description: "Success" }),
+      ApiParam({ name: 'type', enum: EvaluationAspect, required: true, description: 'Evaluation aspect type' }),
+      ApiResponse({ status: 200, description: "Evaluations retrieved successfully", type: [ManualEvaluationResponseDTO] }),
+      ApiResponse({ status: 400, description: "Invalid aspect type" }),
       HttpCode(200)
     ),
 
   findAllByWebsite: () =>
     applyDecorators(
       ApiOperation({ summary: "Find all evaluations for a specific website" }),
-      ApiParam({ name: 'id', description: 'The unique ID of the website' }),
-      ApiResponse({ status: 200, description: "Success" }),
+      ApiParam({ name: 'id', type: Number, required: true, description: 'Unique identifier of the website' }),
+      ApiResponse({ status: 200, description: "Evaluations retrieved successfully", type: [ManualEvaluationResponseDTO] }),
+      ApiResponse({ status: 400, description: "Invalid website ID" }),
       HttpCode(200)
     ),
 };

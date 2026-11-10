@@ -1,33 +1,81 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { DataSource, Repository, In } from "typeorm";
-import { InternalServerErrorException, Logger } from "@nestjs/common";
-import { TagWebsitesService } from "./tag-website.service";
-import { TagWebsite } from "./tag-websites.entity";
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource, FindOperator, In } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
+import { TagWebsitesService } from './tag-website.service';
+import { TagWebsite } from './tag-website.entity';
+import { Tag } from 'src/domains/inventory/tag/tag.entity';
+import { Website } from 'src/domains/inventory/website/website.entity';
 
-describe("TagWebsitesService", () => {
+describe('TagWebsitesService', () => {
   let service: TagWebsitesService;
-  let repository: Repository<TagWebsite>;
-  let dataSource: DataSource;
 
+  const websiteId = 1;
+  const actorId = 100;
+
+  // State used by the fake repositories
+  let assignedTagIds: number[]; // tags already assigned to the website
+  let existingTagIds: number[] | null; // tags that exist in the DB (null = all exist)
+
+  // Injected repository (must NOT be used, everything runs through the transaction manager)
   const mockRepository = {
     find: jest.fn(),
     delete: jest.fn(),
     save: jest.fn(),
   };
 
-  const mockManager = {
+  // Repositories returned by manager.getRepository(entity)
+  const mockWebsiteRepo = { findOne: jest.fn() };
+  const mockTagRepo = { find: jest.fn() };
+  const mockTagWebsiteRepo = {
     find: jest.fn(),
     delete: jest.fn(),
     save: jest.fn(),
   };
 
-  const mockDataSource = {
-    transaction: jest.fn((callback) => callback(mockManager)),
-  };
+  const mockManager = { getRepository: jest.fn() };
+  const mockDataSource = { transaction: jest.fn() };
+
+  type WhereIn = { where: Record<string, FindOperator<number[]>> };
+  const idsOf = (operator: FindOperator<number[]>): number[] => operator.value;
+
+  const update = (
+    add: number[],
+    remove: number[],
+    targetWebsiteId: number = websiteId,
+    actor: number = actorId,
+  ) => service.updateTagsOnWebsite(targetWebsiteId, add, remove, actor);
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    assignedTagIds = [];
+    existingTagIds = null;
+
+    mockWebsiteRepo.findOne.mockResolvedValue({ id: websiteId });
+
+    mockTagRepo.find.mockImplementation(async ({ where }: WhereIn) =>
+      idsOf(where.id)
+        .filter((id) => existingTagIds === null || existingTagIds.includes(id))
+        .map((id) => ({ id })),
+    );
+
+    mockTagWebsiteRepo.find.mockImplementation(async ({ where }: WhereIn) =>
+      idsOf(where.tagId)
+        .filter((id) => assignedTagIds.includes(id))
+        .map((tagId) => ({ tagId, websiteId })),
+    );
+    mockTagWebsiteRepo.save.mockImplementation(async (entities: unknown) => entities);
+    mockTagWebsiteRepo.delete.mockResolvedValue({ affected: 0 });
+
+    mockManager.getRepository.mockImplementation((entity: unknown) => {
+      if (entity === Website) return mockWebsiteRepo;
+      if (entity === Tag) return mockTagRepo;
+      if (entity === TagWebsite) return mockTagWebsiteRepo;
+      throw new Error(`Unexpected repository requested: ${String(entity)}`);
+    });
+
+    mockDataSource.transaction.mockImplementation((callback) => callback(mockManager));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -44,620 +92,417 @@ describe("TagWebsitesService", () => {
     }).compile();
 
     service = module.get<TagWebsitesService>(TagWebsitesService);
-    repository = module.get<Repository<TagWebsite>>(
-      getRepositoryToken(TagWebsite)
-    );
-    dataSource = module.get<DataSource>(DataSource);
-
-    // Setup default transaction behavior
-    mockDataSource.transaction = jest
-      .fn()
-      .mockImplementation((callback) => callback(mockManager));
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  describe('updateTagsOnWebsite', () => {
+    describe('Happy path', () => {
+      it('should add and remove tags in a single transaction', async () => {
+        assignedTagIds = [5, 6];
 
-  describe("updateTagsOnWebsite", () => {
-    const websiteId = 1;
-    const actorId = 100;
+        await update([10, 20, 30], [5, 6]);
 
-    describe("Happy path", () => {
-      it("should successfully add and remove tags in a transaction", async () => {
-        const toAdd = [10, 20, 30];
-        const toRemove = [5, 6];
-
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 2 });
-        mockManager.save.mockResolvedValueOnce([
+        expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
+          websiteId,
+          tagId: In([5, 6]),
+        });
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId: 10, websiteId, createdBy: actorId },
           { tagId: 20, websiteId, createdBy: actorId },
           { tagId: 30, websiteId, createdBy: actorId },
         ]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
-          websiteId,
-          tagId: In(toRemove),
-        });
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In(toAdd) },
-        });
-        expect(mockManager.save).toHaveBeenCalled();
       });
 
-      it("should successfully add tags when only add array is provided", async () => {
-        const toAdd = [10, 20];
-        const toRemove: number[] = [];
+      it('should only add tags when the remove array is empty', async () => {
+        await update([10, 20], []);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
+        expect(mockTagRepo.find).toHaveBeenCalledWith({
+          where: { id: In([10, 20]) },
+          select: ['id'],
+        });
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { websiteId, tagId: In([10, 20]) },
+        });
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId: 10, websiteId, createdBy: actorId },
           { tagId: 20, websiteId, createdBy: actorId },
         ]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).not.toHaveBeenCalled();
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In(toAdd) },
-        });
-        expect(mockManager.save).toHaveBeenCalled();
       });
 
-      it("should successfully remove tags when only remove array is provided", async () => {
-        const toAdd: number[] = [];
-        const toRemove = [5, 6];
+      it('should only remove tags when the add array is empty', async () => {
+        assignedTagIds = [5, 6];
 
-        mockManager.delete.mockResolvedValueOnce({ affected: 2 });
+        await update([], [5, 6]);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { websiteId, tagId: In([5, 6]) },
+        });
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
           websiteId,
-          tagId: In(toRemove),
+          tagId: In([5, 6]),
         });
-        expect(mockManager.find).not.toHaveBeenCalled();
-        expect(mockManager.save).not.toHaveBeenCalled();
+        expect(mockTagRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
       });
 
-      it("should not perform any operations when both arrays are empty", async () => {
-        const toAdd: number[] = [];
-        const toRemove: number[] = [];
+      it('should not change assignments when both arrays are empty', async () => {
+        await update([], []);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).not.toHaveBeenCalled();
-        expect(mockManager.find).not.toHaveBeenCalled();
-        expect(mockManager.save).not.toHaveBeenCalled();
+        expect(mockTagRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
       });
     });
 
-    describe("Edge cases - Deduplication via sanitizeDelta", () => {
-      it("should remove IDs that exist in both add and remove arrays", async () => {
-        const toAdd = [5, 10, 15];
-        const toRemove = [5, 20]; // 5 is in both arrays
+    describe('Website validation', () => {
+      it('should look up the website inside the transaction', async () => {
+        await update([], []);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 1 });
-        mockManager.save.mockResolvedValueOnce([
+        expect(mockWebsiteRepo.findOne).toHaveBeenCalledWith({ where: { id: websiteId } });
+      });
+
+      it('should throw NotFoundException when the website does not exist', async () => {
+        mockWebsiteRepo.findOne.mockResolvedValue(null);
+
+        await expect(update([10], [5], 999)).rejects.toThrow(NotFoundException);
+        await expect(update([10], [5], 999)).rejects.toThrow('Website with ID 999 does not exist');
+      });
+
+      it('should not touch tags or assignments when the website does not exist', async () => {
+        mockWebsiteRepo.findOne.mockResolvedValueOnce(null);
+
+        await expect(update([10], [5])).rejects.toThrow(NotFoundException);
+
+        expect(mockTagRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Deduplication via sanitizeDelta', () => {
+      it('should drop IDs that appear in both add and remove arrays', async () => {
+        assignedTagIds = [20];
+
+        await update([5, 10, 15], [5, 20]);
+
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
+          websiteId,
+          tagId: In([20]),
+        });
+        expect(mockTagRepo.find).toHaveBeenCalledWith({
+          where: { id: In([10, 15]) },
+          select: ['id'],
+        });
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId: 10, websiteId, createdBy: actorId },
           { tagId: 15, websiteId, createdBy: actorId },
         ]);
+      });
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
+      it('should do nothing when every ID conflicts', async () => {
+        await update([1, 2, 3], [1, 2, 3]);
 
-        // sanitizeDelta should clean both arrays
-        // toAdd: [5, 10, 15] - 5 removed = [10, 15]
-        // toRemove: [5, 20] - 5 removed = [20]
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
+      });
+
+      it('should handle partial conflicts', async () => {
+        assignedTagIds = [10, 11];
+
+        await update([1, 2, 3, 4, 5], [3, 4, 10, 11]);
+
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
           websiteId,
-          tagId: In([20]), // Only 20 should be removed
+          tagId: In([10, 11]),
         });
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In([10, 15]) }, // Only 10, 15 should be added
+        expect(mockTagRepo.find).toHaveBeenCalledWith({
+          where: { id: In([1, 2, 5]) },
+          select: ['id'],
         });
       });
 
-      it("should handle case where all IDs in remove array conflict with add array", async () => {
-        const toAdd = [1, 2, 3];
-        const toRemove = [1, 2, 3]; // All conflict
+      it('should remove duplicate IDs in the add array', async () => {
+        await update([5, 5, 10, 10, 15], []);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        // After sanitizeDelta, both arrays should be empty
-        expect(mockManager.delete).not.toHaveBeenCalled();
-        expect(mockManager.find).not.toHaveBeenCalled();
-        expect(mockManager.save).not.toHaveBeenCalled();
+        expect(mockTagRepo.find).toHaveBeenCalledWith({
+          where: { id: In([5, 10, 15]) },
+          select: ['id'],
+        });
       });
 
-      it("should handle partial conflicts in arrays", async () => {
-        const toAdd = [1, 2, 3, 4, 5];
-        const toRemove = [3, 4, 10, 11]; // 3 and 4 conflict
+      it('should remove duplicate IDs in the remove array', async () => {
+        assignedTagIds = [5, 10];
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 2 });
-        mockManager.save.mockResolvedValueOnce([]);
+        await update([], [5, 5, 10, 10]);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
           websiteId,
-          tagId: In([10, 11]), // Only 10, 11 should be removed
-        });
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In([1, 2, 5]) }, // 1, 2, 5 should be checked for add
+          tagId: In([5, 10]),
         });
       });
     });
 
-    describe("Edge cases - Existing tag handling", () => {
-      it("should not insert tags that already exist", async () => {
-        const toAdd = [10, 20, 30];
-        const toRemove: number[] = [];
+    describe('Existing tags and assignments handling', () => {
+      it('should ignore tag IDs that do not exist', async () => {
+        existingTagIds = [10];
 
-        // Simulate that tags 10 and 20 already exist
-        const existingTags = [
-          { tagId: 10, websiteId },
-          { tagId: 20, websiteId },
-        ];
-        mockManager.find.mockResolvedValueOnce(existingTags);
-        mockManager.save.mockResolvedValueOnce([
+        await update([10, 20], []);
+
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { websiteId, tagId: In([10]) },
+        });
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
+          { tagId: 10, websiteId, createdBy: actorId },
+        ]);
+      });
+
+      it('should not query or save assignments when none of the tags exist', async () => {
+        existingTagIds = [];
+
+        await update([10, 20], []);
+
+        expect(mockTagWebsiteRepo.find).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
+      });
+
+      it('should not insert tags that are already assigned', async () => {
+        assignedTagIds = [10, 20];
+
+        await update([10, 20, 30], []);
+
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledTimes(1);
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId: 30, websiteId, createdBy: actorId },
         ]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        // Should only try to save tag 30
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TagWebsite,
-          expect.arrayContaining([
-            expect.objectContaining({
-              tagId: 30,
-              websiteId,
-              createdBy: actorId,
-            }),
-          ])
-        );
-
-        // Verify that only 1 item was saved (not 3)
-        const saveCall = mockManager.save.mock.calls[0];
-        expect(saveCall[1]).toHaveLength(1);
       });
 
-      it("should not save anything if all tags already exist", async () => {
-        const toAdd = [10, 20];
-        const toRemove: number[] = [];
+      it('should not save anything if all tags are already assigned', async () => {
+        assignedTagIds = [10, 20];
 
-        // All tags already exist
-        const existingTags = [
-          { tagId: 10, websiteId },
-          { tagId: 20, websiteId },
-        ];
-        mockManager.find.mockResolvedValueOnce(existingTags);
+        await update([10, 20], []);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.save).not.toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).not.toHaveBeenCalled();
       });
 
-      it("should correctly build TagWebsite entities when saving", async () => {
-        const toAdd = [100, 200];
-        const toRemove: number[] = [];
+      it('should only delete assignments that exist', async () => {
+        assignedTagIds = [5];
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
+        await update([], [5, 6]);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
+          websiteId,
+          tagId: In([5]),
+        });
+      });
 
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TagWebsite,
-          expect.arrayContaining([
-            expect.objectContaining({
-              tagId: 100,
-              websiteId,
-              createdBy: actorId,
-            }),
-            expect.objectContaining({
-              tagId: 200,
-              websiteId,
-              createdBy: actorId,
-            }),
-          ])
-        );
+      it('should not delete anything if none of the tags are assigned', async () => {
+        assignedTagIds = [];
+
+        await update([], [5, 6]);
+
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
       });
     });
 
-    describe("Edge cases - Array sizes and special values", () => {
-      it("should handle single tag addition", async () => {
-        const toAdd = [42];
-        const toRemove: number[] = [];
+    describe('Array sizes and special values', () => {
+      it('should handle a single tag addition', async () => {
+        await update([42], []);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId: 42, websiteId, createdBy: actorId },
         ]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.save).toHaveBeenCalled();
       });
 
-      it("should handle single tag removal", async () => {
-        const toAdd: number[] = [];
-        const toRemove = [42];
+      it('should handle a single tag removal', async () => {
+        assignedTagIds = [42];
 
-        mockManager.delete.mockResolvedValueOnce({ affected: 1 });
+        await update([], [42]);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
           websiteId,
           tagId: In([42]),
         });
       });
 
-      it("should handle large numbers of tags", async () => {
+      it('should handle large numbers of tags', async () => {
         const toAdd = Array.from({ length: 100 }, (_, i) => i + 1);
         const toRemove = Array.from({ length: 50 }, (_, i) => i + 101);
+        assignedTagIds = toRemove;
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 50 });
-        mockManager.save.mockResolvedValueOnce([]);
+        await update(toAdd, toRemove);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
           websiteId,
           tagId: In(toRemove),
         });
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
           where: { websiteId, tagId: In(toAdd) },
         });
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith(
+          toAdd.map((tagId) => ({ tagId, websiteId, createdBy: actorId })),
+        );
       });
 
-      it("should handle zero values in arrays", async () => {
-        const toAdd = [0, 1, 2];
-        const toRemove = [0];
+      it('should handle zero values that conflict between arrays', async () => {
+        await update([0, 1, 2], [0]);
 
-        // sanitizeDelta will remove 0 from both
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        // Both should be cleaned by sanitizeDelta
-        expect(mockManager.delete).not.toHaveBeenCalled();
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In([1, 2]) },
+        expect(mockTagWebsiteRepo.delete).not.toHaveBeenCalled();
+        expect(mockTagRepo.find).toHaveBeenCalledWith({
+          where: { id: In([1, 2]) },
+          select: ['id'],
         });
       });
 
-      it("should handle large numeric IDs", async () => {
-        const toAdd = [2147483647, 1000000000]; // Large integers
-        const toRemove: number[] = [];
+      it('should handle large numeric IDs', async () => {
+        const toAdd = [2147483647, 1000000000];
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
+        await update(toAdd, []);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
           where: { websiteId, tagId: In(toAdd) },
-        });
-      });
-
-      it("should remove duplicate IDs in add array", async () => {
-        const toAdd = [5, 5, 10, 10, 15]; // Duplicates
-        const toRemove: number[] = [];
-
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        // duplicates should be removed by the logic
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In([5, 10, 15]) },
-        });
-      });
-
-      it("should handle duplicate IDs in remove array", async () => {
-        const toAdd: number[] = [];
-        const toRemove = [5, 5, 10, 10]; // Duplicates
-
-        mockManager.delete.mockResolvedValueOnce({ affected: 4 });
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.delete).toHaveBeenCalledWith(TagWebsite, {
-          websiteId,
-          tagId: In([5,10]),
         });
       });
     });
 
-    describe("Edge cases - WebsiteId and ActorId variations", () => {
-      it("should handle minimum websiteId (1)", async () => {
-        const minWebsiteId = 1;
-        const toAdd = [1];
-        const toRemove: number[] = [];
+    describe('WebsiteId and ActorId variations', () => {
+      it('should handle the minimum websiteId (1)', async () => {
+        await update([1], [], 1);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(minWebsiteId, toAdd, toRemove, actorId);
-
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId: minWebsiteId, tagId: In(toAdd) },
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { websiteId: 1, tagId: In([1]) },
         });
       });
 
-      it("should handle large websiteId", async () => {
+      it('should handle a large websiteId', async () => {
         const largeWebsiteId = 2147483647;
-        const toAdd = [1];
-        const toRemove: number[] = [];
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
+        await update([1], [], largeWebsiteId);
 
-        await service.updateTagsOnWebsite(
-          largeWebsiteId,
-          toAdd,
-          toRemove,
-          actorId
-        );
-
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId: largeWebsiteId, tagId: In(toAdd) },
+        expect(mockWebsiteRepo.findOne).toHaveBeenCalledWith({ where: { id: largeWebsiteId } });
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalledWith({
+          where: { websiteId: largeWebsiteId, tagId: In([1]) },
         });
       });
 
-      it("should correctly pass actorId to createdBy field", async () => {
-        const customActorId = 999;
-        const toAdd = [1];
-        const toRemove: number[] = [];
+      it('should pass actorId to the createdBy field', async () => {
+        await update([1], [], websiteId, 999);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, customActorId);
-
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TagWebsite,
-          expect.arrayContaining([
-            expect.objectContaining({
-              createdBy: customActorId,
-            }),
-          ])
-        );
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
+          { tagId: 1, websiteId, createdBy: 999 },
+        ]);
       });
 
-      it("should handle actorId as 0", async () => {
-        const zeroActorId = 0;
-        const toAdd = [1];
-        const toRemove: number[] = [];
+      it('should handle actorId as 0', async () => {
+        await update([1], [], websiteId, 0);
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, zeroActorId);
-
-        expect(mockManager.save).toHaveBeenCalledWith(
-          TagWebsite,
-          expect.arrayContaining([
-            expect.objectContaining({
-              createdBy: zeroActorId,
-            }),
-          ])
-        );
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
+          { tagId: 1, websiteId, createdBy: 0 },
+        ]);
       });
     });
 
-    describe("Error handling and transaction behavior", () => {
-      it("should throw InternalServerErrorException on database error", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
-        const dbError = new Error("Database connection failed");
+    describe('Error handling', () => {
+      it('should propagate errors thrown by the transaction', async () => {
+        const dbError = new Error('Database connection failed');
+        mockDataSource.transaction.mockRejectedValueOnce(dbError);
 
-        mockDataSource.transaction = jest
-          .fn()
-          .mockRejectedValueOnce(dbError);
-
-        await expect(
-          service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId)
-        ).rejects.toThrow(InternalServerErrorException);
+        await expect(update([10], [])).rejects.toBe(dbError);
       });
 
-      it("should log error message when transaction fails", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
-        const dbError = new Error("Connection timeout");
+      it('should propagate delete failures', async () => {
+        const deleteError = new Error('Delete failed');
+        assignedTagIds = [5];
+        mockTagWebsiteRepo.delete.mockRejectedValueOnce(deleteError);
 
-        mockDataSource.transaction = jest
-          .fn()
-          .mockRejectedValueOnce(dbError);
-
-        const loggerSpy = jest.spyOn(Logger.prototype, "error");
-
-        try {
-          await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-        } catch (e) {
-          // Expected to throw
-        }
-
-        // Note: Since Logger is instantiated in the service, we can't directly spy on it
-        // This test demonstrates the expected behavior
+        await expect(update([], [5])).rejects.toBe(deleteError);
       });
 
-      it("should provide meaningful error message in exception", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
+      it('should propagate find failures', async () => {
+        const findError = new Error('Find query failed');
+        mockTagWebsiteRepo.find.mockRejectedValueOnce(findError);
 
-        mockDataSource.transaction = jest
-          .fn()
-          .mockRejectedValueOnce(new Error("DB error"));
-
-        try {
-          await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-          fail("Should have thrown an exception");
-        } catch (error) {
-          expect(error).toBeInstanceOf(InternalServerErrorException);
-          expect(error.message).toContain(
-            "Erro ao processar atualização de tags"
-          );
-        }
+        await expect(update([10], [])).rejects.toBe(findError);
       });
 
-      it("should handle delete operation failure", async () => {
-        const toAdd: number[] = [];
-        const toRemove = [5];
+      it('should propagate save failures', async () => {
+        const saveError = new Error('Insert failed');
+        mockTagWebsiteRepo.save.mockRejectedValueOnce(saveError);
 
-        const deleteError = new Error("Delete failed");
-        mockManager.delete.mockRejectedValueOnce(deleteError);
-        mockDataSource.transaction = jest
-          .fn()
-          .mockImplementation((callback) => callback(mockManager));
-
-        await expect(
-          service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId)
-        ).rejects.toThrow(InternalServerErrorException);
-      });
-
-      it("should handle find operation failure", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
-
-        const findError = new Error("Find query failed");
-        mockManager.find.mockRejectedValueOnce(findError);
-        mockDataSource.transaction = jest
-          .fn()
-          .mockImplementation((callback) => callback(mockManager));
-
-        await expect(
-          service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId)
-        ).rejects.toThrow(InternalServerErrorException);
-      });
-
-      it("should handle save operation failure", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
-
-        mockManager.find.mockResolvedValueOnce([]);
-        const saveError = new Error("Insert failed");
-        mockManager.save.mockRejectedValueOnce(saveError);
-        mockDataSource.transaction = jest
-          .fn()
-          .mockImplementation((callback) => callback(mockManager));
-
-        await expect(
-          service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId)
-        ).rejects.toThrow(InternalServerErrorException);
+        await expect(update([10], [])).rejects.toBe(saveError);
       });
     });
 
-    describe("Transaction isolation and atomicity", () => {
-      it("should ensure all operations run within a transaction", async () => {
-        const toAdd = [10, 20];
-        const toRemove = [5];
-
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 1 });
-        mockManager.save.mockResolvedValueOnce([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
+    describe('Transaction isolation and atomicity', () => {
+      it('should run all operations inside a single transaction', async () => {
+        await update([10, 20], [5]);
 
         expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
-        expect(mockDataSource.transaction).toHaveBeenCalledWith(
-          expect.any(Function)
-        );
+        expect(mockDataSource.transaction).toHaveBeenCalledWith(expect.any(Function));
       });
 
-      it("should use transaction manager for all database operations", async () => {
-        const toAdd = [10];
-        const toRemove = [5];
+      it('should use the transaction manager and not the injected repository', async () => {
+        assignedTagIds = [5];
 
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.delete.mockResolvedValueOnce({ affected: 1 });
-        mockManager.save.mockResolvedValueOnce([]);
+        await update([10], [5]);
 
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        // All operations should use mockManager, not the injected repository
         expect(mockRepository.delete).not.toHaveBeenCalled();
         expect(mockRepository.find).not.toHaveBeenCalled();
         expect(mockRepository.save).not.toHaveBeenCalled();
 
-        expect(mockManager.delete).toHaveBeenCalled();
-        expect(mockManager.find).toHaveBeenCalled();
-        expect(mockManager.save).toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.find).toHaveBeenCalled();
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalled();
       });
 
-      it("should perform delete before checking existing tags", async () => {
-        const toAdd = [10, 20];
-        const toRemove = [5];
-
+      it('should remove tags before adding new ones', async () => {
+        assignedTagIds = [5];
         const callOrder: string[] = [];
 
-        mockManager.delete.mockImplementationOnce(() => {
-          callOrder.push("delete");
-          return Promise.resolve({ affected: 1 });
+        mockTagWebsiteRepo.delete.mockImplementationOnce(async () => {
+          callOrder.push('delete');
+          return { affected: 1 };
+        });
+        mockTagWebsiteRepo.save.mockImplementationOnce(async () => {
+          callOrder.push('save');
+          return [];
         });
 
-        mockManager.find.mockImplementationOnce(() => {
-          callOrder.push("find");
-          return Promise.resolve([]);
-        });
+        await update([10, 20], [5]);
 
-        mockManager.save.mockImplementationOnce(() => {
-          callOrder.push("save");
-          return Promise.resolve([]);
-        });
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-
-        expect(callOrder).toEqual(["delete", "find", "save"]);
+        expect(callOrder).toEqual(['delete', 'save']);
       });
     });
 
-    describe("Idempotency and repeated operations", () => {
-      it("should handle multiple sequential calls with same data", async () => {
-        const toAdd = [10];
-        const toRemove: number[] = [];
-
-        mockManager.find.mockResolvedValue([]);
-        mockManager.save.mockResolvedValue([]);
-
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
-        await service.updateTagsOnWebsite(websiteId, toAdd, toRemove, actorId);
+    describe('Idempotency and repeated operations', () => {
+      it('should handle multiple sequential calls with the same data', async () => {
+        await update([10], []);
+        await update([10], []);
 
         expect(mockDataSource.transaction).toHaveBeenCalledTimes(2);
       });
 
-      it("should correctly handle adding same tag after removal", async () => {
+      it('should correctly handle adding the same tag after removal', async () => {
         const tagId = 10;
 
-        // First operation: remove tag
-        mockManager.delete.mockResolvedValueOnce({ affected: 1 });
-        await service.updateTagsOnWebsite(websiteId, [], [tagId], actorId);
+        assignedTagIds = [tagId];
+        await update([], [tagId]);
+        expect(mockTagWebsiteRepo.delete).toHaveBeenCalledWith({
+          websiteId,
+          tagId: In([tagId]),
+        });
 
-        jest.clearAllMocks();
+        assignedTagIds = [];
+        mockTagWebsiteRepo.save.mockClear();
+        await update([tagId], []);
 
-        // Second operation: add same tag back
-        mockManager.find.mockResolvedValueOnce([]);
-        mockManager.save.mockResolvedValueOnce([
+        expect(mockTagWebsiteRepo.save).toHaveBeenCalledWith([
           { tagId, websiteId, createdBy: actorId },
         ]);
-
-        await service.updateTagsOnWebsite(websiteId, [tagId], [], actorId);
-
-        expect(mockManager.find).toHaveBeenCalledWith(TagWebsite, {
-          where: { websiteId, tagId: In([tagId]) },
-        });
-        expect(mockManager.save).toHaveBeenCalled();
       });
     });
   });

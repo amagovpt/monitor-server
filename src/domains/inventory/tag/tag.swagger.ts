@@ -5,14 +5,13 @@ import {
   ApiTags, 
   ApiBasicAuth, 
   ApiQuery,
-  ApiBody
+  ApiBody,
+  ApiParam
 } from "@nestjs/swagger";
-import { Tag } from "./tag.entity";
+import { TagResponseDTO } from "./dto/tag-response.dto";
 import { TagRequestDTO } from "./dto/request/tag-request.dto";
 import { CreateTagDTO } from "./dto/create-tag.dto";
 import { UpdateTagDTO } from "./dto/update-tag.dto";
-import { DeleteTagsDTO } from "./dto/delete-tag.dto";
-import { ImportTagDTO } from "./dto/import-tag.dto";
 
 export const TagDocs = {
   controller: () =>
@@ -26,37 +25,42 @@ export const TagDocs = {
   findAll: () =>
     applyDecorators(
       ApiQuery({ type: TagRequestDTO }),
-      ApiOperation({ summary: "Find all tags based on user permissions and search terms" }),
-      ApiResponse({ status: 200, description: "Success", type: [Tag] }) 
+      ApiOperation({ summary: "List tags based on user permissions and search terms" }),
+      ApiResponse({ status: 200, description: "Paginated list of tags retrieved successfully", type: [TagResponseDTO] }),
+      ApiResponse({ status: 400, description: "Invalid query parameters" })
+    ),
+
+  findOne: () =>
+    applyDecorators(
+      ApiOperation({ summary: "Get a specific tag by ID" }),
+      ApiParam({ name: "id", type: Number, required: true, description: "Unique identifier of the tag" }),
+      ApiResponse({ status: 200, description: "Tag retrieved successfully", type: TagResponseDTO }),
+      ApiResponse({ status: 404, description: "Tag not found" })
     ),
 
   create: () =>
     applyDecorators(
       ApiBody({ type: CreateTagDTO }),
       ApiOperation({ summary: "Create a new tag with optional multi-entity mappings" }),
-      ApiResponse({ status: 201, description: "The tag was successfully created", type: Tag }) 
+      ApiResponse({ status: 201, description: "The tag was successfully created", type: TagResponseDTO }),
+      ApiResponse({ status: 400, description: "Invalid request payload" })
     ),
 
   update: () =>
     applyDecorators(
       ApiBody({ type: UpdateTagDTO }),
       ApiOperation({ summary: "Update a specific tag description/meta" }),
-      ApiResponse({ status: 200, description: "The tag was updated", type: Tag })
+      ApiResponse({ status: 200, description: "The tag was updated", type: TagResponseDTO }),
+      ApiResponse({ status: 400, description: "Invalid request payload" }),
+      ApiResponse({ status: 404, description: "Tag not found" })
     ),
 
-  deleteBulk: () =>
+  delete: () =>
     applyDecorators(
-      ApiBody({ type: DeleteTagsDTO }),
-      ApiOperation({ summary: "Delete a list of tags in batch (Transaction and Chunking safe)" }),
-      ApiResponse({ status: 204, description: "The tags were deleted successfully" }),
-      ApiResponse({ status: 400, description: "Invalid payloads or entities constraint block" })
-    ),
-
-  clone: () => 
-    applyDecorators(
-      ApiBody({ type: ImportTagDTO }),
-      ApiOperation({ summary: "Clone/Duplicate the relational scope of an existing tag to a new tag" }),
-      ApiResponse({ status: 201, description: "The tag was cloned successfully", type: Tag }),
-      ApiResponse({ status: 404, description: "Source tag not found" })
+      ApiOperation({ summary: "Delete a specific tag" }),
+      ApiParam({ name: "id", type: Number, required: true, description: "Unique identifier of the tag" }),
+      ApiResponse({ status: 204, description: "The tag was deleted successfully" }),
+      ApiResponse({ status: 400, description: "Invalid tag ID or entity constraint block" }),
+      ApiResponse({ status: 404, description: "Tag not found" })
     ),
 };

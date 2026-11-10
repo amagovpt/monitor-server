@@ -1,0 +1,37 @@
+graph TD
+    %% Estilos globais
+    classDef db fill:#2d3748,stroke:#4a5568,color:#fff,stroke-width:2px;
+    classDef queue fill:#2c5282,stroke:#3182ce,color:#fff,stroke-width:2px;
+    classDef worker fill:#744210,stroke:#d69e2e,color:#fff,stroke-width:2px;
+    classDef api fill:#1a365d,stroke:#2b6cb0,color:#fff,stroke-width:2px;
+
+    Client[Client / Frontend] -->|POST /evaluations| API[API Controller & Service]
+
+    subgraph Monolith ["monitor-server-v2 (Main App Monolith)"]
+        API -->|Transaction ACID| PG[(PostgreSQL OLTP)]
+        Outbox[Outbox Table & Relay] -->|Polls & Dispatches| PG
+        
+        %% Ingestor interno na app principal
+        Stream[(Redis Stream Buffer)]:::queue -->|Batch Sealing / Timeout| Batch[Batch Ingestion Worker]
+        Batch -->|Insert w/ Dedup Token| CH[(ClickHouse OLAP)]:::db
+    end
+
+    Outbox -->|Deterministic jobId| BullMQ[(BullMQ / Redis Queue)]:::queue
+
+    subgraph WorkerCluster ["Isolated Evaluation Worker Microservice (1 to N Containers)"]
+        BullMQ -->|Distributes Jobs| W1[Worker Instance A]:::worker
+        BullMQ -->|Distributes Jobs| W2[Worker Instance B]:::worker
+        BullMQ -->|Distributes Jobs| WN[Worker Instance N]:::worker
+        
+        W1 -->|Uploads Artifact| S3[(S3 Object Storage)]:::db
+        W2 -->|Uploads Artifact| S3
+        WN -->|Uploads Artifact| S3
+        
+        W1 -->|Updates Status = COMPLETED| PG
+        W2 -->|Updates Status = COMPLETED| PG
+        WN -->|Updates Status = COMPLETED| PG
+        
+        W1 -->|XADD Metrics Payload| Stream
+        W2 -->|XADD Metrics Payload| Stream
+        WN -->|XADD Metrics Payload| Stream
+    end

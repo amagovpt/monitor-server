@@ -8,47 +8,63 @@ import {
   ApiParam
 } from "@nestjs/swagger";
 import { UpdateDirectoryTagsDto } from "./dtos/directory-tags-update.dto"; 
+import { DirectoryTagResponseDTO } from "./dtos/directory-tags-response.dto";
 
 export const DirectoryTagsDocs = {
   controller: () =>
     applyDecorators(
       ApiTags("directory-tags"),
       ApiBearerAuth(),
-      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" }),
-      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role" })
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role and FGA authorization" })
     ),
 
   getDirectoryTags: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Get directory tags",
-        description: "Retrieves the list of tags currently associated with a specific directory."
+        summary: "Get tags associated with a directory",
+        description: "Retrieves the list of tags currently associated with the specified directory."
       }),
       ApiParam({ 
         name: "directoryId", 
-        type: "number", 
-        description: "The unique identifier of the directory" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the directory" 
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
-        description: "List of tags successfully retrieved" 
+        description: "List of tags successfully retrieved",
+        type: [DirectoryTagResponseDTO]
+      }),
+      ApiResponse({ 
+        status: HttpStatus.BAD_REQUEST, 
+        description: "Invalid directory ID (must be an integer)" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA viewer authorization" 
       })
     ),
 
   updateDirectoryTags: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Update directory tags allocation (Delta update)",
-        description: "Atomically adds or removes tags for a specific directory."
+        summary: "Update tags associated with a directory",
+        description: "Atomically adds and/or removes tags for the specified directory."
       }),
       ApiParam({ 
         name: "directoryId", 
-        type: "number", 
-        description: "The unique identifier of the directory" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the directory" 
       }),
       ApiBody({ 
         type: UpdateDirectoryTagsDto,
-        description: "Payload containing arrays of tag IDs to add and remove"
+        description: "Arrays of tag IDs to add and remove"
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
@@ -56,7 +72,15 @@ export const DirectoryTagsDocs = {
       }),
       ApiResponse({ 
         status: HttpStatus.BAD_REQUEST, 
-        description: "Invalid directory ID or tag identifiers" 
+        description: "Invalid directory ID or invalid request payload" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA editor authorization" 
       })
     ),
 };

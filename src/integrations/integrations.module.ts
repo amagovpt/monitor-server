@@ -1,9 +1,8 @@
-import { Module } from "@nestjs/common";
-import { AmpModule } from "./amp/amp.module";
-import { ObservatoryModule } from "./observatory/observatory.module";
-import { ApiSeloModule } from "./api-selo/api-selo.module";
+import { Module } from '@nestjs/common';
+import { ObservatoryModule } from './observatory/observatory.module';
+import { ApiSeloModule } from './api-selo/api-selo.module';
 
-const modules = [AmpModule, ApiSeloModule, ObservatoryModule];
+const modules = [ApiSeloModule, ObservatoryModule];
 @Module({
   imports: modules,
   exports: modules,

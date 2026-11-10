@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor Client as API Consumer
+    participant Ctrl as ResourceController
+    participant Svc as ResourceService
+    participant Cache as AppCacheService
+    participant DB as PostgreSQL
+    participant R as Redis
+
+    Client->>Ctrl: PUT /users/202 { name: "Updated Name" }
+    Ctrl->>Svc: update("202", "Updated Name")
+    
+    Note over Svc,DB: 1. Persist Mutation (Single Source of Truth)
+    Svc->>DB: UPDATE users SET name = 'Updated Name' WHERE id = '202'
+    DB-->>Svc: 1 row affected
+
+    Note over Svc,R: 2. Explicit Atomic Invalidation
+    Svc->>Cache: evict("cache:user:202")
+    Cache->>R: DEL cache:user:202
+    R-->>Cache: (integer) 1 (Key successfully purged)
+    Cache-->>Svc: Promise resolved (void)
+
+    Svc-->>Ctrl: { id: "202", name: "Updated Name" }
+    Ctrl-->>Client: 200 OK
+
+    opt Next Read Request (New Lifecycle)
+        Client->>Ctrl: GET /users/202
+        Ctrl->>Cache: wrap("cache:user:202", ttl, factory)
+        Cache->>R: GET cache:user:202
+        R-->>Cache: null (Forced Miss post-invalidation)
+        Cache->>DB: SELECT * FROM users WHERE id = '202'
+        DB-->>Cache: Freshly updated row
+        Cache->>R: SET cache:user:202, payload, PX: 10000
+        Cache-->>Client: 200 OK (Consistent Data)
+    end

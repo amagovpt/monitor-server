@@ -8,42 +8,58 @@ import {
   ApiParam
 } from "@nestjs/swagger";
 import { UpdateTeamMembersDto } from "./dtos/tag-members-update.dto"; 
+import { TeamMemberResponseDTO } from "./dtos/team-members-response.dto";
 export const TeamMembersDocs = {
   controller: () =>
     applyDecorators(
       ApiTags("team-members"),
       ApiBearerAuth(),
-      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" }),
-      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role" })
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role and FGA authorization" })
     ),
 
   getTeamMembers: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Get team members",
-        description: "Retrieves the list of members currently assigned to a specific team."
+        summary: "Get members of a team",
+        description: "Retrieves the list of users currently assigned to the specified team."
       }),
       ApiParam({ 
         name: "teamId", 
-        type: "number", 
-        description: "The unique identifier of the team" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the team" 
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
-        description: "List of team members successfully retrieved" 
+        description: "List of team members successfully retrieved",
+        type: [TeamMemberResponseDTO]
+      }),
+      ApiResponse({ 
+        status: HttpStatus.BAD_REQUEST, 
+        description: "Invalid team ID (must be an integer)" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires FGA viewer authorization" 
       })
     ),
 
   updateTeamMembers: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Update team members membership (Delta update)",
-        description: "Atomically adds or removes specific users from a team's membership list."
+        summary: "Update members of a team",
+        description: "Atomically adds and/or removes users from the specified team's membership list."
       }),
       ApiParam({ 
         name: "teamId", 
-        type: "number", 
-        description: "The unique identifier of the team" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the team" 
       }),
       ApiBody({ 
         type: UpdateTeamMembersDto,
@@ -55,7 +71,15 @@ export const TeamMembersDocs = {
       }),
       ApiResponse({ 
         status: HttpStatus.BAD_REQUEST, 
-        description: "Invalid team or user identifiers" 
+        description: "Invalid team ID or invalid request payload" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA editor authorization" 
       })
     ),
 };

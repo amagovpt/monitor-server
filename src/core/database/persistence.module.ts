@@ -21,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
+  providers: [],
   exports: [TypeOrmModule],
 })
 export class PersistenceModule {}

@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FgaGuard } from './fga.guard';
 import { FgaService } from '../fga.service';
-import { FGA_DECORATOR_KEY, FgaMetadata } from '../decorators/fga-authorization.decorator';
+import { FGA_DECORATOR_KEY } from '../decorators/fga-authorization.decorator';
 import { FGA_RESOURCE, ResourceType } from '../types/fga.types';
 
 describe('FgaGuard', () => {
@@ -34,23 +34,22 @@ describe('FgaGuard', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks(); 
+    jest.clearAllMocks();
   });
 
-function createMockContext(requestPayload: any): ExecutionContext {
-  const mockHandler = jest.fn();
+  function createMockContext(requestPayload: any): ExecutionContext {
+    const mockHandler = jest.fn();
 
-  return {
-    switchToHttp: () => ({
-      getRequest: () => requestPayload,
-    }),
-    getHandler: () => mockHandler, 
-    getClass: () => jest.fn(),
-  } as unknown as ExecutionContext;
-}
+    return {
+      switchToHttp: () => ({
+        getRequest: () => requestPayload,
+      }),
+      getHandler: () => mockHandler,
+      getClass: () => jest.fn(),
+    } as unknown as ExecutionContext;
+  }
 
-   it('should return true if no FGA metadata is present on the handler', async () => {
-    
+  it('should return true if no FGA metadata is present on the handler', async () => {
     mockReflector.get.mockReturnValue(undefined);
 
     const context = createMockContext({});
@@ -58,15 +57,15 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     expect(result).toBe(true);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).not.toHaveBeenCalled(); 
-   });
-   
-   it('should extract user id and resource id and check permissions', async () => {
-    const mockFgaMetadata= {
+    expect(mockFgaService.check).not.toHaveBeenCalled();
+  });
+
+  it('should extract user id and resource id and check permissions', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
       resourceIdResolver: (ctx: ExecutionContext) => '123',
-    } as FgaMetadata<ResourceType>;
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(true);
@@ -79,37 +78,33 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     expect(result).toBe(true);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).toHaveBeenCalledWith(
-      'user:42',
-      'can_view',
-      'website:123'
-    );
-   });
+    expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
+  });
 
-   it('should throw ForbiddenException if user is not authenticated', async () => {
-    const mockFgaMetadata= {
+  it('should throw ForbiddenException if user is not authenticated', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
       resourceIdResolver: (ctx: ExecutionContext) => '123',
-    } as FgaMetadata<ResourceType>;
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
 
     const context = createMockContext({
-      user: null, 
+      user: null,
     });
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).not.toHaveBeenCalled(); 
-   });
+    expect(mockFgaService.check).not.toHaveBeenCalled();
+  });
 
-   it('should throw ForbiddenException if resource ID cannot be resolved', async () => {
-    const mockFgaMetadata= {
+  it('should throw ForbiddenException if resource ID cannot be resolved', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
-      resourceIdResolver: (ctx: ExecutionContext) => undefined, 
-    } as FgaMetadata<ResourceType>;
+      resourceIdResolver: (ctx: ExecutionContext) => undefined,
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
 
@@ -119,15 +114,15 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).not.toHaveBeenCalled(); 
-   });
+    expect(mockFgaService.check).not.toHaveBeenCalled();
+  });
 
-   it('should throw ForbiddenException if object ID is not provided', async () => {
-    const mockFgaMetadata= {
+  it('should throw ForbiddenException if object ID is not provided', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
-      resourceIdResolver: (ctx: ExecutionContext) => undefined, 
-    } as FgaMetadata<ResourceType>;
+      resourceIdResolver: (ctx: ExecutionContext) => undefined,
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
 
@@ -137,15 +132,15 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).not.toHaveBeenCalled(); 
-   });
+    expect(mockFgaService.check).not.toHaveBeenCalled();
+  });
 
-    it('should throw ForbiddenException if permission check fails', async () => {
-    const mockFgaMetadata= {
+  it('should throw ForbiddenException if permission check fails', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
       resourceIdResolver: (ctx: ExecutionContext) => '123',
-    } as FgaMetadata<ResourceType>;
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(false);
@@ -156,19 +151,15 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).toHaveBeenCalledWith(
-      'user:42',
-      'can_view',
-      'website:123'
-    );
-   });
+    expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
+  });
 
-   it('should return true if permission check passes', async () => {
-    const mockFgaMetadata= {
+  it('should return true if permission check passes', async () => {
+    const mockFgaMetadata = {
       objectType: FGA_RESOURCE.WEBSITE,
       action: 'can_view',
       resourceIdResolver: (ctx: ExecutionContext) => '123',
-    } as FgaMetadata<ResourceType>;
+    };
 
     mockReflector.get.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(true);
@@ -181,11 +172,6 @@ function createMockContext(requestPayload: any): ExecutionContext {
 
     expect(result).toBe(true);
     expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
-    expect(mockFgaService.check).toHaveBeenCalledWith(
-      'user:42',
-      'can_view',
-      'website:123'
-    );
-   });
-   
+    expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
+  });
 });

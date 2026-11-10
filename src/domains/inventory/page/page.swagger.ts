@@ -6,131 +6,193 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Page } from './page.entity';
 import { UpdatePageContextDto } from './dto/update.page-context.dto';
 import { CreatePageDto } from './dto/create-page.dto';
+import { DeletePagesDto } from './dto/delete-page.dto';
 
 export const PageDocs = {
   controller: () =>
     applyDecorators(
       ApiTags('Pages'),
       ApiBearerAuth(),
-      ApiResponse({ status: 401, description: 'Unauthorized - Token JWT inválido ou ausente' }),
+      ApiResponse({ status: 401, description: 'Unauthorized - Missing or invalid JWT token' }),
       ApiResponse({
         status: 403,
-        description: 'Forbidden - Sem permissões RBAC ou ReBAC (OpenFGA)',
+        description: 'Forbidden - Insufficient RBAC or ReBAC (OpenFGA) permissions',
       }),
     ),
 
   find: () =>
     applyDecorators(
       ApiOperation({
-        summary: 'Listar páginas filtradas por contexto',
+        summary: 'List pages filtered by context',
         description:
-          'Retorna uma lista paginada de páginas de acordo com os filtros, ordenação e contextos autorizados pelo utilizador.',
+          'Returns a paginated list of pages according to the provided filters, sorting and the contexts the user is authorized for.',
       }),
       ApiResponse({
         status: 200,
-        description: 'Lista paginada de páginas recuperada com sucesso',
+        description: 'Paginated list of pages retrieved successfully',
         type: [Page],
       }),
-      ApiResponse({ status: 400, description: 'Parâmetros de query inválidos' }),
+      ApiResponse({ status: 400, description: 'Invalid query parameters' }),
     ),
 
   findOne: () =>
     applyDecorators(
       ApiOperation({
-        summary: 'Obter detalhes de uma página específica de um website',
-        description: 'Requer permissão de leitura sobre o website no OpenFGA (`website:can_view`).',
+        summary: 'Get details of a specific page of a website',
+        description: 'Requires read permission on the website in OpenFGA (`website:can_view`).',
       }),
       ApiParam({
         name: 'websiteId',
         type: Number,
-        description: 'ID do website proprietário',
+        required: true,
+        description: 'ID of the owning website',
         example: 10,
       }),
       ApiParam({
         name: 'pageId',
         type: Number,
-        description: 'ID da página',
+        required: true,
+        description: 'ID of the page',
         example: 42,
       }),
       ApiResponse({
         status: 200,
-        description: 'Página encontrada com sucesso',
+        description: 'Page retrieved successfully',
         type: Page,
       }),
-      ApiResponse({ status: 404, description: 'Página ou website não encontrado' }),
+      ApiResponse({ status: 404, description: 'Page or website not found' }),
     ),
 
   create: () =>
     applyDecorators(
       ApiOperation({
-        summary: 'Criar uma nova página num website',
-        description: 'Requer permissão de edição sobre o website no OpenFGA (`website:can_edit`).',
+        summary: 'Create a new page on a website',
+        description: 'Requires edit permission on the website in OpenFGA (`website:can_edit`).',
       }),
       ApiParam({
         name: 'websiteId',
         type: Number,
-        description: 'ID do website onde a página será criada',
+        required: true,
+        description: 'ID of the website where the page will be created',
         example: 10,
       }),
       ApiBody({ type: CreatePageDto }),
       ApiResponse({
         status: 201,
-        description: 'Página criada com sucesso',
+        description: 'Page created successfully',
         type: Page,
       }),
-      ApiResponse({ status: 400, description: 'Dados inválidos ou URL duplicado' }),
+      ApiResponse({ status: 400, description: 'Invalid data or duplicate URL' }),
     ),
 
-  bulkDelete: () =>
+  createFromSitemap: () =>
     applyDecorators(
       ApiOperation({
-        summary: 'Remover páginas em lote ou desassociar contextos',
+        summary: 'Create pages on a website from a sitemap file',
         description:
-          'Remove a alocação de contexto associada à role do utilizador. Se a página não tiver mais nenhum contexto alocado, é eliminada permanentemente.',
+          'Receives a sitemap (xml) or txt file (one URL per line) and creates the pages on the website. Requires edit permission on the website in OpenFGA (`website:can_edit`).',
+      }),
+      ApiConsumes('multipart/form-data'),
+      ApiParam({
+        name: 'websiteId',
+        type: Number,
+        required: true,
+        description: 'ID of the website where the pages will be created',
+        example: 10,
       }),
       ApiBody({
+        required: true,
+        description: 'Sitemap (xml) or txt file sent in the multipart field `file` (max 5MB)',
         schema: {
           type: 'object',
-          required: ['ids'],
+          required: ['file'],
           properties: {
-            ids: {
-              type: 'array',
-              items: { type: 'integer' },
-              example: [1, 2, 3],
-              description: 'Lista de IDs das páginas a remover/desalocar',
+            file: {
+              type: 'string',
+              format: 'binary',
+              description: 'Sitemap (.xml) or text (.txt) file',
             },
           },
         },
       }),
       ApiResponse({
-        status: 200,
-        description: 'Páginas processadas/removidas com sucesso',
+        status: 201,
+        description: 'Pages created successfully from the sitemap',
       }),
       ApiResponse({
         status: 400,
-        description: 'Role do utilizador não possui contexto associado ou payload inválido',
+        description: 'File missing, invalid file type, file too large or invalid sitemap content',
+      }),
+      ApiResponse({ status: 404, description: 'Website not found' }),
+    ),
+
+  bulkDelete: () =>
+    applyDecorators(
+      ApiOperation({
+        summary: 'Bulk remove pages or detach contexts',
+        description:
+          'Removes the context allocation associated with the user role. If the page has no remaining context allocated, it is permanently deleted.',
+      }),
+      ApiBody({ type: DeletePagesDto }),
+      ApiResponse({
+        status: 200,
+        description: 'Pages processed/removed successfully',
+      }),
+      ApiResponse({
+        status: 400,
+        description: 'User role has no associated context or invalid payload',
       }),
     ),
 
   changePageContext: () =>
     applyDecorators(
       ApiOperation({
-        summary: 'Alterar os contextos atribuídos a um conjunto de páginas',
+        summary: 'Change the contexts assigned to a set of pages',
         description:
-          'Atualização em lote dos contextos (ex: Study Monitor, My Monitor) para os IDs fornecidos.',
+          'Bulk update of contexts (e.g. Study Monitor, My Monitor) for the provided page IDs.',
       }),
       ApiBody({
         type: UpdatePageContextDto,
-        description: 'Payload contendo a lista de pageIds e os novos contextos',
+        description: 'Payload containing the list of pageIds and the new contexts',
       }),
       ApiResponse({
         status: 200,
-        description: 'Contextos atualizados com sucesso',
+        description: 'Contexts updated successfully',
       }),
-      ApiResponse({ status: 400, description: 'Dados de contexto ou páginas inválidos' }),
+      ApiResponse({ status: 400, description: 'Invalid context or page data' }),
+    ),
+
+  toggleObservatoryStatus: () =>
+    applyDecorators(
+      ApiOperation({
+        summary: 'Toggle the Observatory status of a page',
+        description:
+          'Enables or disables the Observatory flag for the specified page of a website.',
+      }),
+      ApiParam({
+        name: 'websiteId',
+        type: Number,
+        required: true,
+        description: 'ID of the owning website',
+        example: 10,
+      }),
+      ApiParam({
+        name: 'pageId',
+        type: Number,
+        required: true,
+        description: 'ID of the page',
+        example: 42,
+      }),
+      ApiResponse({
+        status: 201,
+        description: 'Observatory status toggled successfully',
+      }),
+      ApiResponse({ status: 400, description: 'Invalid website or page ID' }),
+      ApiResponse({ status: 404, description: 'Page or website not found' }),
     ),
 };

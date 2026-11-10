@@ -19,3 +19,4 @@ src/launch.json
 architecture-graph.svg
 swagger-spec.json
 .fga.env
+.aider*

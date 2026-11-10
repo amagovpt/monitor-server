@@ -9,6 +9,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { RoleSlug, UserPermission } from 'src/core/authentication/interfaces/types';
+import { PermissionLevel } from '../user.entity';
 
 export class CreateUserDto {
   @IsString({ message: 'Username must be a string.' })
@@ -46,8 +47,8 @@ export class CreateUserDto {
   password: string;
 
   @IsString({ message: 'Permissions must be a string.' })
-  @IsEnum(UserPermission, {
-    message: `Permissions must be a valid permission. Valid permissions are: ${Object.values(UserPermission).join(', ')}`,
+  @IsEnum(PermissionLevel, {
+    message: `Permissions must be a valid permission. Valid permissions are: ${Object.values(PermissionLevel).join(', ')}`,
   })
-  permission: UserPermission = UserPermission.VIEWER;
+  permission: PermissionLevel = PermissionLevel.VIEWER;
 }

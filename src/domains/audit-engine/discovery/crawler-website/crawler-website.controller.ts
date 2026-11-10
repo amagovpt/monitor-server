@@ -28,6 +28,7 @@ import { Roles } from 'src/core/authorization/decorators/roles.decorator';
 import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
 import { CrawlerImportDTO } from './dto/crawler-import.dto';
 import { CrawlerTagsCreateDTO } from './dto/crawler-create-tags.dto';
+import { CrawlWebsitesResponseDTO } from './dto/crawler-website-response.dto';
 
 @DiscoveryDocs.controller()
 @Controller('discovery')
@@ -41,7 +42,7 @@ export class CrawlerWebsiteController {
   async getCrawlWebsites(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: CrawlerRequestDTO,
-  ): Promise<any> {
+  ): Promise<CrawlWebsitesResponseDTO> {
     const securityContext: SecurityContext = { user };
     return await this.crawlerWebsiteService.getMany(query, securityContext);
   }
@@ -57,21 +58,7 @@ export class CrawlerWebsiteController {
     const securityContext: SecurityContext = { user };
     await this.crawlerWebsiteService.importCrawlers(securityContext, crawlerImport.crawlerIds);
   }
-  @Roles(RoleSlug.ADMIN)
-  @Post('tags')
-  async crawlWebsiteTags(
-    @Body() crawlerCreate: CrawlerTagsCreateDTO,
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<void> {
-    const securityContext: SecurityContext = { user };
-
-    await this.crawlerWebsiteService.crawlWebsitesTags(securityContext, crawlerCreate.tagsId, {
-      maxDepth: crawlerCreate.maxDepth,
-      maxPages: crawlerCreate.maxPages,
-      waitJS: crawlerCreate.waitJS,
-    });
-  }
-
+  
   @DiscoveryDocs.crawlWebsite()
   @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @Post('')
@@ -91,6 +78,22 @@ export class CrawlerWebsiteController {
       },
     );
   }
+  @DiscoveryDocs.crawlWebsiteTags()
+  @Roles(RoleSlug.ADMIN)
+  @Post('tags')
+  async crawlWebsiteTags(
+    @Body() crawlerCreate: CrawlerTagsCreateDTO,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    const securityContext: SecurityContext = { user };
+
+    await this.crawlerWebsiteService.crawlWebsitesTags(securityContext, crawlerCreate.tagsId, {
+      maxDepth: crawlerCreate.maxDepth,
+      maxPages: crawlerCreate.maxPages,
+      waitJS: crawlerCreate.waitJS,
+    });
+  }
+
 
   @DiscoveryDocs.deleteCrawler()
   @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)

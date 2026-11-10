@@ -1,24 +1,19 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  ParseIntPipe,
-  UseInterceptors,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ObservatoryService } from './observatory.service';
-import { LoggingInterceptor } from 'src/core/log/log.interceptor';
 import { ObservatoryDocs } from './observatory.swagger';
+import { CacheableBy } from 'src/core/cache/decorator/cache-resource.decorator';
 
 ObservatoryDocs.controller();
 @Controller('observatory')
-@UseInterceptors(LoggingInterceptor)
 export class ObservatoryController {
   constructor(private readonly observatoryService: ObservatoryService) {}
 
   @ObservatoryDocs.getGlobalMetrics()
   @Get('')
+  @CacheableBy({
+    key: 'global_metrics_observatory',
+    ttl: 60,
+  })
   @HttpCode(200)
   async getGlobalMetrics(): Promise<any> {
     const data = await this.observatoryService.getGlobalMetrics();
@@ -27,6 +22,10 @@ export class ObservatoryController {
 
   @ObservatoryDocs.getDirectoriesRanks()
   @Get('directories')
+  @CacheableBy({
+    key: 'directories_ranks_observatory',
+    ttl: 60,
+  })
   @HttpCode(200)
   async getDirectoriesRanks(): Promise<any> {
     const data = await this.observatoryService.getDirectoriesStatistics();
@@ -35,6 +34,12 @@ export class ObservatoryController {
 
   @ObservatoryDocs.getDirectoryWebsites()
   @Get('directories/:id/websites')
+  @CacheableBy({
+    key: 'directory_websites_observatory',
+    source: 'path',
+    param: 'id',
+    ttl: 60,
+  })
   @HttpCode(200)
   async getDirectoryWebsites(@Param('id', ParseIntPipe) id: number): Promise<any> {
     const data = await this.observatoryService.getDirectoryWebsites(id);
@@ -43,6 +48,12 @@ export class ObservatoryController {
 
   @ObservatoryDocs.getDirectoryStatistics()
   @Get('directories/:id/statistics')
+  @CacheableBy({
+    key: 'directory_statistics_observatory',
+    source: 'path',
+    param: 'id',
+    ttl: 60,
+  })
   @HttpCode(200)
   async getDirectoryStatistics(@Param('id', ParseIntPipe) id: number): Promise<any> {
     const data = await this.observatoryService.getDirectoryStatistics(id);
@@ -59,6 +70,12 @@ export class ObservatoryController {
 
   @ObservatoryDocs.getWebsiteMetrics()
   @Get('websites/:id')
+  @CacheableBy({
+    key: 'website_metrics_observatory',
+    source: 'path',
+    param: 'id',
+    ttl: 60,
+  })
   @HttpCode(200)
   async getWebsiteMetrics(@Param('id', ParseIntPipe) id: number): Promise<any> {
     const data = await this.observatoryService.getWebsiteMetrics(id);

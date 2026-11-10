@@ -22,6 +22,8 @@ import { InstitutionRequestDTO } from "./dto/request/institution-request.dto";
 import { LoggableController } from "src/common/controllers/loggable.interface";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { FgaGuard } from "src/core/authorization/guards/fga.guard";
+import { PaginationResponse } from "src/common/repositories/base.repository";
+import { InstitutionResponseDTO } from "./dto/institution-response.dto";
 
 @InstitutionDocs.controller()
 @Controller("institutions")
@@ -32,17 +34,18 @@ export class InstitutionController implements LoggableController {
   constructor(private readonly institutionService: InstitutionService) {}
 
 
+  @InstitutionDocs.info()
   @Roles(RoleSlug.ADMIN)
   @Get(":institutionId")
   @HttpCode(200)
-  async getInstitution(@Param("institutionId", ParseIntPipe) institutionId: number,): Promise<any> {
+  async getInstitution(@Param("institutionId", ParseIntPipe) institutionId: number,): Promise<InstitutionResponseDTO> {
     return await this.institutionService.getOne( institutionId );
   }
   @InstitutionDocs.findAllPaged()
   @Roles(RoleSlug.ADMIN)
   @Get("")
   @HttpCode(200)
-  async getAllEntities(@Query() institutionRequestDTO:InstitutionRequestDTO): Promise<any> {
+  async getAllEntities(@Query() institutionRequestDTO:InstitutionRequestDTO): Promise<PaginationResponse<InstitutionResponseDTO>> {
     return await this.institutionService.findAll( institutionRequestDTO );
   }
 
@@ -57,7 +60,7 @@ export class InstitutionController implements LoggableController {
   @Roles(RoleSlug.ADMIN)
   @Post("")
   @HttpCode(201)
-  async createOrganization(@Body() createInstitutionDto: CreateInstitutionDto): Promise<Institution> {
+  async createOrganization(@Body() createInstitutionDto: CreateInstitutionDto): Promise<InstitutionResponseDTO> {
  
     return await this.institutionService.createOne(createInstitutionDto );
 
@@ -72,7 +75,7 @@ export class InstitutionController implements LoggableController {
   @Roles(RoleSlug.ADMIN)
   @Patch("")
   @HttpCode(200)
-  async updateOrganization(@Body() udateInstitutionDto: UpdateInstitutionDto): Promise<any> {
+  async updateOrganization(@Body() udateInstitutionDto: UpdateInstitutionDto): Promise<boolean> {
     const institutionId = udateInstitutionDto.institutionId;
     const shortName = udateInstitutionDto.shortName;
     const longName = udateInstitutionDto.longName;

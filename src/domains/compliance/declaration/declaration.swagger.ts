@@ -22,23 +22,23 @@ export const DeclarationDocs = {
   getDeclaration: () =>
     applyDecorators(
       ApiOperation({ summary: "Get declaration by website ID" }),
-      ApiParam({ name: "websiteId", type: Number, description: "Website unique identifier" }),
+      ApiParam({ name: "websiteId", type: Number, required: true, description: "Website unique identifier" }),
       ApiResponse({ 
         status: 200, 
         description: "Declaration successfully retrieved" 
-        
-      })
+      }),
+      ApiResponse({ status: 400, description: "Bad Request - Invalid website ID" })
     ),
 
   upsertDeclaration: () =>
     applyDecorators(
       ApiOperation({ summary: "Create or update declaration for a website" }),
-      ApiParam({ name: "websiteId", type: Number, description: "Website unique identifier" }),
+      ApiParam({ name: "websiteId", type: Number, required: true, description: "Website unique identifier" }),
       ApiBody({ type: UpdateDeclarationDto }),
       ApiResponse({ 
         status: 200, 
         description: "Declaration successfully upserted" 
       }),
-      ApiResponse({ status: 400, description: "Bad Request / Validation error" })
+      ApiResponse({ status: 400, description: "Bad Request - Validation error" })
     )
 };

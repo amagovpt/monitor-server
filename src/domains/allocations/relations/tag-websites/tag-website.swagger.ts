@@ -8,47 +8,63 @@ import {
   ApiParam
 } from "@nestjs/swagger";
 import { UpdateWebsiteTagsDto } from "./dtos/tag-website-update.dto"; 
+import { TagWebsiteResponseDTO } from "./dtos/tag-websites-response.dto";
 
 export const TagWebsitesDocs = {
   controller: () =>
     applyDecorators(
       ApiTags("tag-websites"),
       ApiBearerAuth(),
-      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" }),
-      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role" })
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role and FGA authorization" })
     ),
 
   getWebsiteTags: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Get website tags",
-        description: "Retrieves the list of tags currently associated with a specific website."
+        summary: "Get tags associated with a website",
+        description: "Retrieves the list of tags currently associated with the specified website."
       }),
       ApiParam({ 
         name: "websiteId", 
-        type: "number", 
-        description: "The unique identifier of the website" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the website" 
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
-        description: "List of tags successfully retrieved" 
+        description: "List of tags successfully retrieved",
+        type: [TagWebsiteResponseDTO]
+      }),
+      ApiResponse({ 
+        status: HttpStatus.BAD_REQUEST, 
+        description: "Invalid website ID (must be an integer)" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA viewer authorization" 
       })
     ),
 
   updateWebsiteTags: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Update website tags allocation (Delta update)",
-        description: "Atomically adds or removes tags for a specific website."
+        summary: "Update tags associated with a website",
+        description: "Atomically adds and/or removes tags for the specified website."
       }),
       ApiParam({ 
         name: "websiteId", 
-        type: "number", 
-        description: "The unique identifier of the website" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the website" 
       }),
       ApiBody({ 
         type: UpdateWebsiteTagsDto,
-        description: "Payload containing arrays of tag IDs to add and remove"
+        description: "Arrays of tag IDs to add and remove"
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
@@ -56,7 +72,15 @@ export const TagWebsitesDocs = {
       }),
       ApiResponse({ 
         status: HttpStatus.BAD_REQUEST, 
-        description: "Invalid website ID or tag identifiers" 
+        description: "Invalid website ID or invalid request payload" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA editor authorization" 
       })
     ),
 };

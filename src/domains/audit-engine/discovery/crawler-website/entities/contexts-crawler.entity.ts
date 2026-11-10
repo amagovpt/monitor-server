@@ -1,4 +1,4 @@
-import { Context } from 'src/domains/inventory/context/context.identity';
+import { Context } from 'src/domains/inventory/context/context.entity';
 import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { CrawlerWebsite } from './crawler-website.entity';
 

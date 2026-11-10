@@ -1,0 +1,26 @@
+flowchart TD
+    Start([Incoming Request]) --> GuardCheck{Method is GET &<br/>Rules Exist?}
+    
+    GuardCheck -- No --> Bypass[Execute Route Handler Directly / Bypass Cache] --> End([Finish])
+    GuardCheck -- Yes --> KeyGen[Canonical Normalization + SHA-256 Hashing<br/>Generates: cache:key:id]
+    
+    KeyGen --> RedisGet[Attempt Read: Redis.get]
+    RedisGet -- Timeout / Network Failure --> LogWarn[Logger.warn: Fail-Open] --> CoalesceCheck
+    RedisGet -- Cache Hit --> ReturnCache[Return Cached Data] --> End
+    
+    RedisGet -- Cache Miss --> CoalesceCheck{Promise Exists in<br/>inFlightRequests?}
+    
+    CoalesceCheck -- Yes (Follower) --> AwaitPromise[Subscribe to Leader's Promise<br/>await inFlight.get]
+    AwaitPromise --> ReturnShared[Return Coalesced Result] --> End
+    
+    CoalesceCheck -- No (Leader) --> CreatePromise[Register leaderPromise in Map<br/>inFlight.set]
+    CreatePromise --> ExecDB[(Execute Query / Business Handler on DB)]
+    
+    ExecDB --> RedisSet[Persist to Redis: Redis.set ttlMs]
+    RedisSet --> CleanMap[finally: inFlight.delete]
+    CleanMap --> ReturnLeader[Return Fresh Data to Leader & Notify Followers] --> End
+    
+
+    class ReturnCache hit;
+    class ExecDB miss;
+    class CoalesceCheck,CreatePromise,AwaitPromise barrier;

@@ -83,7 +83,7 @@ export class UserController {
   async updateUser(@Body() updateUserDto: UpdateUserDto): Promise<UserDTO> {
     return await this.userService.updateUser(updateUserDto.id, updateUserDto);
   }
-
+  
 
   
   @UserDocs.delete

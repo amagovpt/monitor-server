@@ -9,6 +9,7 @@ import { TeamWebsitesDocs } from "./team-websites.swagger";
 import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { AMS_ROLE_EDITOR, AMS_ROLE_VIEWER } from "src/core/authorization/policies/role.policies";
+import { TeamWebsitesResponseDTO } from "./dtos/team-websites-response.dto";
 
 @TeamWebsitesDocs.controller()
 @Controller("teams/:teamId/websites") 
@@ -18,10 +19,11 @@ export class TeamWebsitesController {
 
 
   @Get('')
+  @TeamWebsitesDocs.getTeamWebsites()
   @FgaAuthorized(AMS_ROLE_VIEWER)
   @HttpCode(HttpStatus.OK)
   async getTeamWebsites(
-  @Param("teamId", ParseIntPipe) teamId: number) {
+  @Param("teamId", ParseIntPipe) teamId: number): Promise<TeamWebsitesResponseDTO> {
         return await this.service.getTeamWebsites(teamId);
   }
 

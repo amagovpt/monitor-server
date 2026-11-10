@@ -56,6 +56,7 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
 
     const uniquePageIds = Array.from(new Set(targetIds));
     const contextId = context.user.context.id;
+    const userId = context.user.id;
 
     // 1. Obter a relação página -> website_id para checagem de autorização
     const pageWebsiteMappings: Array<{ id: number; website_id: number }> =
@@ -72,7 +73,6 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
       throw new BadRequestException('No matching pages found for provided target IDs.');
     }
 
-    // 2. Extrair websites únicos e filtrar via OpenFGA
     const uniqueWebsiteIds = Array.from(new Set(pageWebsiteMappings.map((p) => p.website_id)));
 
     const authorizedWebsiteIds: (string | number)[] = [];
@@ -100,17 +100,16 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
       );
     }
 
-    // 4. Selecionar a fila apropriada com base na Role
+    // 4. Selecionar a fila aprop
+    // riada com base na Role
     const targetQueue =
       context.user.role_slug === RoleSlug.ADMIN ? this.privateQueue : this.publicQueue;
 
     let totalEnqueued = 0;
 
-    // 5. Chunking do lote autorizado: busca metadata, enfileira e atualiza status
     for (let i = 0; i < allowedPageIds.length; i += DB_CHUNK_SIZE) {
       const chunkIds = allowedPageIds.slice(i, i + DB_CHUNK_SIZE);
 
-      // Busca metadados apenas de páginas elegíveis (não em RUNNING no contexto)
       const pagesToProcess: PageDispatchMetadata[] = await this.dataSource.query(
         `
         SELECT 
@@ -119,15 +118,16 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
           p.website_id, 
           w.institution_id, 
           w.directories_ids
-        FROM page_contexts_monitor pc
+        FROM page_contexts pc
         INNER JOIN pages p ON p.id = pc.page_id
-        INNER JOIN v_websites_metadata w ON w.website_id = p.website_id
+        INNER JOIN v_institution_websites w ON w.website_id = p.website_id
         WHERE pc.context_id = $1
           AND pc.page_id = ANY($2::int[])
           AND pc.page_status != $3::page_status_enum
+          AND pc.page_status != $4::page_status_enum
         ORDER BY pc.page_id ASC;
         `,
-        [contextId, chunkIds, PageStatus.RUNNING],
+        [contextId, chunkIds, PageStatus.RUNNING, PageStatus.QUEUED],
       );
 
       if (!pagesToProcess.length) {
@@ -142,6 +142,7 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
           websiteId: page.website_id,
           pageId: page.page_id,
           url: page.url,
+          userId,
           institutionId: page.institution_id,
           directoryIds: page.directories_ids ?? [],
         },
@@ -163,16 +164,15 @@ export class PageEvaluationInitiationStrategy implements EvaluationInitiator, On
         .filter((j) => j && j.data?.pageId)
         .map((j) => j.data.pageId);
 
-      // Marca como RUNNING apenas os jobs inseridos com sucesso no Redis
       if (successfullyEnqueuedIds.length > 0) {
         await this.dataSource.query(
           `
-          UPDATE page_contexts_monitor
+          UPDATE page_contexts pc
           SET page_status = $1::page_status_enum
           WHERE context_id = $2
             AND page_id = ANY($3::int[]);
           `,
-          [PageStatus.RUNNING, contextId, successfullyEnqueuedIds],
+          [PageStatus.QUEUED, contextId, successfullyEnqueuedIds],
         );
 
         totalEnqueued += successfullyEnqueuedIds.length;

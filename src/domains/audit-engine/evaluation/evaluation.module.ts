@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EvaluationService } from './evaluation.service';
 import { Evaluation } from './entities/evaluation.entity';
 import { EvaluationController } from './evaluation.controller';
-import { BullModule } from '@nestjs/bullmq';
 import { Page } from 'src/domains/inventory/page/page.entity';
 import { AccessibilityStatementModule } from 'src/domains/compliance/accessibility-statement/accessibility-statement.module';
 import { EvaluationRepository } from './evaluation.repository';
@@ -13,11 +12,9 @@ import { ClickhouseModule } from 'src/core/clickhouse/clickhouse.module';
 import { EvaluationContext } from './entities/contexts-evaluation.entity';
 
 import { Website } from 'src/domains/inventory/website/website.entity';
-import { EvaluationParserService } from './evaluation-parser.service';
 import { RepositoryTableConfig } from 'src/common/repositories/base-context';
 import { EVALUATION_CONTEXT_METADATA_CONFIG } from './evaluation.constants';
 import { EvaluationStorage } from './contracts/evaluation-storage.contract';
-import { EvaluationLocalStorageStrategy } from './strategies/storage/evaluation-local-storage.strategy';
 import { EvaluationInitiatorRegistry } from './registries/evaluation-initiator.registry';
 import {
   GlobalEvaluationInitiationStrategy,
@@ -31,6 +28,10 @@ import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { PublicPageExtractorProcessor } from './queue/processors/page-public.processor';
 import { PrivatePageExtractorProcessor } from './queue/processors/page-private.processor';
 import { EvaluationS3StorageStrategy } from './strategies/storage/evaluation-s3-aws-storage.strategy';
+import { EvaluationPrivateEventsListener } from './queue/events/evaluation-private.event';
+import { EvaluationPublicEventsListener } from './queue/events/evaluation-public.event';
+import { QueuesModule } from 'src/core/queues/queues.module';
+import { EvaluationArtifact } from './entities/evaluation-artifacts.entity';
 
 export const EvaluationTableConfigProvider: Provider = {
   provide: EVALUATION_CONTEXT_METADATA_CONFIG,
@@ -53,14 +54,8 @@ export const EvaluationTableConfigProvider: Provider = {
 
 @Module({
   imports: [
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PUBLIC }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PUBLIC_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE_DLQ }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.EVAL_PRIVATE }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.PUBLIC_PAGE_DISPATCH }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.PRIVATE_PAGE_DISPATCH }),
-    TypeOrmModule.forFeature([Website, Page, Evaluation, EvaluationContext]),
+    QueuesModule,
+    TypeOrmModule.forFeature([EvaluationArtifact, Website, Page, Evaluation, EvaluationContext]),
     RedisModule,
     AccessibilityStatementModule,
     ClickhouseModule,
@@ -74,7 +69,6 @@ export const EvaluationTableConfigProvider: Provider = {
 
     EvaluationInitiatorRegistry,
     EvaluationService,
-    EvaluationParserService,
     EvaluationRepository,
     PublicPageExtractorProcessor,
     PrivatePageExtractorProcessor,
@@ -86,6 +80,8 @@ export const EvaluationTableConfigProvider: Provider = {
     WebsiteEvaluationInitiationStrategy,
     InstitutionEvaluationInitiationStrategy,
     GlobalEvaluationInitiationStrategy,
+    EvaluationPrivateEventsListener,
+    EvaluationPublicEventsListener,
   ],
   controllers: [EvaluationController],
 })

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ListenerModule } from './core/listener/listener.module';
 import { TelemetryModule } from './core/telemetry/telemetry.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { SseModule } from './core/sse/sse.module';
 import { AppService } from './app.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { IntegrationsModule } from './integrations/integrations.module';
@@ -54,6 +54,8 @@ import { EvaluationConsumerModule } from './core/consumer/consumer.module';
     IntegrationsModule,
     AuthorizationModule,
     ClickhouseModule,
+    SseModule,
+    ListenerModule,
   ],
   controllers: [],
   providers: [

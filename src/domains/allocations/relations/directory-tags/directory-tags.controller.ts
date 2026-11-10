@@ -10,6 +10,7 @@ import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { UpdateDirectoryTagsDto } from "./dtos/directory-tags-update.dto";
 import { AMS_ROLE_EDITOR, AMS_ROLE_VIEWER } from "src/core/authorization/policies/role.policies";
+import { DirectoryTagsResponseDTO } from "./dtos/directory-tags-response.dto";
 
 @DirectoryTagsDocs.controller()
 @Controller("directory/:directoryId/tags") 
@@ -24,7 +25,7 @@ export class DirectoryTagsController {
   @HttpCode(HttpStatus.OK)
   async getDirectoryTags(
     @Param("directoryId", ParseIntPipe) directoryId: number
-  ) {
+  ): Promise<DirectoryTagsResponseDTO> {
     return await this.orchestrator.getTagsOnDirectory(directoryId);
   }
 

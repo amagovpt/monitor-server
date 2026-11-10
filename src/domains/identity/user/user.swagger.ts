@@ -19,7 +19,8 @@ export const UserDocs = {
   controller: applyDecorators(
     ApiTags("user"),
     ApiBasicAuth(),
-    ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Unauthorized access." }),
+    ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token." }),
+    ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Insufficient permissions." }),
   ),
 
   create: applyDecorators(
@@ -61,12 +62,15 @@ export const UserDocs = {
 
   getUser: applyDecorators(
     ApiOperation({ summary: "Retrieve a specific user by their unique ID" }),
-    ApiResponse({ status: HttpStatus.OK, description: "User found.", type: UserDTO })
+    ApiParam({ name: "id", description: "Unique identifier of the user", type: Number, required: true }),
+    ApiResponse({ status: HttpStatus.OK, description: "User found.", type: UserDTO }),
+    ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Invalid user ID." }),
+    ApiResponse({ status: HttpStatus.NOT_FOUND, description: "User not found." })
   ),
 
   findAll: applyDecorators(
     ApiOperation({ summary: "Find all users with pagination and filters" }),
-    ApiQuery({ name: "query", description: "Query parameters for filtering, sorting, and paginating users", type: UserQueryDTO }),
+    ApiQuery({ type: UserQueryDTO }),
     ApiResponse({ status: HttpStatus.OK, description: "Paginated list retrieved.", type: UserPaginationResponse }),
     ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Invalid query parameters." }),
     HttpCode(HttpStatus.OK)

@@ -39,6 +39,18 @@ export class Directory implements IdentifiableModel, Auditable {
   })
   isInObservatory: boolean;
 
+  /**
+   * @technical-debt
+   * TODO: The 'tagStrategy' property (UNION/INTERSECTION) couples domain selection rules
+   * directly to the business container (Directory), violating SRP and causing semantic coupling.
+   *
+   * Context: This architectural risk was explicitly communicated.
+   * Accepted as technical debt due to strict delivery timelines.
+   * Future risk: Tag mutability silently affects website cohorts and can degrade analytical query
+   * performance in ClickHouse if data volume scales exponentially.
+   * Planned refactoring: Migrate to a persisted Smart Collections / Specification Pattern.
+   */
+
   @Column({
     name: 'tag_matching_strategy',
     type: 'enum',

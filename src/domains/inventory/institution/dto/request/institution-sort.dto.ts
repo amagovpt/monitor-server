@@ -1,24 +1,31 @@
-import { BaseSortDto } from "src/common/dto/request/base-sort.dto";
-import { IsIn, IsString, ValidateNested, IsOptional, IsArray } from "class-validator";
-import { Type } from "class-transformer";
-import { Institution } from "../../institution.entity";
+import { IsOptional } from 'class-validator';
+import { IsSortOrder } from 'src/common/decorators/is-sort-order.decorator';
+import { SortCriteria } from 'src/common/interfaces/types';
+import { BaseSortDto } from 'src/common/dto/request/base-sort.dto';
+import { Institution } from '../../institution.entity';
 
-export class InstitutionSortItem {
-  @IsIn(["id", "shortName", "longName", "createdAt", "updatedAt"])
-  @IsString()
-  field: keyof Institution; 
-
-  @IsIn(["ASC", "DESC", "asc", "desc"])
-  @IsString()
-  order: "ASC" | "DESC" | "asc" | "desc";
-}
 export class InstitutionSortDTO extends BaseSortDto<Institution> {
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => InstitutionSortItem) 
-  sorts?: InstitutionSortItem[];
-    getAllowedFields(): (keyof Institution)[] {
-        return ["id", "shortName", "longName", "createdAt", "updatedAt"];
-    }
+  @IsSortOrder()
+  id?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  shortName?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  longName?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  createdAt?: SortCriteria;
+
+  @IsOptional()
+  @IsSortOrder()
+  updatedAt?: SortCriteria;
+
+  getAllowedFields(): (keyof Institution)[] {
+    return ['id', 'shortName', 'longName', 'createdAt', 'updatedAt'];
+  }
 }

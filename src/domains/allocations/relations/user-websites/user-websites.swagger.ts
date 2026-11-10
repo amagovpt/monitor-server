@@ -8,34 +8,41 @@ import {
   ApiParam
 } from "@nestjs/swagger";
 import { UpdateUserWebsitesDto } from "./dtos/user-website-update.dto";
+import { UserWebsiteResponseDTO } from "./dtos/user-websites-response.dto";
 
 export const UserWebsitesDocs = {
   controller: () =>
     applyDecorators(
       ApiTags("user-websites"),
       ApiBearerAuth(),
-      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" }),
-      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden" })
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires FGA authorization" })
     ),
 
   getUserWebsites: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Get user website allocations",
-        description: "Retrieves the list of websites currently assigned to a specific user."
+        summary: "Get websites allocated to a user",
+        description: "Retrieves the list of websites currently assigned to the specified user."
       }),
-      ApiParam({ name: "userId", type: "number", description: "The unique identifier of the user" }),
-      ApiResponse({ status: HttpStatus.OK, description: "Successfully retrieved websites" })
+      ApiParam({ name: "userId", type: Number, required: true, description: "Unique identifier of the user" }),
+      ApiResponse({ status: HttpStatus.OK, description: "List of websites successfully retrieved", type: [UserWebsiteResponseDTO] }),
+      ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Invalid user ID (must be an integer)" }),
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires FGA viewer authorization" })
     ),
 
   updateUserWebsites: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Update user websites allocation (Delta update)",
-        description: "Atomically adds or removes website assignments for a specific user."
+        summary: "Update websites allocated to a user",
+        description: "Atomically adds and/or removes website assignments for the specified user."
       }),
-      ApiParam({ name: "userId", type: "number", description: "The unique identifier of the user" }),
-      ApiBody({ type: UpdateUserWebsitesDto }),
-      ApiResponse({ status: HttpStatus.OK, description: "Allocations successfully updated" })
+      ApiParam({ name: "userId", type: Number, required: true, description: "Unique identifier of the user" }),
+      ApiBody({ type: UpdateUserWebsitesDto, description: "Arrays of website IDs to add and remove" }),
+      ApiResponse({ status: HttpStatus.OK, description: "Website allocations successfully updated" }),
+      ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Invalid user ID or invalid request payload" }),
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role and FGA editor authorization" })
     ),
 };

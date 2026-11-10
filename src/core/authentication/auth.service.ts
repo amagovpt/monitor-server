@@ -4,12 +4,10 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../domains/identity/user/user.entity';
-import { InvalidToken } from './entitities/invalid-token.entity';
 import { comparePasswordHash } from '../../common/security';
 import axios from 'axios';
 import { NAME_CONVERTER, NIC } from './constants/constants';
@@ -26,6 +24,10 @@ export interface JWTTokenPayload {
   role: string;
   hash: string;
 }
+
+/** How long a revoked token is remembered when it carries no usable "exp" claim. */
+const FALLBACK_BLACKLIST_TTL_SECONDS = 24 * 60 * 60;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -126,20 +128,21 @@ export class AuthService {
       return;
     }
 
-    let expiresAt: Date;
+    let ttlSeconds: number;
     try {
       const payload = this.jwtService.decode(token);
-      expiresAt = payload?.exp ? new Date(payload.exp * 1000) : new Date();
-
-      if (expiresAt < new Date()) return;
+      if (payload?.exp) {
+        ttlSeconds = Math.ceil(payload.exp - Date.now() / 1000);
+        // already expired: nothing to revoke
+        if (ttlSeconds <= 0) return;
+      } else {
+        // a token without "exp" never expires by itself, so it must still be revoked
+        ttlSeconds = FALLBACK_BLACKLIST_TTL_SECONDS;
+      }
     } catch {
       this.logger.warn('Could not decode JWT exp, using fallback expiration');
-      expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 1);
+      ttlSeconds = FALLBACK_BLACKLIST_TTL_SECONDS;
     }
-
-    const ttlSeconds = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
-    if (ttlSeconds <= 0) return;
 
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const redisKey = `auth:blacklist:${tokenHash}`;
@@ -169,8 +172,10 @@ export class AuthService {
       { token, atributesName },
     );
     const authenticationContextId = responseStart.data.authenticationContextId;
+    // `params` URL-encodes the values, so tokens with "+", "&", "#" etc. arrive intact
     const responseAtributes = await axios.get(
-      `${AUTH_SERVER}/oauthresourceserver/api/AttributeManager?token=${token}&authenticationContextId=${authenticationContextId}`,
+      `${AUTH_SERVER}/oauthresourceserver/api/AttributeManager`,
+      { params: { token, authenticationContextId } },
     );
     return this.parseAtributes(responseAtributes.data);
   }
@@ -183,12 +188,4 @@ export class AuthService {
     });
     return result;
   }
-
-  /*
-  public async findUserByGovId(govUserId: number): Promise<User> {
-
-    return await this.userRepository.findOneOrFail({
-      where: { govUser: { id: govUserId } },
-    });
-  }*/
 }

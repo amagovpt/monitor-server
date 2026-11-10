@@ -1,5 +1,5 @@
 import { BaseFilter, BasePagination, BaseSort, SortCriteria } from 'src/common/interfaces/types';
-import { Context } from '../context/context.identity';
+import { Context } from '../context/context.entity';
 import { ContextEnum } from '../context/context.enum';
 import { SecurityContext } from 'src/core/authentication/interfaces/types';
 
@@ -8,11 +8,15 @@ export interface PageFilter extends BaseFilter {
   websiteId?: number;
   searchTerm?: string;
   contexts?: Context[];
+  archived?: boolean;
 }
 
 export interface PageSort extends BaseSort {
   url?: SortCriteria;
   createdAt?: SortCriteria;
+  id?: SortCriteria;
+  websiteId?: SortCriteria;
+  isInObservatory?: SortCriteria;
   score?: SortCriteria;
 }
 

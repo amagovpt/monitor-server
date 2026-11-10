@@ -1,10 +1,10 @@
-import { createMock, DeepMocked } from "@golevelup/ts-jest";
-import { AppLoggerService } from "@core/app-logger/app-logger.service";
-import { Repository, SelectQueryBuilder } from "typeorm";
-import { ConfigService } from "@nestjs/config";
-import { BaseModel } from "src/common/entities/base.entity";
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { AppLoggerService } from '@core/app-logger/app-logger.service';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { IdentifiableModel } from 'src/common/interfaces/Identifiable.interface';
 
-export const createBaseRepoMocks = <T extends BaseModel>(
+export const createBaseRepoMocks = <T extends IdentifiableModel>(
   entity: T,
 ): {
   mockOrmRepository: DeepMocked<Repository<T>>;
@@ -16,8 +16,8 @@ export const createBaseRepoMocks = <T extends BaseModel>(
   const mockOrmRepository = createMock<Repository<T>>();
   const mockLogger = createMock<AppLoggerService>();
   const mockConfigService = createMock<ConfigService>();
-  Object.defineProperty(mockOrmRepository, "metadata", {
-    value: { name: "MockEntity", primaryColumns: [{ propertyName: "id" }] },
+  Object.defineProperty(mockOrmRepository, 'metadata', {
+    value: { name: 'MockEntity', primaryColumns: [{ propertyName: 'id' }] },
     configurable: true,
   });
   mockQueryBuilder.andWhere.mockReturnThis();
@@ -30,7 +30,7 @@ export const createBaseRepoMocks = <T extends BaseModel>(
   mockOrmRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
   mockConfigService.get.mockImplementation((key, def) =>
-    key === "PAGINATION_MAX_LIMIT" ? 100 : def,
+    key === 'PAGINATION_MAX_LIMIT' ? 100 : def,
   );
   mockOrmRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
   mockQueryBuilder.andWhere.mockReturnThis();

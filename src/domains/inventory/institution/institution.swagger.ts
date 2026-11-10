@@ -6,7 +6,7 @@ import {
   ApiBasicAuth, 
   ApiParam 
 } from "@nestjs/swagger";
-import { Institution } from "./institution.entity";
+import { InstitutionResponseDTO } from "./dto/institution-response.dto";
 import { Website } from "src/domains/inventory/website/website.entity";
 import { Page } from "src/domains/inventory/page/page.entity";
 
@@ -42,37 +42,45 @@ export const InstitutionDocs = {
   findAllPaged: () =>
     applyDecorators(
       ApiOperation({
-        summary: "Find institution by search term, size, page, sort and sort direction in AMS",
+        summary: "List institutions with pagination, sorting and search filters",
       }),
-      ApiResponse({ status: 200, description: "Success", type: Number }),
+      ApiResponse({ status: 200, description: "Paginated list of institutions retrieved successfully", type: [InstitutionResponseDTO] }),
+      ApiResponse({ status: 400, description: "Invalid query parameters" }),
       HttpCode(200)
     ),
 
   info: () =>
     applyDecorators(
       ApiOperation({ summary: "Find institution info by id" }),
-      ApiResponse({ status: 200, description: "Success", type: Institution }),
+      ApiParam({ name: "institutionId", type: Number, required: true, description: "Unique identifier of the institution" }),
+      ApiResponse({ status: 200, description: "Institution retrieved successfully", type: InstitutionResponseDTO }),
+      ApiResponse({ status: 400, description: "Invalid institution ID" }),
+      ApiResponse({ status: 404, description: "Institution not found" }),
       HttpCode(200)
     ),
 
   create: () =>
     applyDecorators(
       ApiOperation({ summary: "Create a new institution" }),
-      ApiResponse({ status: 200, description: "A new institution was created", type: Institution }),
-      HttpCode(200)
+      ApiResponse({ status: 201, description: "A new institution was created", type: InstitutionResponseDTO }),
+      ApiResponse({ status: 400, description: "Invalid request payload" }),
+      HttpCode(201)
     ),
 
   update: () =>
     applyDecorators(
       ApiOperation({ summary: "Update a specific institution" }),
-      ApiResponse({ status: 200, description: "The institution was updated", type: Institution }),
+      ApiResponse({ status: 200, description: "The institution was updated", type: Boolean }),
+      ApiResponse({ status: 400, description: "Invalid request payload" }),
+      ApiResponse({ status: 500, description: "Internal Server Error - Update failed" }),
       HttpCode(200)
     ),
 
   delete: () =>
     applyDecorators(
       ApiOperation({ summary: "Delete a specific institution" }),
-      ApiResponse({ status: 200, description: "The institution was deleted", type: Boolean }),
+      ApiResponse({ status: 200, description: "The institution was deleted" }),
+      ApiResponse({ status: 400, description: "Invalid request payload" }),
       HttpCode(200)
     ),
 

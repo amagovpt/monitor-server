@@ -1,5 +1,5 @@
 import { Evaluation } from 'src/domains/audit-engine/evaluation/entities/evaluation.entity';
-import { Context } from 'src/domains/inventory/context/context.identity';
+import { Context } from 'src/domains/inventory/context/context.entity';
 import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('evaluation_contexts')

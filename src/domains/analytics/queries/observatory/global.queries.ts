@@ -1,24 +1,8 @@
 import { ResourceQuerySet } from '../type';
 
 export const EVALUATIONS_DIRECTORY_COMBINED_LATEST_AMS_CTE = `
-    temp_pages AS (
-        SELECT * 
-        FROM latest_page_evaluations_temp 
-        WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
-         
-    ),
-    main_pages AS (
-        SELECT * 
-        FROM latest_page_evaluations FINAL
-        WHERE page_id NOT IN (SELECT page_id FROM temp_pages) 
-        AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
-    ),
     combined_latest AS (
-        SELECT * FROM temp_pages
-        UNION ALL
-        SELECT * FROM main_pages
+        SELECT * FROM v_latest_pages_evaluations
     )
 `;
 

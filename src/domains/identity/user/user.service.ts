@@ -4,7 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { User } from './user.entity';
+import { PermissionLevel, User } from './user.entity';
 import { plainToInstance } from 'class-transformer';
 import {
   comparePasswordHash,
@@ -39,9 +39,15 @@ export class UserService {
   ) {}
 
   async findUserByGovCC(ccNumber: string): Promise<User> {
-    return await this.userRepository
+    const user = await this.userRepository
       .getOrmRepository()
-      .findOneOrFail({ where: { ccNumber: ccNumber } });
+      .findOne({ where: { ccNumber: ccNumber } });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return user;
   }
 
   async changeUserPassword(
@@ -90,8 +96,7 @@ export class UserService {
     if (dto.newPassword) {
       await this.changeUserPassword(userId, dto.currentPassword, dto.newPassword);
     }
-    const updatedUser = await this.userRepository.getOrmRepository().save(user);
-    return plainToInstance(UserDTO, updatedUser, { excludeExtraneousValues: true });
+    return plainToInstance(UserDTO, user, { excludeExtraneousValues: true });
   }
 
   async updateUser(userId: number, dto: UpdateUserDto): Promise<UserDTO> {
@@ -100,23 +105,66 @@ export class UserService {
       throw new NotFoundException('User not found.');
     }
 
-    if (dto.role) this.handleRoleUpdate(user, dto.role);
     await this.validateUniqueness(userId, dto);
 
-    if (dto.ccNumber !== undefined) user.ccNumber = dto.ccNumber;
+    const previousRoleSlug = this.roleService.getSlugByRoleId(user.roleId);
+    const previousPermission = user.permission;
 
-    const savedUpdate = await this.userRepository.getOrmRepository().save(user);
-    if (dto.role) {
-      savedUpdate.role = {
-        id: savedUpdate.roleId,
-        slug: dto.role,
+    let newRoleSlug: RoleSlug | undefined;
+    let roleChanged = false;
+
+    if (dto.role !== undefined) {
+      newRoleSlug = dto.role as RoleSlug;
+      const newRoleId = this.roleService.getRoleIdBySlug(newRoleSlug);
+      if (!newRoleId) {
+        throw new BadRequestException('The provided role is not valid in the system.');
+      }
+      roleChanged = newRoleId !== user.roleId;
+      if (roleChanged) {
+        user.roleId = newRoleId;
+      }
+    }
+
+    if (dto.ccNumber !== undefined) {
+      user.ccNumber = dto.ccNumber;
+    }
+
+    let newPermission: PermissionLevel | undefined;
+    let permissionChanged = false;
+
+    if (dto.permission !== undefined) {
+      newPermission = dto.permission as unknown as PermissionLevel;
+      permissionChanged = previousPermission !== newPermission;
+      if (permissionChanged) {
+        user.permission = newPermission;
+      }
+    }
+
+    if (!roleChanged && !permissionChanged && dto.ccNumber === undefined) {
+      return plainToInstance(UserDTO, user, { excludeExtraneousValues: true });
+    }
+
+    const savedUser = await this.userRepository.updateUser(user, {
+      role: previousRoleSlug,
+      newRoleSlug: roleChanged ? newRoleSlug : undefined,
+      permission: previousPermission,
+      newPermission: permissionChanged ? newPermission : undefined,
+    });
+
+    if (roleChanged && newRoleSlug) {
+      savedUser.role = {
+        id: savedUser.roleId,
+        slug: newRoleSlug,
       } as Role;
     }
 
-    return plainToInstance(UserDTO, savedUpdate, { excludeExtraneousValues: true });
+    return plainToInstance(UserDTO, savedUser, { excludeExtraneousValues: true });
   }
-
   async delete(userId: number): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
     await this.userRepository.deleteUser(userId);
   }
 
@@ -142,14 +190,18 @@ export class UserService {
 
   async findAllFromMyMonitor(): Promise<User[]> {
     return this.userRepository.getOrmRepository().find({
-      select: ['id', 'username', 'role', 'createdAt', 'lastLogin'],
+      select: ['id', 'username', 'createdAt', 'lastLogin'],
       where: { role: { slug: RoleSlug.MONITOR } },
       relations: ['role'],
     });
   }
 
   async findById(id: number): Promise<User> {
-    return this.userRepository.getOrmRepository().findOneOrFail({ where: { id: id } });
+    const user = await this.userRepository.getOrmRepository().findOne({ where: { id: id } });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    return user;
   }
 
   async findByUsername(username: string): Promise<User | null> {
@@ -160,6 +212,11 @@ export class UserService {
     securityContext: AuthenticatedUser,
     userCreateDto: CreateUserDto,
   ): Promise<UserDTO> {
+    await this.validateUniqueUserConflicts(userCreateDto, {
+      ccNumber: userCreateDto.ccNumber,
+      username: userCreateDto.username,
+    });
+
     const user = new User();
     user.username = userCreateDto.username;
     user.password = await generatePasswordHash(userCreateDto.password);
@@ -168,6 +225,7 @@ export class UserService {
     user.roleId = this.roleService.getRoleIdBySlug(userCreateDto.role as RoleSlug);
     user.uniqueHash = createRandomUniqueHash();
     user.createdById = securityContext.id;
+    user.permission = userCreateDto.permission as unknown as PermissionLevel;
     const savedUser = await this.userRepository.createUser(
       user,
       userCreateDto.role,
@@ -182,27 +240,16 @@ export class UserService {
       throw new NotFoundException();
     }
   }
-  private handleRoleUpdate(user: User, roleSlug: string): void {
-    const roleId = this.roleService.getRoleIdBySlug(roleSlug as RoleSlug);
-    if (!roleId) {
-      throw new BadRequestException('The provided role is not valid in the system.');
-    }
-    (user as { role?: Role }).role = undefined;
-    user.roleId = roleId;
-  }
 
   private async validateUniqueness(userId: number, dto: UpdateUserDto): Promise<void> {
-    const repo = this.userRepository.getOrmRepository();
+    if (!dto.ccNumber) return;
 
-    if (!dto.email && !dto.ccNumber) return;
-
-    const conflict = await repo.findOne({
-      where: [...(dto.ccNumber ? [{ ccNumber: dto.ccNumber, id: Not(userId) }] : [])],
+    const conflict = await this.userRepository.getOrmRepository().findOne({
+      where: { ccNumber: dto.ccNumber, id: Not(userId) },
     });
 
-    if (conflict && conflict.id !== userId) {
-      const field = conflict.ccNumber === dto.ccNumber ? 'citizen card number' : 'username';
-      throw new BadRequestException(`A user with the provided ${field} already exists.`);
+    if (conflict) {
+      throw new BadRequestException('A user with the provided citizen card number already exists.');
     }
   }
 

@@ -11,6 +11,7 @@ import { TeamMembersDocs } from "./team-members.swagger";
 import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { AMS_ROLE_EDITOR } from "src/core/authorization/policies/role.policies";
+import { TeamMembersResponseDTO } from "./dtos/team-members-response.dto";
 
 @TeamMembersDocs.controller()
 @Controller("teams/:teamId/members") 
@@ -20,11 +21,12 @@ export class TeamMembersController {
 
 
     @Get('')
+    @TeamMembersDocs.getTeamMembers()
     @FgaAuthorized(AMS_ROLE_VIEWER)
     @HttpCode(HttpStatus.OK)
     async getTeamMembers(
       @Param("teamId", ParseIntPipe) teamId: number
-    ) {
+    ): Promise<TeamMembersResponseDTO> {
       return await this.service.getTeamMembers(teamId);
     }
   

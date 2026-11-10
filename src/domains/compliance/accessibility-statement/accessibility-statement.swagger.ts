@@ -13,27 +13,40 @@ export const AccessibilityStatementDocs = {
       ApiResponse({ status: 403, description: "Forbidden" })
     ),
 
-  findOne: () =>
-    applyDecorators(
-      ApiOperation({ summary: "Find accessibility statement by website name" }),
-      ApiParam({ name: "name", type: String }),
-      ApiResponse({ status: 200, description: "Success" }),
-      HttpCode(200)
-    ),
-
   findAll: () =>
     applyDecorators(
-      ApiOperation({ summary: "Get list of all accessibility statements" }),
-      ApiResponse({ status: 200, description: "Success" }),
+      ApiOperation({ summary: "List accessibility statements with pagination and filters" }),
+      ApiResponse({ status: 200, description: "Paginated list of accessibility statements retrieved successfully" }),
+      ApiResponse({ status: 400, description: "Invalid query parameters" }),
       HttpCode(200)
     ),
 
   findOneById: () =>
     applyDecorators(
-      ApiOperation({ summary: "Find accessibility statement by ID" }),
-      ApiParam({ name: "id", type: Number }),
-      ApiResponse({ status: 200, description: "Success" }),
+      ApiOperation({ summary: "Get an accessibility statement by ID" }),
+      ApiParam({ name: "id", type: Number, required: true, description: "Unique identifier of the accessibility statement" }),
+      ApiResponse({ status: 200, description: "Accessibility statement retrieved successfully" }),
+      ApiResponse({ status: 400, description: "Invalid ID (must be an integer)" }),
+      ApiResponse({ status: 404, description: "Accessibility statement not found" }),
       HttpCode(200)
+    ),
+
+  upsert: () =>
+    applyDecorators(
+      ApiOperation({ summary: "Create or update an accessibility statement" }),
+      ApiResponse({ status: 200, description: "Accessibility statement successfully upserted" }),
+      ApiResponse({ status: 400, description: "Invalid request payload" }),
+      HttpCode(200)
+    ),
+
+  deleteById: () =>
+    applyDecorators(
+      ApiOperation({ summary: "Delete an accessibility statement by ID" }),
+      ApiParam({ name: "id", type: Number, required: true, description: "Unique identifier of the accessibility statement" }),
+      ApiResponse({ status: 204, description: "Accessibility statement successfully deleted" }),
+      ApiResponse({ status: 400, description: "Invalid ID (must be an integer)" }),
+      ApiResponse({ status: 404, description: "Accessibility statement not found" }),
+      HttpCode(204)
     ),
 
   findAllByYear: () =>

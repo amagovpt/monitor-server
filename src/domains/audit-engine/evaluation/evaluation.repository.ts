@@ -13,6 +13,9 @@ import { EvaluationContext } from './entities/contexts-evaluation.entity';
 import { EvaluationScoring, EvaluationTargetMetadata } from './types';
 import { ContextAwareRepository } from 'src/common/repositories/context-aware.repository';
 import { EVALUATION_CONTEXT_METADATA_CONFIG } from './evaluation.constants';
+import { OutboxService } from 'src/core/outbox/outbox.service';
+import { ResourceTypes } from './queue/payload.types';
+import { ACTION_REGISTRY } from './registry/registry.keys';
 
 export interface EvaluationFilter extends BaseFilter {
   id: number;
@@ -52,6 +55,7 @@ export class EvaluationRepository extends ContextAwareRepository<
     protected readonly configService: ConfigService,
     @Inject(EVALUATION_CONTEXT_METADATA_CONFIG)
     protected readonly tableConfig: RepositoryTableConfig,
+    protected readonly outboxService: OutboxService,
   ) {
     super(ormRepo, logger, configService, tableConfig);
     this.logger.setContext(EvaluationRepository.name);
@@ -102,6 +106,23 @@ export class EvaluationRepository extends ContextAwareRepository<
       .innerJoin('p.website', 'w');
   }
 
+  async getEvaluationByContext(
+    evaluationId: number,
+    websiteId: number,
+    pageId: number,
+    contextId: number,
+  ): Promise<Evaluation | null> {
+    const query = this.getBaseQuery();
+
+    query
+      .innerJoin('evaluation_contexts', 'ec', `ec.evaluationId = ${this.alias}.id`)
+      .andWhere(`${this.alias}.id = :evaluationId`, { evaluationId })
+      .andWhere('w.id = :websiteId', { websiteId })
+      .andWhere(`${this.alias}.pageId = :pageId`, { pageId })
+      .andWhere('ec.contextId = :contextId', { contextId });
+
+    return await query.getOne();
+  }
   async createEvaluation(evaluation: Evaluation, contextId: number): Promise<Evaluation> {
     return await this.dataSource.transaction(async (transactionalEntityManager) => {
       const savedEval = await transactionalEntityManager.save(evaluation);
@@ -236,5 +257,26 @@ export class EvaluationRepository extends ContextAwareRepository<
     }
 
     return rows[0];
+  }
+
+  async deleteEvaluation(evaluation: Evaluation, websiteId: number): Promise<void> {
+    this.runInTransaction(async (queryRunner) => {
+      await queryRunner.manager.delete(Evaluation, evaluation.id);
+      const manager = queryRunner.manager;
+
+      await this.outboxService.putInOutbox(manager, {
+        aggregateType: ResourceTypes.EVALUATION,
+        aggregateId: evaluation.id,
+        eventType: 'evaluation',
+        payload: {
+          resourceType: ResourceTypes.EVALUATION,
+          resourceId: evaluation.id,
+          action: ACTION_REGISTRY.EVALUATION_DELETE,
+          websiteId: websiteId,
+          pageId: evaluation.pageId,
+          evaluationDate: evaluation.evaluationDate!.toString(),
+        },
+      });
+    });
   }
 }

@@ -10,6 +10,7 @@ import { TagWebsitesDocs } from "./tag-website.swagger";
 import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { AMS_ROLE_EDITOR } from "src/core/authorization/policies/role.policies";
+import { TagWebsitesResponseDTO } from "./dtos/tag-websites-response.dto";
 
 @TagWebsitesDocs.controller()
 @Controller("websites/:websiteId/tags") // Rota RESTful consolidada
@@ -28,7 +29,7 @@ export class TagWebsitesController {
   @HttpCode(HttpStatus.OK)
   async getWebsiteTags(
     @Param("websiteId", ParseIntPipe) websiteId: number
-  ) {
+  ): Promise<TagWebsitesResponseDTO> {
     return await this.orchestrator.getTagsOnWebsite(websiteId);
   }
 

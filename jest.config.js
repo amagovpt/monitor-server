@@ -2,6 +2,7 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.spec.ts$',
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.spec\\.ts$', '\\.e2e-spec\\.ts$'],
   transform: {
     '^.+\\.(t|j)s$': [
       '@swc/jest',
@@ -13,7 +14,7 @@ module.exports = {
           },
           transform: {
             legacyDecorator: true,
-            decoratorMetadata: true, 
+            decoratorMetadata: true,
           },
           baseUrl: '.',
           paths: {
@@ -23,14 +24,12 @@ module.exports = {
             '@domains/*': ['./src/domains/*'],
             '@common/*': ['./src/common/*'],
             '@core/*': ['./src/core/*'],
-          }
+          },
         },
       },
     ],
   },
-  transformIgnorePatterns: [
-    '/node_modules/(?!uuid)/'
-  ],
+  transformIgnorePatterns: ['/node_modules/(?!uuid)/'],
   collectCoverageFrom: [
     '**/*.(t|j)s',
     '!main.(t|j)s',
@@ -49,6 +48,6 @@ module.exports = {
     '^@common/(.*)$': '<rootDir>/src/common/$1',
     '^@core/(.*)$': '<rootDir>/src/core/$1',
     '^test/(.*)$': '<rootDir>/test/$1',
-    '^src/(.*)$': '<rootDir>/src/$1', 
+    '^src/(.*)$': '<rootDir>/src/$1',
   },
 };

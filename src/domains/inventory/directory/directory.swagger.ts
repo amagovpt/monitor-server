@@ -32,8 +32,9 @@ export const DirectoryDocs = {
   getDirectory: () =>
     applyDecorators(
       ApiOperation({ summary: "Get a specific directory by ID" }),
-      ApiParam({ name: "directoryId", type: Number, description: "Directory unique identifier" }),
-      ApiResponse({ status: 200, description: "Success", type: DirectoryDTO }),
+      ApiParam({ name: "directoryId", type: Number, required: true, description: "Directory unique identifier" }),
+      ApiResponse({ status: 200, description: "Directory retrieved successfully", type: DirectoryDTO }),
+      ApiResponse({ status: 400, description: "Bad Request - Invalid directory ID" }),
       ApiResponse({ status: 404, description: "Directory not found" })
     ),
 
@@ -42,7 +43,7 @@ export const DirectoryDocs = {
       ApiOperation({ summary: "Create a new directory" }),
       ApiBody({ type: CreateDirectory }),
       ApiResponse({ status: 201, description: "Directory successfully created", type: DirectoryDTO }),
-      ApiResponse({ status: 400, description: "Bad Request / Validation error" })
+      ApiResponse({ status: 400, description: "Bad Request - Validation error" })
     ),
 
   update: () =>
@@ -56,8 +57,9 @@ export const DirectoryDocs = {
   delete: () =>
     applyDecorators(
       ApiOperation({ summary: "Delete a specific directory" }),
-      ApiParam({ name: "directoryId", type: Number, description: "Directory unique identifier" }),
+      ApiParam({ name: "directoryId", type: Number, required: true, description: "Directory unique identifier" }),
       ApiResponse({ status: 204, description: "Directory successfully deleted" }),
+      ApiResponse({ status: 400, description: "Bad Request - Invalid directory ID" }),
       ApiResponse({ status: 404, description: "Directory not found" })
     ),
 };

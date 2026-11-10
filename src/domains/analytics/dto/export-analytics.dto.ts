@@ -1,28 +1,33 @@
-import { IsEnum } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsDefined, IsEnum, IsInt, IsNotEmpty, IsString, Min, ValidateIf } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ExportFormat, ExportContext, ExportResource } from '../queries/type';
 
-export enum ExportFormat {
-  CSV = 'csv',
-  JSON = 'json',
-  PARQUET = 'parquet',
-}
-export enum ExportContext {
-  AMS = 'ams',
-  OBS = 'obs',
-  MYMONITOR = 'mymonitor',
-  ACCESSMONITOR = 'accessmonitor',
-}
+const RESOURCES_REQUIRING_ENTITY = new Set<ExportResource>([
+  ExportResource.WEBSITE,
+  ExportResource.TAG,
+  ExportResource.INSTITUTION,
+  ExportResource.DIRECTORY,
+  ExportResource.LATEST_PAGES_EVALUATION,
+  ExportResource.ALL_PAGES_EVALUATIONS,
+]);
 
-export class ExportAnalyticsParamsDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase().trim() : value))
-  @IsEnum(ExportFormat, {
-    message: `Formato de exportação inválido. Valores aceites: ${Object.values(ExportFormat).join(', ')}`,
-  })
+export class ExportAnalyticsDto {
+  @IsEnum(ExportResource)
+  resource: ExportResource;
+
+  @IsEnum(ExportFormat)
   format: ExportFormat;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.toLowerCase().trim() : value))
-  @IsEnum(ExportContext, {
-    message: `Contexto de exportação inválido. Valores aceites: ${Object.values(ExportContext).join(', ')}`,
-  })
+  @IsEnum(ExportContext)
   context: ExportContext;
+
+  @ValidateIf(
+    (o: ExportAnalyticsDto) =>
+      RESOURCES_REQUIRING_ENTITY.has(o.resource) || o.entityId !== undefined,
+  )
+  @IsDefined({ message: 'entityId is required for the selected resource' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  entityId?: number;
 }

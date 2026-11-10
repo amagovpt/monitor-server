@@ -1,316 +1,261 @@
+/**
+ * Queries de um website (apenas observatório).
+ *
+ * Todas partem de v_latest_pages_evaluations, que já aplica:
+ *  - deduplicação (temp vs principal, version, is_deleted)
+ *  - página no observatório
+ *  - website no observatório
+ *  - website com pelo menos um diretório no observatório
+ */
+const QUARTILE_TYPE =
+  'Tuple(total String, percentage String, interval Tuple(lower String, upper String))';
+const ROW_ITEM_TYPE = `Tuple(key String, occurrenceCount String, pageCount String, level String, quartiles Array(${QUARTILE_TYPE}))`;
+const TABLE_TYPE = `Tuple(keys Array(String), data Array(${ROW_ITEM_TYPE}))`;
+
 export const EVALUATIONS_COMBINED_LATEST_CTE = `
-    temp_pages AS (
-        SELECT * 
-        FROM latest_page_evaluations_temp 
-        WHERE website_id = {websiteId: UInt32} 
-          AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
-    ),
-    main_pages AS (
-        SELECT * 
-        FROM latest_page_evaluations FINAL
-        WHERE website_id = {websiteId: UInt32} 
-          AND page_id NOT IN (SELECT page_id FROM temp_pages) 
-          AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
-    ),
     combined_latest AS (
-        SELECT * FROM temp_pages
+        SELECT
+            website_id,
+            page_id,
+            evaluation_date,
+            score,
+            aaa_error_count,
+            aa_error_count,
+            a_error_count,
+            total_error_count,
+            failed_rules,
+            warning_rules,
+            passed_rules
+        FROM v_latest_pages_evaluations
+        WHERE website_id = {resourceId: UInt32}
+    )
+`;
+
+/**
+ * Explode os Maps failed/passed em linhas (page_id, rule_id, cnt).
+ * Substitui a leitura direta de evaluations / evaluations_temp.
+ */
+const FLATTENED_RULES_CTE = `
+    flattened_rules AS (
+        SELECT
+            'failed' AS rule_result,
+            page_id,
+            rule_entry.1 AS rule_id,
+            rule_entry.2 AS cnt
+        FROM combined_latest
+        ARRAY JOIN arrayZip(mapKeys(failed_rules), mapValues(failed_rules)) AS rule_entry
+
         UNION ALL
-        SELECT * FROM main_pages
+
+        SELECT
+            'passed' AS rule_result,
+            page_id,
+            rule_entry.1 AS rule_id,
+            rule_entry.2 AS cnt
+        FROM combined_latest
+        ARRAY JOIN arrayZip(mapKeys(passed_rules), mapValues(passed_rules)) AS rule_entry
     )
 `;
 
 export const websiteQueries = {
   summary: `
 WITH
-   ${EVALUATIONS_COMBINED_LATEST_CTE},
-    website_meta AS (
+    ${EVALUATIONS_COMBINED_LATEST_CTE},
+    website_data AS (
         SELECT
-            {websiteId: UInt32} AS id,
-            dictGet(
-                'institution_websites_dict', 
-                ('website_title', 'base_url', 'institution_name'), 
-                {websiteId: UInt32}
-            ) AS meta
+            website_id AS id,
+            website_id,
+            institution_id,
+            base_url AS baseUrl,
+            page_count AS pageCounts
+        FROM institution_websites_dict
+        WHERE website_id = {resourceId: UInt32}
+          AND is_in_observatory = 1
     )
 SELECT
     m.id,
-    m.meta.1 AS name,
-    m.meta.2 AS url,
-    m.meta.3 AS institutionName,
+    m.website_id AS websiteId,
+    m.baseUrl AS url,
+    dictGet('institution_websites_dict', 'institution_name', m.website_id) AS name,
     min(f.evaluation_date) AS oldestPageDate,
     max(f.evaluation_date) AS recentPageDate,
     round(avg(f.score), 1) AS score,
-    uniqExact(f.page_id) AS pageCount,
+    m.pageCounts AS pageCount,
 
     countIf(f.a_error_count > 0 OR f.aa_error_count > 0 OR f.aaa_error_count > 0) AS pagesWithErrorsCount,
     countIf(f.a_error_count = 0 AND f.aa_error_count = 0 AND f.aaa_error_count = 0) AS pagesWithoutErrorsCount,
-    
+
     countIf(f.a_error_count = 0 AND f.aa_error_count > 0) AS pagesWithoutErrorsA,
     countIf(f.a_error_count = 0 AND f.aa_error_count = 0 AND f.aaa_error_count > 0) AS pagesWithoutErrorsAA,
     countIf(f.a_error_count = 0 AND f.aa_error_count = 0 AND f.aaa_error_count = 0) AS pagesWithoutErrorsAAA
 FROM combined_latest AS f
-LEFT JOIN website_meta AS m ON f.website_id = m.id
+CROSS JOIN website_data AS m
 GROUP BY
     m.id,
-    m.meta;
+    m.website_id,
+    m.institution_id,
+    m.baseUrl,
+    m.pageCounts;
 `,
+
   plotScore: `
 WITH ${EVALUATIONS_COMBINED_LATEST_CTE}
 SELECT
-    groupArray(score) AS accessibilityPlotData
-FROM (
-    SELECT score
-    FROM combined_latest
-    ORDER BY score DESC
-);
+    arrayReverseSort(groupArray(score)) AS accessibilityPlotData
+FROM combined_latest;
 `,
+
+  // 10 baldes: 0..8 = [n, n+1[, 9 = [9, 10]
   scoreDistribution: `
-WITH 
-${EVALUATIONS_COMBINED_LATEST_CTE}, 
-   buckets AS (
-        SELECT arrayJoin([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) AS bucket
-    )
-    SELECT 
-        groupArray(frequency) AS scoreDistributionFrequency
-    FROM (
-        SELECT 
-            b.bucket,
-            countIf(f.page_id != 0 AND least(toUInt8(floor(f.score)), 9) = b.bucket) AS frequency
-        FROM buckets AS b
-        LEFT JOIN combined_latest AS f ON least(toUInt8(floor(f.score)), 9) = b.bucket
-        GROUP BY b.bucket
-        ORDER BY b.bucket ASC
-);
+WITH ${EVALUATIONS_COMBINED_LATEST_CTE}
+SELECT [
+    countIf(floor(score) = 0),
+    countIf(floor(score) = 1),
+    countIf(floor(score) = 2),
+    countIf(floor(score) = 3),
+    countIf(floor(score) = 4),
+    countIf(floor(score) = 5),
+    countIf(floor(score) = 6),
+    countIf(floor(score) = 7),
+    countIf(floor(score) = 8),
+    countIf(floor(score) >= 9)
+] AS scoreDistributionFrequency
+FROM combined_latest
+WHERE page_id != 0;
 `,
-scoreMetrics: `
-    WITH 
-    ${EVALUATIONS_COMBINED_LATEST_CTE},
-    plot_data AS (
-        SELECT 
-            groupArray(score) AS accessibilityPlotData
-        FROM (
-            SELECT score
-            FROM combined_latest
-            WHERE page_id != 0
-            ORDER BY score DESC
-        )
-    ),
-    buckets AS (
-        -- Exatamente 9 baldes: 1 = [1-2[, 2 = [2-3[, ..., 8 = [8-9[, 9 = [9-10]
-        SELECT arrayJoin([1, 2, 3, 4, 5, 6, 7, 8, 9]) AS bucket
-    ),
-    distribution_data AS (
-        SELECT 
-            groupArray(frequency) AS scoreDistributionFrequency
-        FROM (
-            SELECT 
-                b.bucket,
-                countIf(
-                    f.page_id != 0 
-                    AND b.bucket = multiIf(
-                        f.score >= 9.0, 9,
-                        f.score < 1.0, 1,
-                        toUInt8(floor(f.score))
-                    )
-                ) AS frequency
-            FROM buckets AS b
-            LEFT JOIN combined_latest AS f ON 
-                b.bucket = multiIf(
-                    f.score >= 9.0, 9,
-                    f.score < 1.0, 1,
-                    toUInt8(floor(f.score))
-                )
-            GROUP BY b.bucket
-            ORDER BY b.bucket ASC
-        )
-    )
-SELECT 
-    p.accessibilityPlotData,
-    d.scoreDistributionFrequency
-FROM plot_data AS p
-CROSS JOIN distribution_data AS d;
+
+  // 9 baldes: 1 = [0-2[, 2 = [2-3[, ..., 8 = [8-9[, 9 = [9-10]
+  scoreMetrics: `
+WITH ${EVALUATIONS_COMBINED_LATEST_CTE}
+SELECT
+    arrayReverseSort(groupArray(score)) AS accessibilityPlotData,
+    [
+        countIf(score < 2),
+        countIf(score >= 2 AND score < 3),
+        countIf(score >= 3 AND score < 4),
+        countIf(score >= 4 AND score < 5),
+        countIf(score >= 5 AND score < 6),
+        countIf(score >= 6 AND score < 7),
+        countIf(score >= 7 AND score < 8),
+        countIf(score >= 8 AND score < 9),
+        countIf(score >= 9)
+    ] AS scoreDistributionFrequency
+FROM combined_latest
+WHERE page_id != 0;
 `,
+
   metrics: `
-WITH 
-    -- 1. Unificação das fontes
-    raw_evaluations AS (
-        SELECT
-            page_id,
-            rule_id,
-            count,
-            evaluation_date,
-            1 AS is_temp
-        FROM evaluations_temp
-        WHERE website_id = {websiteId: UInt32}
-          AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
+WITH
+    ${EVALUATIONS_COMBINED_LATEST_CTE},
+    ${FLATTENED_RULES_CTE},
 
-        UNION ALL
-
-        SELECT
-            page_id,
-            rule_id,
-            count,
-            evaluation_date,
-            0 AS is_temp
-        FROM evaluations
-        PREWHERE website_id = {websiteId: UInt32}
-        WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
-    ),
-
-    -- 2. Último snapshot de cada regra por página
-    latest_page_rules AS (
-        SELECT
-            page_id,
-            rule_id,
-            argMax(count, (is_temp, evaluation_date)) AS latest_count
-        FROM raw_evaluations
-        WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
-        GROUP BY page_id, rule_id
-    ),
-
-    -- 3. Agregação por regra + Enriquecimento com o Dicionário
+    -- Agregação por regra e resultado + enriquecimento com o dicionário
     rules_match AS (
         SELECT
-            rule_id,
+            rule_result,
+            toString(rule_id) AS rule_key,
             uniqExact(page_id) AS page_count,
-            sum(latest_count) AS ocorrences,
-            dictGet('rules_dict', 'wcag_level', rule_id) AS wcag_level,
-            dictGet('rules_dict', 'target_element', rule_id) AS target_element,
-            dictGet('rules_dict', 'test_method', rule_id) AS test_method,
-            dictGet('rules_dict', 'expected_result', rule_id) AS expected_result
-        FROM latest_page_rules
-        GROUP BY rule_id
-        ORDER BY ocorrences DESC
+            sum(cnt) AS ocorrences,
+            toString(dictGet('rules_dict', 'target_element', rule_id)) AS target_element,
+            toString(dictGet('rules_dict', 'test_method', rule_id)) AS test_method
+        FROM flattened_rules
+        GROUP BY rule_result, rule_id
     )
 
--- 4. Agregação final 
-SELECT 
-    -- Erros (failed)
-    groupArrayIf(10)(
-        map(
-            'key', rule_id,
-            'pagesCount', toString(page_count),
-            'occurrenceCount', toString(ocorrences)
+SELECT
+    -- Top 10 erros (ordenados por ocorrências, desc)
+    arrayMap(
+        t -> map(
+            'key', t.2,
+            'pagesCount', toString(t.3),
+            'occurrenceCount', toString(t.1)
         ),
-        expected_result = 'failed'
+        arraySlice(
+            arrayReverseSort(
+                groupArrayIf(tuple(ocorrences, rule_key, page_count), rule_result = 'failed')
+            ),
+            1, 10
+        )
     ) AS errorsDistribution,
 
-    -- Boas Práticas (passed)
-    groupArrayIf(10)(
-        map(
-            'key', rule_id,
-            'pagesCount', toString(page_count),
-            'occurrenceCount', toString(ocorrences)
+    -- Top 10 boas práticas
+    arrayMap(
+        t -> map(
+            'key', t.2,
+            'pagesCount', toString(t.3),
+            'occurrenceCount', toString(t.1)
         ),
-        expected_result = 'passed'
+        arraySlice(
+            arrayReverseSort(
+                groupArrayIf(tuple(ocorrences, rule_key, page_count), rule_result = 'passed')
+            ),
+            1, 10
+        )
     ) AS bestPracticesDistribution,
 
-    -- Métricas de Sucesso em Mapa indexado por rule_id
+    -- Métricas por regra (indexadas por rule_id)
     mapFromArrays(
-        groupArrayIf(rule_id, expected_result = 'passed'),
+        groupArrayIf(rule_key, rule_result = 'passed'),
         groupArrayIf(
             map(
                 'pageCount', toString(page_count),
                 'occurrenceCount', toString(ocorrences),
                 'element', target_element,
                 'testName', test_method,
-                'result', expected_result
+                'result', rule_result
             ),
-            expected_result = 'passed'
+            rule_result = 'passed'
         )
     ) AS successMetrics,
-     mapFromArrays(
-        groupArrayIf(rule_id, expected_result = 'failed'),
+
+    mapFromArrays(
+        groupArrayIf(rule_key, rule_result = 'failed'),
         groupArrayIf(
             map(
                 'pageCount', toString(page_count),
                 'occurrenceCount', toString(ocorrences),
                 'element', target_element,
                 'testName', test_method,
-                'result', expected_result
+                'result', rule_result
             ),
-            expected_result = 'failed'
+            rule_result = 'failed'
         )
     ) AS errorMetrics
 FROM rules_match;
-
-
 `,
+
   rulesLatestQuartiles: `
- WITH
-    -- 1. Unificação das tabelas de avaliações com prioridade para a evaluations_temp
-    raw_evaluations AS (
-        SELECT
-            page_id,
-            rule_id,
-            count,
-            evaluation_date,
-            1 AS is_temp
-        FROM evaluations_temp
-        WHERE (website_id = {websiteId: UInt32}) AND dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', website_id, false) = true
+WITH
+    ${EVALUATIONS_COMBINED_LATEST_CTE},
+    ${FLATTENED_RULES_CTE},
 
-        UNION ALL
-
-        SELECT
-            page_id,
-            rule_id,
-            count,
-            evaluation_date,
-            0 AS is_temp
-        FROM evaluations
-        PREWHERE website_id = {websiteId: UInt32}
-        WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-          AND dictGetOrDefault('institution_websites_dict', 'is_in_observatory', {websiteId: UInt32}, false) = true
-    ),
-
-    -- 2. Snapshot mais recente por (page_id, rule_id)
-
-    latest_pages_snapshot AS (
-        SELECT
-            page_id,
-            rule_id,
-            argMax(count, (is_temp, evaluation_date)) AS latest_count
-        FROM raw_evaluations
-        WHERE dictGetOrDefault('pages_context_dict', 'is_in_observatory', page_id, false) = true
-        GROUP BY page_id, rule_id
-    ),
-
-    -- 3. Métricas base e cálculo de quartis exatos por regra
+    -- Métricas base e quartis exatos por regra
     base_metrics AS (
         SELECT
-            rule_id,
-            dictGet('rules_dict', 'wcag_level', rule_id) AS wcag_level,
-            dictGet('rules_dict', 'expected_result', rule_id) AS expected_result,
-            length(groupArray(latest_count)) AS total_pages,
-            sum(latest_count) AS total_occurrences,
-            arraySort(groupArray(latest_count)) AS vals,
-            quantilesExact(0.25, 0.50, 0.75, 1.0)(latest_count) AS q
-        FROM latest_pages_snapshot
-        GROUP BY rule_id
+            rule_result,
+            toString(rule_id) AS rule_key,
+            toString(dictGet('rules_dict', 'wcag_level', rule_id)) AS wcag_level,
+            count() AS total_pages,
+            sum(cnt) AS total_occurrences,
+            arraySort(groupArray(cnt)) AS vals,
+            quantilesExact(0.25, 0.50, 0.75, 1.0)(cnt) AS q
+        FROM flattened_rules
+        GROUP BY rule_result, rule_id
     ),
 
-    -- 4. Separação em baldes e descarte de baldes vazios
+    -- Baldes por quartil (descarta baldes vazios)
     quartiles_built AS (
         SELECT
-            rule_id,
+            rule_result,
+            rule_key,
             wcag_level,
-            expected_result,
             total_pages,
             total_occurrences,
             arrayMap(
-                b -> map(
-                    'total', toString(length(b)),
-                    'percentage', toString(round((length(b) / total_pages) * 100)),
-                    'interval', map(
-                        'lower', toString(b[1]),
-                        'upper', toString(b[-1])
-                    )
+                b -> tuple(
+                    toString(length(b)),
+                    toString(round((length(b) / total_pages) * 100)),
+                    tuple(toString(b[1]), toString(b[-1]))
                 ),
                 arrayFilter(
                     b -> length(b) > 0,
@@ -323,35 +268,41 @@ FROM rules_match;
                 )
             ) AS quartiles
         FROM base_metrics
-        ORDER BY total_occurrences DESC
     ),
 
-    -- 5. Mapeamento de cada linha individual
     table_rows AS (
         SELECT
-            expected_result,
-            map(
-                'key', rule_id,
-                'occurrenceCount', toString(total_occurrences),
-                'pageCount', toString(total_pages),
-                'level', wcag_level,
-                'quartiles', quartiles
+            rule_result,
+            total_occurrences,
+            CAST(
+                (
+                    rule_key,
+                    toString(total_occurrences),
+                    toString(total_pages),
+                    wcag_level,
+                    quartiles
+                ),
+                '${ROW_ITEM_TYPE}'
             ) AS row_item
         FROM quartiles_built
     )
 
--- 6. Agrupamento final segregado por passed (success) e failed (errors)
 SELECT
-    -- Tabela de Boas Práticas (Passed)
-    map(
-        'keys', arrayMap(i -> toString(i), range(length(groupArrayIf(row_item, expected_result = 'passed')))),
-        'data', groupArrayIf(row_item, expected_result = 'passed')
+    arrayMap(
+        t -> t.2,
+        arrayReverseSort(groupArrayIf(tuple(total_occurrences, row_item), rule_result = 'passed'))
+    ) AS passed_rows,
+    arrayMap(
+        t -> t.2,
+        arrayReverseSort(groupArrayIf(tuple(total_occurrences, row_item), rule_result = 'failed'))
+    ) AS failed_rows,
+    CAST(
+        (arrayMap(i -> toString(i), range(length(passed_rows))), passed_rows),
+        '${TABLE_TYPE}'
     ) AS successDetailsTable,
-
-    -- Tabela de Erros (Failed)
-    map(
-        'keys', arrayMap(i -> toString(i), range(length(groupArrayIf(row_item, expected_result = 'failed')))),
-        'data', groupArrayIf(row_item, expected_result = 'failed')
+    CAST(
+        (arrayMap(i -> toString(i), range(length(failed_rows))), failed_rows),
+        '${TABLE_TYPE}'
     ) AS errorsDetailsTable
 FROM table_rows;
 `,

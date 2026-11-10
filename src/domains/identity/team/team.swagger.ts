@@ -26,26 +26,30 @@ export const TeamDocs = {
   createTeam: () => applyDecorators(
     ApiOperation({ summary: "Create a new team" }),
     ApiBody({ type: CreateTeamDTO }),
-    ApiResponse({ status: 201, type: TeamDetailsDTO, description: "Team created successfully." }),
+    ApiResponse({ status: 201, type: TeamDTO, description: "Team created successfully." }),
+    ApiResponse({ status: 400, description: "Bad Request - Invalid payload." }),
     ApiResponse({ status: 409, description: "Conflict - Team name already exists." })
   ),
 
   getTeamById: () => applyDecorators(
     ApiOperation({ summary: "Get team by ID" }),
-    ApiParam({ name: "id", type: "integer", description: "Numerical team ID" }),
-    ApiResponse({ status: 200, type: TeamDetailsDTO, description: "Team details returned successfully." }),
+    ApiParam({ name: "id", type: "integer", required: true, description: "Numerical team ID" }),
+    ApiResponse({ status: 200, type: TeamDTO, description: "Team details returned successfully." }),
+    ApiResponse({ status: 400, description: "Bad Request - Invalid team ID." }),
     ApiResponse({ status: 404, description: "Team not found." })
   ),
 
   getAllTeams: () => applyDecorators(
-    ApiOperation({ summary: "List all teams" }),
-    ApiResponse({ status: 200, type: UserPaginationResponse, description: "List of teams returned successfully." })
+    ApiOperation({ summary: "List all teams with pagination and filters" }),
+    ApiResponse({ status: 200, type: UserPaginationResponse, description: "Paginated list of teams returned successfully." }),
+    ApiResponse({ status: 400, description: "Bad Request - Invalid query parameters." })
   ),
 
   deleteTeam: () => applyDecorators(
     ApiOperation({ summary: "Delete a team" }),
-    ApiParam({ name: "id", type: "integer", description: "Target team ID" }),
+    ApiParam({ name: "id", type: "integer", required: true, description: "Target team ID" }),
     ApiResponse({ status: 204, description: "Team deleted successfully." }),
+    ApiResponse({ status: 400, description: "Bad Request - Invalid team ID." }),
     ApiResponse({ status: 404, description: "Team not found." })
   ),
 

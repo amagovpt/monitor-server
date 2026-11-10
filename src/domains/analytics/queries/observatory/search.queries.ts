@@ -1,5 +1,5 @@
 export const SEARCH_WEBSITES_QUERY = `
-WITH
+    WITH
           filtered_websites AS
           (
               SELECT

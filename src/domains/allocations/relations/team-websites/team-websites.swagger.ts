@@ -8,14 +8,15 @@ import {
   ApiParam
 } from "@nestjs/swagger";
 import { UpdateTeamWebsitesDto } from "./dtos/team-website-update.dto";
+import { TeamWebsiteResponseDTO } from "./dtos/team-websites-response.dto";
 
 export const TeamWebsitesDocs = {
   controller: () =>
     applyDecorators(
       ApiTags("team-websites"),
       ApiBearerAuth(),
-      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" }),
-      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires Admin role" })
+      ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized - Missing or invalid authentication token" }),
+      ApiResponse({ status: HttpStatus.FORBIDDEN, description: "Forbidden - Requires FGA authorization" })
     ),
   getTeamWebsites: () =>
     applyDecorators(
@@ -25,28 +26,39 @@ export const TeamWebsitesDocs = {
       }),
       ApiParam({ 
         name: "teamId", 
-        type: "number", 
-        description: "The unique identifier of the team" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the team" 
       }),
       ApiResponse({ 
         status: HttpStatus.OK, 
-        description: "Successfully retrieved the list of websites for the team" 
+        description: "List of websites successfully retrieved for the team",
+        type: [TeamWebsiteResponseDTO]
       }),
       ApiResponse({ 
-        status: HttpStatus.NOT_FOUND, 
-        description: "Team not found" 
+        status: HttpStatus.BAD_REQUEST, 
+        description: "Invalid team ID (must be an integer)" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires FGA viewer authorization" 
       })
     ),
   updateTeamWebsites: () =>
     applyDecorators(
       ApiOperation({ 
-        summary: "Update team websites allocation (Delta update)",
-        description: "Atomically adds or removes specific websites from a team's allocation list."
+        summary: "Update websites allocated to a team",
+        description: "Atomically adds and/or removes websites from the specified team's allocation list."
       }),
       ApiParam({ 
         name: "teamId", 
-        type: "number", 
-        description: "The unique identifier of the team" 
+        type: Number, 
+        required: true,
+        description: "Unique identifier of the team" 
       }),
       ApiBody({ 
         type: UpdateTeamWebsitesDto,
@@ -58,7 +70,15 @@ export const TeamWebsitesDocs = {
       }),
       ApiResponse({ 
         status: HttpStatus.BAD_REQUEST, 
-        description: "Invalid team or website identifiers" 
+        description: "Invalid team ID or invalid request payload" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.UNAUTHORIZED, 
+        description: "Unauthorized - Missing or invalid authentication token" 
+      }),
+      ApiResponse({ 
+        status: HttpStatus.FORBIDDEN, 
+        description: "Forbidden - Requires Admin role and FGA editor authorization" 
       })
     ),
 };

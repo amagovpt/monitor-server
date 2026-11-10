@@ -20,6 +20,7 @@ import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { RolesGuard } from "src/core/authorization/guards/roles.guard";
 import { Roles } from "src/core/authorization/decorators/roles.decorator";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
+import { AccessibilityStatementDocs } from "./accessibility-statement.swagger";
 
 @Controller("accessibility-statement")
 @UseGuards(JwtAuthGuard,RolesGuard,FgaGuard)
@@ -28,6 +29,7 @@ export class AccessibilityStatementController {
     private readonly accessibilityStatementService: AccessibilityStatementService,
   ) {}
 
+  @AccessibilityStatementDocs.findAll()
   @Get()
   @Roles(RoleSlug.ADMIN)
   @HttpCode(200)
@@ -35,6 +37,7 @@ export class AccessibilityStatementController {
     return await this.accessibilityStatementService.getAll(user, query);
   }
 
+  @AccessibilityStatementDocs.findOneById()
   @Get(":id")
   @Roles(RoleSlug.ADMIN)
   @FgaAuthorized({
@@ -47,6 +50,7 @@ export class AccessibilityStatementController {
     return await this.accessibilityStatementService.findById(id);
   }
 
+  @AccessibilityStatementDocs.upsert()
   @Post("")
   @Roles(RoleSlug.ADMIN)
   @FgaAuthorized({
@@ -60,6 +64,7 @@ export class AccessibilityStatementController {
   }
 
 
+  @AccessibilityStatementDocs.deleteById()
   @Roles(RoleSlug.ADMIN)
   @FgaAuthorized({
           objectType: "role",

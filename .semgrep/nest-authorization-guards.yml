@@ -1,5 +1,5 @@
 rules:
-  # 1. Todo o Controller tem de ter o trio de Guards declarado na classe
+  # 1. Todo o Controller tem de ter JwtAuthGuard declarado ao nível da classe
   - id: nestjs-controller-missing-security-guards
     languages: [typescript]
     severity: ERROR
@@ -21,7 +21,6 @@ rules:
           @UseGuards(..., JwtAuthGuard, ...)
           export class $CONTROLLER { ... }
 
-  # 2. Todo o endpoint HTTP tem de ter @Roles(...)
   - id: nestjs-method-missing-roles-decorator
     languages: [typescript]
     severity: ERROR
@@ -31,7 +30,6 @@ rules:
       include:
         - 'src/**/*.controller.ts'
     patterns:
-      # Captura qualquer método com verbo HTTP
       - pattern-either:
           - pattern: |
               @Get(...)
@@ -48,17 +46,33 @@ rules:
           - pattern: |
               @Patch(...)
               $METHOD(...) { ... }
-      # Não pode conter @Roles acima (sintaxe válida sem elipse isolada)
+      # Não pode ter @Roles em qualquer posição da stack de decorators
       - pattern-not-inside: |
-          @Roles(...)
-          $METHOD(...) { ... }
+          class $CLASS {
+            ...
+            @Roles(...)
+            $METHOD(...) { ... }
+            ...
+          }
+
+      # Exclui métodos decorados com @Public() ou @Public(...)
       - pattern-not-inside: |
-          @Roles(...)
-          @$OTHER_DEC(...)
-          $METHOD(...) { ... }
+          class $CLASS {
+            ...
+            @Public(...)
+            $METHOD(...) { ... }
+            ...
+          }
       - pattern-not-inside: |
-          @$OTHER_DEC(...)
+          class $CLASS {
+            ...
+            @Public
+            $METHOD(...) { ... }
+            ...
+          }
+      - pattern-not: |
           @Roles(...)
+          ...
           $METHOD(...) { ... }
 
   # 3. Rotas parametrizadas com :parametro devem ter @FgaAuthorized
@@ -87,22 +101,13 @@ rules:
           - pattern: |
               @Patch($ROUTE)
               $METHOD(...) { ... }
-      # Filtra rotas que têm ":" no path (ex: ':websiteId')
       - metavariable-regex:
           metavariable: $ROUTE
           regex: '.*:.*'
-      # Exclui se tiver o decorator @FgaAuthorized
-      - pattern-not-inside: |
+      # Exclui se @FgaAuthorized existir em qualquer ordem antes do método
+      - pattern-not: |
           @FgaAuthorized(...)
-          $METHOD(...) { ... }
-      - pattern-not-inside: |
-          @FgaAuthorized(...)
-          @$DEC(...)
-          $METHOD(...) { ... }
-      - pattern-not-inside: |
-          @$DEC1(...)
-          @FgaAuthorized(...)
-          @$DEC2(...)
+          ...
           $METHOD(...) { ... }
 
   # 4. Tipagem estrita de retorno em Controllers
@@ -115,5 +120,10 @@ rules:
       include:
         - 'src/**/*.controller.ts'
     patterns:
-      - pattern: |
-          async $METHOD(...): Promise<any> { ... }
+      - pattern-either:
+          - pattern: |
+              async $METHOD(...): Promise<any> { ... }
+          - pattern: |
+              $METHOD(...): Promise<any> { ... }
+          - pattern: |
+              $METHOD(...): any { ... }

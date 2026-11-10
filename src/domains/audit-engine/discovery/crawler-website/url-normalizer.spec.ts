@@ -44,7 +44,7 @@ describe('UrlNormalizer.filterAndNormalize', () => {
     it('resolve caminhos relativos com ./ e ../', () => {
       const result = UrlNormalizer.filterAndNormalize(['../other-post', './sibling'], BASE);
       expect(result.sort()).toEqual(
-        ['https://example.com/blog/other-post', 'https://example.com/blog/sibling'].sort(),
+        ['https://example.com/other-post', 'https://example.com/blog/sibling'].sort(),
       );
     });
 
@@ -115,12 +115,11 @@ describe('UrlNormalizer.filterAndNormalize', () => {
 
     it('ignora URLs completamente inválidos (não resolvem nem como relativos)', () => {
       const result = UrlNormalizer.filterAndNormalize(
-        ['http://[::1', 'https://', '::::not-a-url'],
+        ['http://[::1', 'https://', 'https://example.com:invalid-port'],
         BASE,
       );
       expect(result).toEqual([]);
     });
-
     it('ignora silenciosamente e continua a processar os hrefs seguintes após um inválido', () => {
       const result = UrlNormalizer.filterAndNormalize(['http://[::1', '/valid-after-error'], BASE);
       expect(result).toEqual(['https://example.com/valid-after-error']);

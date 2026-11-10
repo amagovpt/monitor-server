@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CrawlerPageRepository } from './crawler-page.repository';
 import { SecurityContext } from 'src/core/authorization/SecurityContext';
 import { PageService } from 'src/domains/inventory/page/page.service';
+import { CrawlerRequestDTO } from './dto/request/cralwer-request.dto';
 
 @Injectable()
 export class CrawlerPageService {
@@ -11,6 +12,7 @@ export class CrawlerPageService {
   ) {}
 
   async getCrawlPages(
+    query: CrawlerRequestDTO,
     securityContext: SecurityContext,
     websiteId: number,
     crawlWebsiteId: number,
@@ -24,6 +26,8 @@ export class CrawlerPageService {
       securityContext,
       {
         filters: { crawlerWebsiteId: crawlWebsiteId },
+        pagination: query.pagination,
+        sortings: (query.sorts ?? {}) as Record<string, any>,
       },
     );
     return { data: pages };

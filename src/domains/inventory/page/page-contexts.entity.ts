@@ -1,9 +1,10 @@
-import { Context } from 'src/domains/inventory/context/context.identity';
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
+import { Context } from 'src/domains/inventory/context/context.entity';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column, UpdateDateColumn } from 'typeorm';
 import { Page } from './page.entity';
 
 export enum PageStatus {
   PENDING = 'PENDING',
+  QUEUED = 'QUEUED',
   RUNNING = 'RUNNING',
   EVALUATED = 'EVALUATED',
   FAILED = 'FAILED',
@@ -33,4 +34,7 @@ export class PageContext {
     default: PageStatus.PENDING,
   })
   pageStatus: PageStatus;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  updatedAt: Date;
 }

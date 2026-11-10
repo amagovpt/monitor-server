@@ -27,6 +27,7 @@ import { UpdateWebsiteContextDto } from './dto/update.website-context.dto';
 import { ContextFilterGuard } from 'src/core/authorization/guards/context.guard';
 import { AMS_ROLE_EDITOR, AMS_ROLE_MANAGER } from 'src/core/authorization/policies/role.policies';
 import { WebsiteDetailDTO } from './dto/website-detail.dto';
+import { UpdateUrlWebsiteDto } from './dto/update-url-website.dto';
 
 @WebsiteDocs.controller()
 @UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
@@ -77,6 +78,18 @@ export class WebsiteController {
     return this.websiteService.update(websiteId, dto, { user });
   }
 
+  @WebsiteDocs.changeWebsiteUrl()
+  @FgaAuthorized(AMS_ROLE_MANAGER)
+  @Roles(RoleSlug.ADMIN)
+  @Patch(':websiteId/url')
+  async changeWebsiteUrl(
+    @Param('websiteId', ParseIntPipe) websiteId: number,
+    @Body() updateUrlWebsiteDto: UpdateUrlWebsiteDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.websiteService.changeWebsiteUrl(websiteId, updateUrlWebsiteDto.baseUrl, { user });
+  }
+
   @WebsiteDocs.delete()
   @FgaAuthorized(AMS_ROLE_MANAGER)
   @Roles(RoleSlug.ADMIN)
@@ -88,6 +101,7 @@ export class WebsiteController {
     return this.websiteService.delete(deleteBulkDto.websiteIds, { user });
   }
 
+  @WebsiteDocs.changeWebsiteContexts()
   @FgaAuthorized(AMS_ROLE_MANAGER)
   @Roles(RoleSlug.ADMIN)
   @Post(':websiteId/contexts')

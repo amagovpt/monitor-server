@@ -31,13 +31,13 @@ export class WebsiteEvaluationInitiationStrategy implements EvaluationInitiator,
     }
     const uniqueWebsiteIds = Array.from(new Set(targetIds));
     const FGA_BATCH_LIMIT = 50;
-
+    const userId = context.user.id;
     const authorizedWebsiteIds: (string | number)[] = [];
     for (let i = 0; i < uniqueWebsiteIds.length; i += FGA_BATCH_LIMIT) {
       const chunk = uniqueWebsiteIds.slice(i, i + FGA_BATCH_LIMIT);
 
       const authorizedChunk = await this.openFgaService.filterAuthorizedIds(
-        `user:${context.user.id}`,
+        `user:${userId}`,
         'website',
         chunk,
         ['can_manage', 'can_edit'],
@@ -55,6 +55,7 @@ export class WebsiteEvaluationInitiationStrategy implements EvaluationInitiator,
         data: {
           websiteId: websiteId,
           contextId: context.user.context.id,
+          userId,
         },
         opts: {
           jobId: `ctx-${context.user.context.id}-website-${websiteId}`,

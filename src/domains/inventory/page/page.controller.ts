@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
   Logger,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PageService } from './page.service';
 import { AuthenticatedUser, RoleSlug } from 'src/core/authentication/interfaces/types';
@@ -26,6 +28,9 @@ import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorizati
 import { UpdatePageContextDto } from './dto/update.page-context.dto';
 import { ContextMapByRole } from '../context/context.enum';
 import { PageDocs } from './page.swagger';
+import { DeletePagesDto } from './dto/delete-page.dto';
+import { FileSitemapInterceptor } from './interceptors/file-sitemap.interceptor';
+
 @UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
 @Controller('pages')
 export class PageController implements LoggableController {
@@ -40,7 +45,7 @@ export class PageController implements LoggableController {
     return this.pageService.findAll(
       {
         pagination: { limit: query.pagination?.limit, page: query.pagination?.page },
-        sortings: query.sorts?.sort,
+        sortings: query.sorts,
         filters: query.filters,
       },
       query.contexts,
@@ -76,6 +81,27 @@ export class PageController implements LoggableController {
     return this.pageService.create(dto, { user });
   }
 
+  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
+  @FgaAuthorized({
+    objectType: 'website',
+    action: 'can_edit',
+    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+  })
+  @PageDocs.createFromSitemap()
+  @UseInterceptors(FileSitemapInterceptor)
+  @Post('website/:websiteId/sitemap')
+  async createFromSitemap(
+    @Param('websiteId', ParseIntPipe) websiteId: number,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    if (!file) {
+      throw new BadRequestException('A sitemap (xml) or txt file is required');
+    }
+
+    return this.pageService.createFromSitemap(websiteId, file, { user });
+  }
+
   @Roles(RoleSlug.ADMIN)
   @FgaAuthorized({
     objectType: 'role',
@@ -84,14 +110,17 @@ export class PageController implements LoggableController {
   })
   @PageDocs.bulkDelete()
   @Delete('')
-  async bulkDelete(@Body('ids') ids: number[], @CurrentUser() user: AuthenticatedUser) {
+  async bulkDelete(
+    @Body() deletePagesDtos: DeletePagesDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     // strategy depends if is allocated to more than one context, if so, remove only the context, if not, delete the page
     const contextUser = ContextMapByRole[user.role_slug];
     if (!contextUser) {
       throw new BadRequestException('User role does not have an associated context');
     }
 
-    return this.pageService.handlePageRemoval(ids, { user });
+    return this.pageService.handlePageRemoval(deletePagesDtos.pageIds, { user });
   }
 
   @Roles(RoleSlug.ADMIN)
@@ -119,6 +148,7 @@ export class PageController implements LoggableController {
     action: 'can_manage_users',
     resourceIdResolver: () => 'ams',
   })
+  @PageDocs.toggleObservatoryStatus()
   @Post('website/:websiteId/page/:pageId/toggle-observatory')
   async toggleObservatoryStatus(
     @Param('websiteId', ParseIntPipe) websiteId: number,

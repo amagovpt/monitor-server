@@ -1,4 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { context, trace, propagation } from '@opentelemetry/api';
 import { Job, Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
@@ -13,6 +14,7 @@ export interface WebsiteExtractorJobData {
   websiteId: number;
   institutionId: number;
   directoryIds: number[];
+  userId: number;
   lastPageId?: number;
 }
 
@@ -35,7 +37,8 @@ export class PublicPageExtractorProcessor extends WorkerHost {
   async process(job: Job<WebsiteExtractorJobData>): Promise<void> {
     const { contextId, websiteId } = job.data;
     this.logger.log(`A extrair páginas para Website ID: ${websiteId} (Context ID: ${contextId})`);
-
+    const carrier: Record<string, string> = {};
+    propagation.inject(context.active(), carrier);
     let lastPageId = job.data.lastPageId ?? 0;
     let totalDispatched = 0;
 
@@ -52,13 +55,13 @@ export class PublicPageExtractorProcessor extends WorkerHost {
         SELECT pc.page_id, p.url,p.website_id, w.institution_id , w.directories_ids
         FROM page_contexts_monitor pc
         INNER JOIN pages p ON p.id = pc.page_id
-	    	INNER JOIN v_websites_metadata w ON w.website_id = p.website_id
+	    	INNER JOIN v_institution_websites w ON w.website_id = p.website_id
         WHERE pc.context_id = $1
           AND p.website_id = $2
           AND pc.page_id > $3
-          AND pc.page_status NOT IN ('RUNNING'::page_status_enum)
+          AND pc.page_status NOT IN ($4::page_status_enum, $5::page_status_enum)
         ORDER BY pc.page_id ASC
-        LIMIT $5;
+        LIMIT $6;
         
         `,
         [
@@ -66,6 +69,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
           websiteId,
           lastPageId,
           PageStatus.RUNNING,
+          PageStatus.QUEUED,
           PublicPageExtractorProcessor.CHUNK_SIZE,
         ],
       );
@@ -82,6 +86,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
           contextId,
           websiteId,
           pageId: pages.page_id,
+          userId: job.data.userId,
           url: pages.url,
           institutionId: pages.institution_id,
           directoryIds: pages.directories_ids,
@@ -95,6 +100,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
             type: 'exponential',
             delay: 2000,
           },
+          __otelContext: carrier,
         },
       }));
 
@@ -111,7 +117,7 @@ export class PublicPageExtractorProcessor extends WorkerHost {
             SET page_status = $1
             WHERE page_id = ANY($2::int[]);
             `,
-          [PageStatus.RUNNING, successfullyEnqueuedPageIds],
+          [PageStatus.QUEUED, successfullyEnqueuedPageIds],
         );
 
         totalDispatched += pageIds.length;

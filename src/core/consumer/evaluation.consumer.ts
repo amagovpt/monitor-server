@@ -2,6 +2,7 @@ import { ClickHouseClient } from '@clickhouse/client';
 import { Injectable, Inject, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { CLICKHOUSE_CLIENT } from 'src/core/clickhouse/clickhouse.constants';
+import { IMetricData } from 'src/domains/audit-engine/evaluation/types';
 import { REDIS_CLIENT, REDIS_STREAMS, REDIS_GROUPS } from 'src/redis/types';
 
 export interface EvaluationResult {
@@ -42,9 +43,8 @@ export class EvaluationConsumer implements OnModuleInit, OnModuleDestroy {
   private runPromise?: Promise<void>;
   private lastHeartbeat = 0;
 
-  private readonly buffer = new Map<string, EvaluationResult>();
+  private readonly buffer = new Map<string, IMetricData | IMetricData[]>();
   private bufferSince = 0;
-
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     @Inject(CLICKHOUSE_CLIENT) private readonly clickhouse: ClickHouseClient,
@@ -209,7 +209,7 @@ export class EvaluationConsumer implements OnModuleInit, OnModuleDestroy {
       if (!fields || this.buffer.has(id)) continue;
 
       try {
-        this.buffer.set(id, JSON.parse(fields[1]) as EvaluationResult);
+        this.buffer.set(id, JSON.parse(fields[1]) as IMetricData | IMetricData[]);
         if (this.bufferSince === 0) this.bufferSince = Date.now();
       } catch {
         // invalid message will never pass: dead letter + ACK
@@ -239,7 +239,7 @@ export class EvaluationConsumer implements OnModuleInit, OnModuleDestroy {
     if (this.buffer.size === 0) return;
 
     const ids = [...this.buffer.keys()];
-    const values = [...this.buffer.values()];
+    const values = [...this.buffer.values()].flat();
 
     this.dbgLog(`flush: a inserir ${values.length} linhas. Exemplo: ${JSON.stringify(values[0])}`);
 

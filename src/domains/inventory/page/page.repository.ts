@@ -37,6 +37,8 @@ export class PageRepository extends ContextAwareRepository<
   protected readonly filterMap: FilterMap<PageFilter, Page> = {
     id: (query, value) => this.addFilter(query, 'id', value, 'eq'),
     ids: (query, value) => this.addFilter(query, 'id', value, 'in'),
+    archived: (query, value) =>
+      query.andWhere(`${this.alias}.archived_at IS ${value ? 'NOT NULL' : 'NULL'}`),
     searchTerm: (query, val) => {
       if (val && val.trim().length >= 3) {
         const term = `%${val.trim()}%`;
@@ -66,9 +68,25 @@ export class PageRepository extends ContextAwareRepository<
   protected readonly sortMap: SortingMap<PageSort, Page> = {
     id: (query, order) => this.addSort(query, 'id', order),
     url: (query, order) => this.addSort(query, 'url', order),
-    score: (query, order) => query.addOrderBy('evaluation.score', order),
-    createdAt: (query, order) => query.addOrderBy('evaluation.createdAt', order),
+    isInObservatory: (query, order) => query.addOrderBy(`${this.alias}.is_in_observatory`, order),
+    websiteId: (query, order) => this.addSort(query, 'websiteId', order),
+    createdAt: (query, order) => query.addOrderBy(`${this.alias}.created_at`, order),
+    score: (query, order) => query.addOrderBy(this.latestEvaluationScoreSql(), order, 'NULLS LAST'),
   };
+
+  /**
+   * Scalar subquery returning the score of the page's most recent evaluation.
+   * Returns NULL when the page has never been evaluated.
+   */
+  protected latestEvaluationScoreSql(): string {
+    return `(
+      SELECT e.score
+      FROM evaluations e
+      WHERE e.page_id = ${this.alias}.id
+      ORDER BY e.created_at DESC
+      LIMIT 1
+    )`;
+  }
 
   async findManyWithLastEvalScore(
     queryArgs: PageQueryRequest,
@@ -81,6 +99,12 @@ export class PageRepository extends ContextAwareRepository<
     this.applyContextRules(query, queryArgs.contexts, queryArgs.securityContext);
     this.applyDynamicFilters(query, filters);
     this.applyDynamicSorting(query, sortings);
+
+    // Deterministic tie-breaker so pagination is stable when many pages share
+    // the same score (or have no evaluation at all).
+    if (!(`${this.alias}.id` in query.expressionMap.orderBys)) {
+      query.addOrderBy(`${this.alias}.id`, 'ASC');
+    }
 
     const countQuery = connection.createQueryBuilder().from(Page, this.alias);
     this.applyContextRules(countQuery, queryArgs.contexts, queryArgs.securityContext);
@@ -133,11 +157,28 @@ export class PageRepository extends ContextAwareRepository<
       meta: metadataPagination,
     };
   }
-  async findByPageByWebsiteId(websiteId: number, pageId: number): Promise<Page | null> {
+  async findByPageByWebsiteId(
+    websiteId: number,
+    pageId: number,
+    securityContext: SecurityContext,
+  ): Promise<Page | null> {
+    const contextId = securityContext.user.context.id ?? null;
+    if (contextId === null) return null;
+
     const query = this.getOrmRepository().createQueryBuilder(this.alias);
     query
       .where(`${this.alias}.id = :pageId`, { pageId })
-      .andWhere(`${this.alias}.website_id = :websiteId`, { websiteId });
+      .andWhere(`${this.alias}.website_id = :websiteId`, { websiteId })
+      .andWhere(`${this.alias}.deleted_at IS NULL`)
+      .andWhere(
+        `${this.alias}.id IN (
+        SELECT page_id
+        FROM page_contexts
+        WHERE context_id = :contextId
+        )
+      )`,
+        { contextId },
+      );
     return await query.getOne();
   }
 
@@ -145,29 +186,40 @@ export class PageRepository extends ContextAwareRepository<
     websiteId: number,
     records: PageRecord[],
     securityContext: SecurityContext,
-  ): Promise<void> {
-    if (!records.length) return;
+  ): Promise<number[]> {
+    if (!records.length) return [];
 
     const urls = records.map((r) => r.url);
     const hashes = records.map((r) => r.urlHash);
-
-    const query = `
+    return await this.runInTransaction(async (queryRunner) => {
+      const query = `
       WITH incoming_data AS (
         SELECT 
           $1::int AS website_id,
           u.url,
           u.url_hash::bigint AS url_hash
         FROM unnest($2::text[], $3::text[]) AS u(url, url_hash)
+      ),
+      upserted_pages AS (
+        INSERT INTO pages (website_id, url, url_hash, created_by_id, updated_by_id, deleted_at)
+        SELECT 
+          website_id, 
+          url, 
+          url_hash, 
+          $4::int, 
+          $4::int, 
+          NULL
+        FROM incoming_data
+        ON CONFLICT (website_id, url_hash) DO UPDATE
+        SET 
+          deleted_at = NULL,
+          updated_by_id = EXCLUDED.updated_by_id,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING id
       )
-      INSERT INTO pages (website_id, url, url_hash, created_by_id, updated_by_id)
-      SELECT website_id, url, url_hash, $4::int, $4::int
-      FROM incoming_data
-      ON CONFLICT (website_id, url_hash) DO UPDATE
-      SET updated_at = CURRENT_TIMESTAMP
-      RETURNING id;
+      SELECT id FROM upserted_pages;
     `;
 
-    this.runInTransaction(async (queryRunner) => {
       const rows: { id: number }[] = await queryRunner.query(query, [
         websiteId,
         urls,
@@ -175,16 +227,15 @@ export class PageRepository extends ContextAwareRepository<
         securityContext.user.id ?? null,
       ]);
 
-      this.addContextRules(
-        queryRunner,
-        rows.map((r) => r.id),
-        undefined,
-        securityContext,
-      );
-      return rows.map((r) => r.id);
+      const pageIds = rows.map((r) => r.id);
+
+      if (pageIds.length > 0) {
+        await this.addContextRules(queryRunner, pageIds, undefined, securityContext);
+      }
+
+      return pageIds;
     });
   }
-
   async deletePagesWithContextCheck(
     pageIds: number[],
     securityContext: SecurityContext,
@@ -192,6 +243,7 @@ export class PageRepository extends ContextAwareRepository<
     if (!pageIds.length) {
       return;
     }
+
     await this.runInTransaction(async (queryRunner) => {
       const query = `
       WITH target_pages AS (
@@ -210,27 +262,50 @@ export class PageRepository extends ContextAwareRepository<
         RETURNING pc.page_id
       ),
       orphaned_pages AS (
-        SELECT rc.page_id AS id
+        -- Verifica se restou QUALQUER outro contexto associado à página
+        SELECT DISTINCT rc.page_id AS id
         FROM removed_contexts rc
         WHERE NOT EXISTS (
           SELECT 1
           FROM page_contexts pc
           WHERE pc.page_id = rc.page_id
+            AND pc.context_id <> $2::int
         )
       ),
+      classified_orphans AS (
+        -- Separa quem tem histórico de evaluations de quem pode ser purgado
+        SELECT 
+          op.id,
+          EXISTS (
+            SELECT 1 
+            FROM evaluations e 
+            WHERE e.page_id = op.id
+          ) AS has_evaluations
+        FROM orphaned_pages op
+      ),
+      hard_deleted_pages AS (
+        -- Purga páginas sem histórico de auditoria
+        DELETE FROM pages p
+        USING classified_orphans co
+        WHERE p.id = co.id 
+          AND co.has_evaluations = FALSE
+        RETURNING p.id
+      ),
       soft_deleted_pages AS (
-        -- 4. Aplica soft delete apenas às que ficaram órfãs de contexto
+        -- Aplica soft delete apenas às que possuem evaluations associadas
         UPDATE pages p
         SET 
           deleted_at = CURRENT_TIMESTAMP,
           updated_by_id = $3::int
-        FROM orphaned_pages op
-        WHERE p.id = op.id
+        FROM classified_orphans co
+        WHERE p.id = co.id 
+          AND co.has_evaluations = TRUE
         RETURNING p.id
       )
       SELECT 
         (SELECT COUNT(*)::int FROM removed_contexts) AS unlinked_count,
-        (SELECT COUNT(*)::int FROM soft_deleted_pages) AS soft_deleted_count;
+        (SELECT COUNT(*)::int FROM soft_deleted_pages) AS soft_deleted_count,
+        (SELECT COUNT(*)::int FROM hard_deleted_pages) AS hard_deleted_count;
     `;
 
       await queryRunner.query(query, [

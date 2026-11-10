@@ -1,7 +1,7 @@
-import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { ContextService } from "./context.service";
-import { Context } from "./context.identity";
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ContextService } from './context.service';
+import { Context } from './context.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Context])],

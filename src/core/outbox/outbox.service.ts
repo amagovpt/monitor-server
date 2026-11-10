@@ -1,27 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { Outbox, OutboxStatus } from './outbox.entity';
-import { PublishEventAuthOptions, RegistryHandlers } from '../authorization/queue/payload.types';
+import {
+  PublishEventAuthOptions,
+  AuthRegistryHandlers,
+} from '../authorization/queue/payload.types';
 
+import { ResourceRegistryHandlers } from 'src/domains/audit-engine/evaluation/queue/payload.types';
+import { ResourcePublishEventOptions } from 'src/domains/audit-engine/evaluation/queue/payload.types';
 
-export interface PublishEventGenericOptions {
-  aggregateType: string;
-  aggregateId: number;
-  eventType: string;
-  payload: any;
-}
-
-export type PublishEventOptions = PublishEventAuthOptions<keyof RegistryHandlers> | PublishEventGenericOptions;
-export interface AuthorizationPayload {
-  action: string;
-  fgaTuple: any;
-}
-
+export type PublishEventOptions =
+  | PublishEventAuthOptions<keyof AuthRegistryHandlers>
+  | ResourcePublishEventOptions<keyof ResourceRegistryHandlers>;
 
 @Injectable()
 export class OutboxService {
-
-  async putInOutbox<T extends PublishEventOptions>(manager: EntityManager, options: T): Promise<void> {
+  async putInOutbox<T extends PublishEventOptions>(
+    manager: EntityManager,
+    options: T,
+  ): Promise<void> {
     const outboxEvent = new Outbox();
     outboxEvent.aggregateType = options.aggregateType;
     outboxEvent.aggregateId = options.aggregateId;
@@ -31,11 +28,13 @@ export class OutboxService {
     outboxEvent.attempts = 0;
 
     await manager.save(Outbox, outboxEvent);
-    
   }
 
-  async putManyInOutbox<T extends PublishEventOptions>(manager: EntityManager, events: T[]): Promise<void> {
-    const outboxEvents = events.map(options => {
+  async putManyInOutbox<T extends PublishEventOptions>(
+    manager: EntityManager,
+    events: T[],
+  ): Promise<void> {
+    const outboxEvents = events.map((options) => {
       const event = new Outbox();
       event.aggregateType = options.aggregateType;
       event.aggregateId = options.aggregateId;

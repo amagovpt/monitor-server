@@ -11,6 +11,7 @@ import {
 import { LoggingInterceptor } from "src/core/log/log.interceptor";
 import { ManualEvaluationService } from "./manual-evaluation.service";
 import { EvaluationAspect } from "./manual-evaluation.entity";
+import { ManualEvaluationResponseDTO } from "./dto/manual-evaluation-response.dto";
 import { ManualEvaluationDocs } from "./manual-evaluation.swagger";
 import { Roles } from "src/core/authorization/decorators/roles.decorator";
 import { RolesGuard } from "src/core/authorization/guards/roles.guard";
@@ -41,13 +42,13 @@ export class ManualEvaluationController {
 
   @ManualEvaluationDocs.findAllByAspect()
   @Get(":type/all")
-  async getAllByAspectType(@Param("type") type: EvaluationAspect): Promise<any> {
+  async getAllByAspectType(@Param("type") type: EvaluationAspect): Promise<ManualEvaluationResponseDTO[]> {
     return this.manualEvaluationService.findAllByAspect(type);
   }
 
   @ManualEvaluationDocs.findAllByWebsite()
   @Get("website/:id")
-  async getWebsiteEvaluations(@Param("id") websiteId: number): Promise<any> {
+  async getWebsiteEvaluations(@Param("id") websiteId: number): Promise<ManualEvaluationResponseDTO[]> {
     return this.manualEvaluationService.findAllByWebsite(websiteId);
   }
 }

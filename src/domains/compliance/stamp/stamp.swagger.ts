@@ -22,22 +22,23 @@ export const StampDocs = {
   getStamp: () =>
     applyDecorators(
       ApiOperation({ summary: "Get stamp by website ID" }),
-      ApiParam({ name: "websiteId", type: Number, description: "Website unique identifier" }),
+      ApiParam({ name: "websiteId", type: Number, required: true, description: "Website unique identifier" }),
       ApiResponse({ 
         status: 200, 
         description: "Stamp successfully retrieved" 
-      })
+      }),
+      ApiResponse({ status: 400, description: "Bad Request - Invalid website ID" })
     ),
 
   upsertStamp: () =>
     applyDecorators(
       ApiOperation({ summary: "Create or update stamp for a website" }),
-      ApiParam({ name: "websiteId", type: Number, description: "Website unique identifier" }),
+      ApiParam({ name: "websiteId", type: Number, required: true, description: "Website unique identifier" }),
       ApiBody({ type: UpdateStampDto }),
       ApiResponse({ 
         status: 200, 
         description: "Stamp successfully upserted" 
       }),
-      ApiResponse({ status: 400, description: "Bad Request / Validation error" })
+      ApiResponse({ status: 400, description: "Bad Request - Validation error" })
     )
 };

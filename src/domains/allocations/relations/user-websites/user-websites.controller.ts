@@ -9,6 +9,7 @@ import { UserWebsitesDocs } from "./user-websites.swagger";
 import { FgaGuard } from "src/core/authorization/guards/fga.guard";
 import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
 import { AMS_ROLE_EDITOR, AMS_ROLE_VIEWER } from "src/core/authorization/policies/role.policies";
+import { UserWebsitesResponseDTO } from "./dtos/user-websites-response.dto";
 
 @UserWebsitesDocs.controller()
 @Controller("users/:userId/websites")
@@ -18,10 +19,11 @@ export class UserWebsitesController {
 
 
   @Get('')
+  @UserWebsitesDocs.getUserWebsites()
   @FgaAuthorized(AMS_ROLE_VIEWER)
   @HttpCode(HttpStatus.OK)
   async getUserWebsites(
-    @Param("userId", ParseIntPipe) userId: number) {
+    @Param("userId", ParseIntPipe) userId: number): Promise<UserWebsitesResponseDTO> {
         return await this.service.getUserWebsites(userId);
   }
   

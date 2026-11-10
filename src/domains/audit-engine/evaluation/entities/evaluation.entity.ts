@@ -132,6 +132,6 @@ export class Evaluation implements IdentifiableModel, Auditable {
   updatedBy: User | null;
 
   get isFrozen(): boolean {
-    return this.frozenAt !== null;
+    return this.frozenAt != null;
   }
 }
