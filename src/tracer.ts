@@ -6,9 +6,11 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
+import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import type { IncomingMessage } from 'node:http';
-
-const collectorBaseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
+const collectorBaseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
 
 export const otelSDK = new NodeSDK({
   resource: resourceFromAttributes({
@@ -36,6 +38,14 @@ export const otelSDK = new NodeSDK({
     exportIntervalMillis: 15000,
   }),
 
+  logRecordProcessors: [
+    new BatchLogRecordProcessor({
+      exporter: new OTLPLogExporter({
+        url: `${collectorBaseUrl}/v1/logs`,
+      }),
+    }),
+  ],
+
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-fs': { enabled: false },
@@ -44,6 +54,10 @@ export const otelSDK = new NodeSDK({
         enabled: false,
       },
       '@opentelemetry/instrumentation-router': { enabled: false },
+      '@opentelemetry/instrumentation-winston': {
+        enabled: true,
+        disableLogSending: false,
+      },
       '@opentelemetry/instrumentation-net': { enabled: false },
       '@opentelemetry/instrumentation-http': {
         ignoreIncomingRequestHook: (req: IncomingMessage) => {
@@ -51,6 +65,9 @@ export const otelSDK = new NodeSDK({
           return url.includes('/health') || url.includes('/ready') || url.includes('/metrics');
         },
       },
+    }),
+    new RuntimeNodeInstrumentation({
+      monitoringPrecision: 5000,
     }),
   ],
 });
