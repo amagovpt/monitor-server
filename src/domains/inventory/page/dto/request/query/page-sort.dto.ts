@@ -25,7 +25,11 @@ export class PageSortDTO extends BaseSortDto<Page> {
   @IsSortOrder()
   url?: SortCriteria;
 
+  @IsOptional()
+  @IsSortOrder()
+  score?: SortCriteria;
+
   getAllowedFields(): string[] {
-    return ['id', 'websiteId', 'isInObservatory', 'createdAt', 'url'];
+    return ['id', 'websiteId', 'isInObservatory', 'createdAt', 'url', 'score'];
   }
 }

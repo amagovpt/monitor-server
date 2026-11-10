@@ -17,6 +17,7 @@ export interface PageSort extends BaseSort {
   id?: SortCriteria;
   websiteId?: SortCriteria;
   isInObservatory?: SortCriteria;
+  score?: SortCriteria;
 }
 
 export type PageQueryRequest = {

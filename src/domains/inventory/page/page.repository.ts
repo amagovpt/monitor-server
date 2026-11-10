@@ -71,7 +71,22 @@ export class PageRepository extends ContextAwareRepository<
     isInObservatory: (query, order) => query.addOrderBy(`${this.alias}.is_in_observatory`, order),
     websiteId: (query, order) => this.addSort(query, 'websiteId', order),
     createdAt: (query, order) => query.addOrderBy(`${this.alias}.created_at`, order),
+    score: (query, order) => query.addOrderBy(this.latestEvaluationScoreSql(), order, 'NULLS LAST'),
   };
+
+  /**
+   * Scalar subquery returning the score of the page's most recent evaluation.
+   * Returns NULL when the page has never been evaluated.
+   */
+  protected latestEvaluationScoreSql(): string {
+    return `(
+      SELECT e.score
+      FROM evaluations e
+      WHERE e.page_id = ${this.alias}.id
+      ORDER BY e.created_at DESC
+      LIMIT 1
+    )`;
+  }
 
   async findManyWithLastEvalScore(
     queryArgs: PageQueryRequest,
@@ -84,6 +99,12 @@ export class PageRepository extends ContextAwareRepository<
     this.applyContextRules(query, queryArgs.contexts, queryArgs.securityContext);
     this.applyDynamicFilters(query, filters);
     this.applyDynamicSorting(query, sortings);
+
+    // Deterministic tie-breaker so pagination is stable when many pages share
+    // the same score (or have no evaluation at all).
+    if (!(`${this.alias}.id` in query.expressionMap.orderBys)) {
+      query.addOrderBy(`${this.alias}.id`, 'ASC');
+    }
 
     const countQuery = connection.createQueryBuilder().from(Page, this.alias);
     this.applyContextRules(countQuery, queryArgs.contexts, queryArgs.securityContext);
