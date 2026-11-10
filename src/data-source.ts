@@ -4,7 +4,6 @@ import { Website } from './domains/inventory/website/website.entity';
 import { Page } from './domains/inventory/page/page.entity';
 import { User } from './domains/identity/user/user.entity';
 import { Tag } from './domains/inventory/tag/tag.entity';
-import { Log } from './core/log/entities/log.entity';
 import { Directory } from './domains/inventory/directory/directory.entity';
 import { AccessibilityStatement } from './domains/compliance/accessibility-statement/entities/accessibility-statement.entity';
 import { CrawlerWebsite } from './domains/audit-engine/discovery/crawler-website/entities/crawler-website.entity';
@@ -53,7 +52,6 @@ export const AppDataSource = new DataSource({
     TagWebsite,
     Evaluation,
     ManualEvaluation,
-    Log,
     Directory,
     Institution,
     CrawlerWebsite,

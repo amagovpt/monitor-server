@@ -43,6 +43,8 @@ export const otelSDK = new NodeSDK({
       '@opentelemetry/instrumentation-runtime-node': {
         enabled: false,
       },
+      '@opentelemetry/instrumentation-router': { enabled: false },
+      '@opentelemetry/instrumentation-net': { enabled: false },
       '@opentelemetry/instrumentation-http': {
         ignoreIncomingRequestHook: (req: IncomingMessage) => {
           const url = req.url || '';

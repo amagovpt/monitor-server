@@ -1,9 +1,11 @@
-import { Injectable, Scope,LoggerService } from "@nestjs/common";
+import { Injectable, Scope, LoggerService } from "@nestjs/common";
 import * as winston from "winston";
-import { IAppLogger } from "./app-logger.interface";
+import { OpenTelemetryTransportV3 } from "@opentelemetry/winston-transport";
+
+const level = process.env.LOG_LEVEL || "info";
 
 const winstonInstance = winston.createLogger({
-  level: "info",
+  level,
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.json(),
@@ -11,12 +13,15 @@ const winstonInstance = winston.createLogger({
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
+        winston.format.timestamp(),
         winston.format.colorize(),
-        winston.format.simple(),
+        winston.format.printf(({ timestamp, level, message, context, stack }) => {
+          const ctx = context ? ` [${context}]` : "";
+          return `${timestamp} ${level}${ctx}: ${message}${stack ? `\n${stack}` : ""}`;
+        }),
       ),
     }),
-    new winston.transports.File({ filename: "error-log/error.log", level: "error" }),
-    new winston.transports.File({ filename: "action-log/combined.log" }),
+    new OpenTelemetryTransportV3({ level }),
   ],
 });
 
@@ -28,8 +33,12 @@ export class AppLoggerService implements LoggerService {
     this.context = context;
   }
 
+  private format(message: any): string {
+    return typeof message === "string" ? message : JSON.stringify(message);
+  }
+
   log(message: any, context?: string) {
-    winstonInstance.info(message, { context: context || this.context });
+    winstonInstance.info(this.format(message), { context: context || this.context });
   }
 
   error(message: any, stack?: string, context?: string) {
@@ -40,10 +49,14 @@ export class AppLoggerService implements LoggerService {
   }
 
   warn(message: any, context?: string) {
-    winstonInstance.warn(message, { context: context || this.context });
+    winstonInstance.warn(this.format(message), { context: context || this.context });
   }
 
-  debug?(message: any, context?: string) {
-    winstonInstance.debug(message, { context: context || this.context });
+  debug(message: any, context?: string) {
+    winstonInstance.debug(this.format(message), { context: context || this.context });
+  }
+
+  verbose(message: any, context?: string) {
+    winstonInstance.verbose(this.format(message), { context: context || this.context });
   }
 }
