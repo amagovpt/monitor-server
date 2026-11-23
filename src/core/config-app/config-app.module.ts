@@ -15,6 +15,7 @@ import Joi from 'joi';
 
         REDIS_HOST: Joi.string().default('localhost'),
         REDIS_PORT: Joi.number().default(6379),
+        REDIS_PASSWORD: Joi.string().allow('').default(''),
         REDIS_DB_BULL: Joi.number().required(),
         REDIS_DB_MONITOR: Joi.number().required(),
         BULL_BOARD_ROUTE: Joi.string().default('/admin/queues'),
