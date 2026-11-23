@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  UseGuards,
-  Body,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  ParseIntPipe,
-  Param,
-  Query,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get, Body, Delete, HttpCode, HttpStatus, ParseIntPipe, Param, Query, Post } from '@nestjs/common';
 import { CrawlerPageService } from './crawler-page.service';
 
 import { CrawlerPageDeleteDTO } from './dto/crawler-page-delete.dto';
@@ -20,29 +8,26 @@ import { AuthenticatedUser, RoleSlug } from 'src/core/authentication/interfaces/
 import { SecurityContext } from 'src/core/authorization/SecurityContext';
 
 import { DiscoveryDocs } from './crawl-page.swagger';
-import { RolesGuard } from 'src/core/authorization/guards/roles.guard';
-import { JwtAuthGuard } from 'src/core/authentication/guards/jwt-auth.guard';
-import { Roles } from 'src/core/authorization/decorators/roles.decorator';
-import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
 import { CrawlPagesResponseDTO } from './dto/crawler-page-response.dto';
-import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
 import { CrawlerPageImportDTO } from './dto/crawler-page-import.dto';
 import { CrawlerRequestDTO } from './dto/request/cralwer-request.dto';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @DiscoveryDocs.controller()
 @Controller('discovery/websites/:websiteId/crawler/:crawlerId')
-@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
 export class CrawlerPageController {
   constructor(private readonly crawlerPageService: CrawlerPageService) {}
 
   @DiscoveryDocs.getCrawlPages()
-  @FgaAuthorized({
-    objectType: 'website',
-    action: 'can_view',
-    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
-  })
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @Get('')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+      objectType: 'website',
+      action: 'can_view',
+      resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+    },
+  })
   async getCrawlPages(
     @Param('websiteId', ParseIntPipe) websiteId: number,
     @Param('crawlerId', ParseIntPipe) crawlerId: number,
@@ -60,14 +45,16 @@ export class CrawlerPageController {
   }
 
   @DiscoveryDocs.deleteCrawlPages()
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
-  @FgaAuthorized({
-    objectType: 'website',
-    action: 'can_edit',
-    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
-  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+      objectType: 'website',
+      action: 'can_edit',
+      resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+    },
+  })
   async deleteCrawlPages(
     @CurrentUser() user: AuthenticatedUser,
     @Param('websiteId', ParseIntPipe) websiteId: number,
@@ -86,6 +73,14 @@ export class CrawlerPageController {
 
   @DiscoveryDocs.importCrawlPages()
   @Post('pages')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+    objectType: 'website',
+    action: 'can_edit',
+    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+  },
+  })
   async importCrawlerPages(
     @CurrentUser() user: AuthenticatedUser,
     @Param('websiteId', ParseIntPipe) websiteId: number,

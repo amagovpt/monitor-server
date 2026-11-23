@@ -1,39 +1,26 @@
-import { 
-  Controller, 
-  Get, 
-  Put, 
-  Body, 
-  Param, 
-  ParseIntPipe, 
-  HttpStatus, 
-  HttpCode, 
-  UseGuards
-} from "@nestjs/common";
+import { Controller, Get, Put, Body, Param, ParseIntPipe, HttpStatus, HttpCode } from "@nestjs/common";
 import { WebsiteDeclarationService } from "./declaration.service";
 import { UpdateDeclarationDto } from "./dto/update-declaration.dto";
-import { JwtAuthGuard } from "src/core/authentication/guards/jwt-auth.guard";
-import { RolesGuard } from "src/core/authorization/guards/roles.guard";
 import { AuthenticatedUser, RoleSlug } from "src/core/authentication/interfaces/types";
-import { Roles } from "src/core/authorization/decorators/roles.decorator";
 import { CurrentUser } from "src/core/authorization/decorators/current-user.decorator";
 import { DeclarationDocs } from "./declaration.swagger";
-import { FgaGuard } from "src/core/authorization/guards/fga.guard";
-import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @DeclarationDocs.controller()
-@UseGuards(JwtAuthGuard,RolesGuard,FgaGuard)
 @Controller("websites/:websiteId/declaration")
 export class WebsiteDeclarationController {
   constructor(private readonly declarationService: WebsiteDeclarationService) {}
   
   @DeclarationDocs.getDeclaration()
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
-            objectType: "role",
-            action: "can_view_users",
-            resourceIdResolver: () => "ams"
-      })
   @Get("")
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+          objectType: "role",
+          action: "can_view_users",
+          resourceIdResolver: () => "ams"
+    },
+  })
   async getDeclaration(
     @Param("websiteId", ParseIntPipe) websiteId: number
   ) {
@@ -41,14 +28,16 @@ export class WebsiteDeclarationController {
   }
   
   @DeclarationDocs.upsertDeclaration()
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
-            objectType: "role",
-            action: "can_edit_users",
-            resourceIdResolver: () => "ams"
-  })
   @Put()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+              objectType: "role",
+              action: "can_edit_users",
+              resourceIdResolver: () => "ams"
+    },
+  })
   async upsertDeclaration(
     @CurrentUser() user: AuthenticatedUser,
     @Param("websiteId", ParseIntPipe) websiteId: number,

@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-  Body,
-  Delete,
-  Query,
-  HttpCode,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Query, HttpCode, HttpStatus, Param, ParseIntPipe } from '@nestjs/common';
 import { CrawlerWebsiteService } from './crawler-website.service';
 
 import { CrawlerCreateDTO } from './dto/crawler-create.dto';
@@ -22,23 +10,21 @@ import { AuthenticatedUser, RoleSlug } from 'src/core/authentication/interfaces/
 import { SecurityContext } from 'src/core/authorization/SecurityContext';
 
 import { DiscoveryDocs } from './crawler-website.swagger';
-import { RolesGuard } from 'src/core/authorization/guards/roles.guard';
-import { JwtAuthGuard } from 'src/core/authentication/guards/jwt-auth.guard';
-import { Roles } from 'src/core/authorization/decorators/roles.decorator';
-import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
 import { CrawlerImportDTO } from './dto/crawler-import.dto';
 import { CrawlerTagsCreateDTO } from './dto/crawler-create-tags.dto';
 import { CrawlWebsitesResponseDTO } from './dto/crawler-website-response.dto';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @DiscoveryDocs.controller()
 @Controller('discovery')
-@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
 export class CrawlerWebsiteController {
   constructor(private readonly crawlerWebsiteService: CrawlerWebsiteService) {}
 
   @DiscoveryDocs.getCrawlWebsites()
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @Get('')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+  })
   async getCrawlWebsites(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: CrawlerRequestDTO,
@@ -48,9 +34,11 @@ export class CrawlerWebsiteController {
   }
 
   @DiscoveryDocs.importCrawlers()
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @HttpCode(HttpStatus.OK)
   @Post('import')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+  })
   async importCrawlers(
     @CurrentUser() user: AuthenticatedUser,
     @Body() crawlerImport: CrawlerImportDTO,
@@ -60,8 +48,10 @@ export class CrawlerWebsiteController {
   }
   
   @DiscoveryDocs.crawlWebsite()
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @Post('')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+  })
   async crawlWebsite(
     @Body() crawlerCreate: CrawlerCreateDTO,
     @CurrentUser() user: AuthenticatedUser,
@@ -79,8 +69,10 @@ export class CrawlerWebsiteController {
     );
   }
   @DiscoveryDocs.crawlWebsiteTags()
-  @Roles(RoleSlug.ADMIN)
   @Post('tags')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+  })
   async crawlWebsiteTags(
     @Body() crawlerCreate: CrawlerTagsCreateDTO,
     @CurrentUser() user: AuthenticatedUser,
@@ -96,9 +88,11 @@ export class CrawlerWebsiteController {
 
 
   @DiscoveryDocs.deleteCrawler()
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+  })
   async deleteManyCrawlers(
     @CurrentUser() user: AuthenticatedUser,
     @Body() crawlerDelete: CrawlerDeleteDTO,

@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  UseGuards,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,31 +8,29 @@ import {
   Response,
   ParseIntPipe,
   Query,
+  Header,
 } from '@nestjs/common';
 import { AnalyticsDocs } from './analytics.swagger';
 import type { Response as ExpressResponse } from 'express';
 import { AnalyticsService } from './analytics.service';
 import { RoleSlug } from 'src/core/authentication/interfaces/types';
 
-import { RolesGuard } from 'src/core/authorization/guards/roles.guard';
-import { JwtAuthGuard } from 'src/core/authentication/guards/jwt-auth.guard';
-import { Roles } from 'src/core/authorization/decorators/roles.decorator';
-import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
-import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
 import { AMS_ROLE_VIEWER } from 'src/core/authorization/policies/role.policies';
 import { ExportAnalyticsDto } from './dto/export-analytics.dto';
 import { Readable } from 'stream';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @AnalyticsDocs.controller()
 @Controller('analytics')
-@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
-@Roles(RoleSlug.ADMIN)
-@FgaAuthorized(AMS_ROLE_VIEWER)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @AnalyticsDocs.getOverview()
   @Get('overview')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getOverview() {
     return this.analyticsService.getAppCounters();
   }
@@ -41,6 +38,10 @@ export class AnalyticsController {
   @Get('tag/:tagId')
   @AnalyticsDocs.getTagMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getTagMetrics(@Param('tagId', ParseIntPipe) tagId: number) {
     return this.analyticsService.getGlobalTag(tagId);
   }
@@ -48,6 +49,10 @@ export class AnalyticsController {
   @Get('website/:websiteId')
   @AnalyticsDocs.getWebsiteMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getWebsiteMetrics(@Param('websiteId', ParseIntPipe) websiteId: number) {
     return this.analyticsService.getGlobalWebsite(websiteId);
   }
@@ -55,6 +60,10 @@ export class AnalyticsController {
   @Get('institution/:institutionId')
   @AnalyticsDocs.getInstitutionMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getInstitutionMetrics(@Param('institutionId', ParseIntPipe) institutionId: number) {
     return this.analyticsService.getGlobalInstitution(institutionId);
   }
@@ -62,6 +71,10 @@ export class AnalyticsController {
   @Get('directory/:directoryId')
   @AnalyticsDocs.getDirectoryMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getDirectoryMetrics(@Param('directoryId', ParseIntPipe) directoryId: number) {
     return this.analyticsService.getGlobalDirectory(directoryId);
   }
@@ -69,6 +82,10 @@ export class AnalyticsController {
   @AnalyticsDocs.getGlobalMetrics()
   @Get('global')
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getGlobalMetrics() {
     return this.analyticsService.getGlobalMetrics();
   }
@@ -76,6 +93,10 @@ export class AnalyticsController {
   @Get('global/website/:websiteId')
   @AnalyticsDocs.getGlobalWebsiteMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getGlobalWebsiteMetrics(@Param('websiteId', ParseIntPipe) websiteId: number) {
     return this.analyticsService.getGlobalWebsite(websiteId);
   }
@@ -83,33 +104,33 @@ export class AnalyticsController {
   @Get('global/directory/:directoryId')
   @AnalyticsDocs.getGlobalDirectoryMetrics()
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
   async getGlobalDirectoryMetrics(@Param('directoryId', ParseIntPipe) directoryId: number) {
     return this.analyticsService.getGlobalDirectory(directoryId);
   }
-
   @AnalyticsDocs.exportAnalytics()
   @Get('exports')
   @HttpCode(HttpStatus.OK)
-  async exportAnalytics(
-    @Query() dto: ExportAnalyticsDto,
-    @Response({ passthrough: true }) res: ExpressResponse,
-  ): Promise<StreamableFile> {
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_VIEWER,
+  })
+  async exportAnalytics(@Query() dto: ExportAnalyticsDto): Promise<StreamableFile> {
     const { stream, contentType, filename } = await this.analyticsService.exportAnalytics({
       resource: dto.resource,
       format: dto.format,
       entityId: dto.entityId,
     });
 
-    res.set({
-      'Content-Type': contentType,
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Transfer-Encoding': 'chunked',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-    });
-
+    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    // nosemgrep: javascript.nestjs.web.direct-response-string-nestjs.direct-response-string-nestjs -- Returns a binary StreamableFile attachment (not raw HTML); ExportAnalyticsDto is validated via class-validator decorators    return new StreamableFile(stream as Readable, {
     return new StreamableFile(stream as Readable, {
       type: contentType,
-      disposition: `attachment; filename="${filename}"`,
+      disposition: `attachment; filename="${safeFilename}"`,
     });
   }
 }

@@ -1,34 +1,26 @@
-import { 
-  Controller, 
-  Get, 
-  Put, 
-  Body, 
-  Param, 
-  ParseIntPipe, 
-  HttpStatus, 
-  HttpCode, 
-  UseGuards
-} from "@nestjs/common";
+import { Controller, Get, Put, Body, Param, ParseIntPipe, HttpStatus, HttpCode } from "@nestjs/common";
 import { WebsiteStampService } from "./stamp.service";
 import { UpdateStampDto } from "./dto/update-stamp.dto";
-import { JwtAuthGuard } from "src/core/authentication/guards/jwt-auth.guard";
-import { RolesGuard } from "src/core/authorization/guards/roles.guard";
-import { Roles } from "src/core/authorization/decorators/roles.decorator";
 import { AuthenticatedUser, RoleSlug } from "src/core/authentication/interfaces/types";
 import { CurrentUser } from "src/core/authorization/decorators/current-user.decorator";
 import { StampDocs } from "./stamp.swagger";
-import { FgaGuard } from "src/core/authorization/guards/fga.guard";
-import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @StampDocs.controller()
-@UseGuards(JwtAuthGuard,RolesGuard,FgaGuard)
 @Controller("websites/:websiteId/stamp")
 export class WebsiteStampController {
   constructor(private readonly stampService: WebsiteStampService) {}
   
   @StampDocs.getStamp()
-  @Roles(RoleSlug.ADMIN)
   @Get()
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+    objectType: 'role',
+    action: 'can_view_users',
+    resourceIdResolver: () => 'ams',
+  },
+  })
   async getStamp(
     @Param("websiteId", ParseIntPipe) websiteId: number
   ) {
@@ -37,13 +29,15 @@ export class WebsiteStampController {
 
   @StampDocs.upsertStamp()
   @Put()
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
+  @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
           objectType: "role",
           action: "can_edit_users",
           resourceIdResolver: () => "ams"
-    })
-  @HttpCode(HttpStatus.OK)
+    },
+  })
   async upsertStamp(
     @CurrentUser() user: AuthenticatedUser,
     @Param("websiteId", ParseIntPipe) websiteId: number,
