@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Monitor Server v2 - S3 3-Tier Lifecycle & Least-Privilege IAM Service User
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: accessmonitor
+  Environment:
+    Type: String
+    AllowedValues:
+      - staging
+      - prod
+    Default: prod
+
+Resources:
+  AuditSnapshotsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-audit-snapshots-${Environment}-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ThreeTierAuditSnapshotLifecycle
+            Status: Enabled
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: 90
+              - StorageClass: GLACIER_IR
+                TransitionInDays: 365
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  MonitorServerS3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${ProjectPrefix}-s3-rw-${Environment}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: SnapshotObjectCRUD
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+            Resource: !Sub ${AuditSnapshotsBucket.Arn}/*
+
+  MonitorServerServiceUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub ${ProjectPrefix}-svc-${Environment}
+      ManagedPolicyArns:
+        - !Ref MonitorServerS3Policy
+
+Outputs:
+  BucketName:
+    Description: Name of the provisioned S3 audit snapshot bucket
+    Value: !Ref AuditSnapshotsBucket
+  ServiceUserName:
+    Description: IAM service user name; create an access key through the AWS CLI
+    Value: !Ref MonitorServerServiceUser
+  PolicyArn:
+    Description: ARN of the associated least-privilege policy
+    Value: !Ref MonitorServerS3Policy
