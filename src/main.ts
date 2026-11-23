@@ -6,8 +6,7 @@ import express from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { AppLoggerService } from './core/app-logger/app-logger.service';
 import { useContainer } from 'class-validator';
 import { GlobalExceptionFilter } from './core/filters/all-exceptions.filter';
@@ -40,7 +39,6 @@ async function bootstrap() {
 
   app.getHttpAdapter().getInstance().set('query parser', 'extended');
 
-  app.useWebSocketAdapter(new IoAdapter(app) as any);
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
   app.use(compression());
@@ -55,11 +53,6 @@ async function bootstrap() {
     .setVersion('2.0')
     .addTag('website')
     .build();
-
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '2',
-  });
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
