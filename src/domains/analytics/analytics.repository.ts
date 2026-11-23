@@ -197,9 +197,7 @@ export class AnalyticRepository {
 
   async searchForWebsites(query: string): Promise<any[]> {
     const result = await this.clickHouseClient.query({
-      query: `
-        ${SEARCH_WEBSITES_QUERY}
-      `,
+      query: SEARCH_WEBSITES_QUERY,
       query_params: {
         token: query,
       },
