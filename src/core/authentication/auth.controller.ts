@@ -19,7 +19,8 @@ import { LoggingInterceptor } from 'src/core/log/log.interceptor';
 import { AuthDocs } from './auth.swagger';
 import { LocalLoginDto } from './dto/local-login.dto';
 import { ConfigService } from '@nestjs/config/dist/config.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
+import { Public } from 'src/core/authorization/decorators/public.decorator';
 
 @AuthDocs.controller()
 @Controller('auth')
@@ -31,6 +32,7 @@ export class AuthController {
   ) {}
 
   @AuthDocs.login()
+  @Public({ reason: 'Local credential login must be reachable without a token' })
   @Post('login')
   @HttpCode(200)
   @TrackMetric('login')
@@ -49,7 +51,7 @@ export class AuthController {
   }
 
   @AuthDocs.logout()
-  @UseGuards(JwtAuthGuard)
+  @Protected({ roles: 'authenticated' })
   @Post('logout')
   @HttpCode(200)
   async logout(@Request() req: any): Promise<void> {
@@ -58,6 +60,7 @@ export class AuthController {
   }
 
   @AuthDocs.loginGov()
+  @Public({ reason: 'Starts the Autenticacao.gov redirect flow before any token exists' })
   @HttpCode(200)
   @Get('login')
   async loginGov(@Res() response: Response): Promise<void> {
@@ -71,6 +74,7 @@ export class AuthController {
   }
 
   @AuthDocs.verifyToken()
+  @Public({ reason: 'Authenticated by AutenticacaoGovGuard via the gov access_token, not by JWT' })
   @UseGuards(AutenticacaoGovGuard)
   @Get('loginRedirect')
   async verifyToken(@Request() req: any): Promise<{ token: string }> {

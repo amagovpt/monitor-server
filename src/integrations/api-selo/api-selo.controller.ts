@@ -3,9 +3,11 @@ import { LoggingInterceptor } from 'src/core/log/log.interceptor';
 import { ApiSeloService } from './api-selo.service';
 import { APISeloDocs } from './api-selo.swagger';
 import { WebsiteInfo } from './types';
+import { Public } from 'src/core/authorization/decorators/public.decorator';
 import { CacheableBy } from 'src/core/cache/decorator/cache-resource.decorator';
 
 @APISeloDocs.controller()
+@Public({ reason: 'Public stamp listing consumed by external sites' })
 @Controller('apiselo')
 @UseInterceptors(LoggingInterceptor)
 export class APISeloController {

@@ -1,7 +1,6 @@
 import {
   Controller,
   Sse,
-  UseGuards,
   Header,
   MessageEvent,
   UnauthorizedException,
@@ -10,7 +9,7 @@ import { Observable } from 'rxjs';
 import { SseVisibility } from './sse-publisher.service';
 import { SSEService } from './sse.service';
 import { AuthenticatedUser, RoleSlugMap } from '../authentication/interfaces/types';
-import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { Protected } from '../authorization/decorators/protected.decorator';
 import { CurrentUser } from '../authorization/decorators/current-user.decorator';
 
 @Controller('notifications')
@@ -18,7 +17,7 @@ export class SSEController {
   constructor(private readonly sseService: SSEService) {}
 
   @Sse('stream')
-  @UseGuards(JwtAuthGuard)
+  @Protected({ roles: 'authenticated' })
   @Header('Content-Type', 'text/event-stream')
   @Header('Cache-Control', 'no-cache, no-transform')
   @Header('Connection', 'keep-alive')

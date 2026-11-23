@@ -1,9 +1,11 @@
 import { Controller, Get, HttpCode, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ObservatoryService } from './observatory.service';
 import { ObservatoryDocs } from './observatory.swagger';
+import { Public } from 'src/core/authorization/decorators/public.decorator';
 import { CacheableBy } from 'src/core/cache/decorator/cache-resource.decorator';
 
 ObservatoryDocs.controller();
+@Public({ reason: 'Observatory exposes public aggregated accessibility statistics' })
 @Controller('observatory')
 export class ObservatoryController {
   constructor(private readonly observatoryService: ObservatoryService) {}
