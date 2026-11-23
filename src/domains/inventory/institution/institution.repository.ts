@@ -1,14 +1,12 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {  Brackets, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { BaseTransactionalRepository } from 'src/common/repositories/base-transactional.repository';
 import { FilterMap, SortingMap } from 'src/common/repositories/base.repository';
 import { AppLoggerService } from 'src/core/app-logger/app-logger.service';
 import { ConfigService } from '@nestjs/config';
 import { Institution } from './institution.entity';
 import { BaseFilter, BaseSort, SortCriteria } from 'src/common/interfaces/types';
- 
 
 export interface InstitutionFilter extends BaseFilter {
   id?: number;
@@ -16,7 +14,6 @@ export interface InstitutionFilter extends BaseFilter {
   shortName?: string;
   createdAt?: Date;
   searchTerm?: string;
-
 }
 
 export interface InstitutionSort extends BaseSort {
@@ -57,15 +54,16 @@ export class InstitutionRepository extends BaseTransactionalRepository<
     },
     createdAt: (query, value) => {
       query.andWhere(`${this.alias}.createdAt = :createdAt`, { createdAt: value });
-    }, 
+    },
     searchTerm: (query, value) => {
       query.andWhere(
         new Brackets((qb) => {
-          qb.where(`${this.alias}.shortName LIKE :searchTerm`, { searchTerm: `%${value}%` })
-            .orWhere(`${this.alias}.longName LIKE :searchTerm`, { searchTerm: `%${value}%` });
+          qb.where(`${this.alias}.shortName LIKE :searchTerm`, {
+            searchTerm: `%${value}%`,
+          }).orWhere(`${this.alias}.longName LIKE :searchTerm`, { searchTerm: `%${value}%` });
         }),
-      ); 
-    }
+      );
+    },
   };
 
   protected readonly sortMap: SortingMap<InstitutionSort, Institution> = {
@@ -73,9 +71,7 @@ export class InstitutionRepository extends BaseTransactionalRepository<
     shortName: (query, order) => this.addSort(query, 'shortName', order),
     longName: (query, order) => this.addSort(query, 'longName', order),
     createdAt: (query, order) => this.addSort(query, 'createdAt', order),
-
   };
-
 
   async findInfo(id: number): Promise<Institution | null> {
     return this.ormRepo
@@ -85,20 +81,15 @@ export class InstitutionRepository extends BaseTransactionalRepository<
       .getOne();
   }
 
+  async update(id: number, data: Partial<Institution>): Promise<Institution> {
+    const institution = await this.ormRepo.findOne({
+      where: { id },
+    });
 
-  async update(
-    id: number,
-    data: Partial<Institution>,
-  ): Promise<Institution> {
-      const institution = await this.ormRepo.findOne({ 
-        where: { id }, 
-      });
+    if (!institution) throw new Error('Institution not found');
 
-      if (!institution) throw new Error('Institution not found');
-
-      Object.assign(institution, data);
-      return await this.ormRepo.save(institution);
-    
+    Object.assign(institution, data);
+    return await this.ormRepo.save(institution);
   }
 
   async deleteInstitution(institutionId: number): Promise<void> {
@@ -106,5 +97,4 @@ export class InstitutionRepository extends BaseTransactionalRepository<
       await queryRunner.manager.delete(Institution, { id: institutionId });
     });
   }
-
 }
