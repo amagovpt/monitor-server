@@ -27,6 +27,8 @@ import {
 import { QUEUE_NAMES } from 'src/core/queues/queues.config';
 import { PublicPageExtractorProcessor } from './queue/processors/page-public.processor';
 import { PrivatePageExtractorProcessor } from './queue/processors/page-private.processor';
+import { EvaluationPublicDlqProcessor } from './queue/processors/evaluation-public-dlq.processor';
+import { EvaluationPrivateDlqProcessor } from './queue/processors/evaluation-private-dlq.processor';
 import { EvaluationS3StorageStrategy } from './strategies/storage/evaluation-s3-aws-storage.strategy';
 import { EvaluationPrivateEventsListener } from './queue/events/evaluation-private.event';
 import { EvaluationPublicEventsListener } from './queue/events/evaluation-public.event';
@@ -72,6 +74,8 @@ export const EvaluationTableConfigProvider: Provider = {
     EvaluationRepository,
     PublicPageExtractorProcessor,
     PrivatePageExtractorProcessor,
+    EvaluationPublicDlqProcessor,
+    EvaluationPrivateDlqProcessor,
     Logger,
     EvaluationTableConfigProvider,
     DirectoryEvaluationInitiationStrategy,

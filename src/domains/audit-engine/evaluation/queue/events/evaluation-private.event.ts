@@ -6,7 +6,6 @@ import {
   EvaluationJobData,
   EvaluationStarted,
   EvaluationProgress,
-  EvaluationFailed,
   EvaluationCompleted,
 } from './types';
 import { EvaluationDTO } from '../../dto/evaluation.dto';
@@ -82,30 +81,6 @@ export class EvaluationPrivateEventsListener extends QueueEventsHost {
         ? this.SsePublisherService.notifyUser(userId, 'evaluation:completed', event)
         : Promise.resolve(),
       this.SsePublisherService.broadcastToGroups('evaluation:completed', event, 'AMS'),
-    ]);
-  }
-
-  @OnQueueEvent('failed')
-  async onFailed(job: { jobId: string; failedReason: string }) {
-    const jobData = await this.evaluationQueue.getJob(job.jobId);
-    if (!jobData?.data) return;
-
-    const { websiteId, pageId, institutionId, directoryIds, userId } = jobData.data;
-
-    const event: EvaluationFailed = {
-      event: 'evaluation:failed',
-      websiteId,
-      pageId,
-      institutionId,
-      directoryIds,
-      failedReason: job.failedReason,
-    };
-
-    Promise.all([
-      userId
-        ? this.SsePublisherService.notifyUser(userId, 'evaluation:failed', event)
-        : Promise.resolve(),
-      this.SsePublisherService.broadcastToGroups('evaluation:failed', event, 'AMS'),
     ]);
   }
 }

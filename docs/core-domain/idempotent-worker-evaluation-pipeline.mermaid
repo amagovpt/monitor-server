@@ -24,19 +24,17 @@ graph TD
         Step4 --> RecordJournal2["Updates Journal before writing to S3"]
         RecordJournal2 --> Step5["5. steps.saveToStorage<br/>Saves HTML + Evidence in S3 - Progress: 80%"]
     end
-
-    subgraph "Phase 4: Publishing OLAP Metrics"
-        Step5 --> RecordJournal3["Updates Journal before writing to redis Stream "] 
-        RecordJournal3 --> Step6a["6. Publish Metrics<br/>Sends to Redis Stream with IDMP"]
+    subgraph "Phase 4: OLTP Persistence"
+        Step5 --> Step6b["6. completeEvaluation <br/>Closes Evaluation & PageStatus"]
+    end
+     subgraph "Phase 5: Publishing OLAP Metrics"
+        Step6b --> RecordJournal3["Updates Journal before writing to redis Stream "] 
+        RecordJournal3 --> Step6c["7. Publish Metrics<br/>Sends to Redis Stream with IDMP - Progress: 100%"]
         
     end
-    subgraph "Phase 5: OLTP Persistence"
-        Step6a --> Step6b["7. completeEvaluation <br/>Closes Evaluation & PageStatus - Progress: 100%"]
-    end
-
 
     subgraph "Phase 6: Finalization & Events"
-        Step6b --> EmitEvent["Emmit event 'Complete'"]
+        Step6c --> EmitEvent["Emmit event 'Complete'"]
         EmitEvent --> ReturnDTO(["Return EvaluationDTO"])
     end
 
@@ -45,7 +43,7 @@ graph TD
 
     CreateEval -.->|"Network/DB Failure"| DirtyRetry{"Attempts < Max?"}
     Step5 -.->|"S3 Write Failure"| DirtyRetry
-    Step6a -.->|"Redis Failure"| DirtyRetry
+    Step6c -.->|"Redis Failure"| DirtyRetry
     Step6b -.->|"On 7. failure Evaluation entity  </br> Rollback info is already present in journal from phase 2"| DirtyRetry
 
     DirtyRetry -->|"Yes: BullMQ Backoff"| Start

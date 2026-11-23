@@ -8,7 +8,19 @@ import { ConfigService } from '@nestjs/config';
 import { QueueMetricsService } from './queue-metrics.service';
 import { QueuesController } from './queue.controller';
 import { QueueManagementService } from './queue-management.service';
-import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
+import { BullMQOtel } from 'bullmq-otel'; 
+
+// Retention (in seconds) for jobs kept in the evaluation DLQs
+const EVAL_DLQ_RETENTION = {
+  age: 7 * 24 * 60 * 60,
+  count: 1000,
+};
+
+const EVAL_DLQ_JOB_OPTIONS = {
+  ...DEFAULT_JOB_OPTIONS,
+  removeOnComplete: { ...EVAL_DLQ_RETENTION },
+  removeOnFail: { ...EVAL_DLQ_RETENTION },
+};
 
 @Module({
   imports: [
@@ -20,11 +32,13 @@ import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
           meterName: process.env.OTEL_SERVICE_NAME || 'monitor-server',
           enableMetrics: true,
         });
+        const redisPassword = configService.get<string>('REDIS_PASSWORD');
         return {
           connection: {
             host: configService.get<string>('REDIS_HOST'),
             port: configService.get<number>('REDIS_PORT'),
             db: configService.get<number>('REDIS_DB_BULL') || 0,
+            ...(redisPassword ? { password: redisPassword } : {}),
           },
           telemetry,
         };
@@ -33,14 +47,35 @@ import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
     BullModule.registerQueue(
       {
         name: QUEUE_NAMES.CRAWL_PRIVATE,
-        defaultJobOptions: DEFAULT_JOB_OPTIONS,
+        defaultJobOptions: {
+          ...DEFAULT_JOB_OPTIONS,
+          removeOnFail: {
+            age: 20,
+            count: 1000,
+          },
+          removeOnComplete: {
+            age: 20,
+            count: 1000,
+          },
+        },
       },
       {
         name: QUEUE_NAMES.EVAL_PUBLIC,
-        defaultJobOptions: DEFAULT_JOB_OPTIONS,
+        defaultJobOptions: {
+          ...DEFAULT_JOB_OPTIONS,
+          removeOnFail: {
+            age: 20,
+            count: 1000,
+          },
+          removeOnComplete: {
+            age: 20,
+            count: 1000,
+          },
+        },
       },
       {
         name: QUEUE_NAMES.EVAL_PUBLIC_DLQ,
+        defaultJobOptions: EVAL_DLQ_JOB_OPTIONS,
       },
       {
         name: QUEUE_NAMES.EVAL_PRIVATE,
@@ -48,6 +83,7 @@ import { BullMQOtel } from 'bullmq-otel'; // <-- 1. Importar o pacote
       },
       {
         name: QUEUE_NAMES.EVAL_PRIVATE_DLQ,
+        defaultJobOptions: EVAL_DLQ_JOB_OPTIONS,
       },
       {
         name: QUEUE_NAMES.CRAWL_PUBLIC,
