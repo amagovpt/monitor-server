@@ -1,0 +1,6 @@
+.semgrep/
+**/*.fixture.ts
+**/nestjs-security.ts
+**/*.spec.ts
+**/*.e2e-spec.ts
+**/*.semgrep.ts

@@ -38,8 +38,10 @@
     "schema:drop": "npm run typeorm:base -- schema:drop -d src/data-source.ts",
     "openfga:test": "fga model test --tests openfga/tests.fga.yaml",
     "check:unused": "npx knip",
+    "semgrep:test": "semgrep --test --config .semgrep/nestjs-security.yml .semgrep/nestjs-security.ts",
     "security:scan": "semgrep scan --config .semgrep.yml",
     "security:scan:ci": "semgrep scan --pro --config .semgrep/ --config p/nestjs --config p/typescript --config p/secrets --json ",
+    "security:scan:local": "semgrep scan --pro --config .semgrep/ --config p/nestjs --config p/typescript --config p/secrets --sarif --output semgrep.sarif  --metrics=off",
     "prepare": "husky"
   },
   "dependencies": {

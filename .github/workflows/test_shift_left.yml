@@ -2,17 +2,19 @@ name: 'Security & Quality Gate (Shift-Left)'
 
 on:
   push:
-    branches: [main, develop, monitor-server-v2]
+    branches: [main, develop, develop-v2]
   pull_request:
-    branches: [main, develop, monitor-server-v2]
+    branches: [main, develop, develop-v2]
 
 permissions:
   contents: read
-  security-events: write # Upload de SARIF para GitHub Code Scanning
+  security-events: write
   actions: read
 
+env:
+  ENFORCE_GATE: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+
 jobs:
-  # 1. CODE QUALITY & BUILD VALIDATION
   code-quality:
     name: Lint & Build Validation
     runs-on: ubuntu-latest
@@ -34,7 +36,6 @@ jobs:
       - name: Verify TypeScript Compilation
         run: npm run build
 
-  # 2. SAST
   sast-semgrep:
     name: SAST — Semgrep Pro
     runs-on: ubuntu-latest
@@ -59,8 +60,10 @@ jobs:
           semgrep scan --pro \
             --config p/nestjs \
             --config p/typescript \
+            --config p/secrets \
             --sarif \
-            --output semgrep.sarif
+            --output semgrep.sarif \
+            --metrics=off
 
       - name: Upload Semgrep SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -69,7 +72,63 @@ jobs:
           sarif_file: semgrep.sarif
           category: semgrep-pro
 
-  # 3. SBOM
+      - name: Gate — fail on ERROR findings (main only)
+        if: ${{ always() && env.ENFORCE_GATE == 'true' }}
+        run: |
+          count=$(jq '[.runs[].results[]? | select(.level == "error")] | length' semgrep.sarif)
+          echo "Semgrep Pro findings with level=error: $count"
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Semgrep Pro reported $count error-level finding(s). Merge into main is blocked."
+            exit 1
+          fi
+
+  semgrep-access-policy:
+    name: SAST — Access Policy Rules (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Test Semgrep rules (fixtures)
+        run: |
+          semgrep --test --metrics=off \
+            --config .semgrep/nestjs-security.yml \
+            .semgrep/nestjs-security.ts
+
+      - name: Scan source with custom rules
+        run: |
+          semgrep scan \
+            --config .semgrep/ \
+            --metrics=off \
+            --sarif \
+            --output semgrep-access-policy.sarif \
+            src/
+
+      - name: Upload custom rules SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-access-policy.sarif
+          category: semgrep-access-policy
+
+      - name: Gate — fail on ERROR findings (main only)
+        if: ${{ always() && env.ENFORCE_GATE == 'true' }}
+        run: |
+          count=$(jq '[.runs[].results[]? | select(.level == "error")] | length' semgrep-access-policy.sarif)
+          echo "Custom rules findings with level=error: $count"
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Custom Semgrep rules reported $count error-level finding(s). Merge into main is blocked."
+            exit 1
+          fi
+
+  # SBOM
   sca-dependencies:
     name: SCA — Dependencies & Licenses
     runs-on: ubuntu-latest
@@ -103,7 +162,6 @@ jobs:
           path: licenses.json
           retention-days: 30
 
-  # 4. Linting do Dockerfile
   dockerfile-lint:
     name: Dockerfile Lint (Hadolint)
     runs-on: ubuntu-latest
@@ -116,7 +174,6 @@ jobs:
           dockerfile: Dockerfile
           failure-threshold: warning
 
-  # 5.Container Vulnerabilities
   container-security:
     name: Container Vulnerabilities (Trivy)
     runs-on: ubuntu-latest
@@ -143,7 +200,8 @@ jobs:
           format: sarif
           output: trivy-image.sarif
           severity: HIGH,CRITICAL
-          exit-code: '1'
+          limit-severities-for-sarif: true
+          exit-code: '0'
 
       - name: Upload Trivy Image SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -151,3 +209,13 @@ jobs:
         with:
           sarif_file: trivy-image.sarif
           category: trivy-container
+
+      - name: Gate — fail on HIGH/CRITICAL findings (main only)
+        if: ${{ always() && env.ENFORCE_GATE == 'true' }}
+        run: |
+          count=$(jq '[.runs[].results[]? | select(.level == "error")] | length' trivy-image.sarif)
+          echo "Trivy findings with level=error: $count"
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Trivy reported $count HIGH/CRITICAL finding(s). Merge into main is blocked."
+            exit 1
+          fi

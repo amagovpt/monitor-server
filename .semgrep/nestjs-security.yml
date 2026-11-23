@@ -1,0 +1,536 @@
+rules:
+  # ---------------------------------------------------------------------------
+  # 1. Every HTTP handler needs an explicit access policy
+  # ---------------------------------------------------------------------------
+  - id: nestjs-handler-missing-access-policy
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Handler `$M` has no access policy: neither the method nor the controller declares
+      @Protected(...) or @Public(...), so AccessPolicyGuard rejects the route (fail-closed).
+      Use `@Protected({ roles: [RoleSlug.ADMIN], fga: { objectType: 'website', action: 'can_view', resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId } })`
+      for RBAC + OpenFGA, `@Protected({ roles: 'authenticated' })` for any valid JWT, or
+      `@Public({ reason: '...' })` for anonymous routes. Legacy @Roles/@UseGuards do not count.
+      Import from src/core/authorization/decorators/{protected,public}.decorator.
+    metadata:
+      category: security
+      cwe: 'CWE-862: Missing Authorization'
+      owasp: 'A01:2021 Broken Access Control'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    patterns:
+      - pattern-inside: |
+          @Controller(...)
+          class $C { ... }
+      - pattern-either:
+          - pattern: |
+              @Get(...)
+              $M(...) { ... }
+          - pattern: |
+              @Post(...)
+              $M(...) { ... }
+          - pattern: |
+              @Put(...)
+              $M(...) { ... }
+          - pattern: |
+              @Patch(...)
+              $M(...) { ... }
+          - pattern: |
+              @Delete(...)
+              $M(...) { ... }
+          - pattern: |
+              @All(...)
+              $M(...) { ... }
+          - pattern: |
+              @Head(...)
+              $M(...) { ... }
+          - pattern: |
+              @Options(...)
+              $M(...) { ... }
+          - pattern: |
+              @Sse(...)
+              $M(...) { ... }
+      - pattern-not: |
+          @Protected(...)
+          $M(...) { ... }
+      - pattern-not: |
+          @Public(...)
+          $M(...) { ... }
+      - pattern-not-inside: |
+          @Protected(...)
+          class $C { ... }
+      - pattern-not-inside: |
+          @Public(...)
+          class $C { ... }
+
+  # ---------------------------------------------------------------------------
+  # 2. No direct @UseGuards outside the composed decorators
+  # ---------------------------------------------------------------------------
+  - id: nestjs-direct-useguards
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Direct @UseGuards($G) is forbidden. Apply auth guards through @Protected/@Public so
+      guard order and fail-closed behaviour stay centralised. Replace
+      `@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)` + `@Roles(...)` + `@FgaAuthorized(...)`
+      with `@Protected({ roles: [RoleSlug.ADMIN], fga: ... })`.
+      Allowed auxiliary guards (run after @Protected): ContextFilterGuard,
+      DestructionChallengeGuard, and AutenticacaoGovGuard on @Public routes.
+      To add an exception, extend the allow-list in this rule after review.
+    metadata:
+      category: security
+      owasp: 'A01:2021 Broken Access Control'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+        - '/src/core/authorization/decorators/'
+    patterns:
+      - pattern: UseGuards(..., $G, ...)
+      - metavariable-regex:
+          metavariable: $G
+          regex: '^(?!(ContextFilterGuard|DestructionChallengeGuard|AutenticacaoGovGuard)$).*'
+
+  # ---------------------------------------------------------------------------
+  # 3. Contradictory policies on the same target
+  # ---------------------------------------------------------------------------
+  - id: nestjs-protected-and-public-conflict
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      @Public(...) and @Protected(...) on the same class or method are contradictory and
+      AccessPolicyGuard rejects them. Keep only one.
+    metadata:
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @Public(...)
+              @Protected(...)
+              $M(...) { ... }
+          - pattern: |
+              @Protected(...)
+              @Public(...)
+              $M(...) { ... }
+          - pattern: |
+              @Public(...)
+              @Protected(...)
+              class $C { ... }
+          - pattern: |
+              @Protected(...)
+              @Public(...)
+              class $C { ... }
+
+  # ---------------------------------------------------------------------------
+  # 4. PII / secrets flowing to logs or telemetry in interceptors (taint)
+  # ---------------------------------------------------------------------------
+  - id: nestjs-interceptor-pii-leak
+    mode: taint
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Request or response data reaches a log/telemetry sink inside an interceptor.
+      `user`, `body`, `headers` and response payloads may contain e-mail, name, NIF or tokens.
+      Log only non-sensitive fields (`request.user?.id`, method, path, status, duration)
+      or an allow-listed projection.
+    metadata:
+      category: security
+      cwe: 'CWE-532: Insertion of Sensitive Information into Log File'
+      owasp: 'A09:2021 Security Logging and Monitoring Failures'
+    pattern-sources:
+      - patterns:
+          - pattern-inside: |
+              class $C implements NestInterceptor { ... }
+          - pattern-either:
+              - pattern: $REQ.user
+              - pattern: $REQ.body
+              - pattern: $REQ.headers
+              - pattern: $REQ.query
+              - pattern: $REQ.params
+          - metavariable-regex:
+              metavariable: $REQ
+              regex: '^(req|request|httpRequest)$'
+      - patterns:
+          - pattern-inside: |
+              class $C implements NestInterceptor { ... }
+          - pattern-either:
+              - pattern: |
+                  const { ..., $F, ... } = $REQ;
+          - metavariable-regex:
+              metavariable: $F
+              regex: '^(user|body|headers|query|params)$'
+          - metavariable-regex:
+              metavariable: $REQ
+              regex: '^(req|request|httpRequest)$'
+          - focus-metavariable: $F
+      - patterns:
+          - pattern-inside: |
+              class $C implements NestInterceptor { ... }
+          - pattern-either:
+              - pattern-inside: tap(($D) => $BODY)
+              - pattern-inside: map(($D) => $BODY)
+              - pattern-inside: tap(function ($D) { ... })
+              - pattern-inside: map(function ($D) { ... })
+          - pattern: $D
+          - focus-metavariable: $D
+    pattern-sanitizers:
+      - pattern-either:
+          - pattern: $X.id
+          - pattern: $X?.id
+          - pattern: $X.role_slug
+          - pattern: $X?.role_slug
+    pattern-sinks:
+      - patterns:
+          - pattern-inside: |
+              class $C implements NestInterceptor { ... }
+          - pattern-either:
+              - pattern: console.$M(...)
+              - pattern: this.$L.$M(...)
+              - pattern: $L.$M(...)
+              - pattern: $SPAN.setAttribute(...)
+              - pattern: $SPAN.setAttributes(...)
+              - pattern: $SPAN.addEvent(...)
+          - metavariable-regex:
+              metavariable: $M
+              regex: '^(log|debug|info|warn|error|verbose|fatal|trace|setAttribute|setAttributes|addEvent)$'
+
+  # ---------------------------------------------------------------------------
+  # 5. Request resource id reaching a service/repository unscoped (taint)
+  # ---------------------------------------------------------------------------
+  - id: nestjs-idor-unscoped-resource-id
+    mode: taint
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Request value (@Param/@Query/@Body) is passed to `$SVC.$M(...)` with no OpenFGA check,
+      no admin role and no SecurityContext, so nothing proves the caller may access the
+      resource (IDOR/BOLA). Add `fga` to @Protected or pass the SecurityContext to the service.
+    metadata:
+      category: security
+      cwe: 'CWE-639: Authorization Bypass Through User-Controlled Key'
+      owasp: 'A01:2021 Broken Access Control'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    pattern-sources:
+      - patterns:
+          - pattern: $P
+          - pattern-either:
+              - patterns:
+                  - pattern-inside: |
+                      $F(..., @Param(...) $P: $T, ...) { ... }
+                  - metavariable-regex:
+                      metavariable: $P
+                      regex: '(?i).*(id|ids|code|slug|key)$'
+              - patterns:
+                  - pattern-inside: |
+                      $F(..., @Query(...) $P: $T, ...) { ... }
+                  - metavariable-regex:
+                      metavariable: $P
+                      regex: '(?i).*(id|ids|code|slug|key)$'
+              - pattern-inside: |
+                  $F(..., @Body(...) $P: $T, ...) { ... }
+          - focus-metavariable: $P
+    pattern-sinks:
+      - patterns:
+          - pattern: this.$SVC.$M(...)
+          - metavariable-regex:
+              metavariable: $SVC
+              regex: '(?i).*(service|repository|repo)$'
+          - pattern-not: this.$SVC.$M(..., securityContext, ...)
+          - pattern-not: this.$SVC.$M(..., { user }, ...)
+          - pattern-not: 'this.$SVC.$M(..., { user: $U }, ...)'
+          - pattern-not-inside: |
+              @Protected({..., fga: ..., ...})
+              $F(...) { ... }
+          - pattern-not-inside: |
+              @Protected({..., fga: ..., ...})
+              class $K { ... }
+          - pattern-not-inside: |
+              @Protected({..., roles: [..., RoleSlug.ADMIN, ...], ...})
+              $F(...) { ... }
+          - pattern-not-inside: |
+              @Protected({..., roles: [..., RoleSlug.ADMIN, ...], ...})
+              class $K { ... }
+          - pattern-not-inside: |
+              @Public(...)
+              $F(...) { ... }
+          - pattern-not-inside: |
+              @Public(...)
+              class $K { ... }
+
+  # ---------------------------------------------------------------------------
+  # 6. Parameterised routes behind non-admin @Protected without FGA
+  # ---------------------------------------------------------------------------
+  - id: nestjs-parameterized-route-missing-fga
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Route `$ROUTE` addresses a resource by path parameter for a non-admin role without `fga`.
+      Add `fga` to @Protected, or suppress with
+      `// nosemgrep: nestjs-parameterized-route-missing-fga` if the service enforces ownership.
+    metadata:
+      category: security
+      owasp: 'A01:2021 Broken Access Control'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @Get($ROUTE)
+              $M(...) { ... }
+          - pattern: |
+              @Post($ROUTE)
+              $M(...) { ... }
+          - pattern: |
+              @Put($ROUTE)
+              $M(...) { ... }
+          - pattern: |
+              @Patch($ROUTE)
+              $M(...) { ... }
+          - pattern: |
+              @Delete($ROUTE)
+              $M(...) { ... }
+      - metavariable-regex:
+          metavariable: $ROUTE
+          regex: '.*:\w*[iI]d\b.*'
+      - pattern: |
+          @Protected(...)
+          $M(...) { ... }
+      - pattern-not: |
+          @Protected({..., fga: ..., ...})
+          $M(...) { ... }
+      - pattern-not: |
+          @Protected({..., roles: [..., RoleSlug.ADMIN, ...], ...})
+          $M(...) { ... }
+      - pattern-not-inside: |
+          @Protected({..., fga: ..., ...})
+          class $C { ... }
+      - pattern-not-inside: |
+          @Protected({..., roles: [..., RoleSlug.ADMIN, ...], ...})
+          class $C { ... }
+
+  # ---------------------------------------------------------------------------
+  # 7. Typed controller return values
+  # ---------------------------------------------------------------------------
+  - id: nestjs-avoid-any-return-in-controller
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      Handler returns `any`/`Promise<any>`, which defeats response typing and hides what is
+      exposed. Return a typed DTO.
+    metadata:
+      category: best-practice
+    patterns:
+      - pattern-inside: |
+          @Controller(...)
+          class $C { ... }
+      - pattern-either:
+          - patterns:
+              - pattern: |
+                  $M(...): Promise<$X> { ... }
+              - pattern-regex: '\)\s*:\s*Promise\s*<\s*any\s*>\s*\{'
+          - patterns:
+              - pattern: |
+                  $M(...): $A { ... }
+              - metavariable-regex:
+                  metavariable: $A
+                  regex: '^any$'
+
+  # ---------------------------------------------------------------------------
+  # 8. DTO properties must carry class-validator decorators
+  # ---------------------------------------------------------------------------
+  - id: nestjs-dto-property-missing-validator
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Property `$PROP` in DTO `$CLASS` has no class-validator decorator. Without one,
+      ValidationPipe neither validates nor whitelists the field.
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+        - '**/*.response.dto.ts'
+    patterns:
+      - pattern-either:
+          - pattern: |
+              export class $CLASS {
+                ...
+                $PROP: $TYPE;
+                ...
+              }
+          - pattern: |
+              export class $CLASS {
+                ...
+                $PROP?: $TYPE;
+                ...
+              }
+          - pattern: |
+              export class $CLASS {
+                ...
+                $PROP!: $TYPE;
+                ...
+              }
+      - metavariable-regex:
+          metavariable: $CLASS
+          regex: '^(?!.*(Response|Res|Output|Result|View)(DTO|Dto)$).*(DTO|Dto)$'
+      - pattern-not-inside: |
+          export abstract class $CLASS {
+            ...
+          }
+      - pattern-not: |
+          export class $CLASS {
+            ...
+            @$DEC(...)
+            $PROP: $TYPE;
+            ...
+          }
+      - pattern-not: |
+          export class $CLASS {
+            ...
+            @$DEC(...)
+            $PROP?: $TYPE;
+            ...
+          }
+      - pattern-not: |
+          export class $CLASS {
+            ...
+            @$DEC(...)
+            $PROP!: $TYPE;
+            ...
+          }
+      - focus-metavariable: $PROP
+
+  # ---------------------------------------------------------------------------
+  # 9. HTTP boundary: no untyped @Body/@Query/@Param inputs
+  # ---------------------------------------------------------------------------
+  - id: nestjs-controller-untyped-input
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Parameter `$PARAM` receives HTTP input with an open, primitive or inline type and no pipe.
+      Use a `*Dto` class validated by the global ValidationPipe, or apply a strict pipe.
+    metadata:
+      category: security
+      cwe: 'CWE-20: Improper Input Validation'
+      owasp: 'A03:2021 Injection'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    patterns:
+      - pattern-inside: |
+          @Controller(...)
+          class $C {
+            ...
+          }
+      - pattern-either:
+          # @Body() with loose, primitive or inline types
+          - patterns:
+              - pattern-either:
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: any, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: unknown, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: object, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: string, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: number, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: boolean, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: Record<$K, $V>, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: Array<$T>, ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: $T[], ...) { ... }'
+                  - pattern: '$METHOD(..., @Body(...) $PARAM: { $KEY: $VALUE }, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Body(..., new $PIPE(...)) $PARAM: $TYPE, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Body($NAME, $PIPE, ...) $PARAM: $TYPE, ...) { ... }'
+          # @Query() / @Param() with open types
+          - patterns:
+              - pattern-either:
+                  - pattern: '$METHOD(..., @Query(...) $PARAM: any, ...) { ... }'
+                  - pattern: '$METHOD(..., @Query(...) $PARAM: unknown, ...) { ... }'
+                  - pattern: '$METHOD(..., @Query(...) $PARAM: object, ...) { ... }'
+                  - pattern: '$METHOD(..., @Query(...) $PARAM: Record<$K, $V>, ...) { ... }'
+                  - pattern: '$METHOD(..., @Query(...) $PARAM: { $KEY: $VALUE }, ...) { ... }'
+                  - pattern: '$METHOD(..., @Param(...) $PARAM: any, ...) { ... }'
+                  - pattern: '$METHOD(..., @Param(...) $PARAM: unknown, ...) { ... }'
+                  - pattern: '$METHOD(..., @Param(...) $PARAM: object, ...) { ... }'
+                  - pattern: '$METHOD(..., @Param(...) $PARAM: Record<$K, $V>, ...) { ... }'
+                  - pattern: '$METHOD(..., @Param(...) $PARAM: { $KEY: $VALUE }, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Query(..., new $PIPE(...)) $PARAM: $TYPE, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Query($NAME, $PIPE, ...) $PARAM: $TYPE, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Param(..., new $PIPE(...)) $PARAM: $TYPE, ...) { ... }'
+              - pattern-not: '$METHOD(..., @Param($NAME, $PIPE, ...) $PARAM: $TYPE, ...) { ... }'
+
+  # ---------------------------------------------------------------------------
+  # 10. Raw SQL built with string interpolation
+  # ---------------------------------------------------------------------------
+  - id: nestjs-raw-sql-string-interpolation
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Interpolated template string (`${...}`) in a raw SQL query. Use parameterised queries
+      (`$1, $2` on PostgreSQL, `query_params` on ClickHouse).
+    metadata:
+      category: security
+      cwe: 'CWE-89: Improper Neutralization of Special Elements used in an SQL Command'
+      owasp: 'A03:2021 Injection'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    pattern-either:
+      - pattern: $DB.query(`...${$VAR}...`, ...)
+      - pattern: |
+          $DB.query({ ..., query: `...${$VAR}...`, ... })
+      - pattern: |
+          $DB.command({ ..., query: `...${$VAR}...`, ... })
+
+  # ---------------------------------------------------------------------------
+  # 11. BullMQ workers: job.data must be validated at runtime
+  # ---------------------------------------------------------------------------
+  - id: nestjs-worker-unvalidated-job-data
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      `$JOB.data` is passed to a service or repository without runtime schema validation.
+      Queue payloads are persisted in Redis outside the HTTP layer, so call
+      `Schema.parse($JOB.data)` at the start of `process()`.
+    metadata:
+      category: security
+      cwe: 'CWE-20: Improper Input Validation'
+    paths:
+      exclude:
+        - '**/*.spec.ts'
+        - '**/*.e2e-spec.ts'
+    patterns:
+      - pattern-inside: |
+          class $WORKER extends WorkerHost {
+            ...
+            async process($JOB) {
+              ...
+            }
+            ...
+          }
+      - pattern-not-inside: |
+          @OnWorkerEvent(...)
+          $HANDLER(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          async process($JOB) {
+            ...
+            $SCHEMA.parse($JOB.data);
+            ...
+          }
+      - pattern-not-inside: |
+          async process($JOB) {
+            ...
+            $SCHEMA.safeParse($JOB.data);
+            ...
+          }
+      - pattern-either:
+          - pattern: 'this.$SERVICE.$METHOD(..., $JOB.data, ...)'
+          - pattern: 'this.$SERVICE.$METHOD(..., { ..., $KEY: $JOB.data.$PROP, ... }, ...)'
+          - pattern: '$JOB.data.$PROP'
