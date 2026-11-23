@@ -3,6 +3,7 @@ import { ListenerModule } from './core/listener/listener.module';
 import { TelemetryModule } from './core/telemetry/telemetry.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { AccessPolicyGuard } from './core/authorization/guards/access-policy.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SseModule } from './core/sse/sse.module';
 import { AppService } from './app.service';
@@ -63,6 +64,11 @@ import { EvaluationConsumerModule } from './core/consumer/consumer.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      // Fail-closed backstop: handlers need an explicit @Protected() or @Public().
+      provide: APP_GUARD,
+      useClass: AccessPolicyGuard,
     },
     MaxOffsetLimitConstraint,
     {
