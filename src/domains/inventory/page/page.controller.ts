@@ -16,31 +16,28 @@ import {
 import { PageService } from './page.service';
 import { AuthenticatedUser, RoleSlug } from 'src/core/authentication/interfaces/types';
 import { CurrentUser } from 'src/core/authorization/decorators/current-user.decorator';
-import { Roles } from 'src/core/authorization/decorators/roles.decorator';
-import { RolesGuard } from 'src/core/authorization/guards/roles.guard';
 import { CreatePageDto } from './dto/create-page.dto';
 import { PageQueryRequestDTO } from './dto/request/query/page-query-request.dto';
 import { LoggableController } from 'src/common/controllers/loggable.interface';
-import { JwtAuthGuard } from 'src/core/authentication/guards/jwt-auth.guard';
 import { ContextFilterGuard } from 'src/core/authorization/guards/context.guard';
-import { FgaGuard } from 'src/core/authorization/guards/fga.guard';
-import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
 import { UpdatePageContextDto } from './dto/update.page-context.dto';
 import { ContextMapByRole } from '../context/context.enum';
 import { PageDocs } from './page.swagger';
 import { DeletePagesDto } from './dto/delete-page.dto';
 import { FileSitemapInterceptor } from './interceptors/file-sitemap.interceptor';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
-@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
 @Controller('pages')
 export class PageController implements LoggableController {
   readonly logger = new Logger('PageController');
   constructor(private readonly pageService: PageService) {}
 
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
   @UseGuards(ContextFilterGuard)
   @PageDocs.find()
   @Get()
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+  })
   async find(@CurrentUser() user: AuthenticatedUser, @Query() query: PageQueryRequestDTO) {
     return this.pageService.findAll(
       {
@@ -53,14 +50,16 @@ export class PageController implements LoggableController {
     );
   }
 
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
-  @FgaAuthorized({
-    objectType: 'website',
-    action: 'can_view',
-    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
-  })
   @PageDocs.findOne()
   @Get('website/:websiteId/page/:pageId')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+      objectType: 'website',
+      action: 'can_view',
+      resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+    },
+  })
   async findOne(
     @Param('websiteId', ParseIntPipe) websiteId: number,
     @Param('pageId', ParseIntPipe) pageId: number,
@@ -69,27 +68,31 @@ export class PageController implements LoggableController {
     return this.pageService.findPageById(websiteId, pageId, { user });
   }
 
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
-  @FgaAuthorized({
-    objectType: 'website',
-    action: 'can_edit',
-    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
-  })
   @PageDocs.create()
   @Post('website/:websiteId/page')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+      objectType: 'website',
+      action: 'can_edit',
+      resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+    },
+  })
   async create(@Body() dto: CreatePageDto, @CurrentUser() user: AuthenticatedUser) {
     return this.pageService.create(dto, { user });
   }
 
-  @Roles(RoleSlug.ADMIN, RoleSlug.MONITOR)
-  @FgaAuthorized({
-    objectType: 'website',
-    action: 'can_edit',
-    resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
-  })
   @PageDocs.createFromSitemap()
   @UseInterceptors(FileSitemapInterceptor)
   @Post('website/:websiteId/sitemap')
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: {
+      objectType: 'website',
+      action: 'can_edit',
+      resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+    },
+  })
   async createFromSitemap(
     @Param('websiteId', ParseIntPipe) websiteId: number,
     @UploadedFile() file: Express.Multer.File,
@@ -102,14 +105,16 @@ export class PageController implements LoggableController {
     return this.pageService.createFromSitemap(websiteId, file, { user });
   }
 
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
-    objectType: 'role',
-    action: 'can_manage_users',
-    resourceIdResolver: () => 'ams',
-  })
   @PageDocs.bulkDelete()
   @Delete('')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+      objectType: 'role',
+      action: 'can_manage_users',
+      resourceIdResolver: () => 'ams',
+    },
+  })
   async bulkDelete(
     @Body() deletePagesDtos: DeletePagesDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -123,14 +128,16 @@ export class PageController implements LoggableController {
     return this.pageService.handlePageRemoval(deletePagesDtos.pageIds, { user });
   }
 
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
-    objectType: 'role',
-    action: 'can_manage_users',
-    resourceIdResolver: () => 'ams',
-  })
   @PageDocs.changePageContext()
   @Post('contexts')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+      objectType: 'role',
+      action: 'can_manage_users',
+      resourceIdResolver: () => 'ams',
+    },
+  })
   async changePageContext(
     @Body('contexts') updatePageContextDto: UpdatePageContextDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -142,14 +149,16 @@ export class PageController implements LoggableController {
     );
   }
 
-  @Roles(RoleSlug.ADMIN)
-  @FgaAuthorized({
-    objectType: 'role',
-    action: 'can_manage_users',
-    resourceIdResolver: () => 'ams',
-  })
   @PageDocs.toggleObservatoryStatus()
   @Post('website/:websiteId/page/:pageId/toggle-observatory')
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: {
+      objectType: 'role',
+      action: 'can_manage_users',
+      resourceIdResolver: () => 'ams',
+    },
+  })
   async toggleObservatoryStatus(
     @Param('websiteId', ParseIntPipe) websiteId: number,
     @Param('pageId', ParseIntPipe) pageId: number,

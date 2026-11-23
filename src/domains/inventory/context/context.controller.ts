@@ -1,8 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ContextService } from './context.service';
+import { RoleSlug } from 'src/core/authentication/interfaces/types';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 import { Context } from './context.entity';
 
 @Controller('contexts')
+@Protected({ roles: [RoleSlug.ADMIN] })
 export class ContextController {
   constructor(private readonly contextService: ContextService) {}
 

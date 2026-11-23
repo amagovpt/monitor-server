@@ -1,49 +1,54 @@
-import { Controller, Patch, Body, HttpStatus, HttpCode, Param, UseGuards, ParseIntPipe, Get } from "@nestjs/common";
-import { AMS_ROLE_VIEWER } from "src/core/authorization/policies/role.policies";
-import { TeamMembersService } from "./team-members.service";
-import { UpdateTeamMembersDto } from "./dtos/tag-members-update.dto"; 
-import { CurrentUser } from "src/core/authorization/decorators/current-user.decorator";
-import { AuthenticatedUser, RoleSlug } from "src/core/authentication/interfaces/types";
-import { Roles } from "src/core/authorization/decorators/roles.decorator";
-import { RolesGuard } from "src/core/authorization/guards/roles.guard";
-import { JwtAuthGuard } from "src/core/authentication/guards/jwt-auth.guard";
-import { TeamMembersDocs } from "./team-members.swagger";
-import { FgaGuard } from "src/core/authorization/guards/fga.guard";
-import { FgaAuthorized } from "src/core/authorization/decorators/fga-authorization.decorator";
-import { AMS_ROLE_EDITOR } from "src/core/authorization/policies/role.policies";
-import { TeamMembersResponseDTO } from "./dtos/team-members-response.dto";
+import {
+  Controller,
+  Patch,
+  Body,
+  HttpStatus,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Get,
+} from '@nestjs/common';
+import { AMS_ROLE_VIEWER } from 'src/core/authorization/policies/role.policies';
+import { TeamMembersService } from './team-members.service';
+import { UpdateTeamMembersDto } from './dtos/tag-members-update.dto';
+import { CurrentUser } from 'src/core/authorization/decorators/current-user.decorator';
+import { AuthenticatedUser, RoleSlug } from 'src/core/authentication/interfaces/types';
+import { TeamMembersDocs } from './team-members.swagger';
+import { FgaAuthorized } from 'src/core/authorization/decorators/fga-authorization.decorator';
+import { AMS_ROLE_EDITOR } from 'src/core/authorization/policies/role.policies';
+import { TeamMembersResponseDTO } from './dtos/team-members-response.dto';
+import { Protected } from 'src/core/authorization/decorators/protected.decorator';
 
 @TeamMembersDocs.controller()
-@Controller("teams/:teamId/members") 
-@UseGuards(JwtAuthGuard, RolesGuard, FgaGuard)
+@Controller('teams/:teamId/members')
 export class TeamMembersController {
   constructor(private readonly service: TeamMembersService) {}
 
+  @Get('')
+  @TeamMembersDocs.getTeamMembers()
+  @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: AMS_ROLE_VIEWER,
+  })
+  async getTeamMembers(
+    @Param('teamId', ParseIntPipe) teamId: number,
+  ): Promise<TeamMembersResponseDTO> {
+    return await this.service.getTeamMembers(teamId);
+  }
 
-    @Get('')
-    @TeamMembersDocs.getTeamMembers()
-    @FgaAuthorized(AMS_ROLE_VIEWER)
-    @HttpCode(HttpStatus.OK)
-    async getTeamMembers(
-      @Param("teamId", ParseIntPipe) teamId: number
-    ): Promise<TeamMembersResponseDTO> {
-      return await this.service.getTeamMembers(teamId);
-    }
-  
   @Patch()
   @TeamMembersDocs.updateTeamMembers()
-  @FgaAuthorized(AMS_ROLE_EDITOR)
-  @Roles(RoleSlug.ADMIN)
   @HttpCode(HttpStatus.OK)
+  @Protected({
+    roles: [RoleSlug.ADMIN],
+    fga: AMS_ROLE_EDITOR,
+  })
   async updateMembers(
     @CurrentUser() user: AuthenticatedUser,
-    @Param("teamId", ParseIntPipe) teamId: number,
-    @Body() dto: UpdateTeamMembersDto
+    @Param('teamId', ParseIntPipe) teamId: number,
+    @Body() dto: UpdateTeamMembersDto,
   ) {
-    return await this.service.updateTeamMembers(
-      teamId, 
-      dto.add || [], 
-      dto.remove || [],
-    );
+    return await this.service.updateTeamMembers(teamId, dto.add || [], dto.remove || []);
   }
 }
