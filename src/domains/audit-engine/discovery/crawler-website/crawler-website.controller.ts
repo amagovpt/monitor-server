@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, Query, HttpCode, HttpStatus, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { CrawlerWebsiteService } from './crawler-website.service';
 
 import { CrawlerCreateDTO } from './dto/crawler-create.dto';
@@ -46,7 +46,7 @@ export class CrawlerWebsiteController {
     const securityContext: SecurityContext = { user };
     await this.crawlerWebsiteService.importCrawlers(securityContext, crawlerImport.crawlerIds);
   }
-  
+
   @DiscoveryDocs.crawlWebsite()
   @Post('')
   @Protected({
@@ -85,7 +85,6 @@ export class CrawlerWebsiteController {
       waitJS: crawlerCreate.waitJS,
     });
   }
-
 
   @DiscoveryDocs.deleteCrawler()
   @HttpCode(HttpStatus.NO_CONTENT)

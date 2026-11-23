@@ -5,13 +5,11 @@ import {
   HttpStatus,
   Param,
   StreamableFile,
-  Response,
   ParseIntPipe,
   Query,
   Header,
 } from '@nestjs/common';
 import { AnalyticsDocs } from './analytics.swagger';
-import type { Response as ExpressResponse } from 'express';
 import { AnalyticsService } from './analytics.service';
 import { RoleSlug } from 'src/core/authentication/interfaces/types';
 
