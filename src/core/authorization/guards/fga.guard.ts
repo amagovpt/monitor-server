@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FgaService } from '../fga.service';
-import {  EnquireRelationType, FgaObjectIdentifier, FgaUserIdentifier, ResourceType } from '../types/fga.types';
-import { FGA_DECORATOR_KEY, FgtaTupleCheck } from '../decorators/fga-authorization.decorator';
+import { FgaObjectIdentifier, FgaUserIdentifier, ResourceType } from '../types/fga.types';
+import { FGA_DECORATOR_KEY, AnyFgaTupleCheck } from '../decorators/fga-authorization.decorator';
 
 @Injectable()
 export class FgaGuard implements CanActivate {
@@ -12,35 +12,36 @@ export class FgaGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-            const fgaTuple:FgtaTupleCheck<ResourceType, keyof EnquireRelationType> = this.reflector.get<FgtaTupleCheck<ResourceType, keyof EnquireRelationType>>(
-      FGA_DECORATOR_KEY,
-      context.getHandler(),
-    );
+    const metadata = this.reflector.getAllAndOverride<
+      AnyFgaTupleCheck | AnyFgaTupleCheck[] | undefined
+    >(FGA_DECORATOR_KEY, [context.getHandler(), context.getClass()]);
 
-    if (!fgaTuple) return true; 
+    if (!metadata) return true;
+
+    const tuples = Array.isArray(metadata) ? metadata : [metadata];
+    // Empty tuple lists deny access.
+    if (tuples.length === 0) throw new ForbiddenException('Access denied by authorization policy');
 
     const request = context.switchToHttp().getRequest();
-    
-    const userId = request.user?.id; 
+
+    const userId = request.user?.id;
     if (!userId) throw new ForbiddenException('User not authenticated');
-    
-    const subject = `user:${userId}`;
 
-    const objectId = fgaTuple.resourceIdResolver?.(context);
-    if (!objectId) throw new ForbiddenException('Unable to resolve resource ID');
+    const subject = `user:${userId}` as FgaUserIdentifier<ResourceType>;
 
-    const object: FgaObjectIdentifier<ResourceType> = `${fgaTuple.objectType}:${objectId}`;
-    
-    const allowed = await this.fgaService.check(
-      subject as FgaUserIdentifier<ResourceType>,
-      fgaTuple.action,
-      object,
-    );
+    let resolvedAny = false;
+    // (OR) semantics: the first tuple that passes grants access.
+    for (const tuple of tuples) {
+      const objectId = tuple.resourceIdResolver?.(context);
+      // An unresolvable tuple can't grant access (fail-closed), but others may still apply.
+      if (!objectId) continue;
+      resolvedAny = true;
 
-    if (!allowed) {
-      throw new ForbiddenException('Access denied by authorization policy');
+      const object: FgaObjectIdentifier<ResourceType> = `${tuple.objectType}:${objectId}`;
+      if (await this.fgaService.check(subject, tuple.action, object)) return true;
     }
 
-    return true;
+    if (!resolvedAny) throw new ForbiddenException('Unable to resolve resource ID');
+    throw new ForbiddenException('Access denied by authorization policy');
   }
 }

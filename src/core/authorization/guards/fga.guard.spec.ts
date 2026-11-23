@@ -12,7 +12,7 @@ describe('FgaGuard', () => {
   let fgaService: FgaService;
 
   const mockReflector = {
-    get: jest.fn(),
+    getAllAndOverride: jest.fn(),
   };
 
   const mockFgaService = {
@@ -50,13 +50,13 @@ describe('FgaGuard', () => {
   }
 
   it('should return true if no FGA metadata is present on the handler', async () => {
-    mockReflector.get.mockReturnValue(undefined);
+    mockReflector.getAllAndOverride.mockReturnValue(undefined);
 
     const context = createMockContext({});
     const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).not.toHaveBeenCalled();
   });
 
@@ -67,7 +67,7 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => '123',
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(true);
 
     const context = createMockContext({
@@ -77,7 +77,7 @@ describe('FgaGuard', () => {
     const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
   });
 
@@ -88,14 +88,14 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => '123',
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
 
     const context = createMockContext({
       user: null,
     });
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).not.toHaveBeenCalled();
   });
 
@@ -106,14 +106,14 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => undefined,
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
 
     const context = createMockContext({
       user: { id: 42 },
     });
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).not.toHaveBeenCalled();
   });
 
@@ -124,14 +124,14 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => undefined,
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
 
     const context = createMockContext({
       user: { id: 42 },
     });
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).not.toHaveBeenCalled();
   });
 
@@ -142,7 +142,7 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => '123',
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(false);
 
     const context = createMockContext({
@@ -150,7 +150,7 @@ describe('FgaGuard', () => {
     });
 
     await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
   });
 
@@ -161,7 +161,7 @@ describe('FgaGuard', () => {
       resourceIdResolver: (ctx: ExecutionContext) => '123',
     };
 
-    mockReflector.get.mockReturnValue(mockFgaMetadata);
+    mockReflector.getAllAndOverride.mockReturnValue(mockFgaMetadata);
     mockFgaService.check.mockResolvedValue(true);
 
     const context = createMockContext({
@@ -171,7 +171,54 @@ describe('FgaGuard', () => {
     const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(mockReflector.get).toHaveBeenCalledWith(FGA_DECORATOR_KEY, context.getHandler());
+    expect(mockReflector.getAllAndOverride).toHaveBeenCalledWith(FGA_DECORATOR_KEY, [context.getHandler(), expect.anything()]);
     expect(mockFgaService.check).toHaveBeenCalledWith('user:42', 'can_view', 'website:123');
+  });
+
+  describe('multiple tuples (OR)', () => {
+    const tuple = (id: string | undefined, action = 'can_view') => ({
+      objectType: FGA_RESOURCE.WEBSITE,
+      action,
+      resourceIdResolver: () => id,
+    });
+
+    it('grants access if any tuple passes, stopping at the first success', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue([tuple('1'), tuple('2', 'can_edit'), tuple('3')]);
+      mockFgaService.check.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+      await expect(guard.canActivate(createMockContext({ user: { id: 42 } }))).resolves.toBe(true);
+      expect(mockFgaService.check).toHaveBeenCalledTimes(2);
+      expect(mockFgaService.check).toHaveBeenLastCalledWith('user:42', 'can_edit', 'website:2');
+    });
+
+    it('denies if all tuples fail', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue([tuple('1'), tuple('2')]);
+      mockFgaService.check.mockResolvedValue(false);
+
+      await expect(guard.canActivate(createMockContext({ user: { id: 42 } }))).rejects.toThrow(ForbiddenException);
+      expect(mockFgaService.check).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips an unresolvable tuple but still evaluates the others', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue([tuple(undefined), tuple('2')]);
+      mockFgaService.check.mockResolvedValue(true);
+
+      await expect(guard.canActivate(createMockContext({ user: { id: 42 } }))).resolves.toBe(true);
+      expect(mockFgaService.check).toHaveBeenCalledTimes(1);
+    });
+
+    it('denies if no tuple can be resolved', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue([tuple(undefined), tuple(undefined)]);
+
+      await expect(guard.canActivate(createMockContext({ user: { id: 42 } }))).rejects.toThrow(ForbiddenException);
+      expect(mockFgaService.check).not.toHaveBeenCalled();
+    });
+
+    it('denies on an empty list (fail-closed)', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue([]);
+
+      await expect(guard.canActivate(createMockContext({ user: { id: 42 } }))).rejects.toThrow(ForbiddenException);
+      expect(mockFgaService.check).not.toHaveBeenCalled();
+    });
   });
 });
