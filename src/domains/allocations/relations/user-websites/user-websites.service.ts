@@ -9,6 +9,10 @@ import { AuthorizationEvent, PermissionKey } from 'src/core/authorization/queue/
 import { OutboxService } from 'src/core/outbox/outbox.service';
 import { sanitizeDelta } from '../util';
 import { AUTHORIZATION_ACTION } from 'src/core/authorization/registry/registry.keys';
+import {
+  attachWebsitesToMonitorContext,
+  detachOrphanWebsitesFromMonitorContext,
+} from '../website-monitor-context.helper';
 
 @Injectable()
 export class UserWebsitesService {
@@ -81,6 +85,9 @@ export class UserWebsitesService {
     if (toInsert.length > 0) {
       await userWebsiteRepo.save(toInsert.map((websiteId) => ({ websiteId, userId })));
 
+      // Local DB operation, same transaction: no outbox event needed.
+      await attachWebsitesToMonitorContext(manager, toInsert);
+
       await this.outboxService.putInOutbox(manager, {
         aggregateType: FGA_RESOURCE.USER,
         aggregateId: userId,
@@ -117,6 +124,8 @@ export class UserWebsitesService {
         userId,
         websiteId: In(idsToRemove),
       });
+
+      await detachOrphanWebsitesFromMonitorContext(manager, idsToRemove);
 
       await this.outboxService.putInOutbox(manager, {
         aggregateType: FGA_RESOURCE.USER,

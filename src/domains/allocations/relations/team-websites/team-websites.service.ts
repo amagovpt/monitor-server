@@ -9,6 +9,10 @@ import { Website } from 'src/domains/inventory/website/website.entity';
 import { AUTHORIZATION_ACTION } from 'src/core/authorization/registry/registry.keys';
 import { sanitizeDelta } from '../util';
 import { Team } from 'src/domains/identity/team/team.entity';
+import {
+  attachWebsitesToMonitorContext,
+  detachOrphanWebsitesFromMonitorContext,
+} from '../website-monitor-context.helper';
 
 @Injectable()
 export class TeamWebsitesService {
@@ -70,18 +74,23 @@ export class TeamWebsitesService {
     if (toInsert.length > 0) {
       await teamWebsitesRepo.save(toInsert.map((id) => ({ websiteId: id, teamId })));
 
-      await this.outboxService.putInOutbox(manager, {
-        aggregateType: FGA_RESOURCE.TEAM,
-        aggregateId: teamId,
-        eventType: AuthorizationEvent.AUTHORIZATION,
-        payload: {
-          action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
-          resourceType: FGA_RESOURCE.TEAM,
-          resourceId: teamId,
-          teamId,
-          websiteIds: toInsert,
+      // Local DB operation, same transaction: no outbox event needed.
+      await attachWebsitesToMonitorContext(manager, toInsert);
+
+      await this.outboxService.putManyInOutbox(manager, [
+        {
+          aggregateType: FGA_RESOURCE.TEAM,
+          aggregateId: teamId,
+          eventType: AuthorizationEvent.AUTHORIZATION,
+          payload: {
+            action: AUTHORIZATION_ACTION.TEAM_ADD_WEBSITE,
+            resourceType: FGA_RESOURCE.TEAM,
+            resourceId: teamId,
+            teamId,
+            websiteIds: toInsert,
+          },
         },
-      });
+      ]);
     }
   }
 
@@ -103,6 +112,9 @@ export class TeamWebsitesService {
 
     if (idsToRemove.length > 0) {
       await teamWebsitesRepo.delete({ teamId, websiteId: In(idsToRemove) });
+
+      // Local DB operation, same transaction: no outbox event needed.
+      await detachOrphanWebsitesFromMonitorContext(manager, idsToRemove);
 
       await this.outboxService.putInOutbox(manager, {
         aggregateType: FGA_RESOURCE.TEAM,
