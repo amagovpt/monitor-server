@@ -48,8 +48,15 @@ export class AnalyticsController {
   @AnalyticsDocs.getWebsiteMetrics()
   @HttpCode(HttpStatus.OK)
   @Protected({
-    roles: [RoleSlug.ADMIN],
-    fga: AMS_ROLE_VIEWER,
+    roles: [RoleSlug.ADMIN, RoleSlug.MONITOR],
+    fga: [
+      AMS_ROLE_VIEWER,
+      {
+        objectType: 'website',
+        action: 'can_view',
+        resourceIdResolver: (ctx) => ctx.switchToHttp().getRequest().params.websiteId,
+      },
+    ],
   })
   async getWebsiteMetrics(@Param('websiteId', ParseIntPipe) websiteId: number) {
     return this.analyticsService.getGlobalWebsite(websiteId);
